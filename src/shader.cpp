@@ -180,6 +180,8 @@ void shader_program::use()
     glUseProgram(_id);
 }
 
+void shader_program::unuse() { glUseProgram(0); }
+
 void shader_program::deinit()
 {
     // don't deinit shaders, we only deinit the program

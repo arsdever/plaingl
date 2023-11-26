@@ -56,6 +56,7 @@ public:
     void init();
     void link();
     void use();
+    static void unuse();
     void deinit();
     void add_shader(std::string_view path);
     void release_shaders();

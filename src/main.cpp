@@ -4,6 +4,8 @@
 /* clang-format on */
 
 #include <array>
+#include <atomic>
+#include <thread>
 
 #include "logging.hpp"
 #include "shader.hpp"
@@ -27,6 +29,7 @@ void processInput(GLFWwindow* window)
 
 void initScene();
 void draw();
+static std::atomic_int counter = 0;
 
 int main(int argc, char** argv)
 {
@@ -56,17 +59,33 @@ int main(int argc, char** argv)
 
     initScene();
 
+    // fps counter thread
+    logger fps_counter_log = get_logger("fps_counter");
+    std::atomic_bool program_exits = false;
+    std::thread thd { [ &fps_counter_log, &program_exits ]
+    {
+        while (!program_exits)
+        {
+            fps_counter_log->info("FPS: {}", counter);
+            counter = 0;
+            std::this_thread::sleep_for(std::chrono::seconds(1));
+        }
+    } };
+
     while (!glfwWindowShouldClose(window))
     {
         processInput(window);
 
         draw();
+        ++counter;
 
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
 
+    program_exits = true;
     glfwTerminate();
+    thd.join();
     return 0;
 }
 
@@ -115,7 +134,7 @@ void draw()
     glBindVertexArray(vao);
     glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
-    glUseProgram(0);
+    prog.unuse();
 }
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
