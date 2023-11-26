@@ -16,9 +16,9 @@ class logger;
 
 using logger = std::shared_ptr<spdlog::logger>;
 
-logger get_logger(std::string_view logger_name);
+inline logger get_logger(std::string_view logger_name);
 
-logger get_logger(std::string_view logger_name)
+inline logger get_logger(std::string_view logger_name)
 {
     logger l = spdlog::get(std::string(logger_name));
     if (!l)
