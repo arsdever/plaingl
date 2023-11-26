@@ -180,8 +180,6 @@ void shader_program::use()
     glUseProgram(_id);
 }
 
-void shader_program::unuse() { glUseProgram(0); }
-
 void shader_program::deinit()
 {
     // don't deinit shaders, we only deinit the program
@@ -204,3 +202,7 @@ void shader_program::add_shader(std::string_view path)
 }
 
 void shader_program::release_shaders() { _shaders.clear(); }
+
+int shader_program::id() const { return _id; }
+
+void shader_program::unuse() { glUseProgram(0); }
