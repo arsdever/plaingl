@@ -2,7 +2,11 @@
 #include <glad/gl.h>
 #include <GLFW/glfw3.h>
 /* clang-format off */
-#include <spdlog/spdlog.h>
+#include "logging.hpp"
+
+namespace {
+    static logger log() { return get_logger("main");}
+}
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 
@@ -23,7 +27,7 @@ int main(int argc, char** argv)
     GLFWwindow* window = glfwCreateWindow(800, 600, "LearnOpenGL", NULL, NULL);
     if (window == NULL)
     {
-        spdlog::default_logger()->error("Failed to create GLFW window");
+        log()->error("Failed to create GLFW window");
         glfwTerminate();
         return -1;
     }
@@ -31,7 +35,7 @@ int main(int argc, char** argv)
 
     if (!gladLoadGL((GLADloadfunc)glfwGetProcAddress))
     {
-        spdlog::default_logger()->error("Failed to initialize GLAD");
+        log()->error("Failed to initialize GLAD");
         return -1;
     }
 
