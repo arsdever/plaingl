@@ -1,22 +1,20 @@
+#include <array>
+#include <atomic>
+#include <map>
+#include <thread>
+
 /* clang-format off */
 #include <glad/gl.h>
 #include <GLFW/glfw3.h>
 /* clang-format on */
 
-#include <map>
-
 #include <freetype/freetype.h>
 #include <glm/glm.hpp>
-#include FT_FREETYPE_H
-#include <array>
-#include <atomic>
-#include <iostream>
-#include <thread>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 #include "logging.hpp"
 #include "shader.hpp"
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
 
 namespace
 {
@@ -311,7 +309,8 @@ void draw()
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    render_text(text_prog, fmt::format("FPS: {}", last_fps), 0, 0, 0.7f, 0, 0, 0);
+    render_text(
+        text_prog, fmt::format("FPS: {}", last_fps), 0, 0, 0.7f, 0, 0, 0);
 }
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)

@@ -1,11 +1,9 @@
-#include <cstdio>
-#include <fstream>
+#include <glad/gl.h>
 
 #include "shader.hpp"
 
 #include "file.hpp"
 #include "logging.hpp"
-#include <glad/gl.h>
 
 namespace
 {

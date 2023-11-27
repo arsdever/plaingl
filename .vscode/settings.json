@@ -18,6 +18,7 @@
 		"xlocnum": "cpp",
 		"xloctime": "cpp",
 		"xutility": "cpp",
-		"xstring": "cpp"
+		"xstring": "cpp",
+		"thread": "cpp"
 	}
 }
