@@ -51,11 +51,15 @@ public:
 
 public:
     shader_program();
+    shader_program(const shader_program& other) = delete;
+    shader_program(shader_program&& other);
+    shader_program& operator=(const shader_program& other) = delete;
+    shader_program& operator=(shader_program&& other);
     ~shader_program();
 
     void init();
     void link();
-    void use();
+    void use() const;
     void deinit();
     void add_shader(std::string_view path);
     void release_shaders();

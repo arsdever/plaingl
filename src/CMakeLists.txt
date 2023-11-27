@@ -3,11 +3,13 @@ add_executable(
   logging.hpp
   file.hpp
   file.cpp
-  # fontgen.hpp
-  # fontgen.cpp
+  font.hpp
+  font.cpp
   main.cpp
   shader.hpp
   shader.cpp
+  text.hpp
+  text.cpp
   glad/src/gl.c)
 
 target_link_libraries(gl PUBLIC glfw glm spdlog::spdlog freetype)

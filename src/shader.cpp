@@ -121,6 +121,25 @@ shader shader::from_file(std::string_view path)
 
 shader_program::shader_program() = default;
 
+shader_program::shader_program(shader_program&& other)
+{
+    _status = other._status;
+    _id = other._id;
+    _shaders = std::move(other._shaders);
+    other._id = 0;
+    other._status = status::uninitialized;
+}
+
+shader_program& shader_program::operator=(shader_program&& other)
+{
+    _status = other._status;
+    _id = other._id;
+    _shaders = std::move(other._shaders);
+    other._id = 0;
+    other._status = status::uninitialized;
+    return *this;
+}
+
 shader_program::~shader_program()
 {
     // no need to manually deinit shaders
@@ -167,7 +186,7 @@ void shader_program::link()
     _status = status::linked;
 }
 
-void shader_program::use()
+void shader_program::use() const
 {
     if (_status != status::linked)
     {
