@@ -1,3 +1,23 @@
 {
-	"sonarlint.pathToCompileCommands": "${workspaceFolder}\\build\\compile_commands.json"
+	"sonarlint.pathToCompileCommands": "${workspaceFolder}\\build\\compile_commands.json",
+	"files.associations": {
+		"array": "cpp",
+		"iterator": "cpp",
+		"list": "cpp",
+		"vector": "cpp",
+		"xhash": "cpp",
+		"format": "cpp",
+		"istream": "cpp",
+		"memory": "cpp",
+		"tuple": "cpp",
+		"type_traits": "cpp",
+		"utility": "cpp",
+		"variant": "cpp",
+		"xlocmes": "cpp",
+		"xlocmon": "cpp",
+		"xlocnum": "cpp",
+		"xloctime": "cpp",
+		"xutility": "cpp",
+		"xstring": "cpp"
+	}
 }
