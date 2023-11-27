@@ -2,19 +2,13 @@
 
 #include <string>
 
+#include "color.hpp"
 #include "font.hpp"
 #include "shader.hpp"
 
 class text
 {
 public:
-    struct color
-    {
-        float r;
-        float g;
-        float b;
-    };
-
     struct position
     {
         float x;

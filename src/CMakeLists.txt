@@ -1,5 +1,6 @@
 add_executable(
   gl
+  color.hpp
   logging.hpp
   file.hpp
   file.cpp
