@@ -16,6 +16,7 @@
 #include "logging.hpp"
 #include "shader.hpp"
 #include "text.hpp"
+#include "thread.hpp"
 
 namespace
 {
@@ -136,6 +137,7 @@ int main(int argc, char** argv)
             std::this_thread::sleep_for(std::chrono::seconds(1));
         }
     } };
+    set_thread_name(thd, "fps_counter");
 
     glfwSetKeyCallback(window, on_keypress);
 
