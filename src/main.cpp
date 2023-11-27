@@ -1,5 +1,6 @@
 #include <array>
 #include <atomic>
+#include <charconv>
 #include <thread>
 #include <unordered_set>
 
@@ -31,6 +32,7 @@ std::unordered_set<int> pressed_keys;
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 
+void process_console();
 void on_keypress(
     GLFWwindow* window, int key, int scancode, int action, int mods)
 {
@@ -41,6 +43,11 @@ void on_keypress(
 
     switch (key)
     {
+    case GLFW_KEY_ENTER:
+    {
+        process_console();
+        break;
+    }
     case GLFW_KEY_ESCAPE:
     {
         console_text_content.clear();
@@ -77,6 +84,8 @@ void on_keypress(
 
     console_text.set_text(console_text_content);
 }
+
+std::vector<std::string_view> tokenize(std::string_view str);
 
 void initScene();
 void draw();
@@ -221,6 +230,42 @@ void draw()
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     console_text.render();
+}
+
+std::vector<std::string_view> tokenize(std::string_view str)
+{
+    std::vector<std::string_view> result;
+    const char* iter = str.data();
+    size_t length = 0;
+    for (int i = 0; i < str.size(); ++i)
+    {
+        if (str[ i ] == ' ')
+        {
+            result.push_back({ iter, length });
+            iter += length + 1;
+            length = 0;
+            continue;
+        }
+        length++;
+    }
+
+    result.push_back({ iter, length });
+    return result;
+}
+
+void process_console()
+{
+    auto tokens = tokenize(console_text_content);
+    if (tokens[ 0 ] == "set" && tokens[ 1 ] == "position")
+    {
+        float x, y;
+        std::from_chars(
+            tokens[ 2 ].data(), tokens[ 2 ].data() + tokens[ 2 ].size(), x);
+        std::from_chars(
+            tokens[ 3 ].data(), tokens[ 3 ].data() + tokens[ 3 ].size(), y);
+
+        console_text.set_position({ x, y });
+    }
 }
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
