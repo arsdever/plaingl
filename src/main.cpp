@@ -1,7 +1,7 @@
 #include <array>
 #include <atomic>
-#include <map>
 #include <thread>
+#include <unordered_set>
 
 /* clang-format off */
 #include <glad/gl.h>
@@ -20,20 +20,62 @@ namespace
 {
 static logger log() { return get_logger("main"); }
 shader_program prog;
-shader_program text_prog;
 unsigned last_fps;
 unsigned vao;
 unsigned vbo;
 unsigned ebo;
 text console_text;
+std::string console_text_content;
+std::unordered_set<int> pressed_keys;
 } // namespace
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 
-void processInput(GLFWwindow* window)
+void on_keypress(
+    GLFWwindow* window, int key, int scancode, int action, int mods)
 {
-    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-        glfwSetWindowShouldClose(window, true);
+    if (action != GLFW_PRESS && action != GLFW_REPEAT)
+    {
+        return;
+    }
+
+    switch (key)
+    {
+    case GLFW_KEY_ESCAPE:
+    {
+        console_text_content.clear();
+        break;
+    }
+    case GLFW_KEY_BACKSPACE:
+    {
+        if (!console_text_content.empty())
+            console_text_content.pop_back();
+        break;
+    }
+    default:
+    {
+        if (key >= GLFW_KEY_SPACE && key <= GLFW_KEY_GRAVE_ACCENT)
+        {
+            if (isalnum(key))
+            {
+                if (mods & GLFW_MOD_SHIFT)
+                {
+                    console_text_content.push_back(toupper(key));
+                }
+                else
+                {
+                    console_text_content.push_back(tolower(key));
+                }
+            }
+            else
+            {
+                console_text_content.push_back(key);
+            }
+        }
+    }
+    }
+
+    console_text.set_text(console_text_content);
 }
 
 void initScene();
@@ -69,6 +111,9 @@ int main(int argc, char** argv)
 
     initScene();
 
+    console_text_content = "Hello world";
+    console_text.set_text(console_text_content);
+
     // fps counter thread
     logger fps_counter_log = get_logger("fps_counter");
     std::atomic_bool program_exits = false;
@@ -83,10 +128,10 @@ int main(int argc, char** argv)
         }
     } };
 
+    glfwSetKeyCallback(window, on_keypress);
+
     while (!glfwWindowShouldClose(window))
     {
-        processInput(window);
-
         draw();
         ++counter;
 
@@ -107,29 +152,31 @@ void initScene()
     prog.add_shader("shader.frag");
     prog.link();
 
-    text_prog.init();
-    text_prog.add_shader("text.vert");
-    text_prog.add_shader("text.frag");
-    text_prog.link();
+    {
+        shader_program text_prog;
+        text_prog.init();
+        text_prog.add_shader("text.vert");
+        text_prog.add_shader("text.frag");
+        text_prog.link();
 
-    text_prog.use();
-    glm::mat4 projection = glm::ortho(0.0f, 800.0f, 0.0f, 600.0f);
-    unsigned int uniform_position =
-        glGetUniformLocation(text_prog.id(), "projection");
-    glUniformMatrix4fv(
-        uniform_position, 1, GL_FALSE, glm::value_ptr(projection));
-    text_prog.unuse();
+        text_prog.use();
+        glm::mat4 projection = glm::ortho(0.0f, 800.0f, 0.0f, 600.0f);
+        unsigned int uniform_position =
+            glGetUniformLocation(text_prog.id(), "projection");
+        glUniformMatrix4fv(
+            uniform_position, 1, GL_FALSE, glm::value_ptr(projection));
+        text_prog.unuse();
+        console_text.set_shader(std::move(text_prog));
+    }
 
     font console_text_font;
     console_text_font.load("font.ttf");
 
     console_text.init();
-    console_text.set_shader(std::move(text_prog));
     console_text.set_font(std::move(console_text_font));
     console_text.set_color({ 0, 0, 0 });
     console_text.set_position({ 0, 570 });
     console_text.set_scale(.5f);
-    console_text.set_text("Hello world");
 
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
