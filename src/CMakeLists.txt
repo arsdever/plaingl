@@ -7,6 +7,8 @@ add_executable(
   font.hpp
   font.cpp
   main.cpp
+  material.hpp
+  material.cpp
   shader.hpp
   shader.cpp
   text.hpp
