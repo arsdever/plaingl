@@ -1,27 +1,35 @@
 #pragma once
 
+#include <any>
+#include <string>
+
 #include <glad/gl.h>
 
 struct material_property_info
 {
     enum type
     {
-        property_type_float = GL_FLOAT,
-        property_type_vec2 = GL_FLOAT_VEC2,
-        property_type_vec3 = GL_FLOAT_VEC3,
-        property_type_vec4 = GL_FLOAT_VEC4,
+        // supported types
+        property_type_1f = GL_FLOAT,
+        property_type_2f = GL_FLOAT_VEC2,
+        property_type_3f = GL_FLOAT_VEC3,
+        property_type_4f = GL_FLOAT_VEC4,
+
+        property_type_1i = GL_INT,
+        property_type_2i = GL_INT_VEC2,
+        property_type_3i = GL_INT_VEC3,
+        property_type_4i = GL_INT_VEC4,
+
+        property_type_1ui = GL_UNSIGNED_INT,
+        property_type_2ui = GL_UNSIGNED_INT_VEC2,
+        property_type_3ui = GL_UNSIGNED_INT_VEC3,
+        property_type_4ui = GL_UNSIGNED_INT_VEC4,
+
+        // unsupported types
         property_type_double = GL_DOUBLE,
         property_type_dvec2 = GL_DOUBLE_VEC2,
         property_type_dvec3 = GL_DOUBLE_VEC3,
         property_type_dvec4 = GL_DOUBLE_VEC4,
-        property_type_int = GL_INT,
-        property_type_ivec2 = GL_INT_VEC2,
-        property_type_ivec3 = GL_INT_VEC3,
-        property_type_ivec4 = GL_INT_VEC4,
-        property_type_unsigned_int = GL_UNSIGNED_INT,
-        property_type_uvec2 = GL_UNSIGNED_INT_VEC2,
-        property_type_uvec3 = GL_UNSIGNED_INT_VEC3,
-        property_type_uvec4 = GL_UNSIGNED_INT_VEC4,
         property_type_bool = GL_BOOL,
         property_type_bvec2 = GL_BOOL_VEC2,
         property_type_bvec3 = GL_BOOL_VEC3,
@@ -119,28 +127,5 @@ struct material_property_info
     int _index;
     int _size;
     type _type;
-};
-
-template <typename T>
-struct material_property_type_traits;
-
-template <>
-struct material_property_type_traits<float>
-{
-    static constexpr auto gl_type = GL_FLOAT;
-    static constexpr auto gl_setter = &glUniform1f;
-};
-
-template <>
-struct material_property_type_traits<double>
-{
-    static constexpr auto gl_type = GL_DOUBLE;
-    static constexpr auto gl_setter = &glUniform1d;
-};
-
-template <>
-struct material_property_type_traits<int>
-{
-    static constexpr auto gl_type = GL_INT;
-    static constexpr auto gl_setter = &glUniform1i;
+    std::any _value;
 };

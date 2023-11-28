@@ -1,19 +1,21 @@
-#include <array>
-#include <atomic>
-#include <charconv>
-#include <thread>
-#include <unordered_set>
-
 /* clang-format off */
 #include <glad/gl.h>
 #include <GLFW/glfw3.h>
 /* clang-format on */
+
+#include <array>
+#include <atomic>
+#include <charconv>
+#include <chrono>
+#include <thread>
+#include <unordered_set>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
 #include "logging.hpp"
+#include "material.hpp"
 #include "shader.hpp"
 #include "text.hpp"
 #include "thread.hpp"
@@ -29,6 +31,7 @@ unsigned ebo;
 text console_text;
 std::string console_text_content;
 std::unordered_set<int> pressed_keys;
+material basic_mat;
 } // namespace
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -141,10 +144,17 @@ int main(int argc, char** argv)
 
     glfwSetKeyCallback(window, on_keypress);
 
+    color col { 1, 1, 1, 1 };
     while (!glfwWindowShouldClose(window))
     {
         draw();
         ++counter;
+        float hue = std::chrono::duration_cast<std::chrono::duration<double>>(
+                        std::chrono::steady_clock::now().time_since_epoch())
+                        .count();
+        hue = fmod(hue, 3.0f) / 3.0f;
+        hslToRgb(hue, 1.0f, .5f, col.r, col.g, col.b);
+        basic_mat.set_property("materialColor", col.r, col.g, col.b, col.a);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
@@ -162,6 +172,18 @@ void initScene()
     prog.add_shader("shader.vert");
     prog.add_shader("shader.frag");
     prog.link();
+
+    basic_mat.set_shader_program(&prog);
+    for (const auto& property : basic_mat.properties())
+    {
+        log()->info("Material properties:\n\tname: {}\n\tindex: {}\n\tsize: "
+                    "{}\n\ttype: {}",
+                    property._name,
+                    property._index,
+                    property._size,
+                    property._type);
+    }
+    basic_mat.set_property("position", 1);
 
     {
         shader_program text_prog;
@@ -223,7 +245,7 @@ void draw()
 {
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
-    prog.use();
+    basic_mat.activate();
     glBindVertexArray(vao);
     glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);

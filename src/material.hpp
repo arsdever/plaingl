@@ -1,20 +1,14 @@
 #pragma once
 
-#include <optional>
-#include <string>
+#include <tuple>
 #include <unordered_map>
-#include <variant>
 
-#include "color.hpp"
 #include "material_property.hpp"
 
 class shader_program;
 
 class material
 {
-public:
-    using property_t = std::variant<double, float, int, unsigned, bool, color>;
-
 public:
     material();
     ~material();
@@ -24,27 +18,20 @@ public:
 
     void set_shader_program(shader_program* prog);
 
-    template <typename T>
-    void set_property(std::string_view name, T value)
+    template <typename... T>
+    void set_property(std::string_view name, T... value)
     {
-        if (!property_type_matches<T>(_name_property_map.at(name)._type))
+        if (!_name_property_map.contains(name))
         {
             return;
         }
 
-        _shader_program->use();
-        (*material_property_type_traits<T>::gl_setter)(
-            _name_property_map.at(name)._index, value);
-        _shader_program->unuse();
+        _name_property_map.at(name)._value = std::tuple<T...>(value...);
     }
+
+    void activate();
 
 private:
-    template <typename T>
-    bool property_type_matches(material_property_info::type type)
-    {
-        return type == material_property_type_traits<T>::gl_type;
-    }
-
     void resolve_uniforms();
 
 private:
