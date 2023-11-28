@@ -9,10 +9,24 @@ namespace
 static inline logger log() { return get_logger("fs"); }
 } // namespace
 
-std::string get_file_contents(std::string_view path)
+void file::open(std::string_view path, std::string_view privileges)
 {
-    std::FILE* f;
-    auto error = fopen_s(&f, path.data(), "r");
+    if (_state != state::closed)
+    {
+        log()->warn("Another file is already open. Closing");
+        close();
+    }
+
+#ifdef WIN32
+    auto error = fopen_s(&_file_descriptor, path.data(), privileges.data());
+#else
+    auto _file_descriptor = fopen(path.data(), privileges.data());
+    int error;
+    if (_file_descriptor)
+    {
+        error = errno;
+    }
+#endif
 
     if (error != 0)
     {
@@ -20,16 +34,38 @@ std::string get_file_contents(std::string_view path)
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
         log()->error(
             "Failed to load the file at {}: {}", path, std::strerror(error));
-        return "";
+        return;
 #pragma clang diagnostic pop
     }
+    _state = state::open;
+}
 
-    std::fseek(f, 0, SEEK_END);
-    int size = std::ftell(f);
+size_t file::size() const
+{
+    if (_state != state::open)
+    {
+        log()->error("Can't get the size of a closed file");
+        return -1;
+    }
 
-    std::string result(size, '\0');
-    std::fseek(f, 0, SEEK_SET);
-    std::fread(result.data(), 1, size, f);
+    int pos = std::ftell(_file_descriptor);
+    std::fseek(_file_descriptor, 0, SEEK_END);
+    int size = std::ftell(_file_descriptor);
+    std::fseek(_file_descriptor, pos, SEEK_SET);
+    return size;
+}
+
+std::string file::read_all()
+{
+    if (_state != state::open)
+    {
+        log()->error("Can't read the contents of a closed file");
+        return "";
+    }
+    size_t length = size();
+    std::string result(length, '\0');
+    std::fseek(_file_descriptor, 0, SEEK_SET);
+    std::fread(result.data(), 1, length, _file_descriptor);
 
     return result;
 }
