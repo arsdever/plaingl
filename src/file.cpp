@@ -9,6 +9,10 @@ namespace
 static inline logger log() { return get_logger("fs"); }
 } // namespace
 
+file::file() = default;
+
+file::~file() { close(); }
+
 void file::open(std::string_view path, std::string_view privileges)
 {
     if (_state != state::closed)
@@ -40,6 +44,12 @@ void file::open(std::string_view path, std::string_view privileges)
     _state = state::open;
 }
 
+void file::close()
+{
+    fclose(_file_descriptor);
+    _state = state::closed;
+}
+
 size_t file::size() const
 {
     if (_state != state::open)
@@ -68,4 +78,11 @@ std::string file::read_all()
     std::fread(result.data(), 1, length, _file_descriptor);
 
     return result;
+}
+
+std::string get_file_contents(std::string_view path)
+{
+    file f;
+    f.open(path, "r");
+    return f.read_all();
 }
