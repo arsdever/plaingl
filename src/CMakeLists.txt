@@ -6,6 +6,8 @@ add_executable(
   file.cpp
   font.hpp
   font.cpp
+  gl_window.hpp
+  gl_window.cpp
   main.cpp
   material_property.hpp
   material.hpp

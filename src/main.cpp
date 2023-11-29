@@ -14,6 +14,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include "gl_window.hpp"
 #include "logging.hpp"
 #include "material.hpp"
 #include "shader.hpp"
@@ -33,8 +34,6 @@ std::string console_text_content;
 std::unordered_set<int> pressed_keys;
 material basic_mat;
 } // namespace
-
-void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 
 void process_console();
 void on_keypress(
@@ -92,35 +91,18 @@ void on_keypress(
 std::vector<std::string_view> tokenize(std::string_view str);
 
 void initScene();
-void draw();
 
 static std::atomic_int counter = 0;
 
 int main(int argc, char** argv)
 {
     glfwInit();
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    // glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
-    GLFWwindow* window = glfwCreateWindow(800, 600, "LearnOpenGL", NULL, NULL);
-    if (window == NULL)
-    {
-        log()->error("Failed to create GLFW window");
-        glfwTerminate();
-        return -1;
-    }
-    glfwMakeContextCurrent(window);
-
-    if (!gladLoadGL((GLADloadfunc)glfwGetProcAddress))
-    {
-        log()->error("Failed to initialize GLAD");
-        return -1;
-    }
-
-    glViewport(0, 0, 800, 600);
-    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+    std::vector<gl_window> windows;
+    windows.push_back({});
+    windows.back().init();
+    windows.push_back({});
+    windows.back().init();
 
     initScene();
 
@@ -142,24 +124,16 @@ int main(int argc, char** argv)
     } };
     set_thread_name(thd, "fps_counter");
 
-    glfwSetKeyCallback(window, on_keypress);
-
-    color col { 1, 1, 1, 1 };
-    while (!glfwWindowShouldClose(window))
+    while (true)
     {
-        draw();
-        ++counter;
-        float hue = std::chrono::duration_cast<std::chrono::duration<double>>(
-                        std::chrono::steady_clock::now().time_since_epoch())
-                        .count();
-        hue = fmod(hue, 3.0f) / 3.0f;
-        hslToRgb(hue, 1.0f, .5f, col.r, col.g, col.b);
-        basic_mat.set_property("materialColor", col.r, col.g, col.b, col.a);
-
-        glfwSwapBuffers(window);
+        for (auto& window : windows)
+        {
+            window.update();
+        }
         glfwPollEvents();
     }
 
+    color col { 1, 1, 1, 1 };
     program_exits = true;
     glfwTerminate();
     thd.join();
@@ -241,20 +215,20 @@ void initScene()
     glBindVertexArray(0);
 }
 
-void draw()
-{
-    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
-    basic_mat.activate();
-    glBindVertexArray(vao);
-    glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0);
-    glBindVertexArray(0);
-    prog.unuse();
+// void draw()
+// {
+//     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+//     glClear(GL_COLOR_BUFFER_BIT);
+//     basic_mat.activate();
+//     glBindVertexArray(vao);
+//     glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0);
+//     glBindVertexArray(0);
+//     prog.unuse();
 
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    console_text.render();
-}
+//     glEnable(GL_BLEND);
+//     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+//     console_text.render();
+// }
 
 std::vector<std::string_view> tokenize(std::string_view str)
 {
@@ -290,9 +264,4 @@ void process_console()
 
         console_text.set_position({ x, y });
     }
-}
-
-void framebuffer_size_callback(GLFWwindow* window, int width, int height)
-{
-    glViewport(0, 0, width, height);
 }
