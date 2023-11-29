@@ -19,4 +19,8 @@ add_executable(
   glad/src/gl.c)
 
 target_link_libraries(gl PUBLIC glfw glm spdlog::spdlog freetype)
+if (MACOSX)
+target_link_libraries(gl PUBLIC pthread)
+endif(MACOSX)
+
 target_include_directories(gl PRIVATE glad/include)

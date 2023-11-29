@@ -283,10 +283,13 @@ void process_console()
     if (tokens[ 0 ] == "set" && tokens[ 1 ] == "position")
     {
         float x, y;
+#ifndef __APPLE__
+        // TODO: improve solution for MacOSX
         std::from_chars(
             tokens[ 2 ].data(), tokens[ 2 ].data() + tokens[ 2 ].size(), x);
         std::from_chars(
             tokens[ 3 ].data(), tokens[ 3 ].data() + tokens[ 3 ].size(), y);
+#endif
 
         console_text.set_position({ x, y });
     }
