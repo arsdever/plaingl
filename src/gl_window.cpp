@@ -3,9 +3,12 @@
 #include <GLFW/glfw3.h>
 /* clang-format on */
 
+#include <glm/ext.hpp>
+
 #include "gl_window.hpp"
 
 #include "logging.hpp"
+#include "shader.hpp"
 
 namespace
 {
@@ -55,13 +58,23 @@ void gl_window::init()
         glViewport(0, 0, _this.width(), _this.height());
     });
 
+    configure_fps_text();
+    _last_frame_time = std::chrono::steady_clock::now();
+
     _state = state::initialized;
 }
 
 void gl_window::set_active() { glfwMakeContextCurrent(_window); }
 
+size_t gl_window::width() const { return _width; }
+
+size_t gl_window::height() const { return _height; }
+
 void gl_window::update()
 {
+    auto now = std::chrono::steady_clock::now();
+    auto diff = now - _last_frame_time;
+    _last_frame_time = std::move(now);
     if (_state != state::initialized)
     {
         // TODO: notify that the window was closed
@@ -78,7 +91,16 @@ void gl_window::update()
 
     set_active();
     draw();
-    ++_fps_counter;
+
+    // draw fps counter
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    _fps_text.set_text(fmt::format(
+        "{:.5} ms",
+        std::chrono::duration_cast<std::chrono::duration<double>>(diff)
+                .count() *
+            1000));
+    _fps_text.render();
 
     glfwSwapBuffers(_window);
 }
@@ -89,8 +111,31 @@ void gl_window::draw()
     glClear(GL_COLOR_BUFFER_BIT);
 }
 
-size_t gl_window::width() const { return _width; }
+void gl_window::configure_fps_text()
+{
+    font fps_text_font;
+    fps_text_font.load("font.ttf");
 
-size_t gl_window::height() const { return _height; }
+    shader_program prog;
+    prog.init();
+    prog.add_shader("text.vert");
+    prog.add_shader("text.frag");
+    prog.link();
+
+    prog.use();
+    glm::mat4 projection = glm::ortho(0.0f, 800.0f, 0.0f, 600.0f);
+    unsigned int uniform_position =
+        glGetUniformLocation(prog.id(), "projection");
+    glUniformMatrix4fv(
+        uniform_position, 1, GL_FALSE, glm::value_ptr(projection));
+    prog.unuse();
+
+    _fps_text.init();
+    _fps_text.set_position({ 5.0f, height() - 10.0f });
+    _fps_text.set_color({ 1.0f, 1.0f, 1.0f });
+    _fps_text.set_font(std::move(fps_text_font));
+    _fps_text.set_scale(.2);
+    _fps_text.set_shader(std::move(prog));
+}
 
 std::unordered_map<GLFWwindow*, gl_window&> gl_window::_window_mapping;
