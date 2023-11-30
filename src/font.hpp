@@ -19,7 +19,7 @@ public:
 public:
     font();
 
-    void load(std::string path);
+    void load(std::string path, float size);
 
     const character& operator[](char ch) const;
 

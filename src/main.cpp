@@ -177,7 +177,7 @@ void initScene()
     }
 
     font console_text_font;
-    console_text_font.load("font.ttf");
+    console_text_font.load("font.ttf", 24);
 
     console_text.init();
     console_text.set_font(std::move(console_text_font));

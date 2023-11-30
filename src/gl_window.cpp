@@ -20,6 +20,7 @@ void gl_window::init()
     _width = 800;
     _height = 600;
 
+    glfwWindowHint(GLFW_SAMPLES, 8);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
@@ -72,9 +73,6 @@ size_t gl_window::height() const { return _height; }
 
 void gl_window::update()
 {
-    auto now = std::chrono::steady_clock::now();
-    auto diff = now - _last_frame_time;
-    _last_frame_time = std::move(now);
     if (_state != state::initialized)
     {
         // TODO: notify that the window was closed
@@ -92,29 +90,34 @@ void gl_window::update()
     set_active();
     draw();
 
-    // draw fps counter
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    _fps_text.set_text(fmt::format(
-        "{:.5} ms",
-        std::chrono::duration_cast<std::chrono::duration<double>>(diff)
-                .count() *
-            1000));
-    _fps_text.render();
-
     glfwSwapBuffers(_window);
 }
 
 void gl_window::draw()
 {
+    auto now = std::chrono::steady_clock::now();
+    auto diff = now - _last_frame_time;
+    _last_frame_time = std::move(now);
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
+
+    // draw fps counter
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_MULTISAMPLE);
+    _fps_text.set_text(fmt::format(
+        "{:#6.6} ms",
+        std::chrono::duration_cast<std::chrono::duration<double>>(diff)
+                .count() *
+            1000));
+    _fps_text.render();
+    glDisable(GL_BLEND);
 }
 
 void gl_window::configure_fps_text()
 {
     font fps_text_font;
-    fps_text_font.load("font.ttf");
+    fps_text_font.load("font.ttf", 9);
 
     shader_program prog;
     prog.init();
@@ -134,7 +137,7 @@ void gl_window::configure_fps_text()
     _fps_text.set_position({ 5.0f, height() - 10.0f });
     _fps_text.set_color({ 1.0f, 1.0f, 1.0f });
     _fps_text.set_font(std::move(fps_text_font));
-    _fps_text.set_scale(.2);
+    _fps_text.set_scale(1);
     _fps_text.set_shader(std::move(prog));
 }
 
