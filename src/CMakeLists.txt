@@ -18,6 +18,8 @@ add_executable(
   material.cpp
   mesh.hpp
   mesh.cpp
+  scene.hpp
+  scene.cpp
   shader.hpp
   shader.cpp
   text.hpp
