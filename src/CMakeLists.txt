@@ -12,6 +12,8 @@ add_executable(
   material_property.hpp
   material.hpp
   material.cpp
+  mesh.hpp
+  mesh.cpp
   shader.hpp
   shader.cpp
   text.hpp

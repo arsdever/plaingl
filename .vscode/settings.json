@@ -1,4 +1,5 @@
 {
+	"cmake.configureArgs": ["-DGLFW_BUILD_EXAMPLES=ON"],
 	"sonarlint.pathToCompileCommands": "${workspaceFolder}\\build\\compile_commands.json",
 	"files.associations": {
 		"array": "cpp",
