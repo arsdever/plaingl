@@ -98,7 +98,6 @@ void mesh::render()
         glBindVertexArray(_vao_map[ glfwGetCurrentContext() ]);
         glEnableVertexAttribArray(0);
     }
-    // glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0);
-    glDrawArrays(GL_TRIANGLES, 0, 3);
+    glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
 }

@@ -7,7 +7,9 @@
 
 #include "gl_window.hpp"
 
+#include "game_object.hpp"
 #include "logging.hpp"
+#include "scene.hpp"
 #include "shader.hpp"
 
 namespace
@@ -78,6 +80,14 @@ static inline void gl_debug_output(GLenum source,
 
 void gl_window::init()
 {
+    std::string title = "Window";
+    if (!_main_window)
+    {
+        _main_window = this;
+        _is_main_window = true;
+        title = "Main window";
+    }
+
     _width = 800;
     _height = 600;
 
@@ -88,19 +98,17 @@ void gl_window::init()
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     // glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
-    _window = glfwCreateWindow(width(), height(), "LearnOpenGL", NULL, NULL);
+    _window =
+        glfwCreateWindow(width(),
+                         height(),
+                         title.c_str(),
+                         NULL,
+                         _is_main_window ? nullptr : _main_window->_window);
+    glfwSetWindowUserPointer(_window, this);
     if (_window == nullptr)
     {
         log()->error("Failed to create GLFW window");
         return;
-    }
-
-    auto [ existing_iterator, success ] =
-        _window_mapping.try_emplace(_window, *this);
-    if (!success)
-    {
-        _window_mapping.erase(existing_iterator);
-        _window_mapping.emplace(_window, *this);
     }
 
     set_active();
@@ -115,10 +123,10 @@ void gl_window::init()
     glfwSetFramebufferSizeCallback(_window,
                                    [](GLFWwindow* window, int w, int h)
     {
-        gl_window& _this = _window_mapping.at(window);
-        _this._width = w;
-        _this._width = h;
-        glViewport(0, 0, _this.width(), _this.height());
+        gl_window* _this =
+            static_cast<gl_window*>(glfwGetWindowUserPointer(window));
+        _this->_width = w;
+        _this->_height = h;
     });
 
     {
@@ -159,9 +167,11 @@ void gl_window::update()
     }
 
     set_active();
+    glViewport(0, 0, width(), height());
     draw();
 
     glfwSwapBuffers(_window);
+    glfwPollEvents();
 }
 
 void gl_window::draw()
@@ -169,18 +179,27 @@ void gl_window::draw()
     auto now = std::chrono::steady_clock::now();
     auto diff = now - _last_frame_time;
     _last_frame_time = std::move(now);
+
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
+
+    // glfwMakeContextCurrent(_main_window->_window);
+    for (auto* obj : scene::get_active_scene().objects())
+    {
+        obj->update();
+    }
+    glfwMakeContextCurrent(_window);
 
     // draw fps counter
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_MULTISAMPLE);
     _fps_text.set_text(fmt::format(
-        "{:#6.6} ms",
+        "{:#6.6} ms\nhandle {:#x}",
         std::chrono::duration_cast<std::chrono::duration<double>>(diff)
                 .count() *
-            1000));
+            1000,
+        reinterpret_cast<unsigned long long>(this)));
     _fps_text.render();
     glDisable(GL_BLEND);
 }
@@ -197,7 +216,8 @@ void gl_window::configure_fps_text()
     prog.link();
 
     prog.use();
-    glm::mat4 projection = glm::ortho(0.0f, 800.0f, 0.0f, 600.0f);
+    glm::mat4 projection = glm::ortho(
+        0.0f, static_cast<float>(width()), 0.0f, static_cast<float>(height()));
     unsigned int uniform_position =
         glGetUniformLocation(prog.id(), "projection");
     glUniformMatrix4fv(
@@ -212,4 +232,4 @@ void gl_window::configure_fps_text()
     _fps_text.set_shader(std::move(prog));
 }
 
-std::unordered_map<GLFWwindow*, gl_window&> gl_window::_window_mapping;
+gl_window* gl_window::_main_window = nullptr;

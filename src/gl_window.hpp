@@ -36,5 +36,6 @@ private:
     size_t _height = 600;
     std::chrono::steady_clock::time_point _last_frame_time;
     text _fps_text;
-    static std::unordered_map<GLFWwindow*, gl_window&> _window_mapping;
+    bool _is_main_window = false;
+    static gl_window* _main_window;
 };
