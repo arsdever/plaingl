@@ -8,6 +8,8 @@ add_executable(
   file.cpp
   font.hpp
   font.cpp
+  game_object.hpp
+  game_object.cpp
   gl_window.hpp
   gl_window.cpp
   main.cpp
