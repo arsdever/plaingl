@@ -1,5 +1,7 @@
 add_executable(
   gl
+  camera.hpp
+  camera.cpp
   color.hpp
   logging.hpp
   file.hpp
