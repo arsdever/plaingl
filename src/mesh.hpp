@@ -17,6 +17,8 @@ public:
     void init();
 
     // TODO: not the best approach
+    // SUGGESTION: move the logic into the renderer class. The last will also
+    // manage the vao creation per context
     void render();
 
 private:
