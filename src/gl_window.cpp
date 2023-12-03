@@ -121,6 +121,38 @@ void gl_window::init()
     }
 
     glViewport(0, 0, width(), height());
+
+    glfwSetFramebufferSizeCallback(_window,
+                                   [](GLFWwindow* window, int w, int h)
+    {
+        gl_window* _this =
+            static_cast<gl_window*>(glfwGetWindowUserPointer(window));
+        _this->_width = w;
+        _this->_height = h;
+        _this->_view_camera->set_render_size(w, h);
+    });
+
+    glfwSetMouseButtonCallback(
+        _window,
+        [](GLFWwindow* window, int button, int action, int mods)
+    {
+        gl_window* _this =
+            static_cast<gl_window*>(glfwGetWindowUserPointer(window));
+
+        if (button == GLFW_MOUSE_BUTTON_1 && action == GLFW_RELEASE)
+        {
+            if (_this->_on_mouse_clicked_callback)
+            {
+                double xpos;
+                double ypos;
+                glfwGetCursorPos(window, &xpos, &ypos);
+                game_object* object =
+                    _this->find_game_object_at_position(xpos, ypos);
+                _this->_on_mouse_clicked_callback(object);
+            }
+        }
+    });
+
     glfwSetFramebufferSizeCallback(_window,
                                    [](GLFWwindow* window, int w, int h)
     {
@@ -213,6 +245,11 @@ void gl_window::set_camera(camera* view_camera)
     _view_camera->set_render_size(width(), height());
 }
 
+void gl_window::on_mouse_clicked(std::function<void(game_object*)> callback)
+{
+    _on_mouse_clicked_callback = callback;
+}
+
 void gl_window::configure_fps_text()
 {
     font fps_text_font;
@@ -239,6 +276,13 @@ void gl_window::configure_fps_text()
     _fps_text.set_font(std::move(fps_text_font));
     _fps_text.set_scale(1);
     _fps_text.set_shader(std::move(prog));
+}
+
+game_object* gl_window::find_game_object_at_position(double x, double y)
+{
+    (void)x;
+    (void)y;
+    return nullptr;
 }
 
 gl_window* gl_window::_main_window = nullptr;

@@ -110,9 +110,16 @@ int main(int argc, char** argv)
     std::vector<gl_window*> windows;
     windows.push_back(new gl_window);
     windows.back()->init();
+    windows.back()->set_active();
+    windows.back()->set_camera(&main_camera);
 
-    windows[ 0 ]->set_active();
-    windows[ 0 ]->set_camera(&main_camera);
+    windows.back()->on_mouse_clicked(
+        [](game_object* object)
+    {
+        log()->info("Main window clicked: Object selected {}",
+                    reinterpret_cast<unsigned long long>(object));
+    });
+
     initScene();
 
     windows.push_back(new gl_window);
