@@ -79,6 +79,15 @@
 		"xlocinfo": "cpp",
 		"xmemory": "cpp",
 		"xtree": "cpp",
-		"string_view": "cpp"
+		"string_view": "cpp",
+		"bitset": "cpp",
+		"cinttypes": "cpp",
+		"deque": "cpp",
+		"set": "cpp",
+		"numeric": "cpp",
+		"queue": "cpp",
+		"ranges": "cpp",
+		"regex": "cpp",
+		"stack": "cpp"
 	}
 }

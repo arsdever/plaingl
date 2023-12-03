@@ -14,6 +14,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include "asset_manager.hpp"
 #include "camera.hpp"
 #include "game_object.hpp"
 #include "gl_window.hpp"
@@ -34,6 +35,7 @@ std::string console_text_content;
 std::unordered_set<int> pressed_keys;
 camera main_camera;
 camera second_camera;
+asset_manager asset_manager_;
 } // namespace
 
 void process_console();
@@ -187,15 +189,15 @@ void initScene()
     basic_mat.set_property("position", 1);
 
     game_object* object = new game_object;
-    mesh object_mesh;
-    object_mesh.init();
-    object->set_mesh(std::move(object_mesh));
+    asset_manager_.load_asset("cube.fbx");
+
+    object->set_mesh(asset_manager_.meshes()[ 0 ]);
     object->set_material(std::move(basic_mat));
 
     s.add_object(object);
 
-    main_camera.set_position({ 0, .3, 3 });
-    second_camera.set_position({ 0, -.3, 3 });
+    main_camera.set_position({ 10, 10, 10 });
+    second_camera.set_position({ 0, -10, 10 });
 }
 
 std::vector<std::string_view> tokenize(std::string_view str)

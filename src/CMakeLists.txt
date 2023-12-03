@@ -1,5 +1,7 @@
 add_executable(
   gl
+  asset_manager.hpp
+  asset_manager.cpp
   camera.hpp
   camera.cpp
   color.hpp
@@ -28,5 +30,5 @@ add_executable(
   thread.cpp
   glad/src/gl.c)
 
-target_link_libraries(gl PUBLIC glfw glm spdlog::spdlog freetype)
+target_link_libraries(gl PUBLIC glfw glm assimp::assimp spdlog::spdlog freetype)
 target_include_directories(gl PRIVATE glad/include)

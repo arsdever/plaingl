@@ -7,6 +7,9 @@ project(plaingl)
 
 add_subdirectory(thirdparty/glm)
 add_subdirectory(thirdparty/glfw)
+set(ASSIMP_WARNINGS_AS_ERRORS FALSE)
+set(ASSIMP_BUILD_FBX_IMPORTER TRUE)
+add_subdirectory(thirdparty/assimp)
 add_subdirectory(thirdparty/spdlog)
 add_subdirectory(thirdparty/freetype)
 

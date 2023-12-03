@@ -11,11 +11,9 @@ mesh::mesh() { }
 
 mesh::mesh(mesh&& m)
 {
-    _vao = m._vao;
     _vbo = m._vbo;
     _ebo = m._ebo;
     _vao_map = std::move(m._vao_map);
-    m._vao = 0;
     m._vbo = 0;
     m._ebo = 0;
     m._vao_map.clear();
@@ -23,11 +21,9 @@ mesh::mesh(mesh&& m)
 
 mesh& mesh::operator=(mesh&& m)
 {
-    _vao = m._vao;
     _vbo = m._vbo;
     _ebo = m._ebo;
     _vao_map = std::move(m._vao_map);
-    m._vao = 0;
     m._vbo = 0;
     m._ebo = 0;
     m._vao_map.clear();
@@ -48,36 +44,36 @@ mesh::~mesh()
 
 void mesh::init()
 {
-    // TODO: generate vao per context
-    glGenVertexArrays(1, &_vao);
-    glBindVertexArray(_vao);
-    glGenBuffers(1, &_vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-    glGenBuffers(1, &_ebo);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ebo);
+    if (_vbo == 0)
+    {
+        glGenBuffers(1, &_vbo);
+        glBindBuffer(GL_ARRAY_BUFFER, _vbo);
+    }
 
-    std::array<std::array<float, 3>, 3> vertices {
-        { { -.5, -.5, 0 }, { 0, .75, 0 }, { .5, -.5, 0 } },
-    };
+    if (_ebo == 0)
+    {
+        glGenBuffers(1, &_ebo);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ebo);
+    }
 
     glBufferData(GL_ARRAY_BUFFER,
-                 vertices.size() * vertices[ 0 ].size() *
-                     sizeof(vertices[ 0 ][ 0 ]),
-                 vertices.data(),
+                 _vertex_positions.size() * 3 * sizeof(glm::vec3::type),
+                 _vertex_positions.data(),
                  GL_STATIC_DRAW);
-    glVertexAttribPointer(
-        0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-
-    std::array<int, 3> indices { 0, 1, 2 };
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ebo);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER,
-                 sizeof(indices),
-                 indices.data(),
+                 _vertex_indices.size() * sizeof(int),
+                 _vertex_indices.data(),
                  GL_STATIC_DRAW);
-    _vao_map[ glfwGetCurrentContext() ] = _vao;
+}
 
-    glBindVertexArray(0);
+void mesh::set_vertices(std::vector<glm::vec3> positions)
+{
+    _vertex_positions = std::move(positions);
+}
+
+void mesh::set_indices(std::vector<int> indices)
+{
+    _vertex_indices = std::move(indices);
 }
 
 void mesh::render()
@@ -98,6 +94,6 @@ void mesh::render()
         glBindVertexArray(_vao_map[ glfwGetCurrentContext() ]);
         glEnableVertexAttribArray(0);
     }
-    glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0);
+    glDrawElements(GL_TRIANGLES, _vertex_indices.size(), GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
 }
