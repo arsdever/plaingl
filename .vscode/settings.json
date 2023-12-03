@@ -78,6 +78,7 @@
 		"xlocbuf": "cpp",
 		"xlocinfo": "cpp",
 		"xmemory": "cpp",
-		"xtree": "cpp"
+		"xtree": "cpp",
+		"string_view": "cpp"
 	}
 }

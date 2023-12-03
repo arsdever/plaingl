@@ -1,4 +1,5 @@
 #include <glad/gl.h>
+#include <glm/ext.hpp>
 
 #include "material.hpp"
 
@@ -172,6 +173,27 @@ void material::activate()
                 std::tuple<unsigned, unsigned, unsigned, unsigned>>(
                 property._value);
             glUniform4ui(id, ui1, ui2, ui3, ui4);
+            break;
+        }
+        case material_property_info::type::property_type_mat2:
+        {
+            auto [ matrix ] =
+                std::any_cast<std::tuple<glm::mat2>>(property._value);
+            glUniformMatrix2fv(id, 1, GL_FALSE, glm::value_ptr(matrix));
+            break;
+        }
+        case material_property_info::type::property_type_mat3:
+        {
+            auto [ matrix ] =
+                std::any_cast<std::tuple<glm::mat3>>(property._value);
+            glUniformMatrix3fv(id, 1, GL_FALSE, glm::value_ptr(matrix));
+            break;
+        }
+        case material_property_info::type::property_type_mat4:
+        {
+            auto [ matrix ] =
+                std::any_cast<std::tuple<glm::mat4>>(property._value);
+            glUniformMatrix4fv(id, 1, GL_FALSE, glm::value_ptr(matrix));
             break;
         }
         default: break;

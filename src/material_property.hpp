@@ -24,6 +24,10 @@ struct material_property_info
         property_type_2ui = GL_UNSIGNED_INT_VEC2,
         property_type_3ui = GL_UNSIGNED_INT_VEC3,
         property_type_4ui = GL_UNSIGNED_INT_VEC4,
+       
+        property_type_mat2 = GL_FLOAT_MAT2,
+        property_type_mat3 = GL_FLOAT_MAT3,
+        property_type_mat4 = GL_FLOAT_MAT4,
 
         // unsupported types
         property_type_double = GL_DOUBLE,
@@ -34,9 +38,6 @@ struct material_property_info
         property_type_bvec2 = GL_BOOL_VEC2,
         property_type_bvec3 = GL_BOOL_VEC3,
         property_type_bvec4 = GL_BOOL_VEC4,
-        property_type_mat2 = GL_FLOAT_MAT2,
-        property_type_mat3 = GL_FLOAT_MAT3,
-        property_type_mat4 = GL_FLOAT_MAT4,
         property_type_mat2x3 = GL_FLOAT_MAT2x3,
         property_type_mat2x4 = GL_FLOAT_MAT2x4,
         property_type_mat3x2 = GL_FLOAT_MAT3x2,
