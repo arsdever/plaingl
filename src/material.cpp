@@ -6,6 +6,23 @@
 
 material::material() = default;
 
+material::material(material&& mat)
+{
+    _shader_program = mat._shader_program;
+    mat._shader_program = 0;
+    _properties = std::move(mat._properties);
+    _name_property_map = std::move(mat._name_property_map);
+}
+
+material& material::operator=(material&& mat)
+{
+    _shader_program = mat._shader_program;
+    mat._shader_program = 0;
+    _properties = std::move(mat._properties);
+    _name_property_map = std::move(mat._name_property_map);
+    return *this;
+}
+
 material::~material() = default;
 
 shader_program* material::program() const { return _shader_program; }

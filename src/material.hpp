@@ -11,6 +11,10 @@ class material
 {
 public:
     material();
+    material(material&& mat);
+    material(const material& mat) = delete;
+    material& operator=(material&& mat);
+    material& operator=(const material& mat) = delete;
     ~material();
 
     shader_program* program() const;
@@ -21,12 +25,13 @@ public:
     template <typename... T>
     void set_property(std::string_view name, T... value)
     {
-        if (!_name_property_map.contains(name))
+        if (!_name_property_map.contains(std::string(name)))
         {
             return;
         }
 
-        _name_property_map.at(name)._value = std::tuple<T...>(value...);
+        _name_property_map.at(std::string(name))._value =
+            std::tuple<T...>(value...);
     }
 
     void activate();
@@ -37,6 +42,5 @@ private:
 private:
     shader_program* _shader_program;
     std::vector<material_property_info> _properties;
-    std::unordered_map<std::string_view, material_property_info&>
-        _name_property_map;
+    std::unordered_map<std::string, material_property_info&> _name_property_map;
 };

@@ -134,6 +134,21 @@ int main(int argc, char** argv)
     {
         for (auto& window : windows)
         {
+            window->set_active();
+            color c { 0, 0, 0 };
+            hslToRgb(
+                fmod(std::chrono::duration_cast<std::chrono::duration<double>>(
+                         std::chrono::steady_clock::now().time_since_epoch())
+                         .count(),
+                     5.0) /
+                    5.0,
+                1.0f,
+                .5f,
+                c.r,
+                c.g,
+                c.b);
+            s.objects().back()->get_material().set_property(
+                "materialColor", c.r, c.g, c.b, 1.0f);
             window->update();
         }
     }

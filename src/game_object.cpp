@@ -8,6 +8,10 @@ void game_object::set_mesh(mesh m) { _mesh = std::move(m); }
 
 void game_object::set_material(material mat) { _material = std::move(mat); }
 
+mesh& game_object::get_mesh() { return _mesh; }
+
+material& game_object::get_material() { return _material; }
+
 void game_object::update()
 {
     _material.activate();
