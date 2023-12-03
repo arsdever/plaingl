@@ -113,11 +113,24 @@ int main(int argc, char** argv)
     windows.back()->set_active();
     windows.back()->set_camera(&main_camera);
 
+    game_object* selected_object = nullptr;
     windows.back()->on_mouse_clicked(
-        [](game_object* object)
+        [ &selected_object, &windows ](game_object* object)
     {
         log()->info("Main window clicked: Object selected {}",
                     reinterpret_cast<unsigned long long>(object));
+        if (selected_object != nullptr)
+        {
+            selected_object->set_selected(false);
+            selected_object = nullptr;
+        }
+        if (object != nullptr)
+        {
+            object->set_selected(true);
+            selected_object = object;
+        }
+        windows.front()->toggle_indexing();
+        windows.back()->toggle_indexing();
     });
 
     initScene();
@@ -167,7 +180,6 @@ int main(int argc, char** argv)
         }
     }
 
-    color col { 1, 1, 1, 1 };
     program_exits = true;
     glfwTerminate();
     thd.join();

@@ -14,9 +14,13 @@ public:
     mesh* get_mesh();
     material& get_material();
 
+    void set_selected(bool selected = true);
+    bool is_selected() const;
+
     void update();
 
 private:
     mesh* _mesh;
     material _material;
+    bool _selected = false;
 };

@@ -5,6 +5,7 @@
 #include <unordered_map>
 
 #include "text.hpp"
+#include "texture.hpp"
 
 struct GLFWwindow;
 class camera;
@@ -32,9 +33,11 @@ public:
     void set_camera(camera* view_camera);
 
     void on_mouse_clicked(std::function<void(game_object*)> callback);
+    void toggle_indexing();
 
 private:
     void configure_fps_text();
+    void configure_object_index_mapping();
     game_object* find_game_object_at_position(double x, double y);
 
 private:
@@ -47,5 +50,14 @@ private:
     bool _is_main_window = false;
     camera* _view_camera = nullptr;
     std::function<void(game_object*)> _on_mouse_clicked_callback = nullptr;
+
+    texture* _object_index_map;
+    unsigned _object_index_depth_map;
+    unsigned _object_index_fbo;
+    shader_program _object_index_map_shader;
+    unsigned _object_index_map_mvp_location;
+    unsigned _object_index_map_id_location;
+    bool _index_rendering;
+
     static gl_window* _main_window;
 };

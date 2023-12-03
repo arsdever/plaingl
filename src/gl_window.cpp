@@ -173,6 +173,8 @@ void gl_window::init()
     }
 
     configure_fps_text();
+    configure_object_index_mapping();
+
     _last_frame_time = std::chrono::steady_clock::now();
 
     _state = state::initialized;
@@ -215,15 +217,31 @@ void gl_window::draw()
     auto diff = now - _last_frame_time;
     _last_frame_time = std::move(now);
 
-    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    // glfwMakeContextCurrent(_main_window->_window);
-    for (auto* obj : scene::get_active_scene().objects())
+    if (_index_rendering)
     {
-        obj->update();
+        _object_index_map_shader.use();
+        glm::mat4 model = glm::identity<glm::mat4>();
+        glm::mat4 mvp = model * _view_camera->vp_matrix();
+        glUniformMatrix4fv(
+            _object_index_map_mvp_location, 1, GL_FALSE, glm::value_ptr(mvp));
+        unsigned id = 0;
+        for (auto object : scene::get_active_scene().objects())
+        {
+            glUniform1ui(_object_index_map_id_location, ++id);
+            object->get_mesh()->render();
+        }
+        shader_program::unuse();
     }
-    glfwMakeContextCurrent(_window);
+    else
+    {
+        for (auto* obj : scene::get_active_scene().objects())
+        {
+            obj->update();
+        }
+    }
 
     // draw fps counter
     glEnable(GL_BLEND);
@@ -249,6 +267,8 @@ void gl_window::on_mouse_clicked(std::function<void(game_object*)> callback)
 {
     _on_mouse_clicked_callback = callback;
 }
+
+void gl_window::toggle_indexing() { _index_rendering = !_index_rendering; }
 
 void gl_window::configure_fps_text()
 {
@@ -278,10 +298,95 @@ void gl_window::configure_fps_text()
     _fps_text.set_shader(std::move(prog));
 }
 
+void gl_window::configure_object_index_mapping()
+{
+    glfwMakeContextCurrent(_window);
+    glGenFramebuffers(1, &_object_index_fbo);
+    glBindFramebuffer(GL_FRAMEBUFFER, _object_index_fbo);
+    _object_index_map = new texture(width(), height());
+    _object_index_map->init();
+    glFramebufferTexture2D(GL_FRAMEBUFFER,
+                           GL_COLOR_ATTACHMENT1,
+                           GL_TEXTURE_2D,
+                           _object_index_map->id(),
+                           0);
+
+    glGenTextures(1, &_object_index_depth_map);
+    glBindTexture(GL_TEXTURE_2D, _object_index_depth_map);
+    glTexImage2D(GL_TEXTURE_2D,
+                 0,
+                 GL_DEPTH_COMPONENT,
+                 width(),
+                 height(),
+                 0,
+                 GL_DEPTH_COMPONENT,
+                 GL_FLOAT,
+                 nullptr);
+    glFramebufferTexture2D(GL_FRAMEBUFFER,
+                           GL_DEPTH_ATTACHMENT,
+                           GL_TEXTURE_2D,
+                           _object_index_depth_map,
+                           0);
+    auto status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    if (status != GL_FRAMEBUFFER_COMPLETE)
+    {
+        log()->info("Framebuffer error: {}", status);
+        return;
+    }
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    _object_index_map_shader.init();
+    _object_index_map_shader.add_shader("object_indexing.vert");
+    _object_index_map_shader.add_shader("object_indexing.frag");
+    _object_index_map_shader.link();
+    _object_index_map_shader.use();
+    _object_index_map_mvp_location =
+        glGetUniformLocation(_object_index_map_shader.id(), "mvp_matrix");
+    _object_index_map_id_location =
+        glGetUniformLocation(_object_index_map_shader.id(), "object_index");
+    shader_program::unuse();
+}
+
 game_object* gl_window::find_game_object_at_position(double x, double y)
 {
-    (void)x;
-    (void)y;
+    set_active();
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, _object_index_fbo);
+    GLenum buffers[] { GL_NONE, GL_COLOR_ATTACHMENT1 };
+    glDrawBuffers(2, buffers);
+    glClearColor(0, 0, 0, 0);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    _object_index_map_shader.use();
+    glm::mat4 model = glm::identity<glm::mat4>();
+    glm::mat4 mvp = model * _view_camera->vp_matrix();
+    glUniformMatrix4fv(
+        _object_index_map_mvp_location, 1, GL_FALSE, glm::value_ptr(mvp));
+    unsigned id = 0;
+    for (auto object : scene::get_active_scene().objects())
+    {
+        glUniform1ui(_object_index_map_id_location, ++id);
+        object->get_mesh()->render();
+    }
+    shader_program::unuse();
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, _object_index_fbo);
+    glReadBuffer(GL_COLOR_ATTACHMENT1);
+    struct pixel_info
+    {
+        unsigned id;
+        unsigned reserved1;
+        unsigned reserved2;
+    } pixel_info;
+    glReadPixels(x, y, 1, 1, GL_RGB_INTEGER, GL_UNSIGNED_INT, &pixel_info);
+    glReadBuffer(GL_NONE);
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+
+    if (pixel_info.id > 0)
+    {
+        return scene::get_active_scene().objects()[ pixel_info.id - 1 ];
+    }
+
     return nullptr;
 }
 
