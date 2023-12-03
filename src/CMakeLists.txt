@@ -30,6 +30,8 @@ add_executable(
   texture.cpp
   thread.hpp
   thread.cpp
+  transform.hpp
+  transform.cpp
   glad/src/gl.c)
 
 target_link_libraries(gl PUBLIC glfw glm assimp::assimp spdlog::spdlog freetype)

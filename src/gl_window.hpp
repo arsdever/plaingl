@@ -57,7 +57,7 @@ private:
     shader_program _object_index_map_shader;
     unsigned _object_index_map_mvp_location;
     unsigned _object_index_map_id_location;
-    bool _index_rendering;
+    bool _index_rendering = false;
 
     static gl_window* _main_window;
 };

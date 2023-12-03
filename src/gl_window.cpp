@@ -218,18 +218,21 @@ void gl_window::draw()
     _last_frame_time = std::move(now);
 
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glEnable(GL_DEPTH_TEST);
 
     if (_index_rendering)
     {
         _object_index_map_shader.use();
-        glm::mat4 model = glm::identity<glm::mat4>();
-        glm::mat4 mvp = model * _view_camera->vp_matrix();
-        glUniformMatrix4fv(
-            _object_index_map_mvp_location, 1, GL_FALSE, glm::value_ptr(mvp));
         unsigned id = 0;
         for (auto object : scene::get_active_scene().objects())
         {
+            glm::mat4 model = object->get_transform().get_matrix();
+            glm::mat4 mvp = _view_camera->vp_matrix() * model;
+            glUniformMatrix4fv(_object_index_map_mvp_location,
+                               1,
+                               GL_FALSE,
+                               glm::value_ptr(mvp));
             glUniform1ui(_object_index_map_id_location, ++id);
             object->get_mesh()->render();
         }
@@ -356,14 +359,15 @@ game_object* gl_window::find_game_object_at_position(double x, double y)
     glDrawBuffers(2, buffers);
     glClearColor(0, 0, 0, 0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glEnable(GL_DEPTH_TEST);
     _object_index_map_shader.use();
-    glm::mat4 model = glm::identity<glm::mat4>();
-    glm::mat4 mvp = model * _view_camera->vp_matrix();
-    glUniformMatrix4fv(
-        _object_index_map_mvp_location, 1, GL_FALSE, glm::value_ptr(mvp));
     unsigned id = 0;
     for (auto object : scene::get_active_scene().objects())
     {
+        glm::mat4 model = object->get_transform().get_matrix();
+        glm::mat4 mvp = _view_camera->vp_matrix() * model;
+        glUniformMatrix4fv(
+            _object_index_map_mvp_location, 1, GL_FALSE, glm::value_ptr(mvp));
         glUniform1ui(_object_index_map_id_location, ++id);
         object->get_mesh()->render();
     }

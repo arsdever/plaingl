@@ -114,8 +114,9 @@ int main(int argc, char** argv)
     windows.back()->set_camera(&main_camera);
 
     game_object* selected_object = nullptr;
+
     windows.back()->on_mouse_clicked(
-        [ &selected_object, &windows ](game_object* object)
+        [ &selected_object ](game_object* object)
     {
         log()->info("Main window clicked: Object selected {}",
                     reinterpret_cast<unsigned long long>(object));
@@ -129,8 +130,6 @@ int main(int argc, char** argv)
             object->set_selected(true);
             selected_object = object;
         }
-        windows.front()->toggle_indexing();
-        windows.back()->toggle_indexing();
     });
 
     initScene();
@@ -138,6 +137,9 @@ int main(int argc, char** argv)
     windows.push_back(new gl_window);
     windows.back()->init();
     windows.back()->set_camera(&second_camera);
+
+    // windows.front()->toggle_indexing();
+    // windows.back()->toggle_indexing();
 
     console_text_content = "Hello world";
     console_text.set_text(console_text_content);
@@ -163,19 +165,16 @@ int main(int argc, char** argv)
         {
             window->set_active();
             color c { 0, 0, 0 };
-            hslToRgb(
-                fmod(std::chrono::duration_cast<std::chrono::duration<double>>(
-                         std::chrono::steady_clock::now().time_since_epoch())
-                         .count(),
-                     5.0) /
-                    5.0,
-                1.0f,
-                .5f,
-                c.r,
-                c.g,
-                c.b);
-            s.objects().back()->get_material().set_property(
+            double timed_fraction =
+                std::chrono::duration_cast<std::chrono::duration<double>>(
+                    std::chrono::steady_clock::now().time_since_epoch())
+                    .count();
+            hslToRgb(fmod(timed_fraction, 5.0) / 5.0, 1.0f, .5f, c.r, c.g, c.b);
+            s.objects().back()->get_material()->set_property(
                 "materialColor", c.r, c.g, c.b, 1.0f);
+
+            main_camera.get_transform().set_position(
+                { sin(timed_fraction) * 10, 0, cos(timed_fraction) * 10 });
             window->update();
         }
     }
@@ -194,9 +193,9 @@ void initScene()
     prog->add_shader("shader.frag");
     prog->link();
 
-    material basic_mat;
-    basic_mat.set_shader_program(prog);
-    for (const auto& property : basic_mat.properties())
+    material* basic_mat = new material;
+    basic_mat->set_shader_program(prog);
+    for (const auto& property : basic_mat->properties())
     {
         log()->info("Material properties:\n\tname: {}\n\tindex: {}\n\tsize: "
                     "{}\n\ttype: {}",
@@ -205,18 +204,28 @@ void initScene()
                     property._size,
                     property._type);
     }
-    basic_mat.set_property("position", 1);
+    basic_mat->set_property("position", 1);
 
     game_object* object = new game_object;
     asset_manager_.load_asset("cube.fbx");
 
     object->set_mesh(asset_manager_.meshes()[ 0 ]);
-    object->set_material(std::move(basic_mat));
+    object->set_material(basic_mat);
+    object->get_transform().set_position({ -0.5f, 0, 0 });
 
     s.add_object(object);
 
-    main_camera.set_position({ 10, 10, 10 });
-    second_camera.set_position({ 0, -10, 10 });
+    object = new game_object;
+    asset_manager_.load_asset("sphere.fbx");
+
+    object->set_mesh(asset_manager_.meshes()[ 1 ]);
+    object->set_material(basic_mat);
+    object->get_transform().set_position({ 0.5f, 0, 0 });
+
+    s.add_object(object);
+
+    main_camera.get_transform().set_position({ 10, 10, 10 });
+    second_camera.get_transform().set_position({ 0, -10, 10 });
 }
 
 std::vector<std::string_view> tokenize(std::string_view str)
