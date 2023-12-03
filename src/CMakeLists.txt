@@ -26,6 +26,8 @@ add_executable(
   shader.cpp
   text.hpp
   text.cpp
+  texture.hpp
+  texture.cpp
   thread.hpp
   thread.cpp
   glad/src/gl.c)
