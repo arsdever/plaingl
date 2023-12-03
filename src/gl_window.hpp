@@ -6,6 +6,7 @@
 #include "text.hpp"
 
 struct GLFWwindow;
+class camera;
 
 class gl_window
 {
@@ -26,6 +27,8 @@ public:
     void update();
     void draw();
 
+    void set_camera(camera* view_camera);
+
 private:
     void configure_fps_text();
 
@@ -37,5 +40,6 @@ private:
     std::chrono::steady_clock::time_point _last_frame_time;
     text _fps_text;
     bool _is_main_window = false;
+    camera* _view_camera = nullptr;
     static gl_window* _main_window;
 };

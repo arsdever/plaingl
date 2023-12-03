@@ -7,6 +7,7 @@
 
 #include "gl_window.hpp"
 
+#include "camera.hpp"
 #include "game_object.hpp"
 #include "logging.hpp"
 #include "scene.hpp"
@@ -127,6 +128,7 @@ void gl_window::init()
             static_cast<gl_window*>(glfwGetWindowUserPointer(window));
         _this->_width = w;
         _this->_height = h;
+        _this->_view_camera->set_render_size(w, h);
     });
 
     {
@@ -168,6 +170,7 @@ void gl_window::update()
 
     set_active();
     glViewport(0, 0, width(), height());
+    _view_camera->set_active();
     draw();
 
     glfwSwapBuffers(_window);
@@ -202,6 +205,12 @@ void gl_window::draw()
         reinterpret_cast<unsigned long long>(this)));
     _fps_text.render();
     glDisable(GL_BLEND);
+}
+
+void gl_window::set_camera(camera* view_camera)
+{
+    _view_camera = view_camera;
+    _view_camera->set_render_size(width(), height());
 }
 
 void gl_window::configure_fps_text()

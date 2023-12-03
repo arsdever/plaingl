@@ -3,6 +3,8 @@
 #include <string_view>
 #include <vector>
 
+#include <glm/ext.hpp>
+
 enum class shader_type
 {
     VERTEX,
@@ -71,4 +73,6 @@ private:
     status _status = status::uninitialized;
     int _id = 0;
     std::vector<shader> _shaders;
+    static glm::mat4 _view_matrix;
+    static glm::mat4 _projection_matrix;
 };

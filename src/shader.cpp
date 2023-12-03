@@ -223,3 +223,6 @@ void shader_program::release_shaders() { _shaders.clear(); }
 int shader_program::id() const { return _id; }
 
 void shader_program::unuse() { glUseProgram(0); }
+
+glm::mat4 shader_program::_view_matrix;
+glm::mat4 shader_program::_projection_matrix;

@@ -14,6 +14,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include "camera.hpp"
 #include "game_object.hpp"
 #include "gl_window.hpp"
 #include "logging.hpp"
@@ -31,6 +32,8 @@ text console_text;
 scene s;
 std::string console_text_content;
 std::unordered_set<int> pressed_keys;
+camera main_camera;
+camera second_camera;
 } // namespace
 
 void process_console();
@@ -107,10 +110,12 @@ int main(int argc, char** argv)
     windows.back()->init();
 
     windows[ 0 ]->set_active();
+    windows[ 0 ]->set_camera(&main_camera);
     initScene();
 
     windows.push_back(new gl_window);
     windows.back()->init();
+    windows.back()->set_camera(&second_camera);
 
     console_text_content = "Hello world";
     console_text.set_text(console_text_content);
@@ -188,6 +193,9 @@ void initScene()
     object->set_material(std::move(basic_mat));
 
     s.add_object(object);
+
+    main_camera.set_position({ 0, .3, 3 });
+    second_camera.set_position({ 0, -.3, 3 });
 }
 
 std::vector<std::string_view> tokenize(std::string_view str)
