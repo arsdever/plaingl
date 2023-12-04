@@ -35,8 +35,6 @@ public:
     void scroll_function(GLFWwindow* window, double x_offset, double y_offset);
     void drop_function(GLFWwindow* window, int path_count, const char** paths);
 
-    event<void(mouse_event_params)> drag_drop_start;
-    event<void(mouse_event_params)> drag_drop_end;
     event<void(mouse_event_params)> press;
     event<void(mouse_event_params)> right_press;
     event<void(mouse_event_params)> middle_press;
@@ -49,6 +47,9 @@ public:
     event<void(mouse_event_params)> right_release;
     event<void(mouse_event_params)> middle_release;
     event<void(mouse_event_params)> move;
+    event<void(mouse_event_params)> drag_drop_start;
+    event<void(mouse_event_params)> drag_drop_move;
+    event<void(mouse_event_params)> drag_drop_end;
     event<void(mouse_event_params)> enter;
     event<void(mouse_event_params)> leave;
     event<void(mouse_event_params)> scroll;

@@ -143,6 +143,32 @@ int main(int argc, char** argv)
         }
     };
 
+    mouse_events.drag_drop_start +=
+        [](mouse_events_refiner::mouse_event_params params)
+    {
+        glm::vec2 size = { params._window->width(), params._window->height() };
+        glm::vec2 half_size = size / 2.0f;
+        glm::vec2 from = (params._old_position - half_size) / size * 2.0f;
+        glm::vec2 to = (params._position - half_size) / size * 2.0f;
+        from.y = -from.y;
+        to.y = -to.y;
+        log()->trace("dragging started from position ({}, {})", from.x, from.y);
+        s.gizmo_objects()[ 0 ]->_line = { from, to };
+    };
+    mouse_events.drag_drop_move +=
+        [](mouse_events_refiner::mouse_event_params params)
+    {
+        glm::vec2 size = { params._window->width(), params._window->height() };
+        glm::vec2 half_size = size / 2.0f;
+        glm::vec2 to = (params._position - half_size) / size * 2.0f;
+        to.y = -to.y;
+        log()->trace("dragging to position ({}, {})", to.x, to.y);
+        s.gizmo_objects()[ 0 ]->_line.value()[ 1 ] = to;
+    };
+    mouse_events.drag_drop_end +=
+        [](mouse_events_refiner::mouse_event_params params)
+    { s.gizmo_objects()[ 0 ]->_line = {}; };
+
     initScene();
 
     s.gizmo_objects().back()->_line = { { { -1, -1 }, { .5, .5 } } };

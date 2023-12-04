@@ -114,8 +114,14 @@ void mouse_events_refiner::position_function(GLFWwindow* window,
     // TODO: specify drag distance
     if (_buttons && distance > get_drag_distance())
     {
-        params._position = _press_position;
-        drag_drop_start(params);
+        if (_is_drag)
+        {
+            drag_drop_move(params);
+        }
+        else
+        {
+            drag_drop_start(params);
+        }
         _is_drag = true;
     }
     else
