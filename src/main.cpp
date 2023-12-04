@@ -24,6 +24,7 @@
 #include "gl_window.hpp"
 #include "logging.hpp"
 #include "material.hpp"
+#include "mouse_events_refiner.hpp"
 #include "scene.hpp"
 #include "shader.hpp"
 #include "text.hpp"
@@ -40,6 +41,7 @@ std::unordered_set<int> pressed_keys;
 camera main_camera;
 camera second_camera;
 asset_manager asset_manager_;
+mouse_events_refiner mouse_events;
 } // namespace
 
 void process_console();
@@ -121,9 +123,12 @@ int main(int argc, char** argv)
 
     game_object* selected_object = nullptr;
 
-    windows.back()->on_mouse_clicked +=
-        [ &selected_object ](game_object* object)
+    windows.back()->set_mouse_events_refiner(&mouse_events);
+    mouse_events.click +=
+        [ &selected_object ](mouse_events_refiner::mouse_event_params params)
     {
+        auto* object = params._window->find_game_object_at_position(
+            params._position.x, params._position.y);
         log()->info("Main window clicked: Object selected {}",
                     reinterpret_cast<unsigned long long>(object));
         if (selected_object != nullptr)
@@ -137,6 +142,32 @@ int main(int argc, char** argv)
             selected_object = object;
         }
     };
+
+    mouse_events.drag_drop_start +=
+        [](mouse_events_refiner::mouse_event_params params)
+    {
+        glm::vec2 size = { params._window->width(), params._window->height() };
+        glm::vec2 half_size = size / 2.0f;
+        glm::vec2 from = (params._old_position - half_size) / size * 2.0f;
+        glm::vec2 to = (params._position - half_size) / size * 2.0f;
+        from.y = -from.y;
+        to.y = -to.y;
+        log()->trace("dragging started from position ({}, {})", from.x, from.y);
+        s.gizmo_objects()[ 0 ]->_line = { from, to };
+    };
+    mouse_events.drag_drop_move +=
+        [](mouse_events_refiner::mouse_event_params params)
+    {
+        glm::vec2 size = { params._window->width(), params._window->height() };
+        glm::vec2 half_size = size / 2.0f;
+        glm::vec2 to = (params._position - half_size) / size * 2.0f;
+        to.y = -to.y;
+        log()->trace("dragging to position ({}, {})", to.x, to.y);
+        s.gizmo_objects()[ 0 ]->_line.value()[ 1 ] = to;
+    };
+    mouse_events.drag_drop_end +=
+        [](mouse_events_refiner::mouse_event_params params)
+    { s.gizmo_objects()[ 0 ]->_line = {}; };
 
     initScene();
 

@@ -25,6 +25,8 @@ add_executable(
   material.cpp
   mesh.hpp
   mesh.cpp
+  mouse_events_refiner.hpp
+  mouse_events_refiner.cpp
   scene.hpp
   scene.cpp
   shader.hpp
