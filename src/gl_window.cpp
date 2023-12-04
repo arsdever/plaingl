@@ -199,6 +199,7 @@ void gl_window::update()
         _state = state::closed;
         glfwDestroyWindow(_window);
         _window = nullptr;
+        on_window_closed(this);
         return;
     }
 

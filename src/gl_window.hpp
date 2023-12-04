@@ -37,6 +37,7 @@ public:
     void toggle_indexing();
 
     event<void(game_object*)> on_mouse_clicked;
+    event<void(gl_window*)> on_window_closed;
 
 private:
     void configure_fps_text();

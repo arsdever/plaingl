@@ -112,6 +112,8 @@ int main(int argc, char** argv)
     windows.back()->init();
     windows.back()->set_active();
     windows.back()->set_camera(&main_camera);
+    windows.back()->on_window_closed += [ &windows ](gl_window* window)
+    { windows.erase(std::find(windows.begin(), windows.end(), window)); };
 
     game_object* selected_object = nullptr;
 
@@ -137,6 +139,8 @@ int main(int argc, char** argv)
     windows.push_back(new gl_window);
     windows.back()->init();
     windows.back()->set_camera(&second_camera);
+    windows.back()->on_window_closed += [ &windows ](gl_window* window)
+    { windows.erase(std::find(windows.begin(), windows.end(), window)); };
 
     // windows.front()->toggle_indexing();
     // windows.back()->toggle_indexing();
@@ -159,10 +163,11 @@ int main(int argc, char** argv)
     } };
     set_thread_name(thd, "fps_counter");
 
-    while (true)
+    while (!windows.empty())
     {
-        for (auto& window : windows)
+        for (int i = 0; i < windows.size(); ++i)
         {
+            auto window = windows[ i ];
             window->set_active();
             color c { 0, 0, 0 };
             double timed_fraction =
