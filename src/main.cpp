@@ -124,10 +124,10 @@ int main(int argc, char** argv)
 
     windows.back()->set_mouse_events_refiner(&mouse_events);
     mouse_events.click +=
-        [ &selected_object ](gl_window* window, glm::vec2 position)
+        [ &selected_object ](mouse_events_refiner::mouse_event_params params)
     {
-        auto* object =
-            window->find_game_object_at_position(position.x, position.y);
+        auto* object = params._window->find_game_object_at_position(
+            params._position.x, params._position.y);
         log()->info("Main window clicked: Object selected {}",
                     reinterpret_cast<unsigned long long>(object));
         if (selected_object != nullptr)
