@@ -20,6 +20,7 @@
 #include "asset_manager.hpp"
 #include "camera.hpp"
 #include "game_object.hpp"
+#include "gizmo_object.hpp"
 #include "gl_window.hpp"
 #include "logging.hpp"
 #include "material.hpp"
@@ -139,6 +140,8 @@ int main(int argc, char** argv)
 
     initScene();
 
+    s.gizmo_objects().back()->_line = { { { -1, -1 }, { .5, .5 } } };
+
     windows.push_back(new gl_window);
     windows.back()->init();
     windows.back()->set_camera(&second_camera);
@@ -247,6 +250,8 @@ void initScene()
     object->get_transform().set_position({ 0.5f, 0, 0 });
 
     s.add_object(object);
+
+    s.add_gizmo_object(new gizmo_object);
 
     main_camera.get_transform().set_position({ 10, 10, 10 });
     second_camera.get_transform().set_position({ 0, -10, 10 });

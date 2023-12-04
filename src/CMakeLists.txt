@@ -13,6 +13,10 @@ add_executable(
   font.cpp
   game_object.hpp
   game_object.cpp
+  gizmo_drawer.hpp
+  gizmo_drawer.cpp
+  gizmo_object.hpp
+  gizmo_object.cpp
   gl_window.hpp
   gl_window.cpp
   main.cpp
@@ -35,5 +39,6 @@ add_executable(
   transform.cpp
   glad/src/gl.c)
 
-target_link_libraries(gl PUBLIC glfw glm assimp::assimp profiler::lib spdlog::spdlog freetype)
+target_link_libraries(gl PUBLIC glfw glm assimp::assimp profiler::lib
+                                spdlog::spdlog freetype)
 target_include_directories(gl PRIVATE glad/include)

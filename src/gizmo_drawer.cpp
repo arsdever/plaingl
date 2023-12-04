@@ -1,0 +1,57 @@
+#include <array>
+
+#include <glad/gl.h>
+
+#include "gizmo_drawer.hpp"
+
+void gizmo_drawer::init()
+{
+    _gizmo_shader.init();
+    _gizmo_shader.add_shader("gizmo.vert");
+    _gizmo_shader.add_shader("gizmo.frag");
+    _gizmo_shader.link();
+    _gizmo_shader.use();
+    _color_location = glGetUniformLocation(_gizmo_shader.id(), "color");
+    shader_program::unuse();
+}
+
+void gizmo_drawer::draw_line(glm::vec3, glm::vec3) { }
+
+void gizmo_drawer::draw_line_2d(glm::vec2 p1, glm::vec2 p2, glm::vec4 color)
+{
+    _gizmo_shader.use();
+    unsigned vao;
+    unsigned vbo;
+    glGenVertexArrays(1, &vao);
+    glBindVertexArray(vao);
+    glGenBuffers(1, &vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    std::array<glm::vec3, 3> verts { { { p1, 0 }, { p2, 0 } } };
+    glBufferData(GL_ARRAY_BUFFER,
+                 verts.size() * sizeof(glm::vec2::type) * 2,
+                 verts.data(),
+                 GL_STATIC_DRAW);
+
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
+    glUniform4fv(_color_location, 1, glm::value_ptr(color));
+    glDrawArrays(GL_LINES, 0, 2);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glDeleteBuffers(1, &vbo);
+    glBindVertexArray(0);
+    glDeleteVertexArrays(1, &vao);
+    shader_program::unuse();
+}
+
+gizmo_drawer* gizmo_drawer::instance()
+{
+    if (!_instance)
+    {
+        _instance = new gizmo_drawer;
+        _instance->init();
+    }
+
+    return _instance;
+}
+
+gizmo_drawer* gizmo_drawer::_instance = nullptr;
