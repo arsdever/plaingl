@@ -5,6 +5,8 @@ add_executable(
   camera.hpp
   camera.cpp
   color.hpp
+  component.hpp
+  component.cpp
   logging.hpp
   event.hpp
   file.hpp
@@ -19,8 +21,11 @@ add_executable(
   material_property.hpp
   material.hpp
   material.cpp
+  mesh_renderer.hpp
+  mesh_renderer.cpp
   mesh.hpp
   mesh.cpp
+  renderer.hpp
   scene.hpp
   scene.cpp
   shader.hpp
@@ -35,5 +40,6 @@ add_executable(
   transform.cpp
   glad/src/gl.c)
 
-target_link_libraries(gl PUBLIC glfw glm assimp::assimp profiler::lib spdlog::spdlog freetype)
+target_link_libraries(gl PUBLIC glfw glm assimp::assimp profiler::lib
+                                spdlog::spdlog freetype)
 target_include_directories(gl PRIVATE glad/include)
