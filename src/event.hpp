@@ -15,7 +15,7 @@ public:
     {
         for (auto& listener : _listeners)
         {
-            listener(std::forward<ARGS...>(args...));
+            listener(std::forward<ARGS>(args)...);
         }
     }
 
