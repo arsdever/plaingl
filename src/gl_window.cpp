@@ -271,6 +271,65 @@ void gl_window::set_camera(camera* view_camera)
 
 void gl_window::toggle_indexing() { _index_rendering = !_index_rendering; }
 
+void gl_window::set_mouse_events_refiner(
+    mouse_events_refiner* mouse_events_refiner_)
+{
+    _mouse_events = mouse_events_refiner_;
+    setup_mouse_callbacks();
+}
+
+mouse_events_refiner* gl_window::mouse_events() const { return _mouse_events; }
+
+void gl_window::setup_mouse_callbacks()
+{
+    glfwSetMouseButtonCallback(
+        _window,
+        [](GLFWwindow* window, int button, int action, int mods)
+    {
+        gl_window* _this =
+            static_cast<gl_window*>(glfwGetWindowUserPointer(window));
+        auto* refiner = _this->_mouse_events;
+        refiner->button_function(window, button, action, mods);
+    });
+    glfwSetCursorPosCallback(
+        _window,
+        [](GLFWwindow* window, double x_position, double y_position)
+    {
+        gl_window* _this =
+
+            static_cast<gl_window*>(glfwGetWindowUserPointer(window));
+        auto* refiner = _this->_mouse_events;
+        refiner->position_function(window, x_position, y_position);
+    });
+    glfwSetCursorEnterCallback(_window,
+                               [](GLFWwindow* window, int entered)
+    {
+        gl_window* _this =
+            static_cast<gl_window*>(glfwGetWindowUserPointer(window));
+        auto* refiner = _this->_mouse_events;
+        refiner->enter_function(window, entered);
+    });
+
+    glfwSetScrollCallback(
+        _window,
+        [](GLFWwindow* window, double x_offset, double y_offset)
+    {
+        gl_window* _this =
+            static_cast<gl_window*>(glfwGetWindowUserPointer(window));
+        auto* refiner = _this->_mouse_events;
+        refiner->scroll_function(window, x_offset, y_offset);
+    });
+    glfwSetDropCallback(
+        _window,
+        [](GLFWwindow* window, int path_count, const char** paths)
+    {
+        gl_window* _this =
+            static_cast<gl_window*>(glfwGetWindowUserPointer(window));
+        auto* refiner = _this->_mouse_events;
+        refiner->drop_function(window, path_count, paths);
+    });
+}
+
 void gl_window::configure_fps_text()
 {
     font fps_text_font;

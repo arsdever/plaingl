@@ -23,6 +23,7 @@
 #include "gl_window.hpp"
 #include "logging.hpp"
 #include "material.hpp"
+#include "mouse_events_refiner.hpp"
 #include "scene.hpp"
 #include "shader.hpp"
 #include "text.hpp"
@@ -39,6 +40,7 @@ std::unordered_set<int> pressed_keys;
 camera main_camera;
 camera second_camera;
 asset_manager asset_manager_;
+mouse_events_refiner mouse_events;
 } // namespace
 
 void process_console();
@@ -120,9 +122,12 @@ int main(int argc, char** argv)
 
     game_object* selected_object = nullptr;
 
-    windows.back()->on_mouse_clicked +=
-        [ &selected_object ](game_object* object)
+    windows.back()->set_mouse_events_refiner(&mouse_events);
+    mouse_events.click +=
+        [ &selected_object ](gl_window* window, glm::vec2 position)
     {
+        auto* object =
+            window->find_game_object_at_position(position.x, position.y);
         log()->info("Main window clicked: Object selected {}",
                     reinterpret_cast<unsigned long long>(object));
         if (selected_object != nullptr)

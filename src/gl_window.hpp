@@ -5,6 +5,7 @@
 #include <unordered_map>
 
 #include "event.hpp"
+#include "mouse_events_refiner.hpp"
 #include "text.hpp"
 #include "texture.hpp"
 
@@ -38,10 +39,15 @@ public:
     event<void(game_object*)> on_mouse_clicked;
     event<void(gl_window*)> on_window_closed;
 
+    void set_mouse_events_refiner(mouse_events_refiner* mouse_events_refiner_);
+    mouse_events_refiner* mouse_events() const;
+
+    game_object* find_game_object_at_position(double x, double y);
+
 private:
+    void setup_mouse_callbacks();
     void configure_fps_text();
     void configure_object_index_mapping();
-    game_object* find_game_object_at_position(double x, double y);
 
 private:
     GLFWwindow* _window = nullptr;
@@ -52,6 +58,7 @@ private:
     text _fps_text;
     bool _is_main_window = false;
     camera* _view_camera = nullptr;
+    mouse_events_refiner* _mouse_events;
 
     texture* _object_index_map;
     unsigned _object_index_depth_map;
