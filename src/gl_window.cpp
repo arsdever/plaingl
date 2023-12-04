@@ -269,11 +269,6 @@ void gl_window::set_camera(camera* view_camera)
     _view_camera->set_render_size(width(), height());
 }
 
-// void gl_window::on_mouse_clicked(std::function<void(game_object*)> callback)
-// {
-//     _on_mouse_clicked_callback = callback;
-// }
-
 void gl_window::toggle_indexing() { _index_rendering = !_index_rendering; }
 
 void gl_window::configure_fps_text()
