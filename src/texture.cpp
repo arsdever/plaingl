@@ -42,10 +42,13 @@ void texture::set_pixel(size_t x, size_t y, color c)
 
 color texture::get_pixel(size_t x, size_t y)
 {
+    // TODO: implement
     if (x > _width || y > _height)
     {
         return {};
     }
+
+    return {};
 }
 
 unsigned texture::id() const { return _texture_id; }

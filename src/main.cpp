@@ -115,7 +115,7 @@ int main(int argc, char** argv)
 
     game_object* selected_object = nullptr;
 
-    windows.back()->on_mouse_clicked(
+    windows.back()->on_mouse_clicked +=
         [ &selected_object ](game_object* object)
     {
         log()->info("Main window clicked: Object selected {}",
@@ -130,7 +130,7 @@ int main(int argc, char** argv)
             object->set_selected(true);
             selected_object = object;
         }
-    });
+    };
 
     initScene();
 

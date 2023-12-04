@@ -141,14 +141,14 @@ void gl_window::init()
 
         if (button == GLFW_MOUSE_BUTTON_1 && action == GLFW_RELEASE)
         {
-            if (_this->_on_mouse_clicked_callback)
+            if (_this->on_mouse_clicked.has_listeners())
             {
                 double xpos;
                 double ypos;
                 glfwGetCursorPos(window, &xpos, &ypos);
                 game_object* object =
                     _this->find_game_object_at_position(xpos, ypos);
-                _this->_on_mouse_clicked_callback(object);
+                _this->on_mouse_clicked(object);
             }
         }
     });
@@ -266,10 +266,10 @@ void gl_window::set_camera(camera* view_camera)
     _view_camera->set_render_size(width(), height());
 }
 
-void gl_window::on_mouse_clicked(std::function<void(game_object*)> callback)
-{
-    _on_mouse_clicked_callback = callback;
-}
+// void gl_window::on_mouse_clicked(std::function<void(game_object*)> callback)
+// {
+//     _on_mouse_clicked_callback = callback;
+// }
 
 void gl_window::toggle_indexing() { _index_rendering = !_index_rendering; }
 

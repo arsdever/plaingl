@@ -4,6 +4,7 @@
 #include <functional>
 #include <unordered_map>
 
+#include "event.hpp"
 #include "text.hpp"
 #include "texture.hpp"
 
@@ -32,8 +33,10 @@ public:
 
     void set_camera(camera* view_camera);
 
-    void on_mouse_clicked(std::function<void(game_object*)> callback);
+    // void on_mouse_clicked(std::function<void(game_object*)> callback);
     void toggle_indexing();
+
+    event<void(game_object*)> on_mouse_clicked;
 
 private:
     void configure_fps_text();
@@ -49,7 +52,7 @@ private:
     text _fps_text;
     bool _is_main_window = false;
     camera* _view_camera = nullptr;
-    std::function<void(game_object*)> _on_mouse_clicked_callback = nullptr;
+    // std::function<void(game_object*)> _on_mouse_clicked_callback = nullptr;
 
     texture* _object_index_map;
     unsigned _object_index_depth_map;

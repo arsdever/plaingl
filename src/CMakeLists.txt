@@ -6,6 +6,7 @@ add_executable(
   camera.cpp
   color.hpp
   logging.hpp
+  event.hpp
   file.hpp
   file.cpp
   font.hpp
