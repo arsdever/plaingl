@@ -11,6 +11,7 @@
 #include "camera.hpp"
 #include "game_object.hpp"
 #include "logging.hpp"
+#include "mesh_renderer.hpp"
 #include "scene.hpp"
 #include "shader.hpp"
 
@@ -237,7 +238,7 @@ void gl_window::draw()
                                GL_FALSE,
                                glm::value_ptr(mvp));
             glUniform1ui(_object_index_map_id_location, ++id);
-            object->get_mesh()->render();
+            object->get_component<mesh_renderer>()->get_mesh()->render();
         }
         shader_program::unuse();
     }
@@ -367,7 +368,7 @@ game_object* gl_window::find_game_object_at_position(double x, double y)
         glUniformMatrix4fv(
             _object_index_map_mvp_location, 1, GL_FALSE, glm::value_ptr(mvp));
         glUniform1ui(_object_index_map_id_location, ++id);
-        object->get_mesh()->render();
+        object->get_component<mesh_renderer>()->get_mesh()->render();
     }
     shader_program::unuse();
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);

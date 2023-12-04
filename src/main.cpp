@@ -23,6 +23,7 @@
 #include "gl_window.hpp"
 #include "logging.hpp"
 #include "material.hpp"
+#include "mesh_renderer.hpp"
 #include "scene.hpp"
 #include "shader.hpp"
 #include "text.hpp"
@@ -179,8 +180,11 @@ int main(int argc, char** argv)
                     std::chrono::steady_clock::now().time_since_epoch())
                     .count();
             hslToRgb(fmod(timed_fraction, 5.0) / 5.0, 1.0f, .5f, c.r, c.g, c.b);
-            s.objects().back()->get_material()->set_property(
-                "materialColor", c.r, c.g, c.b, 1.0f);
+            s.objects()
+                .back()
+                ->get_component<mesh_renderer>()
+                ->get_material()
+                ->set_property("materialColor", c.r, c.g, c.b, 1.0f);
 
             main_camera.get_transform().set_position(
                 { sin(timed_fraction) * 10, 0, cos(timed_fraction) * 10 });
@@ -233,8 +237,9 @@ void initScene()
     game_object* object = new game_object;
     asset_manager_.load_asset("cube.fbx");
 
-    object->set_mesh(asset_manager_.meshes()[ 0 ]);
-    object->set_material(basic_mat);
+    object->get_component<mesh_renderer>()->set_mesh(
+        asset_manager_.meshes()[ 0 ]);
+    object->get_component<mesh_renderer>()->set_material(basic_mat);
     object->get_transform().set_position({ -0.5f, 0, 0 });
 
     s.add_object(object);
@@ -242,8 +247,9 @@ void initScene()
     object = new game_object;
     asset_manager_.load_asset("sphere.fbx");
 
-    object->set_mesh(asset_manager_.meshes()[ 1 ]);
-    object->set_material(basic_mat);
+    object->get_component<mesh_renderer>()->set_mesh(
+        asset_manager_.meshes()[ 1 ]);
+    object->get_component<mesh_renderer>()->set_material(basic_mat);
     object->get_transform().set_position({ 0.5f, 0, 0 });
 
     s.add_object(object);

@@ -1,34 +1,25 @@
 #include "game_object.hpp"
 
-#include "camera.hpp"
-#include "shader.hpp"
+#include "mesh_renderer.hpp"
 
-game_object::game_object() = default;
-
-void game_object::set_mesh(mesh* m) { _mesh = m; }
-
-void game_object::set_material(material* mat) { _material = mat; }
-
-mesh* game_object::get_mesh() { return _mesh; }
-
-material* game_object::get_material() { return _material; }
+game_object::game_object()
+    : _mesh_renderer(new mesh_renderer)
+{
+    _mesh_renderer->set_game_object(this);
+}
 
 void game_object::set_selected(bool selected) { _selected = selected; }
 
 bool game_object::is_selected() const { return _selected; }
 
-void game_object::update()
-{
-    glm::mat4 mvp_matrix =
-        camera::active_camera()->vp_matrix() * _transformation.get_matrix();
-
-    _material->set_property("mvp_matrix", mvp_matrix);
-    _material->set_property("is_selected", static_cast<int>(_selected));
-    _material->activate();
-    _mesh->render();
-    shader_program::unuse();
-}
+void game_object::update() { _mesh_renderer->render(); }
 
 transform& game_object::get_transform() { return _transformation; }
 
 const transform& game_object::get_transform() const { return _transformation; }
+
+template <>
+mesh_renderer* game_object::get_component<mesh_renderer>() const
+{
+    return static_cast<mesh_renderer*>(_mesh_renderer);
+}
