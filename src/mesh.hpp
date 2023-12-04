@@ -5,6 +5,8 @@
 
 #include <glm/vec3.hpp>
 
+#include "vertex.hpp"
+
 struct GLFWwindow;
 
 class mesh
@@ -19,7 +21,7 @@ public:
 
     void init();
 
-    void set_vertices(std::vector<glm::vec3> positions);
+    void set_vertices(std::vector<vertex> positions);
     void set_indices(std::vector<int> indices);
 
     // TODO: not the best approach
@@ -28,8 +30,8 @@ public:
     void render();
 
 private:
-    std::vector<glm::vec3> _vertex_positions;
-    std::vector<int> _vertex_indices;
+    std::vector<vertex> _vertices;
+    std::vector<int> _indices;
 
     std::unordered_map<GLFWwindow*, unsigned int> _vao_map;
     unsigned int _vbo = 0;

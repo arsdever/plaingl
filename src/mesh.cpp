@@ -4,6 +4,7 @@
 /* clang-format on */
 
 #include <array>
+#include <iostream>
 
 #include "mesh.hpp"
 
@@ -57,23 +58,23 @@ void mesh::init()
     }
 
     glBufferData(GL_ARRAY_BUFFER,
-                 _vertex_positions.size() * 3 * sizeof(glm::vec3::type),
-                 _vertex_positions.data(),
+                 _vertices.size() * vertex::size,
+                 _vertices.data(),
                  GL_STATIC_DRAW);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER,
-                 _vertex_indices.size() * sizeof(int),
-                 _vertex_indices.data(),
+                 _indices.size() * sizeof(int),
+                 _indices.data(),
                  GL_STATIC_DRAW);
 }
 
-void mesh::set_vertices(std::vector<glm::vec3> positions)
+void mesh::set_vertices(std::vector<vertex> positions)
 {
-    _vertex_positions = std::move(positions);
+    _vertices = std::move(positions);
 }
 
 void mesh::set_indices(std::vector<int> indices)
 {
-    _vertex_indices = std::move(indices);
+    _indices = std::move(indices);
 }
 
 void mesh::render()
@@ -85,15 +86,27 @@ void mesh::render()
         glBindVertexArray(_vao_map[ glfwGetCurrentContext() ]);
         glBindBuffer(GL_ARRAY_BUFFER, _vbo);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ebo);
-        glVertexAttribPointer(
-            0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-        glEnableVertexAttribArray(0);
+        size_t attribute_offset = 0;
+        for (int i = 0; i < vertex::attributes_count; ++i)
+        {
+            glVertexAttribPointer(i,
+                                  vertex::attribute_elements_counts[ i ],
+                                  GL_FLOAT,
+                                  GL_FALSE,
+                                  vertex::size,
+                                  (void*)attribute_offset);
+            attribute_offset += vertex::attribute_sizes[ i ];
+            glEnableVertexAttribArray(i);
+        }
     }
     else
     {
         glBindVertexArray(_vao_map[ glfwGetCurrentContext() ]);
-        glEnableVertexAttribArray(0);
+        for (int i = 0; i < vertex::attributes_count; ++i)
+        {
+            glEnableVertexAttribArray(i);
+        }
     }
-    glDrawElements(GL_TRIANGLES, _vertex_indices.size(), GL_UNSIGNED_INT, 0);
+    glDrawElements(GL_TRIANGLES, _indices.size(), GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
 }

@@ -31,6 +31,7 @@ add_executable(
   scene.cpp
   shader.hpp
   shader.cpp
+  vertex.hpp
   text.hpp
   text.cpp
   texture.hpp

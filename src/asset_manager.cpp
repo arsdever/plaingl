@@ -21,15 +21,27 @@ void asset_manager::load_asset(std::string_view path)
         const aiMesh* assimp_mesh = scene->mMeshes[ i ];
 
         mesh* mesh_ = new mesh;
-        std::vector<glm::vec3> vertices;
+        std::vector<vertex> vertices;
         std::vector<int> indices;
 
         for (int vertex_index = 0; vertex_index < assimp_mesh->mNumVertices;
              ++vertex_index)
         {
-            vertices.push_back({ assimp_mesh->mVertices[ vertex_index ].x,
-                                 assimp_mesh->mVertices[ vertex_index ].y,
-                                 assimp_mesh->mVertices[ vertex_index ].z });
+            vertices.push_back({});
+            vertices.back().position() = {
+                assimp_mesh->mVertices[ vertex_index ].x,
+                assimp_mesh->mVertices[ vertex_index ].y,
+                assimp_mesh->mVertices[ vertex_index ].z
+            };
+            vertices.back().normal() = {
+                assimp_mesh->mNormals[ vertex_index ].x,
+                assimp_mesh->mNormals[ vertex_index ].y,
+                assimp_mesh->mNormals[ vertex_index ].z
+            };
+            vertices.back().uv() = {
+                assimp_mesh->mTextureCoords[ 0 ][ vertex_index ].x,
+                assimp_mesh->mTextureCoords[ 0 ][ vertex_index ].y,
+            };
         }
 
         for (int face_index = 0; face_index < assimp_mesh->mNumFaces;
