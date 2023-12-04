@@ -10,6 +10,7 @@
 
 #include "camera.hpp"
 #include "game_object.hpp"
+#include "gizmo_object.hpp"
 #include "logging.hpp"
 #include "scene.hpp"
 #include "shader.hpp"
@@ -223,6 +224,7 @@ void gl_window::draw()
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_MULTISAMPLE);
 
     if (_index_rendering)
     {
@@ -252,7 +254,12 @@ void gl_window::draw()
     // draw fps counter
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glEnable(GL_MULTISAMPLE);
+
+    for (auto* obj : scene::get_active_scene().gizmo_objects())
+    {
+        obj->update();
+    }
+
     _fps_text.set_text(fmt::format(
         "{:#6.6} ms\nhandle {:#x}",
         std::chrono::duration_cast<std::chrono::duration<double>>(diff)
