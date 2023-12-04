@@ -4,6 +4,7 @@
 /* clang-format on */
 
 #include <glm/ext.hpp>
+#include <prof/profiler.hpp>
 
 #include "gl_window.hpp"
 
@@ -214,6 +215,7 @@ void gl_window::update()
 
 void gl_window::draw()
 {
+    auto p = prof::profile(__FUNCTION__);
     auto now = std::chrono::steady_clock::now();
     auto diff = now - _last_frame_time;
     _last_frame_time = std::move(now);

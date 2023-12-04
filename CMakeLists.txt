@@ -12,5 +12,6 @@ set(ASSIMP_BUILD_FBX_IMPORTER TRUE)
 add_subdirectory(thirdparty/assimp)
 add_subdirectory(thirdparty/spdlog)
 add_subdirectory(thirdparty/freetype)
+add_subdirectory(thirdparty/prof)
 
 add_subdirectory(src)

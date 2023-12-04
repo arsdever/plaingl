@@ -13,3 +13,6 @@
 [submodule "thirdparty/assimp"]
 	path = thirdparty/assimp
 	url = https://github.com/assimp/assimp
+[submodule "thirdparty/prof"]
+	path = thirdparty/prof
+	url = https://github.com/arsdever/prof

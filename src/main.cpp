@@ -7,12 +7,15 @@
 #include <atomic>
 #include <charconv>
 #include <chrono>
+#include <iostream>
+#include <sstream>
 #include <thread>
 #include <unordered_set>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <prof/profiler.hpp>
 
 #include "asset_manager.hpp"
 #include "camera.hpp"
@@ -167,6 +170,7 @@ int main(int argc, char** argv)
     {
         for (int i = 0; i < windows.size(); ++i)
         {
+            auto p = prof::profile_frame(__FUNCTION__);
             auto window = windows[ i ];
             window->set_active();
             color c { 0, 0, 0 };
@@ -184,6 +188,21 @@ int main(int argc, char** argv)
         }
     }
 
+    std::stringstream ss;
+    ss << std::this_thread::get_id();
+    prof::apply_for_data(ss.str(),
+                         [](const prof::data_sample& data) -> bool
+    {
+        log()->info("Profiling frame:\n\tfunction name: {}\n\tdepth: "
+                    "{}\n\tduration: {}",
+                    data.name(),
+                    data.depth(),
+                    std::chrono::duration_cast<std::chrono::duration<double>>(
+                        data.end() - data.start())
+                        .count());
+        return true;
+    });
+    std::cout << std::flush;
     program_exits = true;
     glfwTerminate();
     thd.join();
