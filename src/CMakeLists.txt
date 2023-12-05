@@ -40,7 +40,12 @@ add_executable(
   thread.cpp
   transform.hpp
   transform.cpp
-  glad/src/gl.c)
+  glad/src/gl.c
+  asset_loaders/asset_loader.hpp
+  asset_loaders/fbx.hpp
+  asset_loaders/fbx.cpp)
+
+target_include_directories(gl PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 target_link_libraries(gl PUBLIC glfw glm assimp::assimp profiler::lib
                                 spdlog::spdlog freetype)
