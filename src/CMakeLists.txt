@@ -45,7 +45,9 @@ add_executable(
   glad/src/gl.c
   asset_loaders/asset_loader.hpp
   asset_loaders/fbx.hpp
-  asset_loaders/fbx.cpp)
+  asset_loaders/fbx.cpp
+  asset_loaders/png.hpp
+  asset_loaders/png.cpp)
 
 target_include_directories(gl PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
