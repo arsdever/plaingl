@@ -22,12 +22,14 @@
 #include "game_object.hpp"
 #include "gizmo_object.hpp"
 #include "gl_window.hpp"
+#include "image.hpp"
 #include "logging.hpp"
 #include "material.hpp"
 #include "mouse_events_refiner.hpp"
 #include "scene.hpp"
 #include "shader.hpp"
 #include "text.hpp"
+#include "texture_viewer.hpp"
 #include "thread.hpp"
 
 namespace
@@ -112,6 +114,9 @@ int main(int argc, char** argv)
 {
     glfwInit();
     glfwSetErrorCallback(on_error);
+
+    asset_manager_.load_asset("sample.png");
+    texture_viewer::show_preview(asset_manager_.textures()[ 0 ]);
 
     std::vector<gl_window*> windows;
     windows.push_back(new gl_window);
