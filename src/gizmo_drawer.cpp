@@ -26,9 +26,9 @@ void gizmo_drawer::draw_line_2d(glm::vec2 p1, glm::vec2 p2, glm::vec4 color)
     glBindVertexArray(vao);
     glGenBuffers(1, &vbo);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    std::array<glm::vec3, 3> verts { { { p1, 0 }, { p2, 0 } } };
+    std::array<glm::vec3, 2> verts { { { p1, 0 }, { p2, 0 } } };
     glBufferData(GL_ARRAY_BUFFER,
-                 verts.size() * sizeof(glm::vec2::type) * 2,
+                 verts.size() * sizeof(glm::vec2::type) * 3,
                  verts.data(),
                  GL_STATIC_DRAW);
 
