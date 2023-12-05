@@ -36,6 +36,8 @@ add_executable(
   vertex.hpp
   text.hpp
   text.cpp
+  texture_viewer.hpp
+  texture_viewer.cpp
   texture.hpp
   texture.cpp
   thread.hpp
