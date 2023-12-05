@@ -69,7 +69,7 @@ void shader::compile()
         int log_length = 0;
         char msg[ 1024 ];
         glGetShaderInfoLog(_id, 1024, &log_length, msg);
-        log()->error("Failed to compile shader {}: {}", _id, msg);
+        log()->error("Failed to compile shader {}({}): {}", _id, _path, msg);
         return;
     }
 
@@ -96,6 +96,8 @@ void shader::set_source(std::string_view source_code)
     _status = status::updated;
 }
 
+void shader::set_path(std::string_view path) { _path = path; }
+
 int shader::id() const { return _id; }
 
 shader shader::from_file(std::string_view path)
@@ -113,6 +115,7 @@ shader shader::from_file(std::string_view path)
     shader result(type);
 
     std::string data = get_file_contents(path);
+    result.set_path(path);
     result.init();
     result.set_source(data);
     result.compile();
