@@ -5,6 +5,8 @@ add_executable(
   camera.hpp
   camera.cpp
   color.hpp
+  component.hpp
+  component.cpp
   logging.hpp
   event.hpp
   file.hpp
@@ -23,10 +25,13 @@ add_executable(
   material_property.hpp
   material.hpp
   material.cpp
+  mesh_renderer.hpp
+  mesh_renderer.cpp
   mesh.hpp
   mesh.cpp
   mouse_events_refiner.hpp
   mouse_events_refiner.cpp
+  renderer.hpp
   scene.hpp
   scene.cpp
   shader.hpp
