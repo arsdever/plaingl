@@ -42,6 +42,13 @@ add_executable(
   transform.cpp
   glad/src/gl.c)
 
-target_link_libraries(gl PUBLIC glfw glm assimp::assimp profiler::lib
-                                spdlog::spdlog freetype)
+target_link_libraries(
+  gl
+  PUBLIC glfw
+         glm
+         assimp::assimp
+         PNG::PNG
+         profiler::lib
+         spdlog::spdlog
+         freetype)
 target_include_directories(gl PRIVATE glad/include)
