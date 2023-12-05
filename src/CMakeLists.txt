@@ -19,6 +19,8 @@ add_executable(
   gizmo_object.cpp
   gl_window.hpp
   gl_window.cpp
+  image.hpp
+  image.cpp
   main.cpp
   material_property.hpp
   material.hpp
