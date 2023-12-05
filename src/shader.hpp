@@ -30,6 +30,7 @@ public:
     void compile();
     void deinit();
     void set_source(std::string_view source_code);
+    void set_path(std::string_view path);
     int id() const;
 
     static shader from_file(std::string_view path);
@@ -38,6 +39,7 @@ private:
     status _status = status::uninitialized;
     int _id = 0;
     shader_type _type;
+    std::string _path = "unknown";
 };
 
 class shader_program
