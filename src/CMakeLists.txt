@@ -47,6 +47,13 @@ add_executable(
 
 target_include_directories(gl PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
-target_link_libraries(gl PUBLIC glfw glm assimp::assimp profiler::lib
-                                spdlog::spdlog freetype)
+target_link_libraries(
+  gl
+  PUBLIC glfw
+         glm
+         assimp::assimp
+         PNG::PNG
+         profiler::lib
+         spdlog::spdlog
+         freetype)
 target_include_directories(gl PRIVATE glad/include)
