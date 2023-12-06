@@ -5,9 +5,11 @@
 
 #include <glm/vec3.hpp>
 
+#include "base.hpp"
 #include "vertex.hpp"
 
 struct GLFWwindow;
+class mesh_asset;
 
 class mesh
 {
@@ -21,6 +23,8 @@ public:
 
     void init();
 
+    void set_mesh_asset(sp<mesh_asset> asset);
+
     void set_vertices(std::vector<vertex> positions);
     void set_indices(std::vector<int> indices);
 
@@ -30,10 +34,13 @@ public:
     void render();
 
 private:
+    sp<mesh_asset> _mesh_asset = nullptr;
+
     std::vector<vertex> _vertices;
     std::vector<int> _indices;
 
     std::unordered_map<GLFWwindow*, unsigned int> _vao_map;
     unsigned int _vbo = 0;
     unsigned int _ebo = 0;
+    bool _needs_update = true;
 };

@@ -279,17 +279,19 @@ void initScene()
     game_object* object = new game_object;
     auto* am = asset_manager::default_asset_manager();
     am->load_asset("cube.fbx");
+    am->load_asset("sphere.fbx");
 
-    object->set_mesh(am->meshes()[ 0 ]);
+    object->set_mesh(new mesh);
+    object->get_mesh()->set_mesh_asset(am->meshes()[ 0 ]);
     object->set_material(basic_mat);
     object->get_transform().set_position({ -0.5f, 0, 0 });
 
     s.add_object(object);
 
     object = new game_object;
-    am->load_asset("sphere.fbx");
 
-    object->set_mesh(am->meshes()[ 1 ]);
+    object->set_mesh(new mesh);
+    object->get_mesh()->set_mesh_asset(am->meshes()[ 1 ]);
     object->set_material(basic_mat);
     object->get_transform().set_position({ 0.5f, 0, 0 });
 

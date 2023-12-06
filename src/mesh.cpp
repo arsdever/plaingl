@@ -4,9 +4,10 @@
 /* clang-format on */
 
 #include <array>
-#include <iostream>
 
 #include "mesh.hpp"
+
+#include "assets/mesh_asset.hpp"
 
 mesh::mesh() { }
 
@@ -57,28 +58,59 @@ void mesh::init()
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ebo);
     }
 
-    glBufferData(GL_ARRAY_BUFFER,
-                 _vertices.size() * vertex::size,
-                 _vertices.data(),
-                 GL_STATIC_DRAW);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER,
-                 _indices.size() * sizeof(int),
-                 _indices.data(),
-                 GL_STATIC_DRAW);
+    if (_mesh_asset == nullptr)
+    {
+        glBufferData(GL_ARRAY_BUFFER,
+                     _vertices.size() * vertex::size,
+                     _vertices.data(),
+                     GL_STATIC_DRAW);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+                     _indices.size() * sizeof(int),
+                     _indices.data(),
+                     GL_STATIC_DRAW);
+    }
+    else
+    {
+        glBufferData(GL_ARRAY_BUFFER,
+                     _mesh_asset->vertices().size() * vertex::size,
+                     _mesh_asset->vertices().data(),
+                     GL_STATIC_DRAW);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+                     _mesh_asset->indices().size() * sizeof(int),
+                     _mesh_asset->indices().data(),
+                     GL_STATIC_DRAW);
+    }
+}
+
+void mesh::set_mesh_asset(sp<mesh_asset> asset)
+{
+    if (asset != _mesh_asset)
+    {
+        _mesh_asset = asset;
+        _needs_update = true;
+    }
 }
 
 void mesh::set_vertices(std::vector<vertex> positions)
 {
     _vertices = std::move(positions);
+    _needs_update = true;
 }
 
 void mesh::set_indices(std::vector<int> indices)
 {
     _indices = std::move(indices);
+    _needs_update = true;
 }
 
 void mesh::render()
 {
+    if (_needs_update)
+    {
+        init();
+        _needs_update = false;
+    }
+
     if (!_vao_map.contains(glfwGetCurrentContext()))
     {
         _vao_map[ glfwGetCurrentContext() ] = 0;
@@ -102,11 +134,21 @@ void mesh::render()
     else
     {
         glBindVertexArray(_vao_map[ glfwGetCurrentContext() ]);
+        glBindBuffer(GL_ARRAY_BUFFER, _vbo);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ebo);
         for (int i = 0; i < vertex::attributes_count; ++i)
         {
             glEnableVertexAttribArray(i);
         }
     }
-    glDrawElements(GL_TRIANGLES, _indices.size(), GL_UNSIGNED_INT, 0);
+    if (_mesh_asset == nullptr)
+    {
+        glDrawElements(GL_TRIANGLES, _indices.size(), GL_UNSIGNED_INT, 0);
+    }
+    else
+    {
+        glDrawElements(
+            GL_TRIANGLES, _mesh_asset->indices().size(), GL_UNSIGNED_INT, 0);
+    }
     glBindVertexArray(0);
 }

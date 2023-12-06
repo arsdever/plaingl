@@ -5,7 +5,7 @@
 
 #include "asset_loaders/fbx.hpp"
 
-#include "mesh.hpp"
+#include "assets/mesh_asset.hpp"
 
 void asset_loader_FBX::load(std::string_view path)
 {
@@ -20,7 +20,6 @@ void asset_loader_FBX::load(std::string_view path)
     {
         const aiMesh* assimp_mesh = scene->mMeshes[ i ];
 
-        mesh* mesh_ = new mesh;
         std::vector<vertex> vertices;
         std::vector<int> indices;
 
@@ -52,17 +51,16 @@ void asset_loader_FBX::load(std::string_view path)
                 indices.push_back(assimp_face.mIndices[ j ]);
         }
 
-        mesh_->set_vertices(std::move(vertices));
-        mesh_->set_indices(std::move(indices));
-        mesh_->init();
-        _meshes.push_back(mesh_);
+        _meshes.emplace_back(std::make_shared<mesh_asset>(
+            std::string_view(assimp_mesh->mName.data,
+                             assimp_mesh->mName.length),
+            std::move(vertices),
+            std::move(indices)));
     }
 }
 
-const std::vector<mesh*>& asset_loader_FBX::get_meshes() const {
+const std::vector<std::shared_ptr<mesh_asset>>&
+asset_loader_FBX::get_meshes() const
+{
     return _meshes;
-}
-
-std::vector<mesh*>&& asset_loader_FBX::extract_meshes() {
-    return std::move(_meshes);
 }

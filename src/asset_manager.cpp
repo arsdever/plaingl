@@ -4,7 +4,9 @@
 #include "asset_loaders/mat.hpp"
 #include "asset_loaders/png.hpp"
 #include "asset_loaders/shader.hpp"
+#include "assets/mesh_asset.hpp"
 #include "file.hpp"
+
 void asset_manager::load_asset(std::string_view path)
 {
     auto [ _, filename, extension ] = parse_path(path);
@@ -12,8 +14,16 @@ void asset_manager::load_asset(std::string_view path)
     {
         asset_loader_FBX fbx_loader;
         fbx_loader.load(path);
-        auto [ it, success ] =
-            _meshes.try_emplace(filename, fbx_loader.get_meshes());
+        const auto& meshes = fbx_loader.get_meshes();
+        for (const auto& mesh : meshes)
+        {
+            auto [ it, success ] =
+                _meshes.try_emplace(filename + mesh->id(), mesh);
+            if (success)
+            {
+                _cached_meshes_result.second = false;
+            }
+        }
     }
     else if (extension == ".shader")
     {
@@ -38,14 +48,20 @@ void asset_manager::load_asset(std::string_view path)
     }
 }
 
-const std::vector<mesh*> asset_manager::meshes() const
+const std::vector<sp<mesh_asset>>& asset_manager::meshes() const
 {
-    std::vector<mesh*> result;
+    if (_cached_meshes_result.second)
+    {
+        return _cached_meshes_result.first;
+    }
+
+    std::vector<sp<mesh_asset>> result;
     for (auto& [ _, value ] : _meshes)
     {
-        result.insert(result.end(), value.begin(), value.end());
+        result.push_back(value);
     }
-    return result;
+    _cached_meshes_result = { std::move(result), true };
+    return _cached_meshes_result.first;
 }
 
 const std::vector<material*> asset_manager::materials() const

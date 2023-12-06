@@ -46,6 +46,10 @@ add_executable(
   uniform_info.hpp
   utils.hpp
   glad/src/gl.c
+  assets/asset.cpp
+  assets/asset.hpp
+  assets/mesh_asset.hpp
+  assets/mesh_asset.cpp
   asset_loaders/asset_loader.hpp
   asset_loaders/fbx.hpp
   asset_loaders/fbx.cpp

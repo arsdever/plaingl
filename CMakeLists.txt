@@ -8,6 +8,11 @@ project(plaingl)
 include($ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake)
 find_package(ZLIB REQUIRED)
 find_package(PNG REQUIRED)
+find_program(FLATBUFFER_COMPILER flatc)
+
+if(NOT FLATBUFFER_COMPILER)
+  message(SEND_ERROR "Flatbuffers compiler not found")
+endif()
 
 add_definitions(-w)
 add_subdirectory(thirdparty/glm)
