@@ -31,9 +31,22 @@ public:
 
     bool has_property(std::string_view name) const;
 
-    void set_property_value(std::string_view name, std::any value);
+    template <typename... T>
+    void set_property_value(std::string_view name, T... args)
+    {
+        set_property_value(name, std::any { std::make_tuple(args...) });
+    }
 
-    void activate();
+    template <typename... T>
+    void set_property_value(std::string_view name, std::tuple<T...> pack)
+    {
+        set_property_value(name, std::any { pack });
+    }
+
+    void activate() const;
+
+private:
+    void set_property_value(std::string_view name, std::any value);
 
 private:
     shader_program* _shader_program;

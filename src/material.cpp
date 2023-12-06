@@ -16,12 +16,14 @@ material::material() = default;
 material::material(material&& mat)
 {
     _shader_program = mat._shader_program;
+    _property_map = std::move(mat._property_map);
     mat._shader_program = 0;
 }
 
 material& material::operator=(material&& mat)
 {
     _shader_program = mat._shader_program;
+    _property_map = std::move(mat._property_map);
     mat._shader_program = 0;
     return *this;
 }
@@ -72,4 +74,11 @@ void material::set_property_value(std::string_view name, std::any value)
     found_iterator->second._value = std::move(value);
 }
 
-void material::activate() { }
+void material::activate() const
+{
+    for (const auto& [ name, property ] : _property_map)
+    {
+        _shader_program->set_uniform(name, property._value);
+    }
+    _shader_program->use();
+}

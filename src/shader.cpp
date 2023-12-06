@@ -1,7 +1,9 @@
 #include <glad/gl.h>
+#include <glm/ext.hpp>
 
 #include "shader.hpp"
 
+#include "camera.hpp"
 #include "file.hpp"
 #include "logging.hpp"
 
@@ -129,6 +131,8 @@ shader_program::shader_program(shader_program&& other)
     _status = other._status;
     _id = other._id;
     _shaders = std::move(other._shaders);
+    _properties = std::move(other._properties);
+    _name_property_map = std::move(other._name_property_map);
     other._id = 0;
     other._status = status::uninitialized;
 }
@@ -138,6 +142,8 @@ shader_program& shader_program::operator=(shader_program&& other)
     _status = other._status;
     _id = other._id;
     _shaders = std::move(other._shaders);
+    _properties = std::move(other._properties);
+    _name_property_map = std::move(other._name_property_map);
     other._id = 0;
     other._status = status::uninitialized;
     return *this;
@@ -187,6 +193,7 @@ void shader_program::link()
     }
 
     _status = status::linked;
+    resolve_uniforms();
 }
 
 void shader_program::use() const
@@ -227,6 +234,12 @@ void shader_program::release_shaders() { _shaders.clear(); }
 int shader_program::id() const { return _id; }
 
 void shader_program::unuse() { glUseProgram(0); }
+
+void shader_program::set_uniform(std::string_view name, std::any value)
+{
+    auto iterator = _name_property_map.find(name);
+    iterator->second._value = std::move(value);
+}
 
 void shader_program::resolve_uniforms()
 {
@@ -380,6 +393,14 @@ void shader_program::setup_property_values() const
         }
         default: break;
         }
+    }
+
+    if (_name_property_map.contains("vp_matrix"))
+    {
+        glUniformMatrix4fv(
+            _name_property_map.find("vp_matrix")->second._index,
+            1,
+            GL_FALSE, glm::value_ptr(camera::active_camera()->vp_matrix()));
     }
 }
 
