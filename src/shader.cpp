@@ -319,6 +319,7 @@ void shader_program::setup_property_values() const
             glUniform4f(id, f1, f2, f3, f4);
             break;
         }
+        case uniform_info::type::property_type_sampler2D:
         case uniform_info::type::property_type_1i:
         {
             auto [ i1 ] = std::any_cast<std::tuple<int>>(property._value);

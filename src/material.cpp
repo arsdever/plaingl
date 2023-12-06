@@ -5,6 +5,7 @@
 
 #include "logging.hpp"
 #include "shader.hpp"
+#include "texture.hpp"
 
 namespace
 {
@@ -78,7 +79,22 @@ void material::activate() const
 {
     for (const auto& [ name, property ] : _property_map)
     {
-        _shader_program->set_uniform(name, property._value);
+        if (!property._value.has_value())
+        {
+            continue;
+        }
+
+        if (property._type == material_property::data_type::type_image)
+        {
+            const auto& [ t ] =
+                std::any_cast<std::tuple<texture*>>(property._value);
+            t->bind(0);
+            _shader_program->set_uniform(name, std::tuple<int>(0));
+        }
+        else
+        {
+            _shader_program->set_uniform(name, property._value);
+        }
     }
     _shader_program->use();
 }
