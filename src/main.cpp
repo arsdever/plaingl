@@ -42,7 +42,6 @@ std::string console_text_content;
 std::unordered_set<int> pressed_keys;
 camera main_camera;
 camera second_camera;
-asset_manager asset_manager_;
 mouse_events_refiner mouse_events;
 } // namespace
 
@@ -115,8 +114,9 @@ int main(int argc, char** argv)
     glfwInit();
     glfwSetErrorCallback(on_error);
 
-    asset_manager_.load_asset("sample.png");
-    texture_viewer::show_preview(asset_manager_.textures()[ 0 ]);
+    auto* am = asset_manager::default_asset_manager();
+    am->load_asset("sample.png");
+    texture_viewer::show_preview(am->textures()[ 0 ]);
 
     std::vector<gl_window*> windows;
     windows.push_back(new gl_window);
@@ -261,10 +261,10 @@ void initScene()
     basic_mat->set_shader_program(prog);
     basic_mat->declare_property(
         "materialColor", material_property::data_type::type_float_vector_4);
-    basic_mat->declare_property(
-        "is_selected", material_property::data_type::type_integer);
-    basic_mat->declare_property(
-        "model_matrix", material_property::data_type::unknown);
+    basic_mat->declare_property("is_selected",
+                                material_property::data_type::type_integer);
+    basic_mat->declare_property("model_matrix",
+                                material_property::data_type::unknown);
     // for (const auto& property : basic_mat->properties())
     // {
     //     log()->info("Material properties:\n\tname: {}\n\tindex: {}\n\tsize: "
@@ -277,18 +277,19 @@ void initScene()
     basic_mat->set_property_value("position", 1);
 
     game_object* object = new game_object;
-    asset_manager_.load_asset("cube.fbx");
+    auto* am = asset_manager::default_asset_manager();
+    am->load_asset("cube.fbx");
 
-    object->set_mesh(asset_manager_.meshes()[ 0 ]);
+    object->set_mesh(am->meshes()[ 0 ]);
     object->set_material(basic_mat);
     object->get_transform().set_position({ -0.5f, 0, 0 });
 
     s.add_object(object);
 
     object = new game_object;
-    asset_manager_.load_asset("sphere.fbx");
+    am->load_asset("sphere.fbx");
 
-    object->set_mesh(asset_manager_.meshes()[ 1 ]);
+    object->set_mesh(am->meshes()[ 1 ]);
     object->set_material(basic_mat);
     object->get_transform().set_position({ 0.5f, 0, 0 });
 
