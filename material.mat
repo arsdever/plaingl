@@ -1,8 +1,15 @@
 {
-	"shader": "simple",
+	"shader": "base",
 	"properties": [
-		"model_matrix",
-		"materialColor",
-		"is_selected"
+		{
+			"name": "model_matrix"
+		},
+		{
+			"name": "vp_matrix"
+		},
+		{
+			"name": "ambient_texture",
+			"type": "image"
+		}
 	]
 }

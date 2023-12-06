@@ -2,8 +2,11 @@
 #include "camera.hpp"
 #include "game_object.hpp"
 #include "gl_window.hpp"
+#include "image.hpp"
 #include "logging.hpp"
 #include "scene.hpp"
+#include "texture.hpp"
+#include "texture_viewer.hpp"
 
 #include <GLFW\glfw3.h>
 
@@ -32,7 +35,7 @@ int main(int argc, char** argv)
 
     auto* am = asset_manager::default_asset_manager();
     am->load_asset("sphere.fbx");
-    am->load_asset("simple.shader");
+    am->load_asset("sample.png");
     am->load_asset("material.mat");
     game_object* object = new game_object();
 
@@ -40,23 +43,28 @@ int main(int argc, char** argv)
 
     object->set_mesh(am->meshes()[ 0 ]);
     object->set_material(am->get_material("material"));
-    object->get_material()->set_property_value(
-        "materialColor", 1.0f, 0.0f, 1.0f, 1.0f);
+    image* sample_image = am->get_image("sample");
+
+    texture* t = new texture;
+    t->init(sample_image->get_width(),
+            sample_image->get_height(),
+            sample_image->get_data());
+    object->get_material()->set_property_value("ambient_texture", t);
 
     s.add_object(object);
 
     bool should_exit = false;
     main_window.on_window_closed +=
         [ &should_exit ](auto) { should_exit = true; };
-    main_window.on_keypress += [ am, object ](gl_window* window, int key_code)
+    main_window.on_keypress +=
+        [ am, object, t ](gl_window* window, int key_code)
     {
         if (key_code == GLFW_KEY_SPACE)
         {
-            am->update("simple.shader");
+            am->update("base.shader");
             am->update("material.mat");
             object->set_material(am->get_material("material"));
-            object->get_material()->set_property_value(
-                "materialColor", 1.0f, 0.0f, 1.0f, 1.0f);
+            object->get_material()->set_property_value("ambient_texture", t);
         }
     };
 
