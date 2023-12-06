@@ -50,7 +50,11 @@ add_executable(
   asset_loaders/fbx.hpp
   asset_loaders/fbx.cpp
   asset_loaders/png.hpp
-  asset_loaders/png.cpp)
+  asset_loaders/png.cpp
+  asset_loaders/mat.hpp
+  asset_loaders/mat.cpp
+  asset_loaders/shader.hpp
+  asset_loaders/shader.cpp)
 
 target_include_directories(gl PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 

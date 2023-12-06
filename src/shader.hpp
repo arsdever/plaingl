@@ -49,7 +49,7 @@ private:
 class shader_program
 {
 public:
-    enum status
+    enum class status
     {
         uninitialized,
         initialized,
@@ -72,6 +72,7 @@ public:
     void add_shader(std::string_view path);
     void release_shaders();
     int id() const;
+    bool linked() const;
 
     static void unuse();
 
