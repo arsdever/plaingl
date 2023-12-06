@@ -44,3 +44,16 @@ const std::vector<material*>& asset_manager::materials() const
 }
 
 const std::vector<image*>& asset_manager::textures() const { return _textures; }
+
+
+asset_manager* asset_manager::default_asset_manager()
+{
+    if (_instance == nullptr)
+    {
+        _instance = new asset_manager;
+    }
+
+    return _instance;
+}
+
+asset_manager* asset_manager::_instance = nullptr;
