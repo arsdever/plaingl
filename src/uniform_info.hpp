@@ -5,7 +5,7 @@
 
 #include <glad/gl.h>
 
-struct material_property_info
+struct uniform_info
 {
     enum type
     {
@@ -24,7 +24,7 @@ struct material_property_info
         property_type_2ui = GL_UNSIGNED_INT_VEC2,
         property_type_3ui = GL_UNSIGNED_INT_VEC3,
         property_type_4ui = GL_UNSIGNED_INT_VEC4,
-       
+
         property_type_mat2 = GL_FLOAT_MAT2,
         property_type_mat3 = GL_FLOAT_MAT3,
         property_type_mat4 = GL_FLOAT_MAT4,

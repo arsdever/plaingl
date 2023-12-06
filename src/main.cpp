@@ -213,8 +213,8 @@ int main(int argc, char** argv)
                     std::chrono::steady_clock::now().time_since_epoch())
                     .count();
             hslToRgb(fmod(timed_fraction, 5.0) / 5.0, 1.0f, .5f, c.r, c.g, c.b);
-            s.objects().back()->get_material()->set_property(
-                "materialColor", c.r, c.g, c.b, 1.0f);
+            // s.objects().back()->get_material()->set_property(
+            //     "materialColor", c.r, c.g, c.b, 1.0f);
 
             main_camera.get_transform().set_position(
                 { sin(timed_fraction) * 10, 0, cos(timed_fraction) * 10 });
@@ -262,7 +262,7 @@ void initScene()
                     property._size,
                     property._type);
     }
-    basic_mat->set_property("position", 1);
+    // basic_mat->set_property("position", 1);
 
     game_object* object = new game_object;
     asset_manager_.load_asset("cube.fbx");

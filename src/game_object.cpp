@@ -22,8 +22,8 @@ void game_object::update()
     glm::mat4 mvp_matrix =
         camera::active_camera()->vp_matrix() * _transformation.get_matrix();
 
-    _material->set_property("mvp_matrix", mvp_matrix);
-    _material->set_property("is_selected", static_cast<int>(_selected));
+    // _material->set_property("mvp_matrix", mvp_matrix);
+    // _material->set_property("is_selected", static_cast<int>(_selected));
     _material->activate();
     _mesh->render();
     shader_program::unuse();

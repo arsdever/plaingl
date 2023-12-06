@@ -20,7 +20,6 @@ add_executable(
   gl_window.hpp
   gl_window.cpp
   main.cpp
-  material_property.hpp
   material.hpp
   material.cpp
   mesh.hpp
@@ -40,6 +39,7 @@ add_executable(
   thread.cpp
   transform.hpp
   transform.cpp
+  uniform_info.hpp
   utils.hpp
   glad/src/gl.c)
 

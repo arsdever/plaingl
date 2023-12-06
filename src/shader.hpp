@@ -1,9 +1,13 @@
 #pragma once
 
 #include <string_view>
+#include <unordered_map>
 #include <vector>
 
 #include <glm/ext.hpp>
+
+#include "uniform_info.hpp"
+#include "utils.hpp"
 
 enum class shader_type
 {
@@ -71,10 +75,41 @@ public:
 
     static void unuse();
 
+    template <typename... T>
+    void set_uniform(std::string_view name, T... value)
+    {
+        if (!_name_property_map.contains(std::string(name)))
+        {
+            return;
+        }
+
+        _name_property_map.at(std::string(name))._value =
+            std::tuple<T...>(value...);
+    }
+
+    template <typename... T>
+    void set_uniform(unsigned id, T... value)
+    {
+        if (id >= _properties.size())
+        {
+            return;
+        }
+
+        _properties.at(id)._value = std::tuple<T...>(value...);
+    }
+
+private:
+    void resolve_uniforms();
+    void setup_property_values() const;
+
 private:
     status _status = status::uninitialized;
     int _id = 0;
     std::vector<shader> _shaders;
     static glm::mat4 _view_matrix;
     static glm::mat4 _projection_matrix;
+
+    std::vector<uniform_info> _properties;
+    std::unordered_map<std::string, uniform_info&, string_hash, std::equal_to<>>
+        _name_property_map;
 };
