@@ -16,6 +16,6 @@ void scene::add_gizmo_object(gizmo_object* object)
     _gizmo_objects.push_back(object);
 }
 
-scene& scene::get_active_scene() { return *_scene_instance; }
+scene* scene::get_active_scene() { return _scene_instance; }
 
 scene* scene::_scene_instance = nullptr;

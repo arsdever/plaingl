@@ -19,7 +19,7 @@ public:
     const std::vector<gizmo_object*>& gizmo_objects() const;
     void add_gizmo_object(gizmo_object* object);
 
-    static scene& get_active_scene();
+    static scene* get_active_scene();
 
 private:
     std::vector<game_object*> _objects;

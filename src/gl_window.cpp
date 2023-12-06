@@ -234,7 +234,7 @@ void gl_window::draw()
     {
         _object_index_map_shader.use();
         unsigned id = 0;
-        for (auto object : scene::get_active_scene().objects())
+        for (auto object : scene::get_active_scene()->objects())
         {
             glm::mat4 model = object->get_transform().get_matrix();
             glm::mat4 mvp = _view_camera->vp_matrix() * model;
@@ -249,9 +249,12 @@ void gl_window::draw()
     }
     else
     {
-        for (auto* obj : scene::get_active_scene().objects())
+        if (scene::get_active_scene())
         {
-            obj->update();
+            for (auto* obj : scene::get_active_scene()->objects())
+            {
+                obj->update();
+            }
         }
     }
 
@@ -259,9 +262,12 @@ void gl_window::draw()
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    for (auto* obj : scene::get_active_scene().gizmo_objects())
+    if (scene::get_active_scene())
     {
-        obj->update();
+        for (auto* obj : scene::get_active_scene()->gizmo_objects())
+        {
+            obj->update();
+        }
     }
 
     glm::mat4 ortho = glm::ortho<float>(
@@ -437,7 +443,7 @@ game_object* gl_window::find_game_object_at_position(double x, double y)
     glEnable(GL_DEPTH_TEST);
     _object_index_map_shader.use();
     unsigned id = 0;
-    for (auto object : scene::get_active_scene().objects())
+    for (auto object : scene::get_active_scene()->objects())
     {
         glm::mat4 model = object->get_transform().get_matrix();
         glm::mat4 mvp = _view_camera->vp_matrix() * model;
@@ -463,7 +469,7 @@ game_object* gl_window::find_game_object_at_position(double x, double y)
 
     if (pixel_info.id > 0)
     {
-        return scene::get_active_scene().objects()[ pixel_info.id - 1 ];
+        return scene::get_active_scene()->objects()[ pixel_info.id - 1 ];
     }
 
     return nullptr;
