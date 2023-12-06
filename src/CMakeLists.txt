@@ -40,6 +40,7 @@ add_executable(
   thread.cpp
   transform.hpp
   transform.cpp
+  utils.hpp
   glad/src/gl.c)
 
 target_link_libraries(
