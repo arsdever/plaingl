@@ -240,7 +240,10 @@ void shader_program::unuse() { glUseProgram(0); }
 void shader_program::set_uniform(std::string_view name, std::any value)
 {
     auto iterator = _name_property_map.find(name);
-    iterator->second._value = std::move(value);
+    if (iterator != _name_property_map.end())
+    {
+        iterator->second._value = std::move(value);
+    }
 }
 
 void shader_program::resolve_uniforms()
@@ -397,7 +400,7 @@ void shader_program::setup_property_values() const
         }
     }
 
-    if (_name_property_map.contains("vp_matrix"))
+    if (camera::active_camera() && _name_property_map.contains("vp_matrix"))
     {
         glUniformMatrix4fv(
             _name_property_map.find("vp_matrix")->second._index,
