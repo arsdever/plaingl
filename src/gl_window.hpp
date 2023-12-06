@@ -29,6 +29,8 @@ public:
     size_t width() const;
     size_t height() const;
 
+    void resize(size_t width, size_t height);
+
     void update();
     void draw();
 

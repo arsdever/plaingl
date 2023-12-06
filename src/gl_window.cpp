@@ -91,9 +91,6 @@ void gl_window::init()
         title = "Main window";
     }
 
-    _width = 800;
-    _height = 600;
-
     glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
     glfwWindowHint(GLFW_SAMPLES, 8);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
@@ -191,6 +188,19 @@ void gl_window::set_active() { glfwMakeContextCurrent(_window); }
 size_t gl_window::width() const { return _width; }
 
 size_t gl_window::height() const { return _height; }
+
+void gl_window::resize(size_t width, size_t height)
+{
+    if (_state != state::initialized)
+    {
+        _width = width;
+        _height = height;
+    }
+    else
+    {
+        glfwSetWindowSize(_window, width, height);
+    }
+}
 
 void gl_window::update()
 {
