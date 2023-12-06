@@ -1,0 +1,8 @@
+{
+	"shader": "simple",
+	"properties": [
+		"model_matrix",
+		"materialColor",
+		"is_selected"
+	]
+}

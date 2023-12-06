@@ -1,4 +1,5 @@
 #include "asset_manager.hpp"
+#include "camera.hpp"
 #include "game_object.hpp"
 #include "gl_window.hpp"
 #include "logging.hpp"
@@ -25,14 +26,22 @@ int main(int argc, char** argv)
     main_window.resize(500, 500);
     main_window.init();
 
-    asset_manager am;
     scene s;
+    camera c;
+    main_window.set_camera(&c);
 
-    am.load_asset("sphere.fbx");
-    am.load_asset("simple.shader");
+    auto* am = asset_manager::default_asset_manager();
+    am->load_asset("sphere.fbx");
+    am->load_asset("simple.shader");
+    am->load_asset("material.mat");
     game_object* object = new game_object();
 
-    object->set_mesh(am.meshes()[ 0 ]);
+    c.get_transform().set_position({ 0, 5, 10 });
+
+    object->set_mesh(am->meshes()[ 0 ]);
+    object->set_material(am->get_material("material"));
+    object->get_material()->set_property_value(
+        "materialColor", 1.0f, 0.0f, 1.0f, 1.0f);
 
     s.add_object(object);
 
@@ -44,5 +53,6 @@ int main(int argc, char** argv)
     {
         main_window.update();
     }
+
     return 0;
 }
