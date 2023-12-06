@@ -1,7 +1,9 @@
 #include <glad/gl.h>
+#include <glm/ext.hpp>
 
 #include "shader.hpp"
 
+#include "camera.hpp"
 #include "file.hpp"
 #include "logging.hpp"
 
@@ -129,6 +131,8 @@ shader_program::shader_program(shader_program&& other)
     _status = other._status;
     _id = other._id;
     _shaders = std::move(other._shaders);
+    _properties = std::move(other._properties);
+    _name_property_map = std::move(other._name_property_map);
     other._id = 0;
     other._status = status::uninitialized;
 }
@@ -138,6 +142,8 @@ shader_program& shader_program::operator=(shader_program&& other)
     _status = other._status;
     _id = other._id;
     _shaders = std::move(other._shaders);
+    _properties = std::move(other._properties);
+    _name_property_map = std::move(other._name_property_map);
     other._id = 0;
     other._status = status::uninitialized;
     return *this;
@@ -187,6 +193,7 @@ void shader_program::link()
     }
 
     _status = status::linked;
+    resolve_uniforms();
 }
 
 void shader_program::use() const
@@ -198,6 +205,7 @@ void shader_program::use() const
     }
 
     glUseProgram(_id);
+    setup_property_values();
 }
 
 void shader_program::deinit()
@@ -226,6 +234,175 @@ void shader_program::release_shaders() { _shaders.clear(); }
 int shader_program::id() const { return _id; }
 
 void shader_program::unuse() { glUseProgram(0); }
+
+void shader_program::set_uniform(std::string_view name, std::any value)
+{
+    auto iterator = _name_property_map.find(name);
+    iterator->second._value = std::move(value);
+}
+
+void shader_program::resolve_uniforms()
+{
+    use();
+    _properties.clear();
+    _name_property_map.clear();
+    int uniform_count = 0;
+    glGetProgramiv(id(), GL_ACTIVE_UNIFORMS, &uniform_count);
+    if (uniform_count == 0)
+    {
+        return;
+    }
+
+    std::string buffer;
+    int length;
+    int size;
+    unsigned type;
+    buffer.resize(512);
+    _properties.resize(uniform_count);
+    for (int i = 0; i < uniform_count; ++i)
+    {
+        glGetActiveUniform(id(), i, 512, &length, &size, &type, buffer.data());
+        _properties[ i ]._name = buffer;
+        _properties[ i ]._name.resize(length);
+        _properties[ i ]._index = i;
+        _properties[ i ]._size = size;
+        _properties[ i ]._type = uniform_info::type(type);
+        // TODO: verify emplace did add element
+        _name_property_map.try_emplace(_properties[ i ]._name,
+                                       _properties[ i ]);
+    }
+    shader_program::unuse();
+}
+
+void shader_program::setup_property_values() const
+{
+    for (auto& property : _properties)
+    {
+        if (!property._value.has_value())
+        {
+            continue;
+        }
+
+        int id = property._index;
+        switch (property._type)
+        {
+        case uniform_info::type::property_type_1f:
+        {
+            auto [ f1 ] = std::any_cast<std::tuple<float>>(property._value);
+            glUniform1f(id, f1);
+            break;
+        }
+        case uniform_info::type::property_type_2f:
+        {
+            auto [ f1, f2 ] =
+                std::any_cast<std::tuple<float, float>>(property._value);
+            glUniform2f(id, f1, f2);
+            break;
+        }
+        case uniform_info::type::property_type_3f:
+        {
+            auto [ f1, f2, f3 ] =
+                std::any_cast<std::tuple<float, float, float>>(property._value);
+            glUniform3f(id, f1, f2, f3);
+            break;
+        }
+        case uniform_info::type::property_type_4f:
+        {
+            auto [ f1, f2, f3, f4 ] =
+                std::any_cast<std::tuple<float, float, float, float>>(
+                    property._value);
+            glUniform4f(id, f1, f2, f3, f4);
+            break;
+        }
+        case uniform_info::type::property_type_1i:
+        {
+            auto [ i1 ] = std::any_cast<std::tuple<int>>(property._value);
+            glUniform1i(id, i1);
+            break;
+        }
+        case uniform_info::type::property_type_2i:
+        {
+            auto [ i1, i2 ] =
+                std::any_cast<std::tuple<int, int>>(property._value);
+            glUniform2i(id, i1, i2);
+            break;
+        }
+        case uniform_info::type::property_type_3i:
+        {
+            auto [ i1, i2, i3 ] =
+                std::any_cast<std::tuple<int, int, int>>(property._value);
+            glUniform3i(id, i1, i2, i3);
+            break;
+        }
+        case uniform_info::type::property_type_4i:
+        {
+            auto [ i1, i2, i3, i4 ] =
+                std::any_cast<std::tuple<int, int, int, int>>(property._value);
+            glUniform4i(id, i1, i2, i3, i4);
+            break;
+        }
+        case uniform_info::type::property_type_1ui:
+        {
+            auto [ ui1 ] = std::any_cast<std::tuple<unsigned>>(property._value);
+            glUniform1ui(id, ui1);
+            break;
+        }
+        case uniform_info::type::property_type_2ui:
+        {
+            auto [ ui1, ui2 ] =
+                std::any_cast<std::tuple<unsigned, unsigned>>(property._value);
+            glUniform2ui(id, ui1, ui2);
+            break;
+        }
+        case uniform_info::type::property_type_3ui:
+        {
+            auto [ ui1, ui2, ui3 ] =
+                std::any_cast<std::tuple<unsigned, unsigned, unsigned>>(
+                    property._value);
+            glUniform3ui(id, ui1, ui2, ui3);
+            break;
+        }
+        case uniform_info::type::property_type_4ui:
+        {
+            auto [ ui1, ui2, ui3, ui4 ] = std::any_cast<
+                std::tuple<unsigned, unsigned, unsigned, unsigned>>(
+                property._value);
+            glUniform4ui(id, ui1, ui2, ui3, ui4);
+            break;
+        }
+        case uniform_info::type::property_type_mat2:
+        {
+            auto [ matrix ] =
+                std::any_cast<std::tuple<glm::mat2>>(property._value);
+            glUniformMatrix2fv(id, 1, GL_FALSE, glm::value_ptr(matrix));
+            break;
+        }
+        case uniform_info::type::property_type_mat3:
+        {
+            auto [ matrix ] =
+                std::any_cast<std::tuple<glm::mat3>>(property._value);
+            glUniformMatrix3fv(id, 1, GL_FALSE, glm::value_ptr(matrix));
+            break;
+        }
+        case uniform_info::type::property_type_mat4:
+        {
+            auto [ matrix ] =
+                std::any_cast<std::tuple<glm::mat4>>(property._value);
+            glUniformMatrix4fv(id, 1, GL_FALSE, glm::value_ptr(matrix));
+            break;
+        }
+        default: break;
+        }
+    }
+
+    if (_name_property_map.contains("vp_matrix"))
+    {
+        glUniformMatrix4fv(
+            _name_property_map.find("vp_matrix")->second._index,
+            1,
+            GL_FALSE, glm::value_ptr(camera::active_camera()->vp_matrix()));
+    }
+}
 
 glm::mat4 shader_program::_view_matrix;
 glm::mat4 shader_program::_projection_matrix;

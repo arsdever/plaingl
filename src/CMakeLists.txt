@@ -20,7 +20,6 @@ add_executable(
   gl_window.hpp
   gl_window.cpp
   main.cpp
-  material_property.hpp
   material.hpp
   material.cpp
   mesh.hpp
@@ -40,8 +39,17 @@ add_executable(
   thread.cpp
   transform.hpp
   transform.cpp
+  uniform_info.hpp
+  utils.hpp
   glad/src/gl.c)
 
-target_link_libraries(gl PUBLIC glfw glm assimp::assimp profiler::lib
-                                spdlog::spdlog freetype)
+target_link_libraries(
+  gl
+  PUBLIC glfw
+         glm
+         assimp::assimp
+         PNG::PNG
+         profiler::lib
+         spdlog::spdlog
+         freetype)
 target_include_directories(gl PRIVATE glad/include)
