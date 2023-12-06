@@ -39,3 +39,12 @@ bool file_exists(std::string_view path)
 {
     return std::filesystem::is_regular_file(path);
 }
+
+std::tuple<std::string, std::string, std::string>
+parse_path(std::string_view path)
+{
+    std::filesystem::path p { path };
+    return { p.root_directory().generic_string(),
+             p.filename().generic_string(),
+             p.extension().generic_string() };
+}
