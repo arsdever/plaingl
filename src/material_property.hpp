@@ -9,6 +9,8 @@ struct material_property
 {
     enum class data_type
     {
+        unknown,
+
         type_integer,
         type_integer_vector_2,
         type_integer_vector_3,

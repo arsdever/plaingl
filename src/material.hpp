@@ -9,6 +9,12 @@ class shader_program;
 
 class material
 {
+private:
+    using property_map_t = std::unordered_map<std::string,
+                                              material_property,
+                                              string_hash,
+                                              std::equal_to<>>;
+
 public:
     material();
     material(material&& mat);
@@ -23,13 +29,13 @@ public:
     void declare_property(std::string_view name,
                           material_property::data_type type);
 
+    bool has_property(std::string_view name) const;
+
+    void set_property_value(std::string_view name, std::any value);
+
     void activate();
 
 private:
     shader_program* _shader_program;
-    std::unordered_map<std::string,
-                       material_property,
-                       string_hash,
-                       std::equal_to<>>
-        _property_map;
+    property_map_t _property_map;
 };

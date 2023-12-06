@@ -255,8 +255,10 @@ void initScene()
     basic_mat->set_shader_program(prog);
     basic_mat->declare_property(
         "color", material_property::data_type::type_float_vector_3);
-    basic_mat->declare_property(
-        "color", material_property::data_type::type_float);
+    basic_mat->declare_property("color",
+                                material_property::data_type::type_float);
+    basic_mat->set_property_value("const", 5);
+    basic_mat->set_property_value("color", 5);
     // for (const auto& property : basic_mat->properties())
     // {
     //     log()->info("Material properties:\n\tname: {}\n\tindex: {}\n\tsize: "

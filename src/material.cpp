@@ -54,4 +54,22 @@ void material::declare_property(std::string_view name,
     }
 }
 
+bool material::has_property(std::string_view name) const
+{
+    return _property_map.contains(name);
+}
+
+void material::set_property_value(std::string_view name, std::any value)
+{
+    if (!has_property(name))
+    {
+        log()->error("The material has no property \"{}\"", name);
+        return;
+    }
+
+    // not using unordered_map.at to have generic string comparison
+    property_map_t::iterator found_iterator = _property_map.find(name);
+    found_iterator->second._value = std::move(value);
+}
+
 void material::activate() { }
