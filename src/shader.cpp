@@ -233,6 +233,8 @@ void shader_program::release_shaders() { _shaders.clear(); }
 
 int shader_program::id() const { return _id; }
 
+bool shader_program::linked() const { return _status == status::linked; }
+
 void shader_program::unuse() { glUseProgram(0); }
 
 void shader_program::set_uniform(std::string_view name, std::any value)
@@ -400,7 +402,8 @@ void shader_program::setup_property_values() const
         glUniformMatrix4fv(
             _name_property_map.find("vp_matrix")->second._index,
             1,
-            GL_FALSE, glm::value_ptr(camera::active_camera()->vp_matrix()));
+            GL_FALSE,
+            glm::value_ptr(camera::active_camera()->vp_matrix()));
     }
 }
 
