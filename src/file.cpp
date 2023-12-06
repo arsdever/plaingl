@@ -1,4 +1,5 @@
 #include <cstring>
+#include <filesystem>
 
 #include "file.hpp"
 
@@ -32,4 +33,9 @@ std::string get_file_contents(std::string_view path)
     std::fread(result.data(), 1, size, f);
 
     return result;
+}
+
+bool file_exists(std::string_view path)
+{
+    return std::filesystem::is_regular_file(path);
 }

@@ -12,7 +12,7 @@ void asset_loader_SHADER::load(std::string_view path)
     std::string shader_line;
     shader_program* prog = new shader_program();
     prog->init();
-    while (std::getline(ss, shader_line, '\n'))
+    while (std::getline(ss, shader_line, '\n') && file_exists(shader_line))
     {
         prog->add_shader(shader_line);
     }
