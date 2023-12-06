@@ -1,6 +1,5 @@
 #include "game_object.hpp"
 
-#include "camera.hpp"
 #include "shader.hpp"
 
 game_object::game_object() = default;
@@ -19,11 +18,8 @@ bool game_object::is_selected() const { return _selected; }
 
 void game_object::update()
 {
-    glm::mat4 mvp_matrix =
-        camera::active_camera()->vp_matrix() * _transformation.get_matrix();
-
-    _material->set_property("mvp_matrix", mvp_matrix);
-    _material->set_property("is_selected", static_cast<int>(_selected));
+    _material->set_property_value("model_matrix", _transformation.get_matrix());
+    _material->set_property_value("is_selected", static_cast<int>(_selected));
     _material->activate();
     _mesh->render();
     shader_program::unuse();

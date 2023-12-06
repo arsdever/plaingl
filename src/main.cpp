@@ -218,8 +218,9 @@ int main(int argc, char** argv)
                     std::chrono::steady_clock::now().time_since_epoch())
                     .count();
             hslToRgb(fmod(timed_fraction, 5.0) / 5.0, 1.0f, .5f, c.r, c.g, c.b);
-            s.objects().back()->get_material()->set_property(
-                "materialColor", c.r, c.g, c.b, 1.0f);
+            s.objects().back()->get_material()->set_property_value(
+                "materialColor",
+                std::tuple<float, float, float, float> { c.r, c.g, c.b, 1.0f });
 
             main_camera.get_transform().set_position(
                 { sin(timed_fraction) * 10, 0, cos(timed_fraction) * 10 });
@@ -258,16 +259,22 @@ void initScene()
 
     material* basic_mat = new material;
     basic_mat->set_shader_program(prog);
-    for (const auto& property : basic_mat->properties())
-    {
-        log()->info("Material properties:\n\tname: {}\n\tindex: {}\n\tsize: "
-                    "{}\n\ttype: {}",
-                    property._name,
-                    property._index,
-                    property._size,
-                    property._type);
-    }
-    basic_mat->set_property("position", 1);
+    basic_mat->declare_property(
+        "materialColor", material_property::data_type::type_float_vector_4);
+    basic_mat->declare_property(
+        "is_selected", material_property::data_type::type_integer);
+    basic_mat->declare_property(
+        "model_matrix", material_property::data_type::unknown);
+    // for (const auto& property : basic_mat->properties())
+    // {
+    //     log()->info("Material properties:\n\tname: {}\n\tindex: {}\n\tsize: "
+    //                 "{}\n\ttype: {}",
+    //                 property._name,
+    //                 property._index,
+    //                 property._size,
+    //                 property._type);
+    // }
+    basic_mat->set_property_value("position", 1);
 
     game_object* object = new game_object;
     asset_manager_.load_asset("cube.fbx");
