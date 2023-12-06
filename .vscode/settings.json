@@ -88,6 +88,20 @@
 		"queue": "cpp",
 		"ranges": "cpp",
 		"regex": "cpp",
-		"stack": "cpp"
+		"stack": "cpp",
+		"cfenv": "cpp",
+		"complex": "cpp",
+		"csignal": "cpp",
+		"cwctype": "cpp",
+		"coroutine": "cpp",
+		"resumable": "cpp",
+		"future": "cpp",
+		"memory_resource": "cpp",
+		"shared_mutex": "cpp",
+		"source_location": "cpp",
+		"stdfloat": "cpp",
+		"strstream": "cpp",
+		"typeindex": "cpp",
+		"valarray": "cpp"
 	}
 }

@@ -1,0 +1,2 @@
+add_executable(plaingl_material_editor material_editor.cpp)
+target_link_libraries(plaingl_material_editor gl_lib)
