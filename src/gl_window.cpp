@@ -166,6 +166,18 @@ void gl_window::init()
         }
     });
 
+    glfwSetKeyCallback(
+        _window,
+        [](GLFWwindow* window, int key, int scancode, int action, int mods)
+    {
+        gl_window* _this =
+            static_cast<gl_window*>(glfwGetWindowUserPointer(window));
+        if (action == GLFW_RELEASE)
+        {
+            _this->on_keypress(_this, key);
+        }
+    });
+
     {
         // configure gl debug output
         glEnable(GL_DEBUG_OUTPUT);

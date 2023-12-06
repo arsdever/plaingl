@@ -18,6 +18,8 @@ private:
 
 public:
     void load_asset(std::string_view path);
+    void update(std::string_view path);
+
     const std::vector<mesh*> meshes() const;
     const std::vector<material*> materials() const;
     const std::vector<image*> textures() const;

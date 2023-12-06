@@ -38,6 +38,38 @@ void asset_manager::load_asset(std::string_view path)
     }
 }
 
+void asset_manager::update(std::string_view path)
+{
+    // TODO: can be improved
+    auto [ _, filename, extension ] = parse_path(path);
+
+    if (extension == ".fbx")
+    {
+        for (auto* mesh : _meshes[ filename ])
+        {
+            delete mesh;
+        }
+        _meshes.erase(filename);
+    }
+    else if (extension == ".shader")
+    {
+        delete _shaders[ filename ];
+        _shaders.erase(filename);
+    }
+    else if (extension == ".mat")
+    {
+        delete _materials[ filename ];
+        _materials.erase(filename);
+    }
+    else if (extension == ".png")
+    {
+        delete _textures[ filename ];
+        _textures.erase(filename);
+    }
+
+    load_asset(path);
+}
+
 const std::vector<mesh*> asset_manager::meshes() const
 {
     std::vector<mesh*> result;

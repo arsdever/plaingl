@@ -31,6 +31,7 @@ std::string get_file_contents(std::string_view path)
     std::string result(size, '\0');
     std::fseek(f, 0, SEEK_SET);
     std::fread(result.data(), 1, size, f);
+    fclose(f);
 
     return result;
 }

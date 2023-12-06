@@ -36,7 +36,7 @@ int main(int argc, char** argv)
     am->load_asset("material.mat");
     game_object* object = new game_object();
 
-    c.get_transform().set_position({ 0, 5, 10 });
+    c.get_transform().set_position({ 0, 3, 3 });
 
     object->set_mesh(am->meshes()[ 0 ]);
     object->set_material(am->get_material("material"));
@@ -48,6 +48,17 @@ int main(int argc, char** argv)
     bool should_exit = false;
     main_window.on_window_closed +=
         [ &should_exit ](auto) { should_exit = true; };
+    main_window.on_keypress += [ am, object ](gl_window* window, int key_code)
+    {
+        if (key_code == GLFW_KEY_SPACE)
+        {
+            am->update("simple.shader");
+            am->update("material.mat");
+            object->set_material(am->get_material("material"));
+            object->get_material()->set_property_value(
+                "materialColor", 1.0f, 0.0f, 1.0f, 1.0f);
+        }
+    };
 
     while (!should_exit)
     {
