@@ -45,6 +45,6 @@ parse_path(std::string_view path)
 {
     std::filesystem::path p { path };
     return { p.root_directory().generic_string(),
-             p.filename().generic_string(),
+             p.stem().generic_string(),
              p.extension().generic_string() };
 }
