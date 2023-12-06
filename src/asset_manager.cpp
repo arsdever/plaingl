@@ -120,6 +120,11 @@ material* asset_manager::get_material(std::string_view name) const
     return _materials.contains(name) ? _materials.find(name)->second : nullptr;
 }
 
+image* asset_manager::get_image(std::string_view name) const
+{
+    return _textures.contains(name) ? _textures.find(name)->second : nullptr;
+}
+
 asset_manager* asset_manager::default_asset_manager()
 {
     if (_instance == nullptr)

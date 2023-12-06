@@ -27,6 +27,7 @@ public:
 
     shader_program* get_shader(std::string_view name) const;
     material* get_material(std::string_view name) const;
+    image* get_image(std::string_view name) const;
 
     static asset_manager* default_asset_manager();
 
