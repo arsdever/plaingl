@@ -78,3 +78,7 @@ void text::render() const
     glBindTexture(GL_TEXTURE_2D, 0);
     _shader.unuse();
 }
+
+const shader_program& text::get_shader() const { return _shader; }
+
+shader_program& text::get_shader() { return _shader; }

@@ -26,6 +26,8 @@ public:
     void set_position(position text_position);
     void set_scale(float scale);
     void render() const;
+    const shader_program& get_shader() const;
+    shader_program& get_shader();
 
 private:
     font _font;

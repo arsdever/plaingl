@@ -162,7 +162,11 @@ void gl_window::init()
             static_cast<gl_window*>(glfwGetWindowUserPointer(window));
         _this->_width = w;
         _this->_height = h;
-        _this->_view_camera->set_render_size(w, h);
+        _this->on_window_resized(_this, w, h);
+        if (_this->_view_camera)
+        {
+            _this->_view_camera->set_render_size(w, h);
+        }
     });
 
     {
@@ -260,6 +264,10 @@ void gl_window::draw()
         obj->update();
     }
 
+    glm::mat4 ortho = glm::ortho<float>(
+        0.0f, static_cast<float>(width()), 0.0f, static_cast<float>(height()));
+    _fps_text.get_shader().set_uniform("projection", std::make_tuple(ortho));
+
     _fps_text.set_text(fmt::format(
         "{:#6.6} ms\nhandle {:#x}",
         std::chrono::duration_cast<std::chrono::duration<double>>(diff)
@@ -340,7 +348,7 @@ void gl_window::setup_mouse_callbacks()
 void gl_window::configure_fps_text()
 {
     font fps_text_font;
-    fps_text_font.load("font.ttf", 9);
+    fps_text_font.load("font.ttf", 12);
 
     shader_program prog;
     prog.init();
@@ -358,11 +366,14 @@ void gl_window::configure_fps_text()
     prog.unuse();
 
     _fps_text.init();
-    _fps_text.set_position({ 5.0f, height() - 10.0f });
+    _fps_text.set_position({ 5.0f, height() - 15.0f });
     _fps_text.set_color({ 1.0f, 1.0f, 1.0f });
     _fps_text.set_font(std::move(fps_text_font));
     _fps_text.set_scale(1);
     _fps_text.set_shader(std::move(prog));
+    on_window_resized += [ this ](auto... args) {
+        _fps_text.set_position({ 5.0f, height() - 15.0f });
+    };
 }
 
 void gl_window::configure_object_index_mapping()
