@@ -29,6 +29,7 @@ int main(int argc, char** argv)
     scene s;
 
     am.load_asset("sphere.fbx");
+    am.load_asset("simple.shader");
     game_object* object = new game_object();
 
     object->set_mesh(am.meshes()[ 0 ]);
