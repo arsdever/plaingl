@@ -25,7 +25,7 @@ public:
 
 private:
     transform _transformation;
-    mesh* _mesh;
-    material* _material;
+    mesh* _mesh = nullptr;
+    material* _material = nullptr;
     bool _selected = false;
 };

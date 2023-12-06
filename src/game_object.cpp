@@ -18,10 +18,18 @@ bool game_object::is_selected() const { return _selected; }
 
 void game_object::update()
 {
-    _material->set_property_value("model_matrix", _transformation.get_matrix());
-    _material->set_property_value("is_selected", static_cast<int>(_selected));
-    _material->activate();
-    _mesh->render();
+    if (_material)
+    {
+        _material->set_property_value("model_matrix",
+                                      _transformation.get_matrix());
+        _material->set_property_value("is_selected",
+                                      static_cast<int>(_selected));
+        _material->activate();
+    }
+    if (_mesh)
+    {
+        _mesh->render();
+    }
     shader_program::unuse();
 }
 
