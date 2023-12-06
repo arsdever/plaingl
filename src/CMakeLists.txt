@@ -19,6 +19,8 @@ add_executable(
   gizmo_object.cpp
   gl_window.hpp
   gl_window.cpp
+  image.hpp
+  image.cpp
   main.cpp
   material.hpp
   material.cpp
@@ -33,6 +35,8 @@ add_executable(
   vertex.hpp
   text.hpp
   text.cpp
+  texture_viewer.hpp
+  texture_viewer.cpp
   texture.hpp
   texture.cpp
   thread.hpp
@@ -41,7 +45,14 @@ add_executable(
   transform.cpp
   uniform_info.hpp
   utils.hpp
-  glad/src/gl.c)
+  glad/src/gl.c
+  asset_loaders/asset_loader.hpp
+  asset_loaders/fbx.hpp
+  asset_loaders/fbx.cpp
+  asset_loaders/png.hpp
+  asset_loaders/png.cpp)
+
+target_include_directories(gl PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 target_link_libraries(
   gl
