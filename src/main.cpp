@@ -253,15 +253,19 @@ void initScene()
 
     material* basic_mat = new material;
     basic_mat->set_shader_program(prog);
-    for (const auto& property : basic_mat->properties())
-    {
-        log()->info("Material properties:\n\tname: {}\n\tindex: {}\n\tsize: "
-                    "{}\n\ttype: {}",
-                    property._name,
-                    property._index,
-                    property._size,
-                    property._type);
-    }
+    basic_mat->declare_property(
+        "color", material_property::data_type::type_float_vector_3);
+    basic_mat->declare_property(
+        "color", material_property::data_type::type_float);
+    // for (const auto& property : basic_mat->properties())
+    // {
+    //     log()->info("Material properties:\n\tname: {}\n\tindex: {}\n\tsize: "
+    //                 "{}\n\ttype: {}",
+    //                 property._name,
+    //                 property._index,
+    //                 property._size,
+    //                 property._type);
+    // }
     // basic_mat->set_property("position", 1);
 
     game_object* object = new game_object;

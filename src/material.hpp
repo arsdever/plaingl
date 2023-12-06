@@ -1,9 +1,9 @@
 #pragma once
 
-#include <tuple>
 #include <unordered_map>
 
-#include "uniform_info.hpp"
+#include "material_property.hpp"
+#include "utils.hpp"
 
 class shader_program;
 
@@ -18,14 +18,18 @@ public:
     ~material();
 
     shader_program* program() const;
-    const std::vector<uniform_info>& properties() const;
-
     void set_shader_program(shader_program* prog);
+
+    void declare_property(std::string_view name,
+                          material_property::data_type type);
 
     void activate();
 
 private:
     shader_program* _shader_program;
-    std::vector<uniform_info> _properties;
-    std::unordered_map<std::string, uniform_info&> _name_property_map;
+    std::unordered_map<std::string,
+                       material_property,
+                       string_hash,
+                       std::equal_to<>>
+        _property_map;
 };

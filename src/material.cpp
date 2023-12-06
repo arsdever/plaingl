@@ -3,7 +3,13 @@
 
 #include "material.hpp"
 
+#include "logging.hpp"
 #include "shader.hpp"
+
+namespace
+{
+static inline logger log() { return get_logger("material"); }
+} // namespace
 
 material::material() = default;
 
@@ -11,16 +17,12 @@ material::material(material&& mat)
 {
     _shader_program = mat._shader_program;
     mat._shader_program = 0;
-    _properties = std::move(mat._properties);
-    _name_property_map = std::move(mat._name_property_map);
 }
 
 material& material::operator=(material&& mat)
 {
     _shader_program = mat._shader_program;
     mat._shader_program = 0;
-    _properties = std::move(mat._properties);
-    _name_property_map = std::move(mat._name_property_map);
     return *this;
 }
 
@@ -28,20 +30,28 @@ material::~material() = default;
 
 shader_program* material::program() const { return _shader_program; }
 
-const std::vector<uniform_info>& material::properties() const
-{
-    return _properties;
-}
-
 void material::set_shader_program(shader_program* prog)
 {
     _shader_program = prog;
 }
 
-void material::activate()
+void material::declare_property(std::string_view name,
+                                material_property::data_type type)
 {
-    for (auto& property : _properties)
+    material_property property;
+    property._name = name;
+    property._type = type;
+    if (auto [ existing, success ] =
+            _property_map.try_emplace(std::string(name), std::move(property));
+        !success)
     {
-        _shader_program->set_uniform(property._index, property._value);
+        std::string_view reason = "Unknown";
+        if (existing != _property_map.end())
+        {
+            reason = "Another property with the same name already exists";
+        }
+        log()->error("Failed to add property \"{}\": {}", name, reason);
     }
 }
+
+void material::activate() { }
