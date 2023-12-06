@@ -78,6 +78,16 @@ const std::vector<shader_program*> asset_manager::shaders() const
     return result;
 }
 
+shader_program* asset_manager::get_shader(std::string_view name) const
+{
+    return _shaders.contains(name) ? _shaders.find(name)->second : nullptr;
+}
+
+material* asset_manager::get_material(std::string_view name) const
+{
+    return _materials.contains(name) ? _materials.find(name)->second : nullptr;
+}
+
 asset_manager* asset_manager::default_asset_manager()
 {
     if (_instance == nullptr)
