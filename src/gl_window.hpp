@@ -7,7 +7,6 @@
 #include "event.hpp"
 #include "mouse_events_refiner.hpp"
 #include "text.hpp"
-#include "texture.hpp"
 
 struct GLFWwindow;
 class camera;
@@ -65,7 +64,7 @@ private:
     camera* _view_camera = nullptr;
     mouse_events_refiner* _mouse_events;
 
-    texture* _object_index_map;
+    unsigned _object_index_map;
     unsigned _object_index_depth_map;
     unsigned _object_index_fbo;
     shader_program _object_index_map_shader;
