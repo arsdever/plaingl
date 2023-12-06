@@ -12,6 +12,6 @@ void image::set_data(char* data) { _data = data; }
 
 const char* image::get_data() { return _data; }
 
-size_t image::width() const { return _width; }
+size_t image::get_width() const { return _width; }
 
-size_t image::height() const { return _height; }
+size_t image::get_height() const { return _height; }
