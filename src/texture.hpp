@@ -5,12 +5,15 @@
 class texture
 {
 public:
-    texture(size_t width, size_t height);
+    texture();
+    texture(const texture& other) = delete;
+    texture(texture&& other);
+    texture& operator=(const texture& other) = delete;
+    texture& operator=(texture&& other);
+    ~texture();
 
-    void init();
-
-    void set_pixel(size_t x, size_t y, color c);
-    color get_pixel(size_t x, size_t y);
+    void init(size_t width, size_t height, const void* data);
+    void bind(size_t index) const;
 
     unsigned id() const;
 

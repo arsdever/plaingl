@@ -1,27 +1,41 @@
+#include <string>
+
 #include <glad/gl.h>
 
-#include <string>
 #include "texture.hpp"
 
-texture::texture(size_t width, size_t height)
-    : _width(width)
-    , _height(height)
+texture::texture() = default;
+
+texture::texture(texture&& other)
 {
+    _texture_id = other._texture_id;
+    other._texture_id = 0;
 }
 
-void texture::init()
+texture& texture::operator=(texture&& other)
 {
+    _texture_id = other._texture_id;
+    other._texture_id = 0;
+    return *this;
+}
+
+texture::~texture() { glDeleteTextures(1, &_texture_id); }
+
+void texture::init(size_t width, size_t height, const void* image_data)
+{
+    _width = width;
+    _height = height;
     glGenTextures(1, &_texture_id);
     glBindTexture(GL_TEXTURE_2D, _texture_id);
     glTexImage2D(GL_TEXTURE_2D,
                  0,
-                 GL_RGB32UI,
+                 GL_RGBA,
                  _width,
                  _height,
                  0,
-                 GL_RGB_INTEGER,
-                 GL_UNSIGNED_INT,
-                 nullptr);
+                 GL_RGBA,
+                 GL_UNSIGNED_BYTE,
+                 image_data);
     auto error = glGetError();
     if (error != GL_NO_ERROR)
     {
@@ -32,23 +46,10 @@ void texture::init()
     return;
 }
 
-void texture::set_pixel(size_t x, size_t y, color c)
+void texture::bind(size_t index) const
 {
-    if (x > _width || y > _height)
-    {
-        return;
-    }
-}
-
-color texture::get_pixel(size_t x, size_t y)
-{
-    // TODO: implement
-    if (x > _width || y > _height)
-    {
-        return {};
-    }
-
-    return {};
+    glActiveTexture(GL_TEXTURE0 + index);
+    glBindTexture(GL_TEXTURE_2D, _texture_id);
 }
 
 unsigned texture::id() const { return _texture_id; }
