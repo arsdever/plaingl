@@ -21,20 +21,19 @@ public:
     void init();
     void set_font(font font);
     void set_text(std::string text);
-    void set_shader(shader_program prog);
+    void set_shader(shader_program* prog);
     void set_color(color text_color);
     void set_position(position text_position);
     void set_scale(float scale);
     void render() const;
-    const shader_program& get_shader() const;
-    shader_program& get_shader();
+    shader_program* get_shader() const;
 
 private:
     font _font;
-    shader_program _shader;
+    shader_program* _shader;
     color _color;
     position _position;
-    float _scale;
+    float _scale = 1;
     std::string _text;
 
     unsigned tvao = 0;

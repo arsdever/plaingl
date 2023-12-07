@@ -22,7 +22,7 @@ void text::set_font(font font) { _font = font; }
 
 void text::set_text(std::string text) { _text = std::move(text); }
 
-void text::set_shader(shader_program prog) { _shader = std::move(prog); }
+void text::set_shader(shader_program* prog) { _shader = prog; }
 
 void text::set_color(color text_color) { _color = text_color; }
 
@@ -32,11 +32,9 @@ void text::set_scale(float scale) { _scale = scale; }
 
 void text::render() const
 {
-    _shader.use();
-    glUniform3f(glGetUniformLocation(_shader.id(), "textColor"),
-                _color.r,
-                _color.g,
-                _color.b);
+    _shader->use();
+    _shader->set_uniform("textColor",
+                         std::make_tuple(_color.r, _color.g, _color.b));
     glActiveTexture(GL_TEXTURE0);
     glBindVertexArray(tvao);
 
@@ -76,9 +74,7 @@ void text::render() const
     }
     glBindVertexArray(0);
     glBindTexture(GL_TEXTURE_2D, 0);
-    _shader.unuse();
+    _shader->unuse();
 }
 
-const shader_program& text::get_shader() const { return _shader; }
-
-shader_program& text::get_shader() { return _shader; }
+shader_program* text::get_shader() const { return _shader; }

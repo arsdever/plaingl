@@ -284,7 +284,7 @@ void gl_window::draw()
 
     glm::mat4 ortho = glm::ortho<float>(
         0.0f, static_cast<float>(width()), 0.0f, static_cast<float>(height()));
-    _fps_text.get_shader().set_uniform("projection", std::make_tuple(ortho));
+    _fps_text.get_shader()->set_uniform("projection", std::make_tuple(ortho));
 
     _fps_text.set_text(fmt::format(
         "{:#6.6} ms\nhandle {:#x}",
@@ -368,27 +368,22 @@ void gl_window::configure_fps_text()
     font fps_text_font;
     fps_text_font.load("font.ttf", 12);
 
-    shader_program prog;
-    prog.init();
-    prog.add_shader("text.vert");
-    prog.add_shader("text.frag");
-    prog.link();
-
-    prog.use();
     glm::mat4 projection = glm::ortho(
         0.0f, static_cast<float>(width()), 0.0f, static_cast<float>(height()));
-    unsigned int uniform_position =
-        glGetUniformLocation(prog.id(), "projection");
-    glUniformMatrix4fv(
-        uniform_position, 1, GL_FALSE, glm::value_ptr(projection));
-    prog.unuse();
-
     _fps_text.init();
     _fps_text.set_position({ 5.0f, height() - 15.0f });
     _fps_text.set_color({ 1.0f, 1.0f, 1.0f });
     _fps_text.set_font(std::move(fps_text_font));
     _fps_text.set_scale(1);
-    _fps_text.set_shader(std::move(prog));
+    if (!asset_manager::default_asset_manager()->get_shader("text"))
+    {
+        asset_manager::default_asset_manager()->load_asset("text.shader");
+    }
+    _fps_text.set_shader(
+        asset_manager::default_asset_manager()->get_shader("text"));
+    _fps_text.get_shader()->set_uniform("projection",
+                                        std::make_tuple(projection));
+
     on_window_resized += [ this ](auto... args) {
         _fps_text.set_position({ 5.0f, height() - 15.0f });
     };
