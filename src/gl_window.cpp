@@ -8,6 +8,7 @@
 
 #include "gl_window.hpp"
 
+#include "asset_manager.hpp"
 #include "camera.hpp"
 #include "game_object.hpp"
 #include "gizmo_object.hpp"
@@ -223,6 +224,7 @@ void gl_window::update()
     glViewport(0, 0, width(), height());
     _view_camera->set_active();
     draw();
+    on_custom_draw();
 
     glfwSwapBuffers(_window);
     glfwPollEvents();

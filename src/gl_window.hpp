@@ -41,6 +41,8 @@ public:
     event<void(game_object*)> on_mouse_clicked;
     event<void(gl_window*)> on_window_closed;
     event<void(gl_window*, size_t w, size_t h)> on_window_resized;
+    // TODO: handling should be improved
+    event<void()> on_custom_draw;
 
     void set_mouse_events_refiner(mouse_events_refiner* mouse_events_refiner_);
     mouse_events_refiner* mouse_events() const;
