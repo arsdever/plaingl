@@ -1,5 +1,6 @@
 #include "game_object.hpp"
 
+#include "gizmo_drawer.hpp"
 #include "shader.hpp"
 
 game_object::game_object() = default;
@@ -31,6 +32,19 @@ void game_object::update()
         _mesh->render();
     }
     shader_program::unuse();
+}
+
+void game_object::draw_gizmos()
+{
+    float size = 3;
+    gizmo_drawer::instance()->get_shader().set_uniform(
+        "model_matrix", std::make_tuple(_transformation.get_matrix()));
+    gizmo_drawer::instance()->draw_line(
+        { 0, 0, 0 }, { 0, 0, 1 }, { 0, 0, 1, 1 });
+    gizmo_drawer::instance()->draw_line(
+        { 0, 0, 0 }, { 0, 1, 0 }, { 0, 1, 0, 1 });
+    gizmo_drawer::instance()->draw_line(
+        { 0, 0, 0 }, { 1, 0, 0 }, { 1, 0, 0, 1 });
 }
 
 transform& game_object::get_transform() { return _transformation; }

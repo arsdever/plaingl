@@ -11,6 +11,7 @@
 #include "asset_manager.hpp"
 #include "camera.hpp"
 #include "game_object.hpp"
+#include "gizmo_drawer.hpp"
 #include "gizmo_object.hpp"
 #include "gl_error_handler.hpp"
 #include "logging.hpp"
@@ -215,16 +216,29 @@ void gl_window::draw()
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+    glm::mat4 ortho = glm::ortho<float>(
+        0.0f, static_cast<float>(width()), 0.0f, static_cast<float>(height()));
+
     if (scene::get_active_scene())
     {
+        glDisable(GL_DEPTH_TEST);
+        gizmo_drawer::instance()->get_shader().set_uniform(
+            "projection_matrix", std::make_tuple(ortho));
+        gizmo_drawer::instance()->get_shader().set_uniform(
+            "model_matrix", std::make_tuple(glm::mat4(1)));
         for (auto* obj : scene::get_active_scene()->gizmo_objects())
         {
             obj->update();
         }
+
+        gizmo_drawer::instance()->get_shader().set_uniform(
+            "projection_matrix", std::make_tuple(_view_camera->vp_matrix()));
+        for (auto* obj : scene::get_active_scene()->objects())
+        {
+            obj->draw_gizmos();
+        }
     }
 
-    glm::mat4 ortho = glm::ortho<float>(
-        0.0f, static_cast<float>(width()), 0.0f, static_cast<float>(height()));
     _fps_text.get_shader()->set_uniform("projection", std::make_tuple(ortho));
 
     _fps_text.set_text(fmt::format(

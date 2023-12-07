@@ -19,6 +19,7 @@ public:
     bool is_selected() const;
 
     void update();
+    void draw_gizmos();
 
     transform& get_transform();
     const transform& get_transform() const;
