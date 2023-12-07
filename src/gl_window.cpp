@@ -394,12 +394,24 @@ void gl_window::configure_object_index_mapping()
     glfwMakeContextCurrent(_window);
     glGenFramebuffers(1, &_object_index_fbo);
     glBindFramebuffer(GL_FRAMEBUFFER, _object_index_fbo);
-    _object_index_map = new texture(width(), height());
-    _object_index_map->init();
+    glGenTextures(1, &_object_index_map);
+    glBindTexture(GL_TEXTURE_2D, _object_index_map);
+    glTexImage2D(GL_TEXTURE_2D,
+                 0,
+                 GL_RGB32UI,
+                 _width,
+                 _height,
+                 0,
+                 GL_RGB_INTEGER,
+                 GL_UNSIGNED_INT,
+                 nullptr);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
     glFramebufferTexture2D(GL_FRAMEBUFFER,
                            GL_COLOR_ATTACHMENT1,
                            GL_TEXTURE_2D,
-                           _object_index_map->id(),
+                           _object_index_map,
                            0);
 
     glGenTextures(1, &_object_index_depth_map);
