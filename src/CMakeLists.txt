@@ -49,10 +49,12 @@ add_executable(
   asset_loaders/asset_loader.hpp
   asset_loaders/fbx.hpp
   asset_loaders/fbx.cpp
-  asset_loaders/png.hpp
-  asset_loaders/png.cpp
+  asset_loaders/jpg.hpp
+  asset_loaders/jpg.cpp
   asset_loaders/mat.hpp
   asset_loaders/mat.cpp
+  asset_loaders/png.hpp
+  asset_loaders/png.cpp
   asset_loaders/shader.hpp
   asset_loaders/shader.cpp)
 
@@ -66,5 +68,6 @@ target_link_libraries(
          PNG::PNG
          profiler::lib
          spdlog::spdlog
+         JPEG::JPEG
          freetype)
 target_include_directories(gl PRIVATE glad/include)

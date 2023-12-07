@@ -149,11 +149,11 @@ void texture_viewer::show_preview(image* img)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexImage2D(GL_TEXTURE_2D,
                  0,
-                 GL_RGBA,
+                 GL_RGB,
                  img->width(),
                  img->height(),
                  0,
-                 GL_RGBA,
+                 GL_RGB,
                  GL_UNSIGNED_BYTE,
                  img->get_data());
     auto error = glGetError();

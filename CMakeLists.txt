@@ -8,6 +8,7 @@ project(plaingl)
 include($ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake)
 find_package(ZLIB REQUIRED)
 find_package(PNG REQUIRED)
+find_package(JPEG REQUIRED)
 
 add_definitions(-w)
 add_subdirectory(thirdparty/glm)

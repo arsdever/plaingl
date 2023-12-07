@@ -116,7 +116,8 @@ int main(int argc, char** argv)
 
     auto* am = asset_manager::default_asset_manager();
     am->load_asset("sample.png");
-    texture_viewer::show_preview(am->textures()[ 0 ]);
+    am->load_asset("sample_jpg.jpg");
+    texture_viewer::show_preview(am->get_image("sample_jpg"));
 
     std::vector<gl_window*> windows;
     windows.push_back(new gl_window);

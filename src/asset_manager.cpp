@@ -1,10 +1,12 @@
 #include "asset_manager.hpp"
 
 #include "asset_loaders/fbx.hpp"
+#include "asset_loaders/jpg.hpp"
 #include "asset_loaders/mat.hpp"
 #include "asset_loaders/png.hpp"
 #include "asset_loaders/shader.hpp"
 #include "file.hpp"
+
 void asset_manager::load_asset(std::string_view path)
 {
     auto [ _, filename, extension ] = parse_path(path);
@@ -28,6 +30,13 @@ void asset_manager::load_asset(std::string_view path)
         mat_loader.load(path);
         auto [ it, success ] =
             _materials.try_emplace(filename, mat_loader.get_material());
+    }
+    else if (extension == ".jpg" || extension == ".jpeg")
+    {
+        asset_loader_JPG jpg_loader;
+        jpg_loader.load(path);
+        auto [ it, success ] =
+            _textures.try_emplace(filename, jpg_loader.get_image());
     }
     else if (extension == ".png")
     {
@@ -86,6 +95,11 @@ shader_program* asset_manager::get_shader(std::string_view name) const
 material* asset_manager::get_material(std::string_view name) const
 {
     return _materials.contains(name) ? _materials.find(name)->second : nullptr;
+}
+
+image* asset_manager::get_image(std::string_view name) const
+{
+    return _textures.contains(name) ? _textures.find(name)->second : nullptr;
 }
 
 asset_manager* asset_manager::default_asset_manager()

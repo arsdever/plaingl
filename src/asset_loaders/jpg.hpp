@@ -4,10 +4,10 @@
 
 class image;
 
-class asset_loader_PNG : public asset_loader
+class asset_loader_JPG : public asset_loader
 {
 public:
-    ~asset_loader_PNG() = default;
+    ~asset_loader_JPG() = default;
     void load(std::string_view path) override;
 
     image* get_image();
