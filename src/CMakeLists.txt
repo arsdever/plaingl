@@ -17,6 +17,8 @@ add_executable(
   gizmo_drawer.cpp
   gizmo_object.hpp
   gizmo_object.cpp
+  gl_error_handler.hpp
+  gl_error_handler.cpp
   gl_window.hpp
   gl_window.cpp
   image.hpp

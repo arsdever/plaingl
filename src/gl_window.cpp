@@ -12,6 +12,7 @@
 #include "camera.hpp"
 #include "game_object.hpp"
 #include "gizmo_object.hpp"
+#include "gl_error_handler.hpp"
 #include "logging.hpp"
 #include "scene.hpp"
 #include "shader.hpp"
@@ -19,67 +20,6 @@
 namespace
 {
 static inline logger log() { return get_logger("window"); }
-static inline void gl_debug_output(GLenum source,
-                                   GLenum type,
-                                   unsigned int id,
-                                   GLenum severity,
-                                   GLsizei length,
-                                   const char* message,
-                                   const void* userParam)
-{
-    // SOURCE: https://learnopengl.com/In-Practice/Debugging
-    // ignore non-significant error/warning codes
-    if (id == 131169 || id == 131185 || id == 131218 || id == 131204)
-        return;
-
-    log()->error("---------------");
-    log()->error("Debug message ({}): {}", id, message);
-
-    switch (source)
-    {
-    case GL_DEBUG_SOURCE_API: log()->error("Source: API"); break;
-    case GL_DEBUG_SOURCE_WINDOW_SYSTEM:
-        log()->error("Source: Window System");
-        break;
-    case GL_DEBUG_SOURCE_SHADER_COMPILER:
-        log()->error("Source: Shader Compiler");
-        break;
-    case GL_DEBUG_SOURCE_THIRD_PARTY:
-        log()->error("Source: Third Party");
-        break;
-    case GL_DEBUG_SOURCE_APPLICATION:
-        log()->error("Source: Application");
-        break;
-    case GL_DEBUG_SOURCE_OTHER: log()->error("Source: Other"); break;
-    }
-
-    switch (type)
-    {
-    case GL_DEBUG_TYPE_ERROR: log()->error("Type: Error"); break;
-    case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:
-        log()->error("Type: Deprecated Behaviour");
-        break;
-    case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:
-        log()->error("Type: Undefined Behaviour");
-        break;
-    case GL_DEBUG_TYPE_PORTABILITY: log()->error("Type: Portability"); break;
-    case GL_DEBUG_TYPE_PERFORMANCE: log()->error("Type: Performance"); break;
-    case GL_DEBUG_TYPE_MARKER: log()->error("Type: Marker"); break;
-    case GL_DEBUG_TYPE_PUSH_GROUP: log()->error("Type: Push Group"); break;
-    case GL_DEBUG_TYPE_POP_GROUP: log()->error("Type: Pop Group"); break;
-    case GL_DEBUG_TYPE_OTHER: log()->error("Type: Other"); break;
-    }
-
-    switch (severity)
-    {
-    case GL_DEBUG_SEVERITY_HIGH: log()->error("Severity: high"); break;
-    case GL_DEBUG_SEVERITY_MEDIUM: log()->error("Severity: medium"); break;
-    case GL_DEBUG_SEVERITY_LOW: log()->error("Severity: low"); break;
-    case GL_DEBUG_SEVERITY_NOTIFICATION:
-        log()->error("Severity: notification");
-        break;
-    }
-}
 } // namespace
 
 void gl_window::init()
@@ -171,7 +111,8 @@ void gl_window::init()
         // configure gl debug output
         glEnable(GL_DEBUG_OUTPUT);
         glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-        glDebugMessageCallback(gl_debug_output, nullptr);
+        glDebugMessageCallback(reinterpret_cast<GLDEBUGPROC>(gl_error_handler),
+                               nullptr);
         glDebugMessageControl(
             GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
     }
