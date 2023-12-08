@@ -19,6 +19,8 @@
 
 #include "asset_manager.hpp"
 #include "camera.hpp"
+#include "components/mesh_component.hpp"
+#include "components/mesh_renderer_component.hpp"
 #include "game_object.hpp"
 #include "gizmo_object.hpp"
 #include "gl_window.hpp"
@@ -216,9 +218,13 @@ int main(int argc, char** argv)
                     std::chrono::steady_clock::now().time_since_epoch())
                     .count();
             hslToRgb(fmod(timed_fraction, 5.0) / 5.0, 1.0f, .5f, c.r, c.g, c.b);
-            s.objects().back()->get_material()->set_property_value(
-                "materialColor",
-                std::tuple<float, float, float, float> { c.r, c.g, c.b, 1.0f });
+            s.objects()
+                .back()
+                ->get_component<mesh_renderer_component>()
+                ->get_material()
+                ->set_property_value("materialColor",
+                                     std::tuple<float, float, float, float> {
+                                         c.r, c.g, c.b, 1.0f });
 
             main_camera.get_transform().set_position(
                 { sin(timed_fraction) * 10, 0, cos(timed_fraction) * 10 });
@@ -279,15 +285,19 @@ void initScene()
     am->load_asset("sphere.fbx");
 
     game_object* object = new game_object;
-    object->set_mesh(am->meshes()[ 0 ]);
-    object->set_material(basic_mat);
+    object->create_component<mesh_component>();
+    object->create_component<mesh_renderer_component>();
+    object->get_component<mesh_component>()->set_mesh(am->meshes()[ 0 ]);
+    object->get_component<mesh_renderer_component>()->set_material(basic_mat);
     object->get_transform().set_position({ -0.5f, 0, 0 });
 
     s.add_object(object);
 
     object = new game_object;
-    object->set_mesh(am->meshes()[ 1 ]);
-    object->set_material(basic_mat);
+    object->create_component<mesh_component>();
+    object->create_component<mesh_renderer_component>();
+    object->get_component<mesh_component>()->set_mesh(am->meshes()[ 1 ]);
+    object->get_component<mesh_renderer_component>()->set_material(basic_mat);
     object->get_transform().set_position({ 0.5f, 0, 0 });
 
     s.add_object(object);

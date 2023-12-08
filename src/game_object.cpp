@@ -1,42 +1,41 @@
 #include "game_object.hpp"
 
+#include "component.hpp"
 #include "gizmo_drawer.hpp"
 #include "shader.hpp"
 
 game_object::game_object() = default;
 
-void game_object::set_mesh(mesh* m) { _mesh = m; }
-
-void game_object::set_material(material* mat) { _material = mat; }
-
-mesh* game_object::get_mesh() { return _mesh; }
-
-material* game_object::get_material() { return _material; }
-
 void game_object::set_selected(bool selected) { _selected = selected; }
 
 bool game_object::is_selected() const { return _selected; }
 
+void game_object::init()
+{
+    for (auto& c : _components)
+    {
+        c->init();
+    }
+}
+
 void game_object::update()
 {
-    if (_material)
+    for (auto& c : _components)
     {
-        _material->set_property_value("model_matrix",
-                                      _transformation.get_matrix());
-        _material->set_property_value("is_selected",
-                                      static_cast<int>(_selected));
-        _material->activate();
+        c->update();
     }
-    if (_mesh)
+}
+
+void game_object::deinit()
+{
+    for (auto& c : _components)
     {
-        _mesh->render();
+        c->deinit();
     }
-    shader_program::unuse();
 }
 
 void game_object::draw_gizmos()
 {
-    float size = 3;
     gizmo_drawer::instance()->get_shader().set_uniform(
         "model_matrix", std::make_tuple(_transformation.get_matrix()));
     gizmo_drawer::instance()->draw_line(
@@ -50,3 +49,16 @@ void game_object::draw_gizmos()
 transform& game_object::get_transform() { return _transformation; }
 
 const transform& game_object::get_transform() const { return _transformation; }
+
+component* game_object::get_component(std::string_view type_id)
+{
+    for (auto& c : _components)
+    {
+        if (c->type_id() == type_id)
+        {
+            return c;
+        }
+    }
+
+    return nullptr;
+}

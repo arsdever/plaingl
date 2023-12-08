@@ -98,3 +98,5 @@ void material::activate() const
     }
     _shader_program->use();
 }
+
+void material::deactivate() const { shader_program::unuse(); }

@@ -4,6 +4,8 @@ add_executable(
   asset_manager.cpp
   camera.hpp
   camera.cpp
+  component.hpp
+  component.cpp
   color.hpp
   logging.hpp
   event.hpp
@@ -58,7 +60,11 @@ add_executable(
   asset_loaders/png.hpp
   asset_loaders/png.cpp
   asset_loaders/shader.hpp
-  asset_loaders/shader.cpp)
+  asset_loaders/shader.cpp
+  components/mesh_component.hpp
+  components/mesh_component.cpp
+  components/mesh_renderer_component.hpp
+  components/mesh_renderer_component.cpp)
 
 target_include_directories(gl PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 

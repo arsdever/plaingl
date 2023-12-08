@@ -44,6 +44,7 @@ public:
     }
 
     void activate() const;
+    void deactivate() const;
 
 private:
     void set_property_value(std::string_view name, std::any value);

@@ -10,6 +10,7 @@
 
 #include "asset_manager.hpp"
 #include "camera.hpp"
+#include "components/mesh_component.hpp"
 #include "game_object.hpp"
 #include "gizmo_drawer.hpp"
 #include "gizmo_object.hpp"
@@ -197,7 +198,7 @@ void gl_window::draw()
                                GL_FALSE,
                                glm::value_ptr(mvp));
             glUniform1ui(_object_index_map_id_location, ++id);
-            object->get_mesh()->render();
+            object->get_component<mesh_component>()->get_mesh()->render();
         }
         shader_program::unuse();
     }
@@ -424,7 +425,7 @@ game_object* gl_window::find_game_object_at_position(double x, double y)
         glUniformMatrix4fv(
             _object_index_map_mvp_location, 1, GL_FALSE, glm::value_ptr(mvp));
         glUniform1ui(_object_index_map_id_location, ++id);
-        object->get_mesh()->render();
+        object->get_component<mesh_component>()->get_mesh()->render();
     }
     shader_program::unuse();
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
