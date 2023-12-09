@@ -31,10 +31,10 @@ void asset_loader_MAT::load(std::string_view path)
 
     if (sh = am->get_shader(shader_name); !sh)
     {
-        log()->error(R"(Shader file "{}" required by material "{}" could not "
-                     "be found)",
-                     shader_name + ".shader",
-                     path);
+        log()->error(
+            R"(Shader file " {} " required by material " {} " could not be found)",
+            shader_name + ".shader",
+            path);
         return;
     }
 
