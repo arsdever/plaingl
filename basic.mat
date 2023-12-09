@@ -1,0 +1,25 @@
+{
+	"shader": "base",
+	"properties": [
+		{
+			"name": "ambient_color",
+			"type": "vec4"
+		},
+		{
+			"name": "ambient_texture",
+			"type": "image"
+		},
+		{
+			"name": "normal_texture",
+			"type": "image"
+		},
+		{
+			"name": "model_matrix",
+			"type": "mat44"
+		},
+		{
+			"name": "vp_matrix",
+			"type": "mat44"
+		}
+	]
+}

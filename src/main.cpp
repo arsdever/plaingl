@@ -28,11 +28,13 @@
 #include "game_object.hpp"
 #include "gizmo_object.hpp"
 #include "gl_window.hpp"
+#include "image.hpp"
 #include "logging.hpp"
 #include "material.hpp"
 #include "mouse_events_refiner.hpp"
 #include "scene.hpp"
 #include "shader.hpp"
+#include "texture.hpp"
 #include "texture_viewer.hpp"
 #include "thread.hpp"
 
@@ -47,6 +49,8 @@ camera main_camera;
 camera second_camera;
 mouse_events_refiner mouse_events;
 game_object* _fps_text_object;
+texture* txt;
+texture* norm_txt;
 } // namespace
 
 void process_console();
@@ -158,24 +162,24 @@ int main(int argc, char** argv)
             auto p = prof::profile_frame(__FUNCTION__);
             auto window = windows[ i ];
             window->set_active();
-            color c { 0, 0, 0 };
+            // color c { 0, 0, 0 };
             double timed_fraction =
                 std::chrono::duration_cast<std::chrono::duration<double>>(
                     std::chrono::steady_clock::now().time_since_epoch())
                     .count();
-            hslToRgb(fmod(timed_fraction, 5.0) / 5.0, 1.0f, .5f, c.r, c.g, c.b);
-            for (auto& obj : s.objects())
-            {
-                if (obj->get_component<mesh_renderer_component>())
-                {
-                    obj->get_component<mesh_renderer_component>()
-                        ->get_material()
-                        ->set_property_value(
-                            "materialColor",
-                            std::tuple<float, float, float, float> {
-                                c.r, c.g, c.b, 1.0f });
-                }
-            }
+            // hslToRgb(fmod(timed_fraction, 5.0) / 5.0, 1.0f, .5f, c.r, c.g,
+            // c.b); for (auto& obj : s.objects())
+            // {
+            //     if (obj->get_component<mesh_renderer_component>())
+            //     {
+            //         obj->get_component<mesh_renderer_component>()
+            //             ->get_material()
+            //             ->set_property_value(
+            //                 "materialColor",
+            //                 std::tuple<float, float, float, float> {
+            //                     c.r, c.g, c.b, 1.0f });
+            //     }
+            // }
 
             main_camera.get_transform().set_position(
                 { sin(timed_fraction) * 10, 0, cos(timed_fraction) * 10 });
@@ -223,14 +227,6 @@ void initScene()
     prog->add_shader("shader.frag");
     prog->link();
 
-    material* basic_mat = new material;
-    basic_mat->set_shader_program(prog);
-    basic_mat->declare_property(
-        "materialColor", material_property::data_type::type_float_vector_4);
-    basic_mat->declare_property("is_selected",
-                                material_property::data_type::type_integer);
-    basic_mat->declare_property("model_matrix",
-                                material_property::data_type::unknown);
     // for (const auto& property : basic_mat->properties())
     // {
     //     log()->info("Material properties:\n\tname: {}\n\tindex: {}\n\tsize: "
@@ -240,12 +236,24 @@ void initScene()
     //                 property._size,
     //                 property._type);
     // }
-    basic_mat->set_property_value("position", 1);
 
     auto* am = asset_manager::default_asset_manager();
     am->load_asset("cube.fbx");
     am->load_asset("sphere.fbx");
     am->load_asset("text.mat");
+    am->load_asset("basic.mat");
+    am->load_asset("sample.png");
+    am->load_asset("brick.png");
+
+    material* basic_mat = am->get_material("basic");
+    txt = new texture();
+    image* img = am->get_image("sample");
+    txt->init(img->get_width(), img->get_height(), img->get_data());
+    norm_txt = new texture();
+    img = am->get_image("brick");
+    norm_txt->init(img->get_width(), img->get_height(), img->get_data());
+    basic_mat->set_property_value("ambient_texture", txt);
+    basic_mat->set_property_value("normal_texture", norm_txt);
 
     game_object* object = new game_object;
     object->create_component<mesh_component>();
@@ -272,8 +280,7 @@ void initScene()
     _fps_text_object->get_component<text_renderer_component>()->set_font(&ttf);
     _fps_text_object->get_component<text_renderer_component>()->set_material(
         am->get_material("text"));
-    am->get_material("text")->set_property_value(
-        "textColor", 1.0f, 1.0f, 1.0f);
+    am->get_material("text")->set_property_value("textColor", 1.0f, 1.0f, 1.0f);
     _fps_text_object->get_transform().set_position({ 0.5f, 2.0f, 0 });
 
     s.add_object(_fps_text_object);
