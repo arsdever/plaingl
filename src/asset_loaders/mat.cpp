@@ -41,10 +41,18 @@ void asset_loader_MAT::load(std::string_view path)
     _material = new material;
     _material->set_shader_program(sh);
 
-    for (auto& prop_name : mat_struct[ "properties" ])
+    for (auto& prop : mat_struct[ "properties" ])
     {
-        _material->declare_property(prop_name.get<std::string>(),
-                                    material_property::data_type::unknown);
+        auto prop_type = material_property::data_type::unknown;
+        auto prop_name = prop[ "name" ].get<std::string>();
+
+        if (prop.contains("type") &&
+            prop[ "type" ].get<std::string>() == "image")
+        {
+            prop_type = material_property::data_type::type_image;
+        }
+
+        _material->declare_property(prop_name, prop_type);
     }
 }
 
