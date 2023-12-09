@@ -1,5 +1,4 @@
 {
-	"cmake.configureArgs": ["-DGLFW_BUILD_EXAMPLES=ON"],
 	"cmake.debugConfig": {"args": ["SPDLOG_LEVEL=trace"]},
 	"sonarlint.pathToCompileCommands": "${workspaceFolder}\\build\\compile_commands.json",
 	"files.associations": {
