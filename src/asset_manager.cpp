@@ -6,45 +6,68 @@
 #include "asset_loaders/png.hpp"
 #include "asset_loaders/shader.hpp"
 #include "file.hpp"
+#include "logging.hpp"
+
+namespace
+{
+static logger log() { return get_logger("asset_manager"); }
+} // namespace
 
 void asset_manager::load_asset(std::string_view path)
 {
     auto [ _, filename, extension ] = parse_path(path);
+#ifdef GAMIFY_SUPPORTS_FBX
     if (extension == ".fbx")
     {
         asset_loader_FBX fbx_loader;
         fbx_loader.load(path);
         auto [ it, success ] =
             _meshes.try_emplace(filename, fbx_loader.get_meshes());
+        return;
     }
-    else if (extension == ".shader")
+#endif
+#ifdef GAMIFY_SUPPORTS_SHADER
+    if (extension == ".shader")
     {
         asset_loader_SHADER shader_loader;
         shader_loader.load(path);
         auto [ it, success ] =
             _shaders.try_emplace(filename, shader_loader.get_shader_program());
+        return;
     }
-    else if (extension == ".mat")
+#endif
+#ifdef GAMIFY_SUPPORTS_MAT
+    if (extension == ".mat")
     {
         asset_loader_MAT mat_loader;
         mat_loader.load(path);
         auto [ it, success ] =
             _materials.try_emplace(filename, mat_loader.get_material());
+        return;
     }
-    else if (extension == ".jpg" || extension == ".jpeg")
+#endif
+#ifdef GAMIFY_SUPPORTS_JPG
+    if (extension == ".jpg" || extension == ".jpeg")
     {
         asset_loader_JPG jpg_loader;
         jpg_loader.load(path);
         auto [ it, success ] =
             _textures.try_emplace(filename, jpg_loader.get_image());
+        return;
     }
-    else if (extension == ".png")
+#endif
+#ifdef GAMIFY_SUPPORTS_PNG
+    if (extension == ".png")
     {
         asset_loader_PNG png_loader;
         png_loader.load(path);
         auto [ it, success ] =
             _textures.try_emplace(filename, png_loader.get_image());
+        return;
     }
+#endif
+
+    log()->error("Asset manager doesn't support {} format", extension);
 }
 
 const std::vector<mesh*> asset_manager::meshes() const

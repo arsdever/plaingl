@@ -49,16 +49,6 @@ add_executable(
   utils.hpp
   glad/src/gl.c
   asset_loaders/asset_loader.hpp
-  asset_loaders/fbx.hpp
-  asset_loaders/fbx.cpp
-  asset_loaders/jpg.hpp
-  asset_loaders/jpg.cpp
-  asset_loaders/mat.hpp
-  asset_loaders/mat.cpp
-  asset_loaders/png.hpp
-  asset_loaders/png.cpp
-  asset_loaders/shader.hpp
-  asset_loaders/shader.cpp
   components/mesh_component.hpp
   components/mesh_component.cpp
   components/mesh_renderer_component.hpp
@@ -68,16 +58,30 @@ add_executable(
   components/text_renderer_component.hpp
   components/text_renderer_component.cpp)
 
-target_include_directories(gl PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+add_library(${PROJECT}_includes INTERFACE)
+target_include_directories(${PROJECT}_includes
+                           INTERFACE ${CMAKE_CURRENT_SOURCE_DIR} glad/include)
 
-target_link_libraries(
-  gl
-  PUBLIC glfw
-         glm
-         assimp::assimp
-         PNG::PNG
-         profiler::lib
-         spdlog::spdlog
-         JPEG::JPEG
-         freetype)
-target_include_directories(gl PRIVATE glad/include)
+link_libraries(spdlog::spdlog)
+
+target_link_libraries(gl PUBLIC ${PROJECT}_includes glfw glm profiler::lib
+                                freetype)
+
+macro(enable_asset_type)
+  if(NOT ${PROJECT}_asset_loaders)
+    add_custom_target(${PROJECT}_asset_loaders)
+  endif()
+  foreach(asset_type ${ARGN})
+    string(TOLOWER ${asset_type} asset_type_lower)
+    string(TOUPPER ${asset_type} asset_type_upper)
+    message(STATUS "Enabling ${asset_type_upper} support")
+    set(${PROJECT}_SUPPORT_${asset_type_upper} ON)
+    target_link_libraries(gl PRIVATE ${PROJECT}::asset::${asset_type_lower})
+    add_dependencies(${PROJECT}_asset_loaders
+                     ${PROJECT}::asset::${asset_type_lower})
+  endforeach()
+endmacro()
+
+enable_asset_type(fbx jpg png mat shader)
+
+add_subdirectory(asset_loaders)
