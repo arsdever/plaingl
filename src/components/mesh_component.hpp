@@ -2,6 +2,8 @@
 
 #include "component.hpp"
 
+class mesh;
+
 class mesh_component : public component
 {
 public:

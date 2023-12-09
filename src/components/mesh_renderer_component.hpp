@@ -2,6 +2,8 @@
 
 #include "component.hpp"
 
+class material;
+
 class mesh_renderer_component : public component
 {
 public:

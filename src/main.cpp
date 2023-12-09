@@ -19,18 +19,20 @@
 
 #include "asset_manager.hpp"
 #include "camera.hpp"
+#include "color.hpp"
 #include "components/mesh_component.hpp"
 #include "components/mesh_renderer_component.hpp"
+#include "components/text_component.hpp"
+#include "components/text_renderer_component.hpp"
+#include "font.hpp"
 #include "game_object.hpp"
 #include "gizmo_object.hpp"
 #include "gl_window.hpp"
-#include "image.hpp"
 #include "logging.hpp"
 #include "material.hpp"
 #include "mouse_events_refiner.hpp"
 #include "scene.hpp"
 #include "shader.hpp"
-#include "text.hpp"
 #include "texture_viewer.hpp"
 #include "thread.hpp"
 
@@ -38,69 +40,16 @@ namespace
 {
 static logger log() { return get_logger("main"); }
 unsigned last_fps;
-text console_text;
+font ttf;
 scene s;
-std::string console_text_content;
 std::unordered_set<int> pressed_keys;
 camera main_camera;
 camera second_camera;
 mouse_events_refiner mouse_events;
+game_object* _fps_text_object;
 } // namespace
 
 void process_console();
-void on_keypress(
-    GLFWwindow* window, int key, int scancode, int action, int mods)
-{
-    if (action != GLFW_PRESS && action != GLFW_REPEAT)
-    {
-        return;
-    }
-
-    switch (key)
-    {
-    case GLFW_KEY_ENTER:
-    {
-        process_console();
-        break;
-    }
-    case GLFW_KEY_ESCAPE:
-    {
-        console_text_content.clear();
-        break;
-    }
-    case GLFW_KEY_BACKSPACE:
-    {
-        if (!console_text_content.empty())
-            console_text_content.pop_back();
-        break;
-    }
-    default:
-    {
-        if (key >= GLFW_KEY_SPACE && key <= GLFW_KEY_GRAVE_ACCENT)
-        {
-            if (isalnum(key))
-            {
-                if (mods & GLFW_MOD_SHIFT)
-                {
-                    console_text_content.push_back(toupper(key));
-                }
-                else
-                {
-                    console_text_content.push_back(tolower(key));
-                }
-            }
-            else
-            {
-                console_text_content.push_back(key);
-            }
-        }
-    }
-    }
-
-    console_text.set_text(console_text_content);
-}
-
-std::vector<std::string_view> tokenize(std::string_view str);
 
 void initScene();
 
@@ -187,9 +136,6 @@ int main(int argc, char** argv)
     // windows.front()->toggle_indexing();
     // windows.back()->toggle_indexing();
 
-    console_text_content = "Hello world";
-    console_text.set_text(console_text_content);
-
     // fps counter thread
     logger fps_counter_log = get_logger("fps_counter");
     std::atomic_bool program_exits = false;
@@ -218,16 +164,32 @@ int main(int argc, char** argv)
                     std::chrono::steady_clock::now().time_since_epoch())
                     .count();
             hslToRgb(fmod(timed_fraction, 5.0) / 5.0, 1.0f, .5f, c.r, c.g, c.b);
-            s.objects()
-                .back()
-                ->get_component<mesh_renderer_component>()
-                ->get_material()
-                ->set_property_value("materialColor",
-                                     std::tuple<float, float, float, float> {
-                                         c.r, c.g, c.b, 1.0f });
+            for (auto& obj : s.objects())
+            {
+                if (obj->get_component<mesh_renderer_component>())
+                {
+                    obj->get_component<mesh_renderer_component>()
+                        ->get_material()
+                        ->set_property_value(
+                            "materialColor",
+                            std::tuple<float, float, float, float> {
+                                c.r, c.g, c.b, 1.0f });
+                }
+            }
 
             main_camera.get_transform().set_position(
                 { sin(timed_fraction) * 10, 0, cos(timed_fraction) * 10 });
+
+            _fps_text_object->get_component<text_component>()->set_text(
+                fmt::format(
+                    "{:#6.6} ms\nhandle {:#x}",
+                    // std::chrono::duration_cast<std::chrono::duration<double>>(
+                    //     diff)
+                    //         .count() *
+                    //     1000,
+                    16.146,
+                    reinterpret_cast<unsigned long long>(window)));
+
             window->update();
         }
     }
@@ -283,6 +245,7 @@ void initScene()
     auto* am = asset_manager::default_asset_manager();
     am->load_asset("cube.fbx");
     am->load_asset("sphere.fbx");
+    am->load_asset("text.mat");
 
     game_object* object = new game_object;
     object->create_component<mesh_component>();
@@ -302,44 +265,21 @@ void initScene()
 
     s.add_object(object);
 
+    ttf.load("font.ttf", 12);
+    _fps_text_object = new game_object;
+    _fps_text_object->create_component<text_component>();
+    _fps_text_object->create_component<text_renderer_component>();
+    _fps_text_object->get_component<text_renderer_component>()->set_font(&ttf);
+    _fps_text_object->get_component<text_renderer_component>()->set_material(
+        am->get_material("text"));
+    am->get_material("text")->set_property_value(
+        "textColor", 1.0f, 1.0f, 1.0f);
+    _fps_text_object->get_transform().set_position({ 0.5f, 2.0f, 0 });
+
+    s.add_object(_fps_text_object);
+
     s.add_gizmo_object(new gizmo_object);
 
     main_camera.get_transform().set_position({ 10, 10, 10 });
     second_camera.get_transform().set_position({ 0, -10, 10 });
-}
-
-std::vector<std::string_view> tokenize(std::string_view str)
-{
-    std::vector<std::string_view> result;
-    const char* iter = str.data();
-    size_t length = 0;
-    for (int i = 0; i < str.size(); ++i)
-    {
-        if (str[ i ] == ' ')
-        {
-            result.push_back({ iter, length });
-            iter += length + 1;
-            length = 0;
-            continue;
-        }
-        length++;
-    }
-
-    result.push_back({ iter, length });
-    return result;
-}
-
-void process_console()
-{
-    auto tokens = tokenize(console_text_content);
-    if (tokens[ 0 ] == "set" && tokens[ 1 ] == "position")
-    {
-        float x, y;
-        std::from_chars(
-            tokens[ 2 ].data(), tokens[ 2 ].data() + tokens[ 2 ].size(), x);
-        std::from_chars(
-            tokens[ 3 ].data(), tokens[ 3 ].data() + tokens[ 3 ].size(), y);
-
-        console_text.set_position({ x, y });
-    }
 }

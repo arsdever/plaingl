@@ -1,7 +1,8 @@
 #pragma once
 
-#include "material.hpp"
-#include "mesh.hpp"
+#include <string_view>
+#include <vector>
+
 #include "transform.hpp"
 
 class component;

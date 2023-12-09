@@ -6,8 +6,7 @@
 
 #include "event.hpp"
 #include "mouse_events_refiner.hpp"
-#include "text.hpp"
-#include "texture.hpp"
+#include "shader.hpp"
 
 struct GLFWwindow;
 class camera;
@@ -51,7 +50,6 @@ public:
 
 private:
     void setup_mouse_callbacks();
-    void configure_fps_text();
     void configure_object_index_mapping();
 
 private:
@@ -59,8 +57,6 @@ private:
     state _state = state::uninitialized;
     size_t _width = 800;
     size_t _height = 600;
-    std::chrono::steady_clock::time_point _last_frame_time;
-    text _fps_text;
     bool _is_main_window = false;
     camera* _view_camera = nullptr;
     mouse_events_refiner* _mouse_events;

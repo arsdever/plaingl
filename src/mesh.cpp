@@ -65,6 +65,9 @@ void mesh::init()
                  _indices.size() * sizeof(int),
                  _indices.data(),
                  GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
 void mesh::set_vertices(std::vector<vertex> positions)

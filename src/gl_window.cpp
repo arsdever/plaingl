@@ -16,6 +16,8 @@
 #include "gizmo_object.hpp"
 #include "gl_error_handler.hpp"
 #include "logging.hpp"
+#include "material.hpp"
+#include "mesh.hpp"
 #include "scene.hpp"
 #include "shader.hpp"
 
@@ -119,12 +121,19 @@ void gl_window::init()
             GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
     }
 
-    configure_fps_text();
     configure_object_index_mapping();
 
-    _last_frame_time = std::chrono::steady_clock::now();
-
     _state = state::initialized;
+
+// TODO: may not be the best place for object initialization
+// Probably should be done in some sort of scene loading procedure
+    if (scene::get_active_scene())
+    {
+        for (auto* obj : scene::get_active_scene()->objects())
+        {
+            obj->init();
+        }
+    }
 }
 
 void gl_window::set_active() { glfwMakeContextCurrent(_window); }
@@ -176,10 +185,6 @@ void gl_window::update()
 void gl_window::draw()
 {
     auto p = prof::profile(__FUNCTION__);
-    auto now = std::chrono::steady_clock::now();
-    auto diff = now - _last_frame_time;
-    _last_frame_time = std::move(now);
-
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
@@ -240,15 +245,6 @@ void gl_window::draw()
         }
     }
 
-    _fps_text.get_shader()->set_uniform("projection", std::make_tuple(ortho));
-
-    _fps_text.set_text(fmt::format(
-        "{:#6.6} ms\nhandle {:#x}",
-        std::chrono::duration_cast<std::chrono::duration<double>>(diff)
-                .count() *
-            1000,
-        reinterpret_cast<unsigned long long>(this)));
-    _fps_text.render();
     glDisable(GL_BLEND);
 }
 
@@ -317,32 +313,6 @@ void gl_window::setup_mouse_callbacks()
         auto* refiner = _this->_mouse_events;
         refiner->drop_function(window, path_count, paths);
     });
-}
-
-void gl_window::configure_fps_text()
-{
-    font fps_text_font;
-    fps_text_font.load("font.ttf", 12);
-
-    glm::mat4 projection = glm::ortho(
-        0.0f, static_cast<float>(width()), 0.0f, static_cast<float>(height()));
-    _fps_text.init();
-    _fps_text.set_position({ 5.0f, height() - 15.0f });
-    _fps_text.set_color({ 1.0f, 1.0f, 1.0f });
-    _fps_text.set_font(std::move(fps_text_font));
-    _fps_text.set_scale(1);
-    if (!asset_manager::default_asset_manager()->get_shader("text"))
-    {
-        asset_manager::default_asset_manager()->load_asset("text.shader");
-    }
-    _fps_text.set_shader(
-        asset_manager::default_asset_manager()->get_shader("text"));
-    _fps_text.get_shader()->set_uniform("projection",
-                                        std::make_tuple(projection));
-
-    on_window_resized += [ this ](auto... args) {
-        _fps_text.set_position({ 5.0f, height() - 15.0f });
-    };
 }
 
 void gl_window::configure_object_index_mapping()
@@ -425,7 +395,10 @@ game_object* gl_window::find_game_object_at_position(double x, double y)
         glUniformMatrix4fv(
             _object_index_map_mvp_location, 1, GL_FALSE, glm::value_ptr(mvp));
         glUniform1ui(_object_index_map_id_location, ++id);
-        object->get_component<mesh_component>()->get_mesh()->render();
+        if (object->get_component<mesh_component>())
+        {
+            object->get_component<mesh_component>()->get_mesh()->render();
+        }
     }
     shader_program::unuse();
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);

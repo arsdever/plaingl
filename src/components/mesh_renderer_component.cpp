@@ -2,6 +2,8 @@
 
 #include "components/mesh_component.hpp"
 #include "logging.hpp"
+#include "material.hpp"
+#include "mesh.hpp"
 
 namespace
 {
