@@ -1,5 +1,5 @@
 add_executable(
-  gl
+  ${PROJECT}
   asset_manager.hpp
   asset_manager.cpp
   camera.hpp
@@ -64,7 +64,7 @@ target_include_directories(${PROJECT}_includes
 
 link_libraries(spdlog::spdlog)
 
-target_link_libraries(gl PUBLIC ${PROJECT}_includes glfw glm profiler::lib
+target_link_libraries(${PROJECT} PUBLIC ${PROJECT}_includes glfw glm profiler::lib
                                 freetype)
 
 macro(enable_asset_type)
@@ -76,7 +76,7 @@ macro(enable_asset_type)
     string(TOUPPER ${asset_type} asset_type_upper)
     message(STATUS "Enabling ${asset_type_upper} support")
     set(${PROJECT}_SUPPORT_${asset_type_upper} ON)
-    target_link_libraries(gl PRIVATE ${PROJECT}::asset::${asset_type_lower})
+    target_link_libraries(${PROJECT} PRIVATE ${PROJECT}::asset::${asset_type_lower})
     add_dependencies(${PROJECT}_asset_loaders
                      ${PROJECT}::asset::${asset_type_lower})
   endforeach()
