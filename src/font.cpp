@@ -50,6 +50,7 @@ void font::load(std::string path, float size)
             log()->error("FREETYTPE: Failed to load Glyph");
             continue;
         }
+        // TODO: use our texture class when it supports custom color types
         // generate texture
         unsigned int texture;
         glGenTextures(1, &texture);

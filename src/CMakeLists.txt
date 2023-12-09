@@ -37,8 +37,6 @@ add_executable(
   shader.hpp
   shader.cpp
   vertex.hpp
-  text.hpp
-  text.cpp
   texture_viewer.hpp
   texture_viewer.cpp
   texture.hpp
@@ -64,7 +62,11 @@ add_executable(
   components/mesh_component.hpp
   components/mesh_component.cpp
   components/mesh_renderer_component.hpp
-  components/mesh_renderer_component.cpp)
+  components/mesh_renderer_component.cpp
+  components/text_component.hpp
+  components/text_component.cpp
+  components/text_renderer_component.hpp
+  components/text_renderer_component.cpp)
 
 target_include_directories(gl PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
