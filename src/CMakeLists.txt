@@ -1,5 +1,5 @@
-add_executable(
-  ${PROJECT}
+add_library(
+  ${PROJECT}_lib STATIC
   asset_manager.hpp
   asset_manager.cpp
   camera.hpp
@@ -25,7 +25,6 @@ add_executable(
   gl_window.cpp
   image.hpp
   image.cpp
-  main.cpp
   material.hpp
   material.cpp
   mesh.hpp
@@ -58,14 +57,14 @@ add_executable(
   components/text_renderer_component.hpp
   components/text_renderer_component.cpp)
 
+target_link_libraries(${PROJECT}_lib PUBLIC ${PROJECT}_includes glfw glm
+                                             profiler::lib freetype)
+
 add_library(${PROJECT}_includes INTERFACE)
 target_include_directories(${PROJECT}_includes
                            INTERFACE ${CMAKE_CURRENT_SOURCE_DIR} glad/include)
 
 link_libraries(spdlog::spdlog)
-
-target_link_libraries(${PROJECT} PUBLIC ${PROJECT}_includes glfw glm profiler::lib
-                                freetype)
 
 macro(enable_asset_type)
   if(NOT ${PROJECT}_asset_loaders)
@@ -76,7 +75,8 @@ macro(enable_asset_type)
     string(TOUPPER ${asset_type} asset_type_upper)
     message(STATUS "Enabling ${asset_type_upper} support")
     set(${PROJECT}_SUPPORT_${asset_type_upper} ON)
-    target_link_libraries(${PROJECT} PRIVATE ${PROJECT}::asset::${asset_type_lower})
+    target_link_libraries(${PROJECT}_lib
+                          PRIVATE ${PROJECT}::asset::${asset_type_lower})
     add_dependencies(${PROJECT}_asset_loaders
                      ${PROJECT}::asset::${asset_type_lower})
   endforeach()
@@ -85,3 +85,8 @@ endmacro()
 enable_asset_type(fbx jpg png mat shader)
 
 add_subdirectory(asset_loaders)
+
+add_library(${PROJECT}::lib ALIAS ${PROJECT}_lib)
+
+add_executable(${PROJECT} main.cpp)
+target_link_libraries(${PROJECT} PUBLIC ${PROJECT}::lib)
