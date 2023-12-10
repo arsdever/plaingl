@@ -222,34 +222,40 @@ void gl_window::draw()
         }
     }
 
-    // draw fps counter
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    glm::mat4 ortho = glm::ortho<float>(
-        0.0f, static_cast<float>(width()), 0.0f, static_cast<float>(height()));
-
-    if (scene::get_active_scene())
+    if (_should_draw_gizmos)
     {
-        glDisable(GL_DEPTH_TEST);
-        gizmo_drawer::instance()->get_shader().set_uniform(
-            "projection_matrix", std::make_tuple(ortho));
-        gizmo_drawer::instance()->get_shader().set_uniform(
-            "model_matrix", std::make_tuple(glm::mat4(1)));
-        for (auto* obj : scene::get_active_scene()->gizmo_objects())
+        // draw gizmos
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+        glm::mat4 ortho = glm::ortho<float>(0.0f,
+                                            static_cast<float>(width()),
+                                            0.0f,
+                                            static_cast<float>(height()));
+
+        if (scene::get_active_scene())
         {
-            obj->update();
+            glDisable(GL_DEPTH_TEST);
+            gizmo_drawer::instance()->get_shader().set_uniform(
+                "projection_matrix", std::make_tuple(ortho));
+            gizmo_drawer::instance()->get_shader().set_uniform(
+                "model_matrix", std::make_tuple(glm::mat4(1)));
+            for (auto* obj : scene::get_active_scene()->gizmo_objects())
+            {
+                obj->update();
+            }
+
+            gizmo_drawer::instance()->get_shader().set_uniform(
+                "projection_matrix",
+                std::make_tuple(_view_camera->vp_matrix()));
+            for (auto* obj : scene::get_active_scene()->objects())
+            {
+                obj->draw_gizmos();
+            }
         }
 
-        gizmo_drawer::instance()->get_shader().set_uniform(
-            "projection_matrix", std::make_tuple(_view_camera->vp_matrix()));
-        for (auto* obj : scene::get_active_scene()->objects())
-        {
-            obj->draw_gizmos();
-        }
+        glDisable(GL_BLEND);
     }
-
-    glDisable(GL_BLEND);
 }
 
 void gl_window::set_camera(camera* view_camera)
@@ -259,6 +265,8 @@ void gl_window::set_camera(camera* view_camera)
 }
 
 void gl_window::toggle_indexing() { _index_rendering = !_index_rendering; }
+
+void gl_window::set_draw_gizmos(bool value) { _should_draw_gizmos = value; }
 
 void gl_window::set_mouse_events_refiner(
     mouse_events_refiner* mouse_events_refiner_)

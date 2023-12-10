@@ -36,6 +36,7 @@ public:
     void set_camera(camera* view_camera);
 
     void toggle_indexing();
+    void set_draw_gizmos(bool value = true);
 
     event<void(game_object*)> on_mouse_clicked;
     event<void(gl_window*)> on_window_closed;
@@ -62,6 +63,7 @@ private:
     bool _is_main_window = false;
     camera* _view_camera = nullptr;
     mouse_events_refiner* _mouse_events;
+    bool _should_draw_gizmos = false;
 
     unsigned _object_index_map;
     unsigned _object_index_depth_map;
