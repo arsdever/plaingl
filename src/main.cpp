@@ -254,6 +254,9 @@ void initScene()
     norm_txt->init(img->get_width(), img->get_height(), img->get_data());
     basic_mat->set_property_value("ambient_texture", txt);
     basic_mat->set_property_value("normal_texture", norm_txt);
+    basic_mat->set_property_value("light_pos", 0.0f, 10.0f, 5.0f);
+    basic_mat->set_property_value("light_color", 1.0f, 0.9f, 0.8f);
+    basic_mat->set_property_value("light_intensity", 1.0f);
 
     game_object* object = new game_object;
     object->create_component<mesh_component>();

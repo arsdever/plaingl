@@ -20,6 +20,18 @@
 		{
 			"name": "vp_matrix",
 			"type": "mat44"
+		},
+		{
+			"name": "light_intensity",
+			"type": "float"
+		},
+		{
+			"name": "light_pos",
+			"type": "vec3"
+		},
+		{
+			"name": "light_color",
+			"type": "vec3"
 		}
 	]
 }
