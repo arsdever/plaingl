@@ -240,14 +240,16 @@ void initScene()
     auto* am = asset_manager::default_asset_manager();
     am->load_asset("cube.fbx");
     am->load_asset("sphere.fbx");
+    am->load_asset("susane_head.fbx");
     am->load_asset("text.mat");
     am->load_asset("basic.mat");
     am->load_asset("sample.png");
     am->load_asset("brick.png");
+    am->load_asset("diffuse.png");
 
     material* basic_mat = am->get_material("basic");
     txt = new texture();
-    image* img = am->get_image("sample");
+    image* img = am->get_image("diffuse");
     txt->init(img->get_width(), img->get_height(), img->get_data());
     norm_txt = new texture();
     img = am->get_image("brick");
@@ -261,18 +263,8 @@ void initScene()
     game_object* object = new game_object;
     object->create_component<mesh_component>();
     object->create_component<mesh_renderer_component>();
-    object->get_component<mesh_component>()->set_mesh(am->meshes()[ 0 ]);
+    object->get_component<mesh_component>()->set_mesh(am->meshes()[ 2 ]);
     object->get_component<mesh_renderer_component>()->set_material(basic_mat);
-    object->get_transform().set_position({ -0.5f, 0, 0 });
-
-    s.add_object(object);
-
-    object = new game_object;
-    object->create_component<mesh_component>();
-    object->create_component<mesh_renderer_component>();
-    object->get_component<mesh_component>()->set_mesh(am->meshes()[ 1 ]);
-    object->get_component<mesh_renderer_component>()->set_material(basic_mat);
-    object->get_transform().set_position({ 0.5f, 0, 0 });
 
     s.add_object(object);
 
