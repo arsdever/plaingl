@@ -1,6 +1,6 @@
 #version 460 core
 
-uniform uint object_index;
+uniform uint object_id;
 
 layout(location = 0) out vec4 diffuseColor;
 layout(location = 1) out uvec3 fragmentColor;
@@ -39,6 +39,6 @@ vec3 hslToRgb(float h, float s, float l)
 
 void main()
 {
-    diffuseColor = vec4(hslToRgb(object_index / 2.0, 1.0f, 0.5f), 1.0f);
-    fragmentColor = uvec3(object_index, 0, 0);
+    diffuseColor = vec4(hslToRgb(object_id / 2.0, 1.0f, 0.5f), 1.0f);
+    fragmentColor = uvec3(object_id, 0, 0);
 }

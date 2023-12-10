@@ -121,12 +121,14 @@ void gl_window::init()
             GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
     }
 
+    _object_index_map_shader = new shader_program;
+
     configure_object_index_mapping();
 
     _state = state::initialized;
 
-// TODO: may not be the best place for object initialization
-// Probably should be done in some sort of scene loading procedure
+    // TODO: may not be the best place for object initialization
+    // Probably should be done in some sort of scene loading procedure
     if (scene::get_active_scene())
     {
         for (auto* obj : scene::get_active_scene()->objects())
@@ -192,18 +194,20 @@ void gl_window::draw()
 
     if (_index_rendering)
     {
-        _object_index_map_shader.use();
         unsigned id = 0;
         for (auto object : scene::get_active_scene()->objects())
         {
             glm::mat4 model = object->get_transform().get_matrix();
             glm::mat4 mvp = _view_camera->vp_matrix() * model;
-            glUniformMatrix4fv(_object_index_map_mvp_location,
-                               1,
-                               GL_FALSE,
-                               glm::value_ptr(mvp));
-            glUniform1ui(_object_index_map_id_location, ++id);
-            object->get_component<mesh_component>()->get_mesh()->render();
+            _object_index_map_shader->set_uniform("mvp_matrix",
+                                                  std::make_tuple(mvp));
+            _object_index_map_shader->set_uniform("object_id",
+                                                  std::make_tuple(++id));
+            _object_index_map_shader->use();
+            if (auto* m = object->get_component<mesh_component>())
+            {
+                m->get_mesh()->render();
+            }
         }
         shader_program::unuse();
     }
@@ -367,15 +371,11 @@ void gl_window::configure_object_index_mapping()
     glBindTexture(GL_TEXTURE_2D, 0);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-    _object_index_map_shader.init();
-    _object_index_map_shader.add_shader("object_indexing.vert");
-    _object_index_map_shader.add_shader("object_indexing.frag");
-    _object_index_map_shader.link();
-    _object_index_map_shader.use();
-    _object_index_map_mvp_location =
-        glGetUniformLocation(_object_index_map_shader.id(), "mvp_matrix");
-    _object_index_map_id_location =
-        glGetUniformLocation(_object_index_map_shader.id(), "object_index");
+    _object_index_map_shader->init();
+    _object_index_map_shader->add_shader("object_indexing.vert");
+    _object_index_map_shader->add_shader("object_indexing.frag");
+    _object_index_map_shader->link();
+    _object_index_map_shader->use();
     shader_program::unuse();
 }
 
@@ -388,15 +388,16 @@ game_object* gl_window::find_game_object_at_position(double x, double y)
     glClearColor(0, 0, 0, 0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
-    _object_index_map_shader.use();
     unsigned id = 0;
     for (auto object : scene::get_active_scene()->objects())
     {
         glm::mat4 model = object->get_transform().get_matrix();
         glm::mat4 mvp = _view_camera->vp_matrix() * model;
-        glUniformMatrix4fv(
-            _object_index_map_mvp_location, 1, GL_FALSE, glm::value_ptr(mvp));
-        glUniform1ui(_object_index_map_id_location, ++id);
+        _object_index_map_shader->set_uniform("mvp_matrix",
+                                              std::make_tuple(mvp));
+        _object_index_map_shader->set_uniform("object_id",
+                                              std::make_tuple(++id));
+        _object_index_map_shader->use();
         if (object->get_component<mesh_component>())
         {
             object->get_component<mesh_component>()->get_mesh()->render();

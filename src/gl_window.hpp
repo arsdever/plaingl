@@ -6,11 +6,11 @@
 
 #include "event.hpp"
 #include "mouse_events_refiner.hpp"
-#include "shader.hpp"
 
 struct GLFWwindow;
 class camera;
 class game_object;
+class shader_program;
 
 class gl_window
 {
@@ -66,9 +66,7 @@ private:
     unsigned _object_index_map;
     unsigned _object_index_depth_map;
     unsigned _object_index_fbo;
-    shader_program _object_index_map_shader;
-    unsigned _object_index_map_mvp_location;
-    unsigned _object_index_map_id_location;
+    shader_program* _object_index_map_shader;
     bool _index_rendering = false;
 
     static gl_window* _main_window;
