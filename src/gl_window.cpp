@@ -265,6 +265,8 @@ void gl_window::set_mouse_events_refiner(
 
 mouse_events_refiner* gl_window::mouse_events() const { return _mouse_events; }
 
+gl_window* gl_window::get_main_window() { return _main_window; }
+
 void gl_window::setup_mouse_callbacks()
 {
     glfwSetMouseButtonCallback(

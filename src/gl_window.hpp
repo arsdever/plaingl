@@ -48,6 +48,8 @@ public:
 
     game_object* find_game_object_at_position(double x, double y);
 
+    static gl_window* get_main_window();
+
 private:
     void setup_mouse_callbacks();
     void configure_object_index_mapping();
