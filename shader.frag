@@ -18,7 +18,8 @@ void main()
     vec3 norm = texture(normal_texture, uv).rgb;
     norm = normalize(norm * 2 - 1);
     vec3 light_dir = normalize(light_pos - position);
-    float diff = max(dot(norm, light_dir), 0.0) + .2;
+    float normal_strength = 0.2;
+    float diff = max(1 - normal_strength * dot(norm, light_dir), 0.0) + .2;
     vec3 diffuse = diff * light_color * light_intensity;
 
     ambient_color;
