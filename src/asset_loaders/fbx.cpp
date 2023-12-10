@@ -16,6 +16,8 @@ void asset_loader_FBX::load(std::string_view path)
                               aiProcess_JoinIdenticalVertices |
                               aiProcess_SortByPType | aiProcess_EmbedTextures);
 
+    // TODO: check if the scene was loaded
+
     for (int i = 0; i < scene->mNumMeshes; ++i)
     {
         const aiMesh* assimp_mesh = scene->mMeshes[ i ];
