@@ -3,11 +3,22 @@
 	"properties": [
 		{
 			"name": "ambient_color",
-			"type": "vec4"
+			"type": "vec4",
+			"value": [1.0, 0.0, 1.0, 1.0]
+		},
+		{
+			"name": "ambient_texture_strength",
+			"type": "float",
+			"value": 1.0
 		},
 		{
 			"name": "ambient_texture",
 			"type": "image"
+		},
+		{
+			"name": "normal_texture_strength",
+			"type": "float",
+			"value": 1.0
 		},
 		{
 			"name": "normal_texture",

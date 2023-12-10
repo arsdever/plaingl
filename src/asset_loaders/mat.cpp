@@ -15,6 +15,20 @@ static inline logger log() { return get_logger("asset_loader_mat"); }
 
 using json = nlohmann::json;
 
+template <typename... Args, std::size_t... Is>
+std::tuple<Args...> from_json(const nlohmann::json& args,
+                              std::index_sequence<Is...>)
+{
+    if constexpr (std::tuple_size_v<std::tuple<Args...>> == 1)
+    {
+        return { args.get<Args>()... };
+    }
+    else
+    {
+        return { args[ Is ].get<Args>()... };
+    }
+}
+
 void asset_loader_MAT::load(std::string_view path)
 {
     std::string content = get_file_contents(path);
@@ -46,13 +60,52 @@ void asset_loader_MAT::load(std::string_view path)
         auto prop_type = material_property::data_type::unknown;
         auto prop_name = prop[ "name" ].get<std::string>();
 
-        if (prop.contains("type") &&
-            prop[ "type" ].get<std::string>() == "image")
+        if (prop.contains("type"))
         {
-            prop_type = material_property::data_type::type_image;
+            if (prop[ "type" ].get<std::string>() == "image")
+            {
+                prop_type = material_property::data_type::type_image;
+            }
+            else if (prop[ "type" ].get<std::string>() == "float")
+            {
+                prop_type = material_property::data_type::type_float;
+            }
+            else if (prop[ "type" ].get<std::string>() == "vec4")
+            {
+                prop_type = material_property::data_type::type_float_vector_4;
+            }
         }
 
         _material->declare_property(prop_name, prop_type);
+        if (prop.contains("value"))
+        {
+            switch (prop_type)
+            {
+            case material_property::data_type::type_float:
+            {
+                _material->set_property_value(
+                    prop_name,
+                    from_json<float>(prop[ "value" ],
+                                     std::make_index_sequence<1>()));
+                break;
+            }
+            case material_property::data_type::type_float_vector_4:
+            {
+                _material->set_property_value(
+                    prop_name,
+                    from_json<float, float, float, float>(
+                        prop[ "value" ], std::make_index_sequence<4>()));
+                break;
+            }
+            default:
+            {
+                // TODO: prop_type enum can be stringified
+                log()->warn("Parsing of data type \"{}\" is not supported",
+                            static_cast<int>(prop_type));
+                break;
+            }
+            }
+        }
     }
 }
 
