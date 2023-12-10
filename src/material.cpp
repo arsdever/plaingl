@@ -44,6 +44,12 @@ void material::declare_property(std::string_view name,
     material_property property;
     property._name = name;
     property._type = type;
+
+    if (type == material_property::data_type::type_image)
+    {
+        property._special = _textures_count++;
+    }
+
     if (auto [ existing, success ] =
             _property_map.try_emplace(std::string(name), std::move(property));
         !success)
@@ -88,8 +94,9 @@ void material::activate() const
         {
             const auto& [ t ] =
                 std::any_cast<std::tuple<texture*>>(property._value);
-            t->bind(0);
-            _shader_program->set_uniform(name, std::tuple<int>(0));
+            t->bind(property._special);
+            _shader_program->set_uniform(name,
+                                         std::tuple<int>(property._special));
         }
         else
         {

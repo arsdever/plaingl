@@ -52,4 +52,5 @@ private:
 private:
     shader_program* _shader_program;
     property_map_t _property_map;
+    unsigned _textures_count = 0;
 };

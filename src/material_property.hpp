@@ -48,4 +48,11 @@ struct material_property
      * @brief Property data
      */
     std::any _value;
+
+    /**
+     * @brief Special field
+     *
+     * For textures, this is the OpenGL texture id used in the material.
+     */
+    unsigned _special;
 };
