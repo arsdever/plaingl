@@ -24,6 +24,5 @@ void main()
     vec3 diffuse = diff * lightColor;
 
     ambient_color;
-    fragment_color = vec4(diffuse, 1) * vec4(1); // texture(ambient_texture,
-                                                 // uv);
+    fragment_color = vec4(diffuse, 1) * texture(ambient_texture, uv);
 }
