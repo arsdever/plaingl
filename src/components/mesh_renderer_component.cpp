@@ -14,7 +14,7 @@ static inline logger log()
 } // namespace
 
 mesh_renderer_component::mesh_renderer_component(game_object* parent)
-    : component(parent, class_type_id)
+    : renderer_component(parent, class_type_id)
 {
     if (get_component<mesh_component>() == nullptr)
     {
@@ -26,7 +26,7 @@ void mesh_renderer_component::set_material(material* mat) { _material = mat; }
 
 material* mesh_renderer_component::get_material() { return _material; }
 
-void mesh_renderer_component::update()
+void mesh_renderer_component::render()
 {
     if (_material)
     {

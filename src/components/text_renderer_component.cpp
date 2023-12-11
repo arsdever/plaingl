@@ -19,7 +19,7 @@ static inline logger log()
 } // namespace
 
 text_renderer_component::text_renderer_component(game_object* parent)
-    : component(parent, class_type_id)
+    : renderer_component(parent, class_type_id)
 {
     if (get_component<text_component>() == nullptr)
     {
@@ -43,7 +43,7 @@ void text_renderer_component::init()
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-void text_renderer_component::update()
+void text_renderer_component::render()
 {
     if (_material && get_component<text_component>())
     {

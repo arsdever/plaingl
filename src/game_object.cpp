@@ -49,16 +49,3 @@ void game_object::draw_gizmos()
 transform& game_object::get_transform() { return _transformation; }
 
 const transform& game_object::get_transform() const { return _transformation; }
-
-component* game_object::get_component(std::string_view type_id)
-{
-    for (auto& c : _components)
-    {
-        if (c->type_id() == type_id)
-        {
-            return c;
-        }
-    }
-
-    return nullptr;
-}

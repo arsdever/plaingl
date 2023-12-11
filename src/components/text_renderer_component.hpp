@@ -2,13 +2,13 @@
 
 #include <unordered_map>
 
-#include "component.hpp"
+#include "components/renderer_component.hpp"
 
 struct GLFWwindow;
 class font;
 class material;
 
-class text_renderer_component : public component
+class text_renderer_component : public renderer_component
 {
 public:
     text_renderer_component(game_object* parent);
@@ -20,7 +20,7 @@ public:
     material* get_material();
 
     void init() override;
-    void update() override;
+    void render() override;
     void deinit() override;
 
     static constexpr std::string_view class_type_id = "text_renderer_component";

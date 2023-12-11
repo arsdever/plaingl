@@ -34,7 +34,15 @@ public:
     template <typename T>
     T* get_component()
     {
-        return static_cast<T*>(get_component(T::class_type_id));
+        // TODO: need to figure out a cleverer way of checking the component
+        // hierarchy to find matching component
+        auto iterator = std::find_if(_components.begin(),
+                                     _components.end(),
+                                     [](auto* component) -> bool
+        { return dynamic_cast<T*>(component); });
+
+        return iterator == _components.end() ? nullptr
+                                             : static_cast<T*>(*iterator);
     }
 
 private:

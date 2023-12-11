@@ -10,7 +10,7 @@ public:
     camera();
 
     void set_fov(float fov);
-    void set_active();
+    camera* set_active();
     void set_render_size(float width, float height);
 
     void render();

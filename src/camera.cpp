@@ -1,16 +1,50 @@
+/* clang-format off */
+#include <glad/gl.h>
+#include <GLFW/glfw3.h>
+/* clang-format on */
+
 #include <glm/glm.hpp>
 
 #include "camera.hpp"
+
+#include "components/renderer_component.hpp"
+#include "game_object.hpp"
+#include "scene.hpp"
 
 camera::camera() = default;
 
 void camera::set_fov(float fov) { _fov = fov; }
 
-void camera::set_active() { _active_camera = this; }
+camera* camera::set_active()
+{
+    auto* old = _active_camera;
+    _active_camera = this;
+    return old;
+}
 
 void camera::set_render_size(float width, float height)
 {
     _render_size = { width, height };
+}
+
+void camera::render()
+{
+    auto* old_active_camera = set_active();
+    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glEnable(GL_DEPTH_TEST);
+
+    if (scene::get_active_scene())
+    {
+        for (auto* obj : scene::get_active_scene()->objects())
+        {
+            if (obj->get_component<renderer_component>())
+            {
+                obj->get_component<renderer_component>()->render();
+            }
+        }
+    }
+    old_active_camera->set_active();
 }
 
 glm::mat4 camera::vp_matrix() const
