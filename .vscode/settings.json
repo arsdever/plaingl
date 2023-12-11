@@ -1,4 +1,5 @@
 {
+	"cmake.debugConfig": {"args": ["SPDLOG_LEVEL=trace"]},
 	"sonarlint.pathToCompileCommands": "${workspaceFolder}\\build\\compile_commands.json",
 	"files.associations": {
 		"array": "cpp",
@@ -77,6 +78,30 @@
 		"xlocbuf": "cpp",
 		"xlocinfo": "cpp",
 		"xmemory": "cpp",
-		"xtree": "cpp"
+		"xtree": "cpp",
+		"string_view": "cpp",
+		"bitset": "cpp",
+		"cinttypes": "cpp",
+		"deque": "cpp",
+		"set": "cpp",
+		"numeric": "cpp",
+		"queue": "cpp",
+		"ranges": "cpp",
+		"regex": "cpp",
+		"stack": "cpp",
+		"cfenv": "cpp",
+		"complex": "cpp",
+		"csignal": "cpp",
+		"cwctype": "cpp",
+		"coroutine": "cpp",
+		"resumable": "cpp",
+		"future": "cpp",
+		"memory_resource": "cpp",
+		"shared_mutex": "cpp",
+		"source_location": "cpp",
+		"stdfloat": "cpp",
+		"strstream": "cpp",
+		"typeindex": "cpp",
+		"valarray": "cpp"
 	}
 }

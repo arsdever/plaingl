@@ -7,159 +7,200 @@
 #include <atomic>
 #include <charconv>
 #include <chrono>
+#include <iostream>
+#include <sstream>
 #include <thread>
 #include <unordered_set>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <prof/profiler.hpp>
 
+#include "asset_manager.hpp"
+#include "camera.hpp"
+#include "color.hpp"
+#include "components/fps_show_component.hpp"
+#include "components/jumpy_component.hpp"
+#include "components/mesh_component.hpp"
+#include "components/mesh_renderer_component.hpp"
+#include "components/text_component.hpp"
+#include "components/text_renderer_component.hpp"
+#include "font.hpp"
+#include "game_clock.hpp"
+#include "game_object.hpp"
+#include "gizmo_object.hpp"
+#include "gl_window.hpp"
+#include "image.hpp"
 #include "logging.hpp"
 #include "material.hpp"
+#include "mouse_events_refiner.hpp"
+#include "scene.hpp"
 #include "shader.hpp"
-#include "text.hpp"
+#include "texture.hpp"
+#include "texture_viewer.hpp"
 #include "thread.hpp"
 
 namespace
 {
 static logger log() { return get_logger("main"); }
-shader_program prog;
 unsigned last_fps;
-unsigned vao;
-unsigned vbo;
-unsigned ebo;
-text console_text;
-std::string console_text_content;
+font ttf;
+scene s;
 std::unordered_set<int> pressed_keys;
-material basic_mat;
+camera main_camera;
+camera second_camera;
+mouse_events_refiner mouse_events;
+game_object* _fps_text_object;
+texture* txt;
+texture* norm_txt;
 } // namespace
 
-void framebuffer_size_callback(GLFWwindow* window, int width, int height);
-
 void process_console();
-void on_keypress(
-    GLFWwindow* window, int key, int scancode, int action, int mods)
-{
-    if (action != GLFW_PRESS && action != GLFW_REPEAT)
-    {
-        return;
-    }
-
-    switch (key)
-    {
-    case GLFW_KEY_ENTER:
-    {
-        process_console();
-        break;
-    }
-    case GLFW_KEY_ESCAPE:
-    {
-        console_text_content.clear();
-        break;
-    }
-    case GLFW_KEY_BACKSPACE:
-    {
-        if (!console_text_content.empty())
-            console_text_content.pop_back();
-        break;
-    }
-    default:
-    {
-        if (key >= GLFW_KEY_SPACE && key <= GLFW_KEY_GRAVE_ACCENT)
-        {
-            if (isalnum(key))
-            {
-                if (mods & GLFW_MOD_SHIFT)
-                {
-                    console_text_content.push_back(toupper(key));
-                }
-                else
-                {
-                    console_text_content.push_back(tolower(key));
-                }
-            }
-            else
-            {
-                console_text_content.push_back(key);
-            }
-        }
-    }
-    }
-
-    console_text.set_text(console_text_content);
-}
-
-std::vector<std::string_view> tokenize(std::string_view str);
 
 void initScene();
-void draw();
+
+void on_error(int error_code, const char* description)
+{
+    log()->error("Error {}: {}", error_code, description);
+}
 
 static std::atomic_int counter = 0;
 
 int main(int argc, char** argv)
 {
+    configure_levels(argc, argv);
+    game_clock* clock = game_clock::init();
     glfwInit();
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    // glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+    glfwSetErrorCallback(on_error);
+    adjust_timeout_accuracy_guard guard;
 
-    GLFWwindow* window = glfwCreateWindow(800, 600, "LearnOpenGL", NULL, NULL);
-    if (window == NULL)
+    auto* am = asset_manager::default_asset_manager();
+    am->load_asset("sample.png");
+    am->load_asset("sample_jpg.jpg");
+    texture_viewer::show_preview(am->get_image("sample_jpg"));
+
+    std::vector<gl_window*> windows;
+    windows.push_back(new gl_window);
+    windows.back()->init();
+    windows.back()->set_active();
+    windows.back()->set_camera(&main_camera);
+    windows.back()->on_window_closed += [ &windows ](gl_window* window)
+    { windows.erase(std::find(windows.begin(), windows.end(), window)); };
+
+    game_object* selected_object = nullptr;
+
+    windows.back()->set_mouse_events_refiner(&mouse_events);
+    mouse_events.click +=
+        [ &selected_object ](mouse_events_refiner::mouse_event_params params)
     {
-        log()->error("Failed to create GLFW window");
-        glfwTerminate();
-        return -1;
-    }
-    glfwMakeContextCurrent(window);
+        auto* object = params._window->find_game_object_at_position(
+            params._position.x, params._position.y);
+        log()->info("Main window clicked: Object selected {}",
+                    reinterpret_cast<unsigned long long>(object));
+        if (selected_object != nullptr)
+        {
+            selected_object->set_selected(false);
+            selected_object = nullptr;
+        }
+        if (object != nullptr)
+        {
+            object->set_selected(true);
+            selected_object = object;
+        }
+    };
 
-    if (!gladLoadGL((GLADloadfunc)glfwGetProcAddress))
+    mouse_events.drag_drop_start +=
+        [](mouse_events_refiner::mouse_event_params params)
     {
-        log()->error("Failed to initialize GLAD");
-        return -1;
-    }
-
-    glViewport(0, 0, 800, 600);
-    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+        glm::vec2 from = params._old_position;
+        glm::vec2 to = params._position;
+        from.y = params._window->height() - from.y;
+        to.y = params._window->height() - to.y;
+        log()->trace("dragging started from position ({}, {})", from.x, from.y);
+        s.gizmo_objects()[ 0 ]->_line = { from, to };
+    };
+    mouse_events.drag_drop_move +=
+        [](mouse_events_refiner::mouse_event_params params)
+    {
+        glm::vec2 to = params._position;
+        to.y = params._window->height() - to.y;
+        log()->trace("dragging to position ({}, {})", to.x, to.y);
+        s.gizmo_objects()[ 0 ]->_line.value()[ 1 ] = to;
+    };
+    mouse_events.drag_drop_end +=
+        [](mouse_events_refiner::mouse_event_params params)
+    { s.gizmo_objects()[ 0 ]->_line = {}; };
 
     initScene();
 
-    console_text_content = "Hello world";
-    console_text.set_text(console_text_content);
+    s.gizmo_objects().back()->_line = { { { -1, -1 }, { .5, .5 } } };
 
-    // fps counter thread
-    logger fps_counter_log = get_logger("fps_counter");
+    windows.push_back(new gl_window);
+    windows.back()->init();
+    windows.back()->set_camera(&second_camera);
+    windows.back()->on_window_closed += [ &windows ](gl_window* window)
+    { windows.erase(std::find(windows.begin(), windows.end(), window)); };
+
+    // windows.front()->toggle_indexing();
+    // windows.back()->toggle_indexing();
+
+    // start a physics thread
+    // TODO: these should move into physics engine class
     std::atomic_bool program_exits = false;
-    std::thread thd { [ &fps_counter_log, &program_exits ]
+    // TODO: make this variable
+    static constexpr std::atomic<double> physics_fps = 500.0;
+    std::thread thd { [ &program_exits, clock ]
     {
+        double physics_frame_time_hint = 1.0 / physics_fps;
         while (!program_exits)
         {
-            fps_counter_log->info("FPS: {}", counter);
-            last_fps = counter;
-            counter = 0;
-            std::this_thread::sleep_for(std::chrono::seconds(1));
+            auto _physics_frame_start = std::chrono::steady_clock::now();
+            // do stuff
+
+            clock->physics_frame();
+            std::this_thread::sleep_until(
+                _physics_frame_start +
+                std::chrono::duration<double>(physics_frame_time_hint));
         }
     } };
-    set_thread_name(thd, "fps_counter");
+    set_thread_name(thd, "physics_thread");
+    set_thread_priority(thd, 15);
 
-    glfwSetKeyCallback(window, on_keypress);
-
-    color col { 1, 1, 1, 1 };
-    while (!glfwWindowShouldClose(window))
+    while (!windows.empty())
     {
-        draw();
-        ++counter;
-        float hue = std::chrono::duration_cast<std::chrono::duration<double>>(
-                        std::chrono::steady_clock::now().time_since_epoch())
-                        .count();
-        hue = fmod(hue, 3.0f) / 3.0f;
-        hslToRgb(hue, 1.0f, .5f, col.r, col.g, col.b);
-        basic_mat.set_property("materialColor", col.r, col.g, col.b, col.a);
+        for (int i = 0; i < windows.size(); ++i)
+        {
+            auto p = prof::profile_frame(__FUNCTION__);
+            auto window = windows[ i ];
+            window->set_active();
+            double timed_fraction =
+                std::chrono::duration_cast<std::chrono::duration<double>>(
+                    std::chrono::steady_clock::now().time_since_epoch())
+                    .count();
+            main_camera.get_transform().set_position(
+                { sin(timed_fraction) * 10, 0, cos(timed_fraction) * 10 });
 
-        glfwSwapBuffers(window);
-        glfwPollEvents();
+            window->update();
+        }
+        clock->frame();
     }
 
+    std::stringstream ss;
+    ss << std::this_thread::get_id();
+    prof::apply_for_data(ss.str(),
+                         [](const prof::data_sample& data) -> bool
+    {
+        log()->info("Profiling frame:\n\tfunction name: {}\n\tdepth: "
+                    "{}\n\tduration: {}",
+                    data.name(),
+                    data.depth(),
+                    std::chrono::duration_cast<std::chrono::duration<double>>(
+                        data.end() - data.start())
+                        .count());
+        return true;
+    });
+    std::cout << std::flush;
     program_exits = true;
     glfwTerminate();
     thd.join();
@@ -168,131 +209,70 @@ int main(int argc, char** argv)
 
 void initScene()
 {
-    prog.init();
-    prog.add_shader("shader.vert");
-    prog.add_shader("shader.frag");
-    prog.link();
+    shader_program* prog = new shader_program;
+    prog->init();
+    prog->add_shader("shader.vert");
+    prog->add_shader("shader.frag");
+    prog->link();
 
-    basic_mat.set_shader_program(&prog);
-    for (const auto& property : basic_mat.properties())
-    {
-        log()->info("Material properties:\n\tname: {}\n\tindex: {}\n\tsize: "
-                    "{}\n\ttype: {}",
-                    property._name,
-                    property._index,
-                    property._size,
-                    property._type);
-    }
-    basic_mat.set_property("position", 1);
+    // for (const auto& property : basic_mat->properties())
+    // {
+    //     log()->info("Material properties:\n\tname: {}\n\tindex: {}\n\tsize: "
+    //                 "{}\n\ttype: {}",
+    //                 property._name,
+    //                 property._index,
+    //                 property._size,
+    //                 property._type);
+    // }
 
-    {
-        shader_program text_prog;
-        text_prog.init();
-        text_prog.add_shader("text.vert");
-        text_prog.add_shader("text.frag");
-        text_prog.link();
+    auto* am = asset_manager::default_asset_manager();
+    am->load_asset("cube.fbx");
+    am->load_asset("sphere.fbx");
+    am->load_asset("susane_head.fbx");
+    am->load_asset("text.mat");
+    am->load_asset("basic.mat");
+    am->load_asset("sample.png");
+    am->load_asset("brick.png");
+    am->load_asset("diffuse.png");
 
-        text_prog.use();
-        glm::mat4 projection = glm::ortho(0.0f, 800.0f, 0.0f, 600.0f);
-        unsigned int uniform_position =
-            glGetUniformLocation(text_prog.id(), "projection");
-        glUniformMatrix4fv(
-            uniform_position, 1, GL_FALSE, glm::value_ptr(projection));
-        text_prog.unuse();
-        console_text.set_shader(std::move(text_prog));
-    }
+    material* basic_mat = am->get_material("basic");
+    txt = new texture();
+    image* img = am->get_image("diffuse");
+    txt->init(img->get_width(), img->get_height(), img->get_data());
+    norm_txt = new texture();
+    img = am->get_image("brick");
+    norm_txt->init(img->get_width(), img->get_height(), img->get_data());
+    basic_mat->set_property_value("ambient_texture", txt);
+    basic_mat->set_property_value("ambient_texture_strength", .8f);
+    basic_mat->set_property_value("normal_texture", norm_txt);
+    basic_mat->set_property_value("light_pos", 0.0f, 10.0f, 5.0f);
+    basic_mat->set_property_value("light_color", 1.0f, 0.9f, 0.8f);
+    basic_mat->set_property_value("light_intensity", 1.0f);
 
-    font console_text_font;
-    console_text_font.load("font.ttf");
+    game_object* object = new game_object;
+    object->create_component<mesh_component>();
+    object->create_component<mesh_renderer_component>();
+    object->create_component<jumpy_component>();
+    object->get_component<mesh_component>()->set_mesh(am->meshes()[ 2 ]);
+    object->get_component<mesh_renderer_component>()->set_material(basic_mat);
 
-    console_text.init();
-    console_text.set_font(std::move(console_text_font));
-    console_text.set_color({ 0, 0, 0 });
-    console_text.set_position({ 0, 570 });
-    console_text.set_scale(.5f);
+    s.add_object(object);
 
-    glGenVertexArrays(1, &vao);
-    glBindVertexArray(vao);
-    glGenBuffers(1, &vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glGenBuffers(1, &ebo);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+    ttf.load("font.ttf", 12);
+    _fps_text_object = new game_object;
+    _fps_text_object->create_component<text_component>();
+    _fps_text_object->create_component<text_renderer_component>();
+    _fps_text_object->create_component<fps_show_component>();
+    _fps_text_object->get_component<text_renderer_component>()->set_font(&ttf);
+    _fps_text_object->get_component<text_renderer_component>()->set_material(
+        am->get_material("text"));
+    am->get_material("text")->set_property_value("textColor", 1.0f, 1.0f, 1.0f);
+    _fps_text_object->get_transform().set_position({ 0.5f, 2.0f, 0 });
 
-    std::array<std::array<float, 3>, 3> vertices {
-        { { -.5, -.5, 0 }, { 0, .75, 0 }, { .5, -.5, 0 } },
-    };
+    s.add_object(_fps_text_object);
 
-    glBufferData(GL_ARRAY_BUFFER,
-                 vertices.size() * vertices[ 0 ].size() *
-                     sizeof(vertices[ 0 ][ 0 ]),
-                 vertices.data(),
-                 GL_STATIC_DRAW);
-    glVertexAttribPointer(
-        0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
+    s.add_gizmo_object(new gizmo_object);
 
-    std::array<int, 3> indices { 0, 1, 2 };
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER,
-                 sizeof(indices),
-                 indices.data(),
-                 GL_STATIC_DRAW);
-
-    glBindVertexArray(0);
-}
-
-void draw()
-{
-    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
-    basic_mat.activate();
-    glBindVertexArray(vao);
-    glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0);
-    glBindVertexArray(0);
-    prog.unuse();
-
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    console_text.render();
-}
-
-std::vector<std::string_view> tokenize(std::string_view str)
-{
-    std::vector<std::string_view> result;
-    const char* iter = str.data();
-    size_t length = 0;
-    for (int i = 0; i < str.size(); ++i)
-    {
-        if (str[ i ] == ' ')
-        {
-            result.push_back({ iter, length });
-            iter += length + 1;
-            length = 0;
-            continue;
-        }
-        length++;
-    }
-
-    result.push_back({ iter, length });
-    return result;
-}
-
-void process_console()
-{
-    auto tokens = tokenize(console_text_content);
-    if (tokens[ 0 ] == "set" && tokens[ 1 ] == "position")
-    {
-        float x, y;
-        std::from_chars(
-            tokens[ 2 ].data(), tokens[ 2 ].data() + tokens[ 2 ].size(), x);
-        std::from_chars(
-            tokens[ 3 ].data(), tokens[ 3 ].data() + tokens[ 3 ].size(), y);
-
-        console_text.set_position({ x, y });
-    }
-}
-
-void framebuffer_size_callback(GLFWwindow* window, int width, int height)
-{
-    glViewport(0, 0, width, height);
+    main_camera.get_transform().set_position({ 10, 10, 10 });
+    second_camera.get_transform().set_position({ 0, -10, 10 });
 }
