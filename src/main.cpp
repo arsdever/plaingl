@@ -73,6 +73,7 @@ int main(int argc, char** argv)
     game_clock* clock = game_clock::init();
     glfwInit();
     glfwSetErrorCallback(on_error);
+    adjust_timeout_accuracy_guard guard;
 
     auto* am = asset_manager::default_asset_manager();
     am->load_asset("sample.png");
@@ -144,20 +145,27 @@ int main(int argc, char** argv)
     // windows.front()->toggle_indexing();
     // windows.back()->toggle_indexing();
 
-    // fps counter thread
-    logger fps_counter_log = get_logger("fps_counter");
+    // start a physics thread
+    // TODO: these should move into physics engine class
     std::atomic_bool program_exits = false;
-    std::thread thd { [ &fps_counter_log, &program_exits ]
+    // TODO: make this variable
+    static constexpr std::atomic<double> physics_fps = 500.0;
+    std::thread thd { [ &program_exits, clock ]
     {
+        double physics_frame_time_hint = 1.0 / physics_fps;
         while (!program_exits)
         {
-            fps_counter_log->info("FPS: {}", counter);
-            last_fps = counter;
-            counter = 0;
-            std::this_thread::sleep_for(std::chrono::seconds(1));
+            auto _physics_frame_start = std::chrono::steady_clock::now();
+            // do stuff
+
+            clock->physics_frame();
+            std::this_thread::sleep_until(
+                _physics_frame_start +
+                std::chrono::duration<double>(physics_frame_time_hint));
         }
     } };
-    set_thread_name(thd, "fps_counter");
+    set_thread_name(thd, "physics_thread");
+    set_thread_priority(thd, 15);
 
     while (!windows.empty())
     {
@@ -166,25 +174,10 @@ int main(int argc, char** argv)
             auto p = prof::profile_frame(__FUNCTION__);
             auto window = windows[ i ];
             window->set_active();
-            // color c { 0, 0, 0 };
             double timed_fraction =
                 std::chrono::duration_cast<std::chrono::duration<double>>(
                     std::chrono::steady_clock::now().time_since_epoch())
                     .count();
-            // hslToRgb(fmod(timed_fraction, 5.0) / 5.0, 1.0f, .5f, c.r, c.g,
-            // c.b); for (auto& obj : s.objects())
-            // {
-            //     if (obj->get_component<mesh_renderer_component>())
-            //     {
-            //         obj->get_component<mesh_renderer_component>()
-            //             ->get_material()
-            //             ->set_property_value(
-            //                 "materialColor",
-            //                 std::tuple<float, float, float, float> {
-            //                     c.r, c.g, c.b, 1.0f });
-            //     }
-            // }
-
             main_camera.get_transform().set_position(
                 { sin(timed_fraction) * 10, 0, cos(timed_fraction) * 10 });
 
@@ -250,6 +243,7 @@ void initScene()
     img = am->get_image("brick");
     norm_txt->init(img->get_width(), img->get_height(), img->get_data());
     basic_mat->set_property_value("ambient_texture", txt);
+    basic_mat->set_property_value("ambient_texture_strength", .8f);
     basic_mat->set_property_value("normal_texture", norm_txt);
     basic_mat->set_property_value("light_pos", 0.0f, 10.0f, 5.0f);
     basic_mat->set_property_value("light_color", 1.0f, 0.9f, 0.8f);

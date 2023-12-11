@@ -24,5 +24,7 @@ fps_show_component::fps_show_component(game_object* parent)
 void fps_show_component::update()
 {
     get_component<text_component>()->set_text(
-        fmt::format("FPS: {:#6.6}", 1.0 / game_clock::delta().count()));
+        fmt::format("FPS: {:#6.6} PHYSICS: {:#8}",
+                    1.0 / game_clock::delta().count(),
+                    1.0 / game_clock::physics_delta().count()));
 }

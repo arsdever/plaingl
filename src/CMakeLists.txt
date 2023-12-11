@@ -64,7 +64,7 @@ add_library(
   components/text_renderer_component.cpp)
 
 target_link_libraries(${PROJECT}_lib PUBLIC ${PROJECT}_includes glfw glm
-                                            profiler::lib freetype)
+                                            profiler::lib freetype Winmm)
 
 add_library(${PROJECT}_includes INTERFACE)
 target_include_directories(${PROJECT}_includes
