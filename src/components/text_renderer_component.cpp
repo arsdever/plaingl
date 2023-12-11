@@ -23,7 +23,7 @@ text_renderer_component::text_renderer_component(game_object* parent)
 {
     if (get_component<text_component>() == nullptr)
     {
-        log()->error("requires mesh_component");
+        log()->error("requires text_component");
     }
 }
 
@@ -79,7 +79,6 @@ void text_renderer_component::update()
 
         std::string_view text_str = get_component<text_component>()->get_text();
         for (auto& c : text_str)
-
         {
             const font::character& ch = (*_font)[ static_cast<size_t>(c) ];
 

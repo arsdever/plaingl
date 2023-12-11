@@ -13,6 +13,8 @@ add_library(
   file.cpp
   font.hpp
   font.cpp
+  game_clock.hpp
+  game_clock.cpp
   game_object.hpp
   game_object.cpp
   gizmo_drawer.hpp
@@ -48,6 +50,10 @@ add_library(
   utils.hpp
   glad/src/gl.c
   asset_loaders/asset_loader.hpp
+  components/fps_show_component.hpp
+  components/fps_show_component.cpp
+  components/jumpy_component.hpp
+  components/jumpy_component.cpp
   components/mesh_component.hpp
   components/mesh_component.cpp
   components/mesh_renderer_component.hpp
@@ -58,7 +64,7 @@ add_library(
   components/text_renderer_component.cpp)
 
 target_link_libraries(${PROJECT}_lib PUBLIC ${PROJECT}_includes glfw glm
-                                             profiler::lib freetype)
+                                            profiler::lib freetype)
 
 add_library(${PROJECT}_includes INTERFACE)
 target_include_directories(${PROJECT}_includes

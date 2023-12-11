@@ -20,11 +20,14 @@
 #include "asset_manager.hpp"
 #include "camera.hpp"
 #include "color.hpp"
+#include "components/fps_show_component.hpp"
+#include "components/jumpy_component.hpp"
 #include "components/mesh_component.hpp"
 #include "components/mesh_renderer_component.hpp"
 #include "components/text_component.hpp"
 #include "components/text_renderer_component.hpp"
 #include "font.hpp"
+#include "game_clock.hpp"
 #include "game_object.hpp"
 #include "gizmo_object.hpp"
 #include "gl_window.hpp"
@@ -67,6 +70,7 @@ static std::atomic_int counter = 0;
 int main(int argc, char** argv)
 {
     configure_levels(argc, argv);
+    game_clock* clock = game_clock::init();
     glfwInit();
     glfwSetErrorCallback(on_error);
 
@@ -184,18 +188,9 @@ int main(int argc, char** argv)
             main_camera.get_transform().set_position(
                 { sin(timed_fraction) * 10, 0, cos(timed_fraction) * 10 });
 
-            _fps_text_object->get_component<text_component>()->set_text(
-                fmt::format(
-                    "{:#6.6} ms\nhandle {:#x}",
-                    // std::chrono::duration_cast<std::chrono::duration<double>>(
-                    //     diff)
-                    //         .count() *
-                    //     1000,
-                    16.146,
-                    reinterpret_cast<unsigned long long>(window)));
-
             window->update();
         }
+        clock->frame();
     }
 
     std::stringstream ss;
@@ -263,6 +258,7 @@ void initScene()
     game_object* object = new game_object;
     object->create_component<mesh_component>();
     object->create_component<mesh_renderer_component>();
+    object->create_component<jumpy_component>();
     object->get_component<mesh_component>()->set_mesh(am->meshes()[ 2 ]);
     object->get_component<mesh_renderer_component>()->set_material(basic_mat);
 
@@ -272,6 +268,7 @@ void initScene()
     _fps_text_object = new game_object;
     _fps_text_object->create_component<text_component>();
     _fps_text_object->create_component<text_renderer_component>();
+    _fps_text_object->create_component<fps_show_component>();
     _fps_text_object->get_component<text_renderer_component>()->set_font(&ttf);
     _fps_text_object->get_component<text_renderer_component>()->set_material(
         am->get_material("text"));
