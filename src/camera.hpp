@@ -13,6 +13,8 @@ public:
     ~camera();
 
     void set_fov(float fov);
+    float get_fov()const;
+    float get_aspect_ratio() const;
     camera* set_active();
     void set_render_size(float width, float height);
 

@@ -17,6 +17,13 @@ camera::~camera() { std::erase(_cameras, this); }
 
 void camera::set_fov(float fov) { _fov = fov; }
 
+float camera::get_fov() const { return _fov; }
+
+float camera::get_aspect_ratio() const
+{
+    return _render_size.x / _render_size.y;
+}
+
 camera* camera::set_active()
 {
     auto* old = _active_camera;

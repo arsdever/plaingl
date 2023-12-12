@@ -50,6 +50,8 @@ add_library(
   utils.hpp
   glad/src/gl.c
   asset_loaders/asset_loader.hpp
+  components/camera_component.hpp
+  components/camera_component.cpp
   components/fps_show_component.hpp
   components/fps_show_component.cpp
   components/jumpy_component.hpp

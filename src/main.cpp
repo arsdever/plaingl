@@ -20,6 +20,7 @@
 #include "asset_manager.hpp"
 #include "camera.hpp"
 #include "color.hpp"
+#include "components/camera_component.hpp"
 #include "components/fps_show_component.hpp"
 #include "components/jumpy_component.hpp"
 #include "components/mesh_component.hpp"
@@ -49,7 +50,9 @@ font ttf;
 scene s;
 std::unordered_set<int> pressed_keys;
 camera* main_camera;
+game_object* main_camera_object;
 camera* second_camera;
+game_object* second_camera_object;
 mouse_events_refiner mouse_events;
 game_object* _fps_text_object;
 texture* txt;
@@ -188,6 +191,7 @@ int main(int argc, char** argv)
             main_camera->get_transform().set_rotation(glm::quatLookAt(
                 glm::normalize(-main_camera->get_transform().get_position()),
                 glm::vec3(0, 1, 0)));
+            main_camera_object->get_transform() = main_camera->get_transform();
 
             window->update();
         }
@@ -265,6 +269,17 @@ void initScene()
     object->get_component<mesh_renderer_component>()->set_material(basic_mat);
 
     s.add_object(object);
+
+    main_camera_object = new game_object();
+    main_camera_object->create_component<camera_component>();
+    main_camera_object->get_component<camera_component>()->set_camera(
+        main_camera);
+    s.add_object(main_camera_object);
+    second_camera_object = new game_object();
+    second_camera_object->create_component<camera_component>();
+    second_camera_object->get_component<camera_component>()->set_camera(
+        second_camera);
+    s.add_object(second_camera_object);
 
     ttf.load("font.ttf", 30);
     _fps_text_object = new game_object;
