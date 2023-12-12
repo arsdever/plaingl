@@ -14,6 +14,7 @@ camera* camera_component::get_camera() { return _camera; }
 
 void camera_component::draw_gizmos()
 {
+    // https://docs.unity3d.com/Manual/FrustumSizeAtDistance.html
     double distance = 20;
     double frustumHeight =
         2.0 * distance * std::tan(glm::radians(_camera->get_fov() * 0.5));
