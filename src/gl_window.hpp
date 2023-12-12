@@ -33,6 +33,7 @@ public:
     void update();
     void draw();
 
+    camera* get_camera() const;
     void set_camera(camera* view_camera);
 
     void toggle_indexing();

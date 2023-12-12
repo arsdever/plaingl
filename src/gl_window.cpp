@@ -196,64 +196,6 @@ void gl_window::draw()
     auto p = prof::profile(__FUNCTION__);
     glEnable(GL_MULTISAMPLE);
     _view_camera->render();
-
-    // if (_index_rendering)
-    // {
-    //     unsigned id = 0;
-    //     for (auto object : scene::get_active_scene()->objects())
-    //     {
-    //         glm::mat4 model = object->get_transform().get_matrix();
-    //         glm::mat4 mvp = _view_camera->vp_matrix() * model;
-    //         _object_index_map_shader->set_uniform("mvp_matrix",
-    //                                               std::make_tuple(mvp));
-    //         _object_index_map_shader->set_uniform("object_id",
-    //                                               std::make_tuple(++id));
-    //         _object_index_map_shader->use();
-    //         if (auto* m = object->get_component<mesh_component>())
-    //         {
-    //             m->get_mesh()->render();
-    //         }
-    //     }
-    //     shader_program::unuse();
-    // }
-    // else
-    // {
-    // }
-
-    // if (_should_draw_gizmos)
-    // {
-    //     // draw gizmos
-    //     glEnable(GL_BLEND);
-    //     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    //     glm::mat4 ortho = glm::ortho<float>(0.0f,
-    //                                         static_cast<float>(width()),
-    //                                         0.0f,
-    //                                         static_cast<float>(height()));
-
-    //     if (scene::get_active_scene())
-    //     {
-    //         glDisable(GL_DEPTH_TEST);
-    //         gizmo_drawer::instance()->get_shader().set_uniform(
-    //             "projection_matrix", std::make_tuple(ortho));
-    //         gizmo_drawer::instance()->get_shader().set_uniform(
-    //             "model_matrix", std::make_tuple(glm::mat4(1)));
-    //         for (auto* obj : scene::get_active_scene()->gizmo_objects())
-    //         {
-    //             obj->update();
-    //         }
-
-    //         gizmo_drawer::instance()->get_shader().set_uniform(
-    //             "projection_matrix",
-    //             std::make_tuple(_view_camera->vp_matrix()));
-    //         for (auto* obj : scene::get_active_scene()->objects())
-    //         {
-    //             obj->draw_gizmos();
-    //         }
-    //     }
-
-    //     glDisable(GL_BLEND);
-    // }
 }
 
 void gl_window::set_camera(camera* view_camera)
