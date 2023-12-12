@@ -17,6 +17,8 @@ public:
 
     virtual void update();
 
+    virtual void draw_gizmos();
+
     virtual void deinit();
 
     game_object* get_game_object() const;

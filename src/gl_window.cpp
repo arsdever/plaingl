@@ -196,6 +196,14 @@ void gl_window::draw()
     auto p = prof::profile(__FUNCTION__);
     glEnable(GL_MULTISAMPLE);
     _view_camera->render();
+
+    if (auto* s = scene::get_active_scene())
+    {
+        for (auto* obj : s->objects())
+        {
+            obj->draw_gizmos();
+        }
+    }
 }
 
 void gl_window::set_camera(camera* view_camera)

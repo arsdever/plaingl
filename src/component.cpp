@@ -22,6 +22,11 @@ void component::update()
     // by default do nothing
 }
 
+void component::draw_gizmos()
+{
+    // by default do nothing
+}
+
 void component::deinit()
 {
     // by default do nothing

@@ -17,8 +17,8 @@ public:
 
     void init();
     void update();
-    void deinit();
     void draw_gizmos();
+    void deinit();
 
     transform& get_transform();
     const transform& get_transform() const;
@@ -26,9 +26,9 @@ public:
     component* get_component(std::string_view type_id);
 
     template <typename T>
-    void create_component()
+    T* create_component()
     {
-        _components.emplace_back(new T(this));
+        return static_cast<T*>(_components.emplace_back(new T(this)));
     }
 
     template <typename T>
