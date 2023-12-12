@@ -48,8 +48,8 @@ unsigned last_fps;
 font ttf;
 scene s;
 std::unordered_set<int> pressed_keys;
-camera main_camera;
-camera second_camera;
+camera* main_camera;
+camera* second_camera;
 mouse_events_refiner mouse_events;
 game_object* _fps_text_object;
 texture* txt;
@@ -79,12 +79,14 @@ int main(int argc, char** argv)
     am->load_asset("sample.png");
     am->load_asset("sample_jpg.jpg");
     texture_viewer::show_preview(am->get_image("sample_jpg"));
+    main_camera = new camera;
+    second_camera = new camera;
 
     std::vector<gl_window*> windows;
     windows.push_back(new gl_window);
     windows.back()->init();
     windows.back()->set_active();
-    windows.back()->set_camera(&main_camera);
+    windows.back()->set_camera(main_camera);
     windows.back()->on_window_closed += [ &windows ](gl_window* window)
     { windows.erase(std::find(windows.begin(), windows.end(), window)); };
 
@@ -132,13 +134,16 @@ int main(int argc, char** argv)
         [](mouse_events_refiner::mouse_event_params params)
     { s.gizmo_objects()[ 0 ]->_line = {}; };
 
-    initScene();
+    mouse_events.move += [](auto params)
+    {
+        // draw ray casted from camera
+    };
 
-    s.gizmo_objects().back()->_line = { { { -1, -1 }, { .5, .5 } } };
+    initScene();
 
     windows.push_back(new gl_window);
     windows.back()->init();
-    windows.back()->set_camera(&second_camera);
+    windows.back()->set_camera(second_camera);
     windows.back()->on_window_closed += [ &windows ](gl_window* window)
     { windows.erase(std::find(windows.begin(), windows.end(), window)); };
 
@@ -178,8 +183,11 @@ int main(int argc, char** argv)
                 std::chrono::duration_cast<std::chrono::duration<double>>(
                     std::chrono::steady_clock::now().time_since_epoch())
                     .count();
-            main_camera.get_transform().set_position(
+            main_camera->get_transform().set_position(
                 { sin(timed_fraction) * 10, 0, cos(timed_fraction) * 10 });
+            main_camera->get_transform().set_rotation(glm::quatLookAt(
+                glm::normalize(-main_camera->get_transform().get_position()),
+                glm::vec3(0, 1, 0)));
 
             window->update();
         }
@@ -273,6 +281,10 @@ void initScene()
 
     s.add_gizmo_object(new gizmo_object);
 
-    main_camera.get_transform().set_position({ 10, 10, 10 });
-    second_camera.get_transform().set_position({ 0, -10, 10 });
+    main_camera->get_transform().set_position({ 10, 10, 10 });
+    second_camera->get_transform().set_position({ 0, 100.0f, 0 });
+    second_camera->get_transform().set_rotation(glm::quatLookAt(
+        glm::normalize(-second_camera->get_transform().get_position()),
+        glm::normalize(glm::vec3 { 0, 0, 1 })));
+    second_camera->set_fov(20);
 }
