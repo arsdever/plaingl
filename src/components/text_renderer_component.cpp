@@ -7,6 +7,7 @@
 
 #include "components/text_component.hpp"
 #include "font.hpp"
+#include "gizmo_drawer.hpp"
 #include "logging.hpp"
 #include "material.hpp"
 
@@ -73,8 +74,8 @@ void text_renderer_component::render()
 
         // iterate through all characters
         std::string::const_iterator c;
-        glm::vec2 scale =
-            get_game_object()->get_transform().get_scale() / 20.0f;
+        // while rendering local to world conversion is already considered
+        glm::vec2 scale = glm::vec2(1);
         glm::vec2 cursor_position = { 0.0f, 0.0f };
 
         std::string_view text_str = get_component<text_component>()->get_text();
@@ -115,19 +116,49 @@ void text_renderer_component::render()
         glDisable(GL_BLEND);
         _material->deactivate();
     }
+}
 
-    // if (_material)
-    // {
-    //     _material->set_property_value(
-    //         "model_matrix", get_game_object()->get_transform().get_matrix());
-    //     _material->activate();
+void text_renderer_component::draw_gizmos()
+{
+    gizmo_drawer::instance()->get_shader().set_uniform(
+        "model_matrix",
+        std::make_tuple(get_game_object()->get_transform().get_matrix()));
 
-    //     if (get_component<text_component>())
-    //     {
-    //         get_component<text_component>()->get_mesh()->render();
-    //     }
-    //     _material->deactivate();
-    // }
+    // while rendering local to world conversion is already considered
+    glm::vec2 scale = glm::vec2(1);
+    glm::vec2 cursor_position = { 0.0f, 0.0f };
+    std::string_view text_str = get_component<text_component>()->get_text();
+    for (auto& c : text_str)
+    {
+        const font::character& ch = (*_font)[ static_cast<size_t>(c) ];
+
+        float xpos = cursor_position.x + ch._bearing.x * scale.x;
+        float ypos = cursor_position.y - (ch._size.y - ch._bearing.y) * scale.y;
+
+        float w = ch._size.x * scale.x;
+        float h = ch._size.y * scale.y;
+
+        std::array<glm::vec2, 4> vertices = { { { xpos, ypos + h },
+                                                { xpos, ypos },
+                                                { xpos + w, ypos },
+                                                { xpos + w, ypos + h } } };
+
+        gizmo_drawer::instance()->draw_line({ vertices[ 0 ], 0 },
+                                            { vertices[ 1 ], 0 },
+                                            { 1.0f, 1.0f, 0.0f, 1.0f });
+        gizmo_drawer::instance()->draw_line({ vertices[ 1 ], 0 },
+                                            { vertices[ 2 ], 0 },
+                                            { 1.0f, 1.0f, 0.0f, 1.0f });
+        gizmo_drawer::instance()->draw_line({ vertices[ 2 ], 0 },
+                                            { vertices[ 3 ], 0 },
+                                            { 1.0f, 1.0f, 0.0f, 1.0f });
+        gizmo_drawer::instance()->draw_line({ vertices[ 3 ], 0 },
+                                            { vertices[ 0 ], 0 },
+                                            { 1.0f, 1.0f, 0.0f, 1.0f });
+        cursor_position.x +=
+            (ch._advance >> 6) *
+            scale.x; // bitshift by 6 to get value in pixels (2^6 = 64)
+    }
 }
 
 void text_renderer_component::deinit()

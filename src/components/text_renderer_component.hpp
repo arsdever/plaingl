@@ -21,6 +21,7 @@ public:
 
     void init() override;
     void render() override;
+    void draw_gizmos() override;
     void deinit() override;
 
     static constexpr std::string_view class_type_id = "text_renderer_component";

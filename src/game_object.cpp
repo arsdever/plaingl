@@ -1,8 +1,9 @@
 #include "game_object.hpp"
 
 #include "component.hpp"
+#include "components/transform_component.hpp"
 
-game_object::game_object() = default;
+game_object::game_object() { create_component<transform_component>(); }
 
 void game_object::set_selected(bool selected) { _selected = selected; }
 

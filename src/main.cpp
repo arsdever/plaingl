@@ -266,7 +266,7 @@ void initScene()
 
     s.add_object(object);
 
-    ttf.load("font.ttf", 12);
+    ttf.load("font.ttf", 30);
     _fps_text_object = new game_object;
     _fps_text_object->create_component<text_component>();
     _fps_text_object->create_component<text_renderer_component>();
@@ -275,7 +275,8 @@ void initScene()
     _fps_text_object->get_component<text_renderer_component>()->set_material(
         am->get_material("text"));
     am->get_material("text")->set_property_value("textColor", 1.0f, 1.0f, 1.0f);
-    _fps_text_object->get_transform().set_position({ 0.5f, 2.0f, 0 });
+    _fps_text_object->get_transform().set_position({ 0.5f, 2.0f, 0.0f });
+    _fps_text_object->get_transform().set_scale({ 0.01f, 0.01f, 1.0f });
 
     s.add_object(_fps_text_object);
 

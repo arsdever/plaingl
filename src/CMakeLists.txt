@@ -62,7 +62,9 @@ add_library(
   components/text_component.hpp
   components/text_component.cpp
   components/text_renderer_component.hpp
-  components/text_renderer_component.cpp)
+  components/text_renderer_component.cpp
+  components/transform_component.hpp
+  components/transform_component.cpp)
 
 target_link_libraries(${PROJECT}_lib PUBLIC ${PROJECT}_includes glfw glm
                                             profiler::lib freetype Winmm)
