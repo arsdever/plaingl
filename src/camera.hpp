@@ -21,6 +21,8 @@ public:
 
     void render();
     glm::mat4 vp_matrix() const;
+    // TODO: remove when merging
+    void debug_vp_matrix();
 
     transform& get_transform();
     const transform& get_transform() const;
@@ -35,4 +37,6 @@ private:
     bool _ortho_flag = false;
     static camera* _active_camera;
     static std::vector<camera*> _cameras;
+    // TODO: remove when merging
+    bool _debug_enabled = false;
 };

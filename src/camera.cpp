@@ -4,12 +4,19 @@
 /* clang-format on */
 
 #include <glm/glm.hpp>
+#include <glm/gtx/string_cast.hpp>
 
 #include "camera.hpp"
 
 #include "components/renderer_component.hpp"
 #include "game_object.hpp"
+#include "logging.hpp"
 #include "scene.hpp"
+
+namespace
+{
+static logger log() { return get_logger("camera"); }
+} // namespace
 
 camera::camera() { _cameras.push_back(this); }
 
@@ -63,10 +70,17 @@ glm::mat4 camera::vp_matrix() const
     // TODO: optimize with caching
     glm::mat4 p_projection = glm::perspective(
         glm::radians(_fov), _render_size.x / _render_size.y, 0.01f, 10000.0f);
-    glm::mat4 o_projection = glm::ortho(-(_render_size / 2.0f).x / 50.0f,
-                                        (_render_size / 2.0f).x / 50.0f,
-                                        -(_render_size / 2.0f).y / 50.0f,
-                                        (_render_size / 2.0f).y / 50.0f, 0.01f, 10000.0f);
+    glm::mat4 o_projection = glm::ortho(
+        -_render_size.x /
+            glm::distance(get_transform().get_position(), { 0, 0, 0 }),
+        _render_size.x /
+            glm::distance(get_transform().get_position(), { 0, 0, 0 }),
+        -_render_size.y /
+            glm::distance(get_transform().get_position(), { 0, 0, 0 }),
+        _render_size.y /
+            glm::distance(get_transform().get_position(), { 0, 0, 0 }),
+        0.01f,
+        10000.0f);
 
     glm::mat4 projection = _ortho_flag ? o_projection : p_projection;
     glm::vec3 direction =
@@ -81,7 +95,35 @@ glm::mat4 camera::vp_matrix() const
     view = glm::inverse(glm::translate(glm::identity<glm::mat4>(),
                                        get_transform().get_position()) *
                         view);
+
+    // TODO: remove when merging
+    if (_debug_enabled)
+    {
+        glm::mat4 lookView = glm::lookAt(
+            get_transform().get_position(), { 0, 0, 0 }, { 0, 1, 0 });
+        log()->info("PProj mat {}", glm::to_string(p_projection));
+        log()->info("OProj mat {}", glm::to_string(o_projection));
+        log()->info("Camera position {}",
+                    glm::to_string(get_transform().get_position()));
+        log()->info("Camera view matrix vectors: right {} | forward "
+                    "{} | up {}",
+                    glm::to_string(cam_right),
+                    glm::to_string(cam_forward),
+                    glm::to_string(cam_up));
+        log()->info("View mat {}", glm::to_string(view));
+        log()->info("Look mat {}", glm::to_string(lookView));
+        log()->info("Proj mat {}", glm::to_string(projection));
+    }
+
     return projection * view;
+}
+
+// TODO: remove when merging
+void camera::debug_vp_matrix()
+{
+    _debug_enabled = true;
+    vp_matrix();
+    _debug_enabled = false;
 }
 
 transform& camera::get_transform() { return _transformation; }

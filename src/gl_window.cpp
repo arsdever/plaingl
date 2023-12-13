@@ -127,16 +127,6 @@ void gl_window::init()
     configure_object_index_mapping();
 
     _state = state::initialized;
-
-    // TODO: may not be the best place for object initialization
-    // Probably should be done in some sort of scene loading procedure
-    if (scene::get_active_scene())
-    {
-        for (auto* obj : scene::get_active_scene()->objects())
-        {
-            obj->init();
-        }
-    }
 }
 
 void gl_window::set_active() { glfwMakeContextCurrent(_window); }
