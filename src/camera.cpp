@@ -19,6 +19,8 @@ void camera::set_fov(float fov) { _fov = fov; }
 
 float camera::get_fov() const { return _fov; }
 
+void camera::set_ortho(bool ortho_flag) { _ortho_flag = ortho_flag; }
+
 float camera::get_aspect_ratio() const
 {
     return _render_size.x / _render_size.y;
@@ -58,8 +60,15 @@ void camera::render()
 
 glm::mat4 camera::vp_matrix() const
 {
-    glm::mat4 projection = glm::perspective(
-        glm::radians(_fov), _render_size.x / _render_size.y, 0.1f, 10000.0f);
+    // TODO: optimize with caching
+    glm::mat4 p_projection = glm::perspective(
+        glm::radians(_fov), _render_size.x / _render_size.y, 0.01f, 10000.0f);
+    glm::mat4 o_projection = glm::ortho(-(_render_size / 2.0f).x / 50.0f,
+                                        (_render_size / 2.0f).x / 50.0f,
+                                        -(_render_size / 2.0f).y / 50.0f,
+                                        (_render_size / 2.0f).y / 50.0f, 0.01f, 10000.0f);
+
+    glm::mat4 projection = _ortho_flag ? o_projection : p_projection;
     glm::vec3 direction =
         get_transform().get_rotation() * glm::vec3 { 0, 0, -1 };
     glm::vec3 cam_right =

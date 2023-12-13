@@ -57,6 +57,8 @@ mouse_events_refiner mouse_events;
 game_object* _fps_text_object;
 texture* txt;
 texture* norm_txt;
+
+std::array<camera*, 3> _view_cameras { nullptr };
 } // namespace
 
 void process_console();
@@ -86,6 +88,19 @@ int main(int argc, char** argv)
     second_camera = new camera;
 
     std::vector<gl_window*> windows;
+
+    for (auto& cam : _view_cameras)
+    {
+        cam = new camera;
+        auto* window = new gl_window;
+        windows.push_back(window);
+        window->resize(200, 200);
+        window->init();
+        window->set_camera(cam);
+        window->on_window_closed += [ &windows ](gl_window* window)
+        { windows.erase(std::find(windows.begin(), windows.end(), window)); };
+    }
+
     windows.push_back(new gl_window);
     windows.back()->init();
     windows.back()->set_active();
@@ -177,22 +192,22 @@ int main(int argc, char** argv)
 
     while (!windows.empty())
     {
+        double timed_fraction =
+            std::chrono::duration_cast<std::chrono::duration<double>>(
+                std::chrono::steady_clock::now().time_since_epoch())
+                .count();
+        main_camera->get_transform().set_position(
+            { sin(timed_fraction) * 10, 0, cos(timed_fraction) * 10 });
+        main_camera->get_transform().set_rotation(glm::quatLookAt(
+            glm::normalize(-main_camera->get_transform().get_position()),
+            glm::vec3(0, 1, 0)));
+        main_camera_object->get_transform() = main_camera->get_transform();
+
         for (int i = 0; i < windows.size(); ++i)
         {
             auto p = prof::profile_frame(__FUNCTION__);
             auto window = windows[ i ];
             window->set_active();
-            double timed_fraction =
-                std::chrono::duration_cast<std::chrono::duration<double>>(
-                    std::chrono::steady_clock::now().time_since_epoch())
-                    .count();
-            main_camera->get_transform().set_position(
-                { sin(timed_fraction) * 10, 0, cos(timed_fraction) * 10 });
-            main_camera->get_transform().set_rotation(glm::quatLookAt(
-                glm::normalize(-main_camera->get_transform().get_position()),
-                glm::vec3(0, 1, 0)));
-            main_camera_object->get_transform() = main_camera->get_transform();
-
             window->update();
         }
         clock->frame();
@@ -261,13 +276,24 @@ void initScene()
     basic_mat->set_property_value("light_color", 1.0f, 0.9f, 0.8f);
     basic_mat->set_property_value("light_intensity", 1.0f);
 
+    _view_cameras[ 0 ]->get_transform().set_position({ 100, 0, 0 });
+    _view_cameras[ 0 ]->get_transform().set_rotation(glm::quatLookAt(
+        glm::vec3 { -1.0f, 0.0f, 0.0f }, glm::vec3 { 0.0f, 1.0f, 0.0f }));
+
+    _view_cameras[ 1 ]->get_transform().set_position({ 0, 100, 0 });
+    _view_cameras[ 1 ]->get_transform().set_rotation(glm::quatLookAt(
+        glm::vec3 { 0.0f, -1.0f, 0.0f }, glm::vec3 { 0.0f, 0.0f, 1.0f }));
+
+    _view_cameras[ 2 ]->get_transform().set_position({ 0, 0, 100 });
+    _view_cameras[ 2 ]->get_transform().set_rotation(glm::quatLookAt(
+        glm::vec3 { 0.0f, 0.0f, -1.0f }, glm::vec3 { 0.0f, 1.0f, 0.0f }));
+
     game_object* object = new game_object;
     object->create_component<mesh_component>();
     object->create_component<mesh_renderer_component>();
     object->create_component<jumpy_component>();
     object->get_component<mesh_component>()->set_mesh(am->meshes()[ 2 ]);
     object->get_component<mesh_renderer_component>()->set_material(basic_mat);
-
     s.add_object(object);
 
     main_camera_object = new game_object();
