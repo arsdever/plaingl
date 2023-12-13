@@ -20,6 +20,12 @@ public:
     void draw_gizmos();
     void deinit();
 
+    void set_active(bool active_flag = true);
+    bool is_active() const;
+
+    void set_name(std::string_view name);
+    std::string_view get_name() const;
+
     transform& get_transform();
     const transform& get_transform() const;
 
@@ -48,6 +54,8 @@ public:
 private:
     transform _transformation;
     bool _selected = false;
+    bool _is_active = true;
+    std::string _name;
 
     std::vector<component*> _components;
 };

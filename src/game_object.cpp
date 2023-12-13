@@ -19,6 +19,11 @@ void game_object::init()
 
 void game_object::update()
 {
+    if (!is_active())
+    {
+        return;
+    }
+
     for (auto& c : _components)
     {
         c->update();
@@ -27,6 +32,11 @@ void game_object::update()
 
 void game_object::draw_gizmos()
 {
+    if (!is_active())
+    {
+        return;
+    }
+
     for (auto& c : _components)
     {
         c->draw_gizmos();
@@ -40,6 +50,16 @@ void game_object::deinit()
         c->deinit();
     }
 }
+
+void game_object::set_active(bool active_flag) { _is_active = active_flag; }
+
+bool game_object::is_active() const { return _is_active; }
+
+void game_object::set_name(std::string_view name) {
+    _name = std::string { name };
+}
+
+std::string_view game_object::get_name() const { return _name; }
 
 transform& game_object::get_transform() { return _transformation; }
 
