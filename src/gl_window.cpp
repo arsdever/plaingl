@@ -202,6 +202,9 @@ void gl_window::draw()
     {
         for (auto* obj : s->objects())
         {
+            gizmo_drawer::instance()->get_shader().set_uniform(
+                "model_matrix",
+                std::make_tuple(obj->get_transform().get_matrix()));
             obj->draw_gizmos();
         }
     }

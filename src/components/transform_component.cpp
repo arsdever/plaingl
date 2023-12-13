@@ -11,14 +11,12 @@ transform_component::transform_component(game_object* parent)
 
 void transform_component::draw_gizmos()
 {
-    gizmo_drawer::instance()->get_shader().set_uniform(
-        "model_matrix", std::make_tuple(get_matrix()));
     gizmo_drawer::instance()->draw_line(
-        { 0, 0, 0 }, { 0, 0, 1 }, { 0, 0, 1, 1 });
+        { 0, 0, 0 }, { 1, 0, 0 }, { 1, 0, 0, 1 });
     gizmo_drawer::instance()->draw_line(
         { 0, 0, 0 }, { 0, 1, 0 }, { 0, 1, 0, 1 });
     gizmo_drawer::instance()->draw_line(
-        { 0, 0, 0 }, { 1, 0, 0 }, { 1, 0, 0, 1 });
+        { 0, 0, 0 }, { 0, 0, 1 }, { 0, 0, 1, 1 });
 }
 
 void transform_component::set_position(glm::vec3 position)
