@@ -4,6 +4,7 @@
 /* clang-format on */
 
 #include <glm/ext.hpp>
+#include <glm/gtx/string_cast.hpp>
 #include <prof/profiler.hpp>
 
 #include "gl_window.hpp"
@@ -156,6 +157,16 @@ void gl_window::resize(size_t width, size_t height)
         glfwSetWindowSize(_window, width, height);
     }
 }
+
+glm::vec<2, size_t> gl_window::position() const
+{
+    int xpos = 0;
+    int ypos = 0;
+    glfwGetWindowPos(_window, &xpos, &ypos);
+    return { xpos, ypos };
+}
+
+void gl_window::move(size_t x, size_t y) { glfwSetWindowPos(_window, x, y); }
 
 void gl_window::update()
 {
