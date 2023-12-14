@@ -46,6 +46,8 @@ add_library(
   transform.cpp
   uniform_info.hpp
   utils.hpp
+  viewport.hpp
+  viewport.cpp
   glad/src/gl.c
   asset_loaders/asset_loader.hpp
   components/camera_component.hpp
