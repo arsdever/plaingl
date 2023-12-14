@@ -10,6 +10,7 @@ class gizmo_drawer
 public:
     void init();
 
+    void draw_ray(glm::vec3 pos, glm::vec3 dir, float length, glm::vec4 color);
     void draw_line(glm::vec3 p1, glm::vec3 p2, glm::vec4 color);
     void draw_line_2d(glm::vec2 p1, glm::vec2 p2, glm::vec4 color);
 

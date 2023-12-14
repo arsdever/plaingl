@@ -1,6 +1,7 @@
 #include <array>
 
 #include <glad/gl.h>
+#include <glm/ext.hpp>
 
 #include "gizmo_drawer.hpp"
 
@@ -14,6 +15,32 @@ void gizmo_drawer::init()
     shader_program::unuse();
 }
 
+void gizmo_drawer::draw_ray(glm::vec3 pos,
+                            glm::vec3 dir,
+                            float length,
+                            glm::vec4 color)
+{
+    glm::vec3 endpoint = pos + dir * length;
+    glm::quat look_rotation = glm::quatLookAt(dir, { 0, 1, 0 });
+    glm::vec3 right = look_rotation *
+                      glm::quat(glm::radians(glm::vec3 { 0, 210, 0 })) *
+                      glm::vec3 { 0, 0, 1 };
+    glm::vec3 left = look_rotation *
+                     glm::quat(glm::radians(glm::vec3 { 0, 150, 0 })) *
+                     glm::vec3 { 0, 0, 1 };
+    glm::vec3 up = look_rotation *
+                   glm::quat(glm::radians(glm::vec3 { 210, 0, 0 })) *
+                   glm::vec3 { 0, 0, 1 };
+    glm::vec3 down = look_rotation *
+                     glm::quat(glm::radians(glm::vec3 { 150, 0, 0 })) *
+                     glm::vec3 { 0, 0, 1 };
+
+    draw_line(pos, endpoint, color);
+    draw_line(endpoint, endpoint - right * length * 0.1f, color);
+    draw_line(endpoint, endpoint - left * length * 0.1f, color);
+    draw_line(endpoint, endpoint - up * length * 0.1f, color);
+    draw_line(endpoint, endpoint - down * length * 0.1f, color);
+}
 void gizmo_drawer::draw_line(glm::vec3 p1, glm::vec3 p2, glm::vec4 color)
 {
     _gizmo_shader.set_uniform(

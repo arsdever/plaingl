@@ -213,6 +213,8 @@ void gl_window::draw()
     }
 }
 
+camera* gl_window::get_camera() const { return _view_camera; }
+
 void gl_window::set_camera(camera* view_camera)
 {
     _view_camera = view_camera;

@@ -25,6 +25,7 @@
 #include "components/jumpy_component.hpp"
 #include "components/mesh_component.hpp"
 #include "components/mesh_renderer_component.hpp"
+#include "components/ray_visualize_component.hpp"
 #include "components/text_component.hpp"
 #include "components/text_renderer_component.hpp"
 #include "font.hpp"
@@ -54,6 +55,7 @@ mouse_events_refiner mouse_events;
 game_object* _fps_text_object;
 texture* txt;
 texture* norm_txt;
+ray_visualize_component* cast_ray;
 
 std::array<camera*, 3> _view_cameras { nullptr };
 } // namespace
@@ -165,6 +167,17 @@ int main(int argc, char** argv)
     mouse_events.move += [](auto params)
     {
         // draw ray casted from camera
+        auto pos = params._window->get_camera()->get_transform().get_position();
+        auto rot = params._window->get_camera()->get_transform().get_rotation();
+        glm::vec3 point = glm::unProject(
+            glm::vec3 { params._position.x,
+                        params._window->height() - params._position.y,
+                        0 },
+            params._window->get_camera()->view_matrix(),
+            params._window->get_camera()->projection_matrix(),
+            glm::vec4 {
+                0, 0, params._window->width(), params._window->height() });
+        cast_ray->set_ray(pos, glm::normalize(point - pos));
     };
 
     initScene();
@@ -209,7 +222,7 @@ int main(int argc, char** argv)
                 .count() /
             3.0f;
         main_camera->get_transform().set_position(
-            { sin(timed_fraction) * 3.0f, 0.0f, cos(timed_fraction) * 3.0f });
+            { sin(timed_fraction) * 3.0f, cos(timed_fraction) * 3.0f, 5.0f });
         main_camera->get_transform().set_rotation(glm::quatLookAt(
             glm::normalize(main_camera->get_transform().get_position()),
             glm::vec3(0, 1, 0)));
@@ -307,8 +320,13 @@ void initScene()
     object->get_component<mesh_component>()->set_mesh(am->meshes()[ 2 ]);
     object->get_component<mesh_renderer_component>()->set_material(basic_mat);
     object->set_name("susane");
-    // object->set_active(false);
     s.add_object(object);
+
+    game_object* ray = new game_object;
+    cast_ray = ray->create_component<ray_visualize_component>();
+    ray->set_name("cast_ray");
+    s.add_object(ray);
+    cast_ray->set_ray({ 0, 0, 0 }, { 0, 0, 1 });
 
     main_camera_object = new game_object();
     main_camera_object->create_component<camera_component>();

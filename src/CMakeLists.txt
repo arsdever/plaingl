@@ -58,6 +58,8 @@ add_library(
   components/mesh_component.cpp
   components/mesh_renderer_component.hpp
   components/mesh_renderer_component.cpp
+  components/ray_visualize_component.hpp
+  components/ray_visualize_component.cpp
   components/renderer_component.hpp
   components/text_component.hpp
   components/text_component.cpp
