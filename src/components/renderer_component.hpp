@@ -15,6 +15,8 @@ public:
 
     inline material* get_material() const { return _material; }
 
+    inline void set_material(material* mat) { _material = mat; }
+
     virtual void render() = 0;
 
     static constexpr std::string_view class_type_id = "renderer_component";

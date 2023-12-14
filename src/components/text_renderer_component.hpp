@@ -16,8 +16,6 @@ public:
     void set_font(font* ttf);
     font* get_font();
 
-    void set_material(material* mat);
-
     void init() override;
     void render() override;
     void draw_gizmos() override;

@@ -22,8 +22,6 @@ mesh_renderer_component::mesh_renderer_component(game_object* parent)
     }
 }
 
-void mesh_renderer_component::set_material(material* mat) { _material = mat; }
-
 void mesh_renderer_component::render()
 {
     if (_material)

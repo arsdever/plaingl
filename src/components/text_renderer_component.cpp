@@ -32,8 +32,6 @@ void text_renderer_component::set_font(font* ttf) { _font = ttf; }
 
 font* text_renderer_component::get_font() { return _font; }
 
-void text_renderer_component::set_material(material* mat) { _material = mat; }
-
 void text_renderer_component::init()
 {
     glGenBuffers(1, &tvbo);
