@@ -17,7 +17,6 @@ public:
     font* get_font();
 
     void set_material(material* mat);
-    material* get_material();
 
     void init() override;
     void render() override;
@@ -27,7 +26,6 @@ public:
     static constexpr std::string_view class_type_id = "text_renderer_component";
 
 private:
-    material* _material = nullptr;
     font* _font = nullptr;
     std::unordered_map<GLFWwindow*, unsigned int> _vao_map;
     unsigned tvbo = 0;

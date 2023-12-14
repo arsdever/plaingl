@@ -34,8 +34,6 @@ font* text_renderer_component::get_font() { return _font; }
 
 void text_renderer_component::set_material(material* mat) { _material = mat; }
 
-material* text_renderer_component::get_material() { return _material; }
-
 void text_renderer_component::init()
 {
     glGenBuffers(1, &tvbo);
@@ -48,9 +46,6 @@ void text_renderer_component::render()
 {
     if (_material && get_component<text_component>())
     {
-        _material->set_property_value(
-            "model_matrix", get_game_object()->get_transform().get_matrix());
-
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         _material->activate();

@@ -10,6 +10,7 @@
 #include "components/renderer_component.hpp"
 #include "game_object.hpp"
 #include "logging.hpp"
+#include "material.hpp"
 #include "scene.hpp"
 
 namespace
@@ -55,9 +56,16 @@ void camera::render()
     {
         for (auto* obj : scene::get_active_scene()->objects())
         {
-            if (obj->is_active() && obj->get_component<renderer_component>())
+            if (!obj->is_active())
             {
-                obj->get_component<renderer_component>()->render();
+                continue;
+            }
+            if (auto* renderer = obj->get_component<renderer_component>();
+                renderer)
+            {
+                renderer->get_material()->set_property_value(
+                    "model_matrix", obj->get_transform().get_matrix());
+                renderer->render();
             }
         }
     }
