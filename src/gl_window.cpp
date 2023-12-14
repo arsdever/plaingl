@@ -14,7 +14,6 @@
 #include "components/mesh_component.hpp"
 #include "game_object.hpp"
 #include "gizmo_drawer.hpp"
-#include "gizmo_object.hpp"
 #include "gl_error_handler.hpp"
 #include "logging.hpp"
 #include "material.hpp"

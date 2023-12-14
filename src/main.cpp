@@ -30,7 +30,6 @@
 #include "font.hpp"
 #include "game_clock.hpp"
 #include "game_object.hpp"
-#include "gizmo_object.hpp"
 #include "gl_window.hpp"
 #include "image.hpp"
 #include "logging.hpp"
@@ -152,7 +151,6 @@ int main(int argc, char** argv)
         from.y = params._window->height() - from.y;
         to.y = params._window->height() - to.y;
         log()->trace("dragging started from position ({}, {})", from.x, from.y);
-        s.gizmo_objects()[ 0 ]->_line = { from, to };
     };
     mouse_events.drag_drop_move +=
         [](mouse_events_refiner::mouse_event_params params)
@@ -160,11 +158,9 @@ int main(int argc, char** argv)
         glm::vec2 to = params._position;
         to.y = params._window->height() - to.y;
         log()->trace("dragging to position ({}, {})", to.x, to.y);
-        s.gizmo_objects()[ 0 ]->_line.value()[ 1 ] = to;
     };
     mouse_events.drag_drop_end +=
-        [](mouse_events_refiner::mouse_event_params params)
-    { s.gizmo_objects()[ 0 ]->_line = {}; };
+        [](mouse_events_refiner::mouse_event_params params) {};
 
     mouse_events.move += [](auto params)
     {

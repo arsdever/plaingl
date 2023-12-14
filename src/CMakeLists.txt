@@ -19,8 +19,6 @@ add_library(
   game_object.cpp
   gizmo_drawer.hpp
   gizmo_drawer.cpp
-  gizmo_object.hpp
-  gizmo_object.cpp
   gl_error_handler.hpp
   gl_error_handler.cpp
   gl_window.hpp
