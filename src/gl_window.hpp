@@ -27,12 +27,15 @@ public:
 
     size_t width() const;
     size_t height() const;
-
     void resize(size_t width, size_t height);
+
+    glm::vec<2, size_t> position() const;
+    void move(size_t x, size_t y);
 
     void update();
     void draw();
 
+    camera* get_camera() const;
     void set_camera(camera* view_camera);
 
     void toggle_indexing();

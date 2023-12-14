@@ -19,6 +19,5 @@ public:
 
 private:
     shader_program _gizmo_shader;
-    unsigned _color_location;
     static gizmo_drawer* _instance;
 };

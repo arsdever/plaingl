@@ -11,12 +11,13 @@ void gizmo_drawer::init()
     _gizmo_shader.add_shader("gizmo.frag");
     _gizmo_shader.link();
     _gizmo_shader.use();
-    _color_location = glGetUniformLocation(_gizmo_shader.id(), "color");
     shader_program::unuse();
 }
 
 void gizmo_drawer::draw_line(glm::vec3 p1, glm::vec3 p2, glm::vec4 color)
 {
+    _gizmo_shader.set_uniform(
+        "color", std::make_tuple(color.r, color.g, color.b, color.a));
     _gizmo_shader.use();
     unsigned vao;
     unsigned vbo;
@@ -37,7 +38,6 @@ void gizmo_drawer::draw_line(glm::vec3 p1, glm::vec3 p2, glm::vec4 color)
 
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
-    glUniform4fv(_color_location, 1, glm::value_ptr(color));
     glDrawArrays(GL_LINES, 0, 2);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glDeleteBuffers(1, &vbo);
@@ -48,6 +48,8 @@ void gizmo_drawer::draw_line(glm::vec3 p1, glm::vec3 p2, glm::vec4 color)
 
 void gizmo_drawer::draw_line_2d(glm::vec2 p1, glm::vec2 p2, glm::vec4 color)
 {
+    _gizmo_shader.set_uniform(
+        "color", std::make_tuple(color.r, color.g, color.b, color.a));
     _gizmo_shader.use();
     unsigned vao;
     unsigned vbo;
@@ -68,7 +70,6 @@ void gizmo_drawer::draw_line_2d(glm::vec2 p1, glm::vec2 p2, glm::vec4 color)
 
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
-    glUniform4fv(_color_location, 1, glm::value_ptr(color));
     glDrawArrays(GL_LINES, 0, 2);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glDeleteBuffers(1, &vbo);

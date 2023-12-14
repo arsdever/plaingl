@@ -8,6 +8,8 @@ component::component(game_object* parent, std::string_view type_id)
 {
 }
 
+component::~component() = default;
+
 std::string_view component::type_id() const { return _type_id; }
 
 void component::init()
@@ -16,6 +18,11 @@ void component::init()
 }
 
 void component::update()
+{
+    // by default do nothing
+}
+
+void component::draw_gizmos()
 {
     // by default do nothing
 }

@@ -19,8 +19,6 @@ add_library(
   game_object.cpp
   gizmo_drawer.hpp
   gizmo_drawer.cpp
-  gizmo_object.hpp
-  gizmo_object.cpp
   gl_error_handler.hpp
   gl_error_handler.cpp
   gl_window.hpp
@@ -50,6 +48,8 @@ add_library(
   utils.hpp
   glad/src/gl.c
   asset_loaders/asset_loader.hpp
+  components/camera_component.hpp
+  components/camera_component.cpp
   components/fps_show_component.hpp
   components/fps_show_component.cpp
   components/jumpy_component.hpp
@@ -58,10 +58,13 @@ add_library(
   components/mesh_component.cpp
   components/mesh_renderer_component.hpp
   components/mesh_renderer_component.cpp
+  components/renderer_component.hpp
   components/text_component.hpp
   components/text_component.cpp
   components/text_renderer_component.hpp
-  components/text_renderer_component.cpp)
+  components/text_renderer_component.cpp
+  components/transform_component.hpp
+  components/transform_component.cpp)
 
 target_link_libraries(${PROJECT}_lib PUBLIC ${PROJECT}_includes glfw glm
                                             profiler::lib freetype Winmm)

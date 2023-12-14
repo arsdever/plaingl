@@ -9,11 +9,15 @@ class component
 public:
     component(game_object* parent, std::string_view type_id);
 
+    virtual ~component();
+
     std::string_view type_id() const;
 
     virtual void init();
 
     virtual void update();
+
+    virtual void draw_gizmos();
 
     virtual void deinit();
 

@@ -20,6 +20,7 @@
 #include "asset_manager.hpp"
 #include "camera.hpp"
 #include "color.hpp"
+#include "components/camera_component.hpp"
 #include "components/fps_show_component.hpp"
 #include "components/jumpy_component.hpp"
 #include "components/mesh_component.hpp"
@@ -29,7 +30,6 @@
 #include "font.hpp"
 #include "game_clock.hpp"
 #include "game_object.hpp"
-#include "gizmo_object.hpp"
 #include "gl_window.hpp"
 #include "image.hpp"
 #include "logging.hpp"
@@ -48,12 +48,14 @@ unsigned last_fps;
 font ttf;
 scene s;
 std::unordered_set<int> pressed_keys;
-camera main_camera;
-camera second_camera;
+camera* main_camera;
+game_object* main_camera_object;
 mouse_events_refiner mouse_events;
 game_object* _fps_text_object;
 texture* txt;
 texture* norm_txt;
+
+std::array<camera*, 3> _view_cameras { nullptr };
 } // namespace
 
 void process_console();
@@ -78,13 +80,44 @@ int main(int argc, char** argv)
     auto* am = asset_manager::default_asset_manager();
     am->load_asset("sample.png");
     am->load_asset("sample_jpg.jpg");
-    texture_viewer::show_preview(am->get_image("sample_jpg"));
+    // texture_viewer::show_preview(am->get_image("sample_jpg"));
+    main_camera = new camera;
 
     std::vector<gl_window*> windows;
+
+    for (auto& cam : _view_cameras)
+    {
+        mouse_events_refiner* me = new mouse_events_refiner;
+        cam = new camera;
+        auto* window = new gl_window;
+        windows.push_back(window);
+        window->resize(400, 400);
+        window->init();
+        window->set_camera(cam);
+        window->set_mouse_events_refiner(me);
+        cam->set_ortho(true);
+        window->on_window_closed += [ &windows ](gl_window* window)
+        { windows.erase(std::find(windows.begin(), windows.end(), window)); };
+
+        me->scroll += [ cam ](auto params)
+        {
+            cam->get_transform().set_position(
+                cam->get_transform().get_position() *
+                std::pow<float>(1.2, params._delta.y));
+        };
+    }
+
+    glm::vec2 wpos = windows[ 0 ]->position();
+    windows[ 1 ]->move(wpos.x + windows[ 0 ]->width(), wpos.y);
+    windows[ 2 ]->move(wpos.x, wpos.y + windows[ 0 ]->height());
+
     windows.push_back(new gl_window);
     windows.back()->init();
+    windows.back()->move(wpos.x + windows[ 0 ]->width(),
+                         wpos.y + windows[ 0 ]->height());
+    windows.back()->resize(400, 400);
     windows.back()->set_active();
-    windows.back()->set_camera(&main_camera);
+    windows.back()->set_camera(main_camera);
     windows.back()->on_window_closed += [ &windows ](gl_window* window)
     { windows.erase(std::find(windows.begin(), windows.end(), window)); };
 
@@ -118,7 +151,6 @@ int main(int argc, char** argv)
         from.y = params._window->height() - from.y;
         to.y = params._window->height() - to.y;
         log()->trace("dragging started from position ({}, {})", from.x, from.y);
-        s.gizmo_objects()[ 0 ]->_line = { from, to };
     };
     mouse_events.drag_drop_move +=
         [](mouse_events_refiner::mouse_event_params params)
@@ -126,24 +158,26 @@ int main(int argc, char** argv)
         glm::vec2 to = params._position;
         to.y = params._window->height() - to.y;
         log()->trace("dragging to position ({}, {})", to.x, to.y);
-        s.gizmo_objects()[ 0 ]->_line.value()[ 1 ] = to;
     };
     mouse_events.drag_drop_end +=
-        [](mouse_events_refiner::mouse_event_params params)
-    { s.gizmo_objects()[ 0 ]->_line = {}; };
+        [](mouse_events_refiner::mouse_event_params params) {};
+
+    mouse_events.move += [](auto params)
+    {
+        // draw ray casted from camera
+    };
 
     initScene();
 
-    s.gizmo_objects().back()->_line = { { { -1, -1 }, { .5, .5 } } };
-
-    windows.push_back(new gl_window);
-    windows.back()->init();
-    windows.back()->set_camera(&second_camera);
-    windows.back()->on_window_closed += [ &windows ](gl_window* window)
-    { windows.erase(std::find(windows.begin(), windows.end(), window)); };
-
-    // windows.front()->toggle_indexing();
-    // windows.back()->toggle_indexing();
+    // TODO: may not be the best place for object initialization
+    // Probably should be done in some sort of scene loading procedure
+    if (scene::get_active_scene())
+    {
+        for (auto* obj : scene::get_active_scene()->objects())
+        {
+            obj->init();
+        }
+    }
 
     // start a physics thread
     // TODO: these should move into physics engine class
@@ -169,18 +203,23 @@ int main(int argc, char** argv)
 
     while (!windows.empty())
     {
+        double timed_fraction =
+            std::chrono::duration_cast<std::chrono::duration<double>>(
+                std::chrono::steady_clock::now().time_since_epoch())
+                .count() /
+            3.0f;
+        main_camera->get_transform().set_position(
+            { sin(timed_fraction) * 3.0f, 0.0f, cos(timed_fraction) * 3.0f });
+        main_camera->get_transform().set_rotation(glm::quatLookAt(
+            glm::normalize(main_camera->get_transform().get_position()),
+            glm::vec3(0, 1, 0)));
+        main_camera_object->get_transform() = main_camera->get_transform();
+
         for (int i = 0; i < windows.size(); ++i)
         {
             auto p = prof::profile_frame(__FUNCTION__);
             auto window = windows[ i ];
             window->set_active();
-            double timed_fraction =
-                std::chrono::duration_cast<std::chrono::duration<double>>(
-                    std::chrono::steady_clock::now().time_since_epoch())
-                    .count();
-            main_camera.get_transform().set_position(
-                { sin(timed_fraction) * 10, 0, cos(timed_fraction) * 10 });
-
             window->update();
         }
         clock->frame();
@@ -249,16 +288,36 @@ void initScene()
     basic_mat->set_property_value("light_color", 1.0f, 0.9f, 0.8f);
     basic_mat->set_property_value("light_intensity", 1.0f);
 
+    _view_cameras[ 0 ]->get_transform().set_position({ 100, 0, 0 });
+    _view_cameras[ 0 ]->get_transform().set_rotation(glm::quatLookAt(
+        glm::vec3 { 1.0f, 0.0f, 0.0f }, glm::vec3 { 0.0f, 1.0f, 0.0f }));
+
+    _view_cameras[ 1 ]->get_transform().set_position({ 0, 100, 0 });
+    _view_cameras[ 1 ]->get_transform().set_rotation(glm::quatLookAt(
+        glm::vec3 { 0.0f, 1.0f, 0.0f }, glm::vec3 { 0.0f, 0.0f, 1.0f }));
+
+    _view_cameras[ 2 ]->get_transform().set_position({ 0, 0, 100 });
+    _view_cameras[ 2 ]->get_transform().set_rotation(glm::quatLookAt(
+        glm::vec3 { 0.0f, 0.0f, 1.0f }, glm::vec3 { 0.0f, 1.0f, 0.0f }));
+
     game_object* object = new game_object;
     object->create_component<mesh_component>();
     object->create_component<mesh_renderer_component>();
     object->create_component<jumpy_component>();
     object->get_component<mesh_component>()->set_mesh(am->meshes()[ 2 ]);
     object->get_component<mesh_renderer_component>()->set_material(basic_mat);
-
+    object->set_name("susane");
+    // object->set_active(false);
     s.add_object(object);
 
-    ttf.load("font.ttf", 12);
+    main_camera_object = new game_object();
+    main_camera_object->create_component<camera_component>();
+    main_camera_object->get_component<camera_component>()->set_camera(
+        main_camera);
+    main_camera_object->set_name("main_camera");
+    s.add_object(main_camera_object);
+
+    ttf.load("font.ttf", 30);
     _fps_text_object = new game_object;
     _fps_text_object->create_component<text_component>();
     _fps_text_object->create_component<text_renderer_component>();
@@ -267,12 +326,19 @@ void initScene()
     _fps_text_object->get_component<text_renderer_component>()->set_material(
         am->get_material("text"));
     am->get_material("text")->set_property_value("textColor", 1.0f, 1.0f, 1.0f);
-    _fps_text_object->get_transform().set_position({ 0.5f, 2.0f, 0 });
-
+    _fps_text_object->get_transform().set_position({ 0.5f, 2.0f, 0.0f });
+    _fps_text_object->get_transform().set_scale({ 0.01f, 0.01f, 1.0f });
+    _fps_text_object->set_name("fps_text");
     s.add_object(_fps_text_object);
 
-    s.add_gizmo_object(new gizmo_object);
-
-    main_camera.get_transform().set_position({ 10, 10, 10 });
-    second_camera.get_transform().set_position({ 0, -10, 10 });
+    main_camera->get_transform().set_position({ 0, 0, 10 });
+    main_camera->get_transform().set_rotation(
+        glm::quatLookAt(glm::vec3 { 0.0f, 0.0f, 1.0f },
+                        glm::vec3 {
+                            0.0f,
+                            1.0f,
+                            0.0f,
+                        }));
+    main_camera_object->get_transform() = main_camera->get_transform();
+    main_camera->set_ortho(false);
 }
