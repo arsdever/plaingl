@@ -202,6 +202,10 @@ void gl_window::draw()
     {
         for (auto* obj : s->objects())
         {
+            if (!obj->is_active())
+            {
+                continue;
+            }
             gizmo_drawer::instance()->get_shader().set_uniform(
                 "model_matrix",
                 std::make_tuple(obj->get_transform().get_matrix()));

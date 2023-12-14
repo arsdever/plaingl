@@ -81,7 +81,7 @@ int main(int argc, char** argv)
     auto* am = asset_manager::default_asset_manager();
     am->load_asset("sample.png");
     am->load_asset("sample_jpg.jpg");
-    texture_viewer::show_preview(am->get_image("sample_jpg"));
+    // texture_viewer::show_preview(am->get_image("sample_jpg"));
     main_camera = new camera;
 
     std::vector<gl_window*> windows;
@@ -210,11 +210,12 @@ int main(int argc, char** argv)
         double timed_fraction =
             std::chrono::duration_cast<std::chrono::duration<double>>(
                 std::chrono::steady_clock::now().time_since_epoch())
-                .count();
+                .count() /
+            3.0f;
         main_camera->get_transform().set_position(
-            { sin(timed_fraction) * 10, 0, cos(timed_fraction) * 10 });
+            { sin(timed_fraction) * 3.0f, 0.0f, cos(timed_fraction) * 3.0f });
         main_camera->get_transform().set_rotation(glm::quatLookAt(
-            glm::normalize(-main_camera->get_transform().get_position()),
+            glm::normalize(main_camera->get_transform().get_position()),
             glm::vec3(0, 1, 0)));
         main_camera_object->get_transform() = main_camera->get_transform();
 
@@ -293,15 +294,15 @@ void initScene()
 
     _view_cameras[ 0 ]->get_transform().set_position({ 100, 0, 0 });
     _view_cameras[ 0 ]->get_transform().set_rotation(glm::quatLookAt(
-        glm::vec3 { -1.0f, 0.0f, 0.0f }, glm::vec3 { 0.0f, 1.0f, 0.0f }));
+        glm::vec3 { 1.0f, 0.0f, 0.0f }, glm::vec3 { 0.0f, 1.0f, 0.0f }));
 
     _view_cameras[ 1 ]->get_transform().set_position({ 0, 100, 0 });
     _view_cameras[ 1 ]->get_transform().set_rotation(glm::quatLookAt(
-        glm::vec3 { 0.0f, -1.0f, 0.0f }, glm::vec3 { 0.0f, 0.0f, 1.0f }));
+        glm::vec3 { 0.0f, 1.0f, 0.0f }, glm::vec3 { 0.0f, 0.0f, 1.0f }));
 
     _view_cameras[ 2 ]->get_transform().set_position({ 0, 0, 100 });
     _view_cameras[ 2 ]->get_transform().set_rotation(glm::quatLookAt(
-        glm::vec3 { 0.0f, 0.0f, -1.0f }, glm::vec3 { 0.0f, 1.0f, 0.0f }));
+        glm::vec3 { 0.0f, 0.0f, 1.0f }, glm::vec3 { 0.0f, 1.0f, 0.0f }));
 
     game_object* object = new game_object;
     object->create_component<mesh_component>();
@@ -310,6 +311,7 @@ void initScene()
     object->get_component<mesh_component>()->set_mesh(am->meshes()[ 2 ]);
     object->get_component<mesh_renderer_component>()->set_material(basic_mat);
     object->set_name("susane");
+    // object->set_active(false);
     s.add_object(object);
 
     main_camera_object = new game_object();
@@ -335,7 +337,7 @@ void initScene()
 
     main_camera->get_transform().set_position({ 0, 0, 10 });
     main_camera->get_transform().set_rotation(
-        glm::quatLookAt(glm::vec3 { 0.0f, 0.0f, -1.0f },
+        glm::quatLookAt(glm::vec3 { 0.0f, 0.0f, 1.0f },
                         glm::vec3 {
                             0.0f,
                             1.0f,

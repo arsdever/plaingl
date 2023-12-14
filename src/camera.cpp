@@ -3,6 +3,7 @@
 #include <GLFW/glfw3.h>
 /* clang-format on */
 
+#include <glm/ext.hpp>
 #include <glm/glm.hpp>
 #include <glm/gtx/string_cast.hpp>
 
@@ -56,7 +57,7 @@ void camera::render()
     {
         for (auto* obj : scene::get_active_scene()->objects())
         {
-            if (obj->get_component<renderer_component>())
+            if (obj->is_active() && obj->get_component<renderer_component>())
             {
                 obj->get_component<renderer_component>()->render();
             }
@@ -67,24 +68,14 @@ void camera::render()
 
 glm::mat4 camera::vp_matrix() const
 {
-    // TODO: optimize with caching
-    glm::mat4 p_projection = glm::perspective(
-        glm::radians(_fov), _render_size.x / _render_size.y, 0.01f, 10000.0f);
-    glm::mat4 o_projection = glm::ortho(
-        -_render_size.x /
-            glm::distance(get_transform().get_position(), { 0, 0, 0 }),
-        _render_size.x /
-            glm::distance(get_transform().get_position(), { 0, 0, 0 }),
-        -_render_size.y /
-            glm::distance(get_transform().get_position(), { 0, 0, 0 }),
-        _render_size.y /
-            glm::distance(get_transform().get_position(), { 0, 0, 0 }),
-        0.01f,
-        10000.0f);
+    return projection_matrix() * view_matrix();
+}
 
-    glm::mat4 projection = _ortho_flag ? o_projection : p_projection;
-    glm::vec3 direction =
-        get_transform().get_rotation() * glm::vec3 { 0, 0, -1 };
+glm::mat4 camera::view_matrix() const
+{
+    // TODO: optimize with caching
+    glm::quat rotation = get_transform().get_rotation();
+    glm::vec3 direction = rotation * glm::vec3 { 0, 0, 1 };
     glm::vec3 cam_right =
         glm::normalize(glm::cross(direction, glm::vec3 { 0, 1, 0 }));
     glm::vec3 cam_up = glm::normalize(glm::cross(cam_right, direction));
@@ -96,34 +87,29 @@ glm::mat4 camera::vp_matrix() const
                                        get_transform().get_position()) *
                         view);
 
-    // TODO: remove when merging
-    if (_debug_enabled)
-    {
-        glm::mat4 lookView = glm::lookAt(
-            get_transform().get_position(), { 0, 0, 0 }, { 0, 1, 0 });
-        log()->info("PProj mat {}", glm::to_string(p_projection));
-        log()->info("OProj mat {}", glm::to_string(o_projection));
-        log()->info("Camera position {}",
-                    glm::to_string(get_transform().get_position()));
-        log()->info("Camera view matrix vectors: right {} | forward "
-                    "{} | up {}",
-                    glm::to_string(cam_right),
-                    glm::to_string(cam_forward),
-                    glm::to_string(cam_up));
-        log()->info("View mat {}", glm::to_string(view));
-        log()->info("Look mat {}", glm::to_string(lookView));
-        log()->info("Proj mat {}", glm::to_string(projection));
-    }
-
-    return projection * view;
+    return view;
 }
 
-// TODO: remove when merging
-void camera::debug_vp_matrix()
+glm::mat4 camera::projection_matrix() const
 {
-    _debug_enabled = true;
-    vp_matrix();
-    _debug_enabled = false;
+    // TODO: optimize with caching
+    if (_ortho_flag)
+    {
+        return glm::ortho(
+            -_render_size.x /
+                glm::distance(get_transform().get_position(), { 0, 0, 0 }),
+            _render_size.x /
+                glm::distance(get_transform().get_position(), { 0, 0, 0 }),
+            -_render_size.y /
+                glm::distance(get_transform().get_position(), { 0, 0, 0 }),
+            _render_size.y /
+                glm::distance(get_transform().get_position(), { 0, 0, 0 }),
+            0.01f,
+            10000.0f);
+    }
+
+    return glm::perspective(
+        glm::radians(_fov), _render_size.x / _render_size.y, 0.01f, 10000.0f);
 }
 
 transform& camera::get_transform() { return _transformation; }

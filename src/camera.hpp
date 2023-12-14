@@ -13,22 +13,23 @@ public:
     ~camera();
 
     void set_fov(float fov);
-    float get_fov()const;
+    float get_fov() const;
     void set_ortho(bool ortho_flag = true);
     float get_aspect_ratio() const;
     camera* set_active();
     void set_render_size(float width, float height);
 
     void render();
-    glm::mat4 vp_matrix() const;
-    // TODO: remove when merging
-    void debug_vp_matrix();
 
     transform& get_transform();
     const transform& get_transform() const;
 
     static camera* active_camera();
     static const std::vector<camera*>& all_cameras();
+
+    glm::mat4 projection_matrix() const;
+    glm::mat4 view_matrix() const;
+    glm::mat4 vp_matrix() const;
 
 private:
     transform _transformation;
