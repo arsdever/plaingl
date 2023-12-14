@@ -1,4 +1,5 @@
 /* clang-format off */
+#include <bit>
 #include <glad/gl.h>
 #include <GLFW/glfw3.h>
 /* clang-format on */
@@ -13,13 +14,13 @@
 #include "camera.hpp"
 #include "components/mesh_component.hpp"
 #include "game_object.hpp"
-#include "gizmo_drawer.hpp"
 #include "gl_error_handler.hpp"
 #include "logging.hpp"
 #include "material.hpp"
 #include "mesh.hpp"
 #include "scene.hpp"
 #include "shader.hpp"
+#include "viewport.hpp"
 
 namespace
 {
@@ -105,10 +106,7 @@ void gl_window::init()
         _this->_width = w;
         _this->_height = h;
         _this->on_window_resized(_this, w, h);
-        if (_this->_view_camera)
-        {
-            _this->_view_camera->set_render_size(w, h);
-        }
+        _this->_viewports[ 0 ]->set_size(w, h);
     });
 
     {
@@ -124,6 +122,11 @@ void gl_window::init()
     _object_index_map_shader = new shader_program;
 
     configure_object_index_mapping();
+
+    auto* single_vp = new viewport;
+    _viewports.push_back(single_vp);
+    single_vp->set_size(width(), height());
+    single_vp->set_position(0, 0);
 
     _state = state::initialized;
 }
@@ -145,6 +148,7 @@ void gl_window::resize(size_t width, size_t height)
     {
         glfwSetWindowSize(_window, width, height);
     }
+    _viewports[ 0 ]->set_size(width, height);
 }
 
 glm::vec<2, size_t> gl_window::position() const
@@ -184,33 +188,14 @@ void gl_window::update()
             obj->update();
         }
     }
-    draw();
-    on_custom_draw();
+
+    for (auto* vp : _viewports)
+    {
+        vp->update();
+    }
 
     glfwSwapBuffers(_window);
     glfwPollEvents();
-}
-
-void gl_window::draw()
-{
-    auto p = prof::profile(__FUNCTION__);
-    glEnable(GL_MULTISAMPLE);
-    _view_camera->render();
-
-    if (auto* s = scene::get_active_scene())
-    {
-        for (auto* obj : s->objects())
-        {
-            if (!obj->is_active())
-            {
-                continue;
-            }
-            gizmo_drawer::instance()->get_shader().set_uniform(
-                "model_matrix",
-                std::make_tuple(obj->get_transform().get_matrix()));
-            obj->draw_gizmos();
-        }
-    }
 }
 
 camera* gl_window::get_camera() const { return _view_camera; }
@@ -218,7 +203,8 @@ camera* gl_window::get_camera() const { return _view_camera; }
 void gl_window::set_camera(camera* view_camera)
 {
     _view_camera = view_camera;
-    _view_camera->set_render_size(width(), height());
+    // _view_camera->set_render_size(width(), height());
+    _viewports[ 0 ]->set_camera(view_camera);
 }
 
 void gl_window::toggle_indexing() { _index_rendering = !_index_rendering; }

@@ -11,6 +11,7 @@ struct GLFWwindow;
 class camera;
 class game_object;
 class shader_program;
+class viewport;
 
 class gl_window
 {
@@ -33,7 +34,6 @@ public:
     void move(size_t x, size_t y);
 
     void update();
-    void draw();
 
     camera* get_camera() const;
     void set_camera(camera* view_camera);
@@ -67,6 +67,7 @@ private:
     camera* _view_camera = nullptr;
     mouse_events_refiner* _mouse_events;
     bool _should_draw_gizmos = false;
+    std::vector<viewport*> _viewports;
 
     unsigned _object_index_map;
     unsigned _object_index_depth_map;
