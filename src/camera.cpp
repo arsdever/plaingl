@@ -3,9 +3,7 @@
 #include <GLFW/glfw3.h>
 /* clang-format on */
 
-#include <glm/ext.hpp>
 #include <glm/glm.hpp>
-#include <glm/gtx/string_cast.hpp>
 
 #include "camera.hpp"
 
@@ -95,6 +93,10 @@ glm::mat4 camera::projection_matrix() const
     // TODO: optimize with caching
     if (_ortho_flag)
     {
+        glm::quat rotation = get_transform().get_rotation();
+        glm::vec3 direction = rotation * glm::vec3 { 0, 0, 1 };
+        float dist = glm::dot(direction, get_transform().get_position());
+
         return glm::ortho(
             -_render_size.x /
                 glm::distance(get_transform().get_position(), { 0, 0, 0 }),
