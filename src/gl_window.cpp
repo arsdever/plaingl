@@ -106,7 +106,7 @@ void gl_window::init()
         _this->_width = w;
         _this->_height = h;
         _this->on_window_resized(_this, w, h);
-        _this->_viewports[ 0 ]->set_size(w, h);
+        // update viewport layout
     });
 
     {
@@ -124,7 +124,6 @@ void gl_window::init()
     configure_object_index_mapping();
 
     auto* single_vp = new viewport;
-    _viewports.push_back(single_vp);
     single_vp->set_size(width(), height());
     single_vp->set_position(0, 0);
 
@@ -148,7 +147,7 @@ void gl_window::resize(size_t width, size_t height)
     {
         glfwSetWindowSize(_window, width, height);
     }
-    _viewports[ 0 ]->set_size(width, height);
+    // update viewport layout
 }
 
 glm::vec<2, size_t> gl_window::position() const
@@ -189,7 +188,7 @@ void gl_window::update()
         }
     }
 
-    for (auto* vp : _viewports)
+    for (auto* vp : get_viewports())
     {
         vp->update();
     }
@@ -204,12 +203,37 @@ void gl_window::set_camera(camera* view_camera)
 {
     _view_camera = view_camera;
     // _view_camera->set_render_size(width(), height());
-    _viewports[ 0 ]->set_camera(view_camera);
+    // _viewports[ 0 ]->set_camera(view_camera);
 }
 
 void gl_window::toggle_indexing() { _index_rendering = !_index_rendering; }
 
 void gl_window::set_draw_gizmos(bool value) { _should_draw_gizmos = value; }
+
+void gl_window::add_viewport(viewport* new_viewport)
+{
+    _viewports.try_emplace(std::string { new_viewport->get_name() },
+                           new_viewport);
+}
+
+std::vector<viewport*> gl_window::get_viewports() const
+{
+    std::vector<viewport*> result;
+
+    for (const auto& [ name, vp ] : _viewports)
+    {
+        result.push_back(vp);
+    }
+
+    return result;
+}
+
+viewport* gl_window::get_viewport(std::string_view name) const
+{
+    return _viewports.contains(std::string { name })
+               ? _viewports.at(std::string { name })
+               : nullptr;
+}
 
 void gl_window::set_mouse_events_refiner(
     mouse_events_refiner* mouse_events_refiner_)

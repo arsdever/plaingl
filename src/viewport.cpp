@@ -40,6 +40,10 @@ void viewport::set_camera(camera* viewport_camera)
     _viewport_camera = viewport_camera;
 }
 
+void viewport::set_name(std::string_view name) { _name = name; }
+
+std::string_view viewport::get_name() { return _name; }
+
 void viewport::update()
 {
     glViewport(static_cast<int>(_position.x),
@@ -50,6 +54,12 @@ void viewport::update()
     _viewport_camera->set_active();
     _viewport_camera->set_render_size(static_cast<float>(_resolution.x),
                                       static_cast<float>(_resolution.y));
+    if (_resolution.x == 0 || _resolution.y == 0)
+    {
+        log()->warn("Viewport ({}) size is too small. Skipping rendering.",
+                    _name);
+        return;
+    }
     draw();
 }
 

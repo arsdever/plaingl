@@ -39,6 +39,7 @@
 #include "texture.hpp"
 #include "texture_viewer.hpp"
 #include "thread.hpp"
+#include "viewport.hpp"
 
 namespace
 {
@@ -97,7 +98,8 @@ int main(int argc, char** argv)
         // window->set_mouse_events_refiner(me);
         cam->set_ortho(true);
         // window->on_window_closed += [ &windows ](gl_window* window)
-        // { windows.erase(std::find(windows.begin(), windows.end(), window)); };
+        // { windows.erase(std::find(windows.begin(), windows.end(), window));
+        // };
 
         // me->scroll += [ cam ](auto params)
         // {
@@ -117,13 +119,17 @@ int main(int argc, char** argv)
     //                      wpos.y + windows[ 0 ]->height());
     windows.back()->resize(400, 400);
     windows.back()->set_active();
-    windows.back()->set_camera(main_camera);
     windows.back()->on_window_closed += [ &windows ](gl_window* window)
     { windows.erase(std::find(windows.begin(), windows.end(), window)); };
+    viewport* vp = new viewport;
+    vp->set_camera(main_camera);
+    windows.back()->add_viewport(vp);
+    vp->set_position(100, 100);
+    vp->set_size(100, 100);
 
     game_object* selected_object = nullptr;
 
-    windows.back()->set_mouse_events_refiner(&mouse_events);
+    // windows.back()->set_mouse_events_refiner(&mouse_events);
     mouse_events.click +=
         [ &selected_object ](mouse_events_refiner::mouse_event_params params)
     {
@@ -165,8 +171,14 @@ int main(int argc, char** argv)
     mouse_events.move += [](auto params)
     {
         // draw ray casted from camera
-        auto pos = params._window->get_camera()->get_transform().get_position();
-        auto rot = params._window->get_camera()->get_transform().get_rotation();
+        auto pos = params._window->get_viewports()[ 0 ]
+                       ->get_camera()
+                       ->get_transform()
+                       .get_position();
+        auto rot = params._window->get_viewports()[ 0 ]
+                       ->get_camera()
+                       ->get_transform()
+                       .get_rotation();
         glm::vec3 point = glm::unProject(
             glm::vec3 { params._position.x,
                         params._window->height() - params._position.y,

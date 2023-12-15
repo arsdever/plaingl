@@ -41,6 +41,10 @@ public:
     void toggle_indexing();
     void set_draw_gizmos(bool value = true);
 
+    void add_viewport(viewport* new_viewport);
+    std::vector<viewport*> get_viewports() const;
+    viewport* get_viewport(std::string_view name) const;
+
     event<void(game_object*)> on_mouse_clicked;
     event<void(gl_window*)> on_window_closed;
     event<void(gl_window*, size_t w, size_t h)> on_window_resized;
@@ -67,7 +71,7 @@ private:
     camera* _view_camera = nullptr;
     mouse_events_refiner* _mouse_events;
     bool _should_draw_gizmos = false;
-    std::vector<viewport*> _viewports;
+    std::unordered_map<std::string, viewport*> _viewports;
 
     unsigned _object_index_map;
     unsigned _object_index_depth_map;

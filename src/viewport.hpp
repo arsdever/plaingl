@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 #include <glm/vec2.hpp>
 
 class camera;
@@ -23,6 +25,9 @@ public:
     camera* get_camera() const;
     void set_camera(camera* viewport_camera);
 
+    void set_name(std::string_view name);
+    std::string_view get_name();
+
     void update();
 
 private:
@@ -32,4 +37,5 @@ private:
     glm::uvec2 _resolution {};
     glm::uvec2 _position {};
     camera* _viewport_camera;
+    std::string _name;
 };
