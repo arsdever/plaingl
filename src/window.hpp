@@ -13,7 +13,7 @@ class game_object;
 class shader_program;
 class viewport;
 
-class gl_window
+class window
 {
     enum class state
     {
@@ -43,8 +43,8 @@ public:
     viewport* get_viewport(std::string_view name) const;
 
     event<void(game_object*)> on_mouse_clicked;
-    event<void(gl_window*)> on_window_closed;
-    event<void(gl_window*, size_t w, size_t h)> on_window_resized;
+    event<void(window*)> on_window_closed;
+    event<void(window*, size_t w, size_t h)> on_window_resized;
     // TODO: handling should be improved
     event<void()> on_custom_draw;
 
@@ -53,7 +53,7 @@ public:
 
     game_object* find_game_object_at_position(double x, double y);
 
-    static gl_window* get_main_window();
+    static window* get_main_window();
 
 private:
     void setup_mouse_callbacks();
@@ -76,5 +76,5 @@ private:
     shader_program* _object_index_map_shader;
     bool _index_rendering = false;
 
-    static gl_window* _main_window;
+    static window* _main_window;
 };

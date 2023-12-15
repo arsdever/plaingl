@@ -160,7 +160,7 @@ mouse_events_refiner::get_default_event_parameters(GLFWwindow* window) const
     mouse_event_params params;
     double x, y;
     glfwGetCursorPos(window, &x, &y);
-    params._window = static_cast<gl_window*>(glfwGetWindowUserPointer(window));
+    params._window = static_cast<window*>(glfwGetWindowUserPointer(window));
     params._position = { x, y };
     params._old_position = _mouse_position;
     return params;

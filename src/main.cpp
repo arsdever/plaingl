@@ -29,7 +29,6 @@
 #include "font.hpp"
 #include "game_clock.hpp"
 #include "game_object.hpp"
-#include "gl_window.hpp"
 #include "image.hpp"
 #include "logging.hpp"
 #include "material.hpp"
@@ -40,6 +39,7 @@
 #include "texture_viewer.hpp"
 #include "thread.hpp"
 #include "viewport.hpp"
+#include "window.hpp"
 
 namespace
 {
@@ -84,20 +84,20 @@ int main(int argc, char** argv)
     // texture_viewer::show_preview(am->get_image("sample_jpg"));
     main_camera = new camera;
 
-    std::vector<gl_window*> windows;
+    std::vector<window*> windows;
 
     for (auto& cam : _view_cameras)
     {
         // mouse_events_refiner* me = new mouse_events_refiner;
         cam = new camera;
-        // auto* window = new gl_window;
+        // auto* window = new window;
         // windows.push_back(window);
         // window->resize(400, 400);
         // window->init();
         // window->set_camera(cam);
         // window->set_mouse_events_refiner(me);
         cam->set_ortho(true);
-        // window->on_window_closed += [ &windows ](gl_window* window)
+        // window->on_window_closed += [ &windows ](window* window)
         // { windows.erase(std::find(windows.begin(), windows.end(), window));
         // };
 
@@ -113,13 +113,13 @@ int main(int argc, char** argv)
     // windows[ 1 ]->move(wpos.x + windows[ 0 ]->width(), wpos.y);
     // windows[ 2 ]->move(wpos.x, wpos.y + windows[ 0 ]->height());
 
-    windows.push_back(new gl_window);
+    windows.push_back(new window);
     windows.back()->init();
     // windows.back()->move(wpos.x + windows[ 0 ]->width(),
     //                      wpos.y + windows[ 0 ]->height());
     windows.back()->resize(400, 400);
     windows.back()->set_active();
-    windows.back()->on_window_closed += [ &windows ](gl_window* window)
+    windows.back()->on_window_closed += [ &windows ](window* window)
     { windows.erase(std::find(windows.begin(), windows.end(), window)); };
     viewport* vp = new viewport;
     vp->set_camera(main_camera);

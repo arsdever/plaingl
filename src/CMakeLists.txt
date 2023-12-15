@@ -21,8 +21,8 @@ add_library(
   gizmo_drawer.cpp
   gl_error_handler.hpp
   gl_error_handler.cpp
-  gl_window.hpp
-  gl_window.cpp
+  window.hpp
+  window.cpp
   image.hpp
   image.cpp
   material.hpp
