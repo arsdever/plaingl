@@ -129,7 +129,7 @@ int main(int argc, char** argv)
 
     game_object* selected_object = nullptr;
 
-    // windows.back()->set_mouse_events_refiner(&mouse_events);
+    windows.back()->set_mouse_events_refiner(&mouse_events);
     mouse_events.click +=
         [ &selected_object ](mouse_events_refiner::mouse_event_params params)
     {
@@ -183,8 +183,10 @@ int main(int argc, char** argv)
             glm::vec3 { params._position.x,
                         params._window->height() - params._position.y,
                         0 },
-            params._window->get_camera()->view_matrix(),
-            params._window->get_camera()->projection_matrix(),
+            params._window->get_viewports()[ 0 ]->get_camera()->view_matrix(),
+            params._window->get_viewports()[ 0 ]
+                ->get_camera()
+                ->projection_matrix(),
             glm::vec4 {
                 0, 0, params._window->width(), params._window->height() });
         cast_ray->set_ray(pos, glm::normalize(point - pos));

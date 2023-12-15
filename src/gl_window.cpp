@@ -197,15 +197,6 @@ void gl_window::update()
     glfwPollEvents();
 }
 
-camera* gl_window::get_camera() const { return _view_camera; }
-
-void gl_window::set_camera(camera* view_camera)
-{
-    _view_camera = view_camera;
-    // _view_camera->set_render_size(width(), height());
-    // _viewports[ 0 ]->set_camera(view_camera);
-}
-
 void gl_window::toggle_indexing() { _index_rendering = !_index_rendering; }
 
 void gl_window::set_draw_gizmos(bool value) { _should_draw_gizmos = value; }

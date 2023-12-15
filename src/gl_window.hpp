@@ -35,9 +35,6 @@ public:
 
     void update();
 
-    camera* get_camera() const;
-    void set_camera(camera* view_camera);
-
     void toggle_indexing();
     void set_draw_gizmos(bool value = true);
 
