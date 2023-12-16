@@ -48,8 +48,6 @@ void camera::set_render_size(float width, float height)
 void camera::render()
 {
     auto* old_active_camera = set_active();
-    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
 
     if (scene::get_active_scene())
@@ -105,17 +103,12 @@ glm::mat4 camera::projection_matrix() const
         glm::vec3 direction = rotation * glm::vec3 { 0, 0, 1 };
         float dist = glm::dot(direction, get_transform().get_position());
 
-        return glm::ortho(
-            -_render_size.x /
-                glm::distance(get_transform().get_position(), { 0, 0, 0 }),
-            _render_size.x /
-                glm::distance(get_transform().get_position(), { 0, 0, 0 }),
-            -_render_size.y /
-                glm::distance(get_transform().get_position(), { 0, 0, 0 }),
-            _render_size.y /
-                glm::distance(get_transform().get_position(), { 0, 0, 0 }),
-            0.01f,
-            10000.0f);
+        return glm::ortho(-_render_size.x / dist,
+                          _render_size.x / dist,
+                          -_render_size.y / dist,
+                          _render_size.y / dist,
+                          0.01f,
+                          10000.0f);
     }
 
     return glm::perspective(

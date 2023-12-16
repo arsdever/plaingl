@@ -2,6 +2,7 @@
 
 #include <chrono>
 #include <functional>
+#include <memory>
 #include <unordered_map>
 
 #include "event.hpp"
@@ -15,6 +16,7 @@ class viewport;
 
 class window
 {
+private:
     enum class state
     {
         uninitialized,
@@ -23,11 +25,34 @@ class window
     };
 
 public:
+    struct layout
+    {
+        virtual ~layout() = default;
+        virtual void calculate_layout(window*) = 0;
+    };
+
+    struct layout_single : layout
+    {
+        void calculate_layout(window*) override;
+    };
+
+    struct layout_3t1b : layout
+    {
+        void calculate_layout(window*) override;
+    };
+
+    struct layout_4x4 : layout
+    {
+        void calculate_layout(window*) override;
+    };
+
+public:
     void init();
     void set_active();
 
-    size_t width() const;
-    size_t height() const;
+    size_t get_width() const;
+    size_t get_height() const;
+    glm::vec<2, size_t> get_size() const;
     void resize(size_t width, size_t height);
 
     glm::vec<2, size_t> position() const;
@@ -38,9 +63,18 @@ public:
     void toggle_indexing();
     void set_draw_gizmos(bool value = true);
 
-    void add_viewport(viewport* new_viewport);
+    void add_viewport(viewport* vp);
     std::vector<viewport*> get_viewports() const;
-    viewport* get_viewport(std::string_view name) const;
+    void remove_viewport(viewport* vp);
+    viewport* main_viewport() const;
+
+    template <typename T>
+        requires std::is_base_of_v<layout, T>
+    void set_layout()
+    {
+        _layout = std::make_unique<T>();
+        update_layout();
+    }
 
     event<void(game_object*)> on_mouse_clicked;
     event<void(window*)> on_window_closed;
@@ -56,19 +90,21 @@ public:
     static window* get_main_window();
 
 private:
+    void update_layout();
     void setup_mouse_callbacks();
     void configure_object_index_mapping();
 
 private:
     GLFWwindow* _window = nullptr;
     state _state = state::uninitialized;
-    size_t _width = 800;
-    size_t _height = 600;
+    glm::vec<2, size_t> _size { 800, 600 };
     bool _is_main_window = false;
     camera* _view_camera = nullptr;
+    std::unique_ptr<layout> _layout = nullptr;
     mouse_events_refiner* _mouse_events;
     bool _should_draw_gizmos = false;
-    std::unordered_map<std::string, viewport*> _viewports;
+    std::vector<std::unique_ptr<viewport>> _viewports;
+    std::vector<viewport*> _user_viewports;
 
     unsigned _object_index_map;
     unsigned _object_index_depth_map;

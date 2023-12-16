@@ -8,8 +8,22 @@
 
 namespace
 {
-static inline logger log() { return get_logger("viewport"); }
+inline logger log() { return get_logger("viewport"); }
 } // namespace
+
+viewport::viewport()
+    : _viewport_camera { std::make_unique<camera>() }
+{
+    _viewport_camera->get_transform().set_position({ 5, 5, 5 });
+    _viewport_camera->get_transform().set_rotation(glm::quatLookAt(
+        glm::normalize(_viewport_camera->get_transform().get_position()),
+        { 0, 0, 1 }));
+}
+
+void viewport::init()
+{
+    // So far nothing to initialzie
+}
 
 size_t viewport::get_width() const { return _resolution.x; }
 
@@ -33,39 +47,54 @@ void viewport::set_position(size_t x, size_t y)
 
 void viewport::set_position(glm::uvec2 position) { _position = position; }
 
-camera* viewport::get_camera() const { return _viewport_camera; }
+camera* viewport::get_camera() const { return _user_camera; }
 
 void viewport::set_camera(camera* viewport_camera)
 {
-    _viewport_camera = viewport_camera;
+    _user_camera = viewport_camera;
 }
 
 void viewport::set_name(std::string_view name) { _name = name; }
 
-std::string_view viewport::get_name() { return _name; }
+std::string_view viewport::get_name() const { return _name; }
+
+void viewport::set_visible(bool visible_flag) { _visible_flag = visible_flag; }
+
+bool viewport::is_visible() const { return _visible_flag; }
 
 void viewport::update()
 {
-    glViewport(static_cast<int>(_position.x),
-               static_cast<int>(_position.y),
-               static_cast<int>(_resolution.x),
-               static_cast<int>(_resolution.y));
+    if (!is_visible())
+    {
+        return;
+    }
 
-    _viewport_camera->set_active();
-    _viewport_camera->set_render_size(static_cast<float>(_resolution.x),
-                                      static_cast<float>(_resolution.y));
     if (_resolution.x == 0 || _resolution.y == 0)
     {
         log()->warn("Viewport ({}) size is too small. Skipping rendering.",
                     _name);
         return;
     }
+
+    glViewport(static_cast<int>(_position.x),
+               static_cast<int>(_position.y),
+               static_cast<int>(_resolution.x),
+               static_cast<int>(_resolution.y));
+
+    render_camera()->set_active();
+    render_camera()->set_render_size(static_cast<float>(_resolution.x),
+                                     static_cast<float>(_resolution.y));
     draw();
+}
+
+camera* viewport::render_camera() const
+{
+    return _user_camera ? _user_camera : _viewport_camera.get();
 }
 
 void viewport::draw() const
 {
-    _viewport_camera->render();
+    render_camera()->render();
 
     if (const auto* s = scene::get_active_scene())
     {
@@ -81,4 +110,31 @@ void viewport::draw() const
             obj->draw_gizmos();
         }
     }
+}
+
+void viewport::set_as_top_view()
+{
+    _viewport_camera->get_transform().set_position({ 0, 100, 0 });
+    _viewport_camera->get_transform().set_rotation(glm::quatLookAt(
+        glm::normalize(_viewport_camera->get_transform().get_position()),
+        { 0, 0, 1 }));
+    _viewport_camera->set_ortho();
+}
+
+void viewport::set_as_right_view()
+{
+    _viewport_camera->get_transform().set_position({ 100, 0, 0 });
+    _viewport_camera->get_transform().set_rotation(glm::quatLookAt(
+        glm::normalize(_viewport_camera->get_transform().get_position()),
+        { 0, 0, 1 }));
+    _viewport_camera->set_ortho();
+}
+
+void viewport::set_as_front_view()
+{
+    _viewport_camera->get_transform().set_position({ 0, 0, -100 });
+    _viewport_camera->get_transform().set_rotation(glm::quatLookAt(
+        glm::normalize(_viewport_camera->get_transform().get_position()),
+        { 0, 1, 0 }));
+    _viewport_camera->set_ortho();
 }

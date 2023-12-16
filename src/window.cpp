@@ -8,6 +8,8 @@
 #include <glm/gtx/string_cast.hpp>
 #include <prof/profiler.hpp>
 
+#include "window.hpp"
+
 #include "asset_manager.hpp"
 #include "camera.hpp"
 #include "components/mesh_component.hpp"
@@ -19,7 +21,6 @@
 #include "scene.hpp"
 #include "shader.hpp"
 #include "viewport.hpp"
-#include "window.hpp"
 
 namespace
 {
@@ -44,8 +45,8 @@ void window::init()
     // glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
     _window =
-        glfwCreateWindow(width(),
-                         height(),
+        glfwCreateWindow(get_width(),
+                         get_height(),
                          title.c_str(),
                          NULL,
                          _is_main_window ? nullptr : _main_window->_window);
@@ -64,22 +65,22 @@ void window::init()
         return;
     }
 
-    glViewport(0, 0, width(), height());
+    glViewport(0, 0, get_width(), get_height());
 
     glfwSetFramebufferSizeCallback(_window,
-                                   [](GLFWwindow* window, int w, int h)
+                                   [](GLFWwindow* wnd, int w, int h)
     {
-        window* _this = static_cast<window*>(glfwGetWindowUserPointer(window));
-        _this->_width = w;
-        _this->_height = h;
+        window* _this = static_cast<window*>(glfwGetWindowUserPointer(wnd));
+        _this->_size = { static_cast<size_t>(w), static_cast<size_t>(h) };
+        _this->update_layout();
         _this->_view_camera->set_render_size(w, h);
     });
 
     glfwSetMouseButtonCallback(
         _window,
-        [](GLFWwindow* window, int button, int action, int mods)
+        [](GLFWwindow* wnd, int button, int action, int mods)
     {
-        window* _this = static_cast<window*>(glfwGetWindowUserPointer(window));
+        window* _this = static_cast<window*>(glfwGetWindowUserPointer(wnd));
 
         if (button == GLFW_MOUSE_BUTTON_1 && action == GLFW_RELEASE)
         {
@@ -87,7 +88,7 @@ void window::init()
             {
                 double xpos;
                 double ypos;
-                glfwGetCursorPos(window, &xpos, &ypos);
+                glfwGetCursorPos(wnd, &xpos, &ypos);
                 game_object* object =
                     _this->find_game_object_at_position(xpos, ypos);
                 _this->on_mouse_clicked(object);
@@ -96,11 +97,11 @@ void window::init()
     });
 
     glfwSetFramebufferSizeCallback(_window,
-                                   [](GLFWwindow* window, int w, int h)
+                                   [](GLFWwindow* wnd, int w, int h)
     {
-        window* _this = static_cast<window*>(glfwGetWindowUserPointer(window));
-        _this->_width = w;
-        _this->_height = h;
+        window* _this = static_cast<window*>(glfwGetWindowUserPointer(wnd));
+        _this->_size = { static_cast<size_t>(w), static_cast<size_t>(h) };
+        _this->update_layout();
         _this->on_window_resized(_this, w, h);
         // update viewport layout
     });
@@ -119,25 +120,37 @@ void window::init()
 
     configure_object_index_mapping();
 
-    auto* single_vp = new viewport;
-    single_vp->set_size(width(), height());
-    single_vp->set_position(0, 0);
+    _viewports.resize(4);
+    for (auto& vp : _viewports)
+    {
+        vp = std::make_unique<viewport>();
+        vp->init();
+        vp->set_visible(false);
+    }
+
+    _viewports[ 0 ]->set_as_front_view();
+    _viewports[ 1 ]->set_as_top_view();
+    _viewports[ 2 ]->set_as_right_view();
+
+    _layout = std::make_unique<layout_single>();
+    update_layout();
 
     _state = state::initialized;
 }
 
 void window::set_active() { glfwMakeContextCurrent(_window); }
 
-size_t window::width() const { return _width; }
+size_t window::get_width() const { return _size.x; }
 
-size_t window::height() const { return _height; }
+size_t window::get_height() const { return _size.y; }
+
+glm::vec<2, size_t> window::get_size() const { return _size; }
 
 void window::resize(size_t width, size_t height)
 {
     if (_state != state::initialized)
     {
-        _width = width;
-        _height = height;
+        _size = { width, height };
     }
     else
     {
@@ -174,7 +187,9 @@ void window::update()
     }
 
     set_active();
-    glViewport(0, 0, width(), height());
+    glViewport(0, 0, get_width(), get_height());
+    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     _view_camera->set_active();
     if (auto* s = scene::get_active_scene())
     {
@@ -184,11 +199,17 @@ void window::update()
         }
     }
 
+    for (auto& vp : _viewports)
+    {
+        vp->update();
+    }
+
     for (auto* vp : get_viewports())
     {
         vp->update();
     }
 
+    glViewport(0, 0, get_width(), get_height());
     glfwSwapBuffers(_window);
     glfwPollEvents();
 }
@@ -197,30 +218,13 @@ void window::toggle_indexing() { _index_rendering = !_index_rendering; }
 
 void window::set_draw_gizmos(bool value) { _should_draw_gizmos = value; }
 
-void window::add_viewport(viewport* new_viewport)
-{
-    _viewports.try_emplace(std::string { new_viewport->get_name() },
-                           new_viewport);
-}
+void window::add_viewport(viewport* vp) { _user_viewports.push_back(vp); }
 
-std::vector<viewport*> window::get_viewports() const
-{
-    std::vector<viewport*> result;
+std::vector<viewport*> window::get_viewports() const { return _user_viewports; }
 
-    for (const auto& [ name, vp ] : _viewports)
-    {
-        result.push_back(vp);
-    }
+void window::remove_viewport(viewport* vp) { std::erase(_user_viewports, vp); }
 
-    return result;
-}
-
-viewport* window::get_viewport(std::string_view name) const
-{
-    return _viewports.contains(std::string { name })
-               ? _viewports.at(std::string { name })
-               : nullptr;
-}
+viewport* window::main_viewport() const { return _viewports[ 3 ].get(); }
 
 void window::set_mouse_events_refiner(
     mouse_events_refiner* mouse_events_refiner_)
@@ -233,49 +237,49 @@ mouse_events_refiner* window::mouse_events() const { return _mouse_events; }
 
 window* window::get_main_window() { return _main_window; }
 
+void window::update_layout() { _layout->calculate_layout(this); }
+
 void window::setup_mouse_callbacks()
 {
     glfwSetMouseButtonCallback(
         _window,
-        [](GLFWwindow* window, int button, int action, int mods)
+        [](GLFWwindow* wnd, int button, int action, int mods)
     {
-        window* _this = static_cast<window*>(glfwGetWindowUserPointer(window));
+        window* _this = static_cast<window*>(glfwGetWindowUserPointer(wnd));
         auto* refiner = _this->_mouse_events;
-        refiner->button_function(window, button, action, mods);
+        refiner->button_function(wnd, button, action, mods);
     });
     glfwSetCursorPosCallback(
         _window,
-        [](GLFWwindow* window, double x_position, double y_position)
+        [](GLFWwindow* wnd, double x_position, double y_position)
     {
         window* _this =
 
-            static_cast<window*>(glfwGetWindowUserPointer(window));
+            static_cast<window*>(glfwGetWindowUserPointer(wnd));
         auto* refiner = _this->_mouse_events;
-        refiner->position_function(window, x_position, y_position);
+        refiner->position_function(wnd, x_position, y_position);
     });
     glfwSetCursorEnterCallback(_window,
-                               [](GLFWwindow* window, int entered)
+                               [](GLFWwindow* wnd, int entered)
     {
-        window* _this = static_cast<window*>(glfwGetWindowUserPointer(window));
+        window* _this = static_cast<window*>(glfwGetWindowUserPointer(wnd));
         auto* refiner = _this->_mouse_events;
-        refiner->enter_function(window, entered);
+        refiner->enter_function(wnd, entered);
     });
 
-    glfwSetScrollCallback(
-        _window,
-        [](GLFWwindow* window, double x_offset, double y_offset)
+    glfwSetScrollCallback(_window,
+                          [](GLFWwindow* wnd, double x_offset, double y_offset)
     {
-        window* _this = static_cast<window*>(glfwGetWindowUserPointer(window));
+        window* _this = static_cast<window*>(glfwGetWindowUserPointer(wnd));
         auto* refiner = _this->_mouse_events;
-        refiner->scroll_function(window, x_offset, y_offset);
+        refiner->scroll_function(wnd, x_offset, y_offset);
     });
-    glfwSetDropCallback(
-        _window,
-        [](GLFWwindow* window, int path_count, const char** paths)
+    glfwSetDropCallback(_window,
+                        [](GLFWwindow* wnd, int path_count, const char** paths)
     {
-        window* _this = static_cast<window*>(glfwGetWindowUserPointer(window));
+        window* _this = static_cast<window*>(glfwGetWindowUserPointer(wnd));
         auto* refiner = _this->_mouse_events;
-        refiner->drop_function(window, path_count, paths);
+        refiner->drop_function(wnd, path_count, paths);
     });
 }
 
@@ -289,8 +293,8 @@ void window::configure_object_index_mapping()
     glTexImage2D(GL_TEXTURE_2D,
                  0,
                  GL_RGB32UI,
-                 _width,
-                 _height,
+                 get_width(),
+                 get_height(),
                  0,
                  GL_RGB_INTEGER,
                  GL_UNSIGNED_INT,
@@ -309,8 +313,8 @@ void window::configure_object_index_mapping()
     glTexImage2D(GL_TEXTURE_2D,
                  0,
                  GL_DEPTH_COMPONENT,
-                 width(),
-                 height(),
+                 get_width(),
+                 get_height(),
                  0,
                  GL_DEPTH_COMPONENT,
                  GL_FLOAT,
@@ -385,3 +389,43 @@ game_object* window::find_game_object_at_position(double x, double y)
 }
 
 window* window::_main_window = nullptr;
+
+void window::layout_single::calculate_layout(window* wnd)
+{
+    for (auto& vp : wnd->_viewports)
+    {
+        vp->set_visible(false);
+    }
+
+    wnd->_viewports[ 3 ]->set_visible();
+    wnd->_viewports[ 3 ]->set_size(wnd->get_size());
+    wnd->_viewports[ 3 ]->set_position({ 0, 0 });
+}
+
+void window::layout_3t1b::calculate_layout(window* wnd)
+{
+    auto size = wnd->get_size();
+    for (int i = 0; i < 3; ++i)
+    {
+        auto& vp = wnd->_viewports[ i ];
+        vp->set_visible(true);
+        vp->set_size(size.x / 3, size.y / 3);
+        vp->set_position({ size.x / 3 * i, size.y / 3 * 2 });
+    }
+
+    wnd->_viewports[ 3 ]->set_visible(true);
+    wnd->_viewports[ 3 ]->set_size(size.x, size.y / 3 * 2);
+    wnd->_viewports[ 3 ]->set_position(0, 0);
+}
+
+void window::layout_4x4::calculate_layout(window* wnd)
+{
+    auto size = wnd->get_size();
+    for (int i = 0; i < 4; ++i)
+    {
+        auto& vp = wnd->_viewports[ i ];
+        vp->set_visible(true);
+        vp->set_size(size.x / 2, size.y / 2);
+        vp->set_position({ size.x / 2 * i % 2, size.y / 2 * (1 - i / 2) });
+    }
+}

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <string>
 
 #include <glm/vec2.hpp>
@@ -9,6 +10,8 @@ class camera;
 class viewport
 {
 public:
+    viewport();
+
     void init();
     void set_active();
 
@@ -26,16 +29,28 @@ public:
     void set_camera(camera* viewport_camera);
 
     void set_name(std::string_view name);
-    std::string_view get_name();
+    std::string_view get_name() const;
+
+    void set_visible(bool visible_flag = true);
+    bool is_visible() const;
 
     void update();
 
 private:
+    camera* render_camera() const;
     void draw() const;
+
+    // For debugging only
+    friend class window;
+    void set_as_top_view();
+    void set_as_right_view();
+    void set_as_front_view();
 
 private:
     glm::uvec2 _resolution {};
     glm::uvec2 _position {};
-    camera* _viewport_camera;
+    std::unique_ptr<camera> _viewport_camera { nullptr };
+    camera* _user_camera { nullptr };
     std::string _name;
+    bool _visible_flag;
 };

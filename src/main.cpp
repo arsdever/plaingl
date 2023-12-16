@@ -119,13 +119,14 @@ int main(int argc, char** argv)
     //                      wpos.y + windows[ 0 ]->height());
     windows.back()->resize(400, 400);
     windows.back()->set_active();
+    // windows.back()->set_layout<window::layout_3t1b>();
     windows.back()->on_window_closed += [ &windows ](window* window)
     { windows.erase(std::find(windows.begin(), windows.end(), window)); };
-    viewport* vp = new viewport;
-    vp->set_camera(main_camera);
-    windows.back()->add_viewport(vp);
-    vp->set_position(100, 100);
-    vp->set_size(100, 100);
+    // viewport* vp = new viewport;
+    windows.back()->main_viewport()->set_camera(main_camera);
+    // windows.back()->add_viewport(vp);
+    // vp->set_position(100, 100);
+    // vp->set_size(100, 100);
 
     game_object* selected_object = nullptr;
 
@@ -154,15 +155,15 @@ int main(int argc, char** argv)
     {
         glm::vec2 from = params._old_position;
         glm::vec2 to = params._position;
-        from.y = params._window->height() - from.y;
-        to.y = params._window->height() - to.y;
+        from.y = params._window->get_height() - from.y;
+        to.y = params._window->get_height() - to.y;
         log()->trace("dragging started from position ({}, {})", from.x, from.y);
     };
     mouse_events.drag_drop_move +=
         [](mouse_events_refiner::mouse_event_params params)
     {
         glm::vec2 to = params._position;
-        to.y = params._window->height() - to.y;
+        to.y = params._window->get_height() - to.y;
         log()->trace("dragging to position ({}, {})", to.x, to.y);
     };
     mouse_events.drag_drop_end +=
@@ -171,24 +172,24 @@ int main(int argc, char** argv)
     mouse_events.move += [](auto params)
     {
         // draw ray casted from camera
-        auto pos = params._window->get_viewports()[ 0 ]
+        auto pos = params._window->main_viewport()
                        ->get_camera()
                        ->get_transform()
                        .get_position();
-        auto rot = params._window->get_viewports()[ 0 ]
+        auto rot = params._window->main_viewport()
                        ->get_camera()
                        ->get_transform()
                        .get_rotation();
         glm::vec3 point = glm::unProject(
             glm::vec3 { params._position.x,
-                        params._window->height() - params._position.y,
+                        params._window->get_height() - params._position.y,
                         0 },
-            params._window->get_viewports()[ 0 ]->get_camera()->view_matrix(),
-            params._window->get_viewports()[ 0 ]
-                ->get_camera()
-                ->projection_matrix(),
-            glm::vec4 {
-                0, 0, params._window->width(), params._window->height() });
+            params._window->main_viewport()->get_camera()->view_matrix(),
+            params._window->main_viewport()->get_camera()->projection_matrix(),
+            glm::vec4 { 0,
+                        0,
+                        params._window->get_width(),
+                        params._window->get_height() });
         cast_ray->set_ray(pos, glm::normalize(point - pos));
     };
 
