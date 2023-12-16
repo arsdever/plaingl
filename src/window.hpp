@@ -36,16 +36,6 @@ public:
         void calculate_layout(window*) override;
     };
 
-    struct layout_3t1b : layout
-    {
-        void calculate_layout(window*) override;
-    };
-
-    struct layout_4x4 : layout
-    {
-        void calculate_layout(window*) override;
-    };
-
 public:
     void init();
     void set_active();
@@ -63,10 +53,10 @@ public:
     void toggle_indexing();
     void set_draw_gizmos(bool value = true);
 
-    void add_viewport(viewport* vp);
-    std::vector<viewport*> get_viewports() const;
-    void remove_viewport(viewport* vp);
-    viewport* main_viewport() const;
+    void add_viewport(std::shared_ptr<viewport> vp);
+    std::vector<std::shared_ptr<viewport>> get_viewports() const;
+    void remove_viewport(std::shared_ptr<viewport> vp);
+    std::shared_ptr<viewport> get_main_viewport();
 
     template <typename T>
         requires std::is_base_of_v<layout, T>
@@ -103,8 +93,7 @@ private:
     std::unique_ptr<layout> _layout = nullptr;
     mouse_events_refiner* _mouse_events;
     bool _should_draw_gizmos = false;
-    std::vector<std::unique_ptr<viewport>> _viewports;
-    std::vector<viewport*> _user_viewports;
+    std::vector<std::shared_ptr<viewport>> _viewports;
 
     unsigned _object_index_map;
     unsigned _object_index_depth_map;

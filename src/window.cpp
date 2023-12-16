@@ -1,5 +1,4 @@
 /* clang-format off */
-#include <bit>
 #include <glad/gl.h>
 #include <GLFW/glfw3.h>
 /* clang-format on */
@@ -120,18 +119,6 @@ void window::init()
 
     configure_object_index_mapping();
 
-    _viewports.resize(4);
-    for (auto& vp : _viewports)
-    {
-        vp = std::make_unique<viewport>();
-        vp->init();
-        vp->set_visible(false);
-    }
-
-    _viewports[ 0 ]->set_as_front_view();
-    _viewports[ 1 ]->set_as_top_view();
-    _viewports[ 2 ]->set_as_right_view();
-
     _layout = std::make_unique<layout_single>();
     update_layout();
 
@@ -199,12 +186,7 @@ void window::update()
         }
     }
 
-    for (auto& vp : _viewports)
-    {
-        vp->update();
-    }
-
-    for (auto* vp : get_viewports())
+    for (auto& vp : get_viewports())
     {
         vp->update();
     }
@@ -218,13 +200,27 @@ void window::toggle_indexing() { _index_rendering = !_index_rendering; }
 
 void window::set_draw_gizmos(bool value) { _should_draw_gizmos = value; }
 
-void window::add_viewport(viewport* vp) { _user_viewports.push_back(vp); }
+void window::add_viewport(std::shared_ptr<viewport> vp)
+{
+    _viewports.push_back(vp);
+    _layout->calculate_layout(this);
+}
 
-std::vector<viewport*> window::get_viewports() const { return _user_viewports; }
+std::vector<std::shared_ptr<viewport>> window::get_viewports() const
+{
+    return _viewports;
+}
 
-void window::remove_viewport(viewport* vp) { std::erase(_user_viewports, vp); }
+void window::remove_viewport(std::shared_ptr<viewport> vp)
+{
+    std::erase(_viewports, vp);
+    _layout->calculate_layout(this);
+}
 
-viewport* window::main_viewport() const { return _viewports[ 3 ].get(); }
+std::shared_ptr<viewport> window::get_main_viewport()
+{
+    return _viewports[ 0 ];
+}
 
 void window::set_mouse_events_refiner(
     mouse_events_refiner* mouse_events_refiner_)
@@ -392,40 +388,12 @@ window* window::_main_window = nullptr;
 
 void window::layout_single::calculate_layout(window* wnd)
 {
-    for (auto& vp : wnd->_viewports)
+    if (wnd->_viewports.empty())
     {
-        vp->set_visible(false);
+        return;
     }
 
-    wnd->_viewports[ 3 ]->set_visible();
-    wnd->_viewports[ 3 ]->set_size(wnd->get_size());
-    wnd->_viewports[ 3 ]->set_position({ 0, 0 });
-}
-
-void window::layout_3t1b::calculate_layout(window* wnd)
-{
-    auto size = wnd->get_size();
-    for (int i = 0; i < 3; ++i)
-    {
-        auto& vp = wnd->_viewports[ i ];
-        vp->set_visible(true);
-        vp->set_size(size.x / 3, size.y / 3);
-        vp->set_position({ size.x / 3 * i, size.y / 3 * 2 });
-    }
-
-    wnd->_viewports[ 3 ]->set_visible(true);
-    wnd->_viewports[ 3 ]->set_size(size.x, size.y / 3 * 2);
-    wnd->_viewports[ 3 ]->set_position(0, 0);
-}
-
-void window::layout_4x4::calculate_layout(window* wnd)
-{
-    auto size = wnd->get_size();
-    for (int i = 0; i < 4; ++i)
-    {
-        auto& vp = wnd->_viewports[ i ];
-        vp->set_visible(true);
-        vp->set_size(size.x / 2, size.y / 2);
-        vp->set_position({ size.x / 2 * i % 2, size.y / 2 * (1 - i / 2) });
-    }
+    wnd->_viewports[ 0 ]->set_visible();
+    wnd->_viewports[ 0 ]->set_position(0, 0);
+    wnd->_viewports[ 0 ]->set_size(wnd->get_size());
 }

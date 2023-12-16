@@ -86,51 +86,66 @@ int main(int argc, char** argv)
 
     std::vector<window*> windows;
 
-    for (auto& cam : _view_cameras)
-    {
-        // mouse_events_refiner* me = new mouse_events_refiner;
-        cam = new camera;
-        // auto* window = new window;
-        // windows.push_back(window);
-        // window->resize(400, 400);
-        // window->init();
-        // window->set_camera(cam);
-        // window->set_mouse_events_refiner(me);
-        cam->set_ortho(true);
-        // window->on_window_closed += [ &windows ](window* window)
-        // { windows.erase(std::find(windows.begin(), windows.end(), window));
-        // };
+    windows.push_back(new window);
+    windows.back()->init();
+    windows.back()->resize(400, 400);
+    windows.back()->set_active();
+    windows.back()->on_window_closed += [ &windows ](window* window)
+    { windows.erase(std::find(windows.begin(), windows.end(), window)); };
+    std::shared_ptr<viewport> vp = std::make_shared<viewport>();
+    vp->init();
+    windows.back()->add_viewport(vp);
+    windows.back()->get_main_viewport()->set_camera(main_camera);
+    windows.back()->set_mouse_events_refiner(&mouse_events);
 
-        // me->scroll += [ cam ](auto params)
-        // {
-        //     cam->get_transform().set_position(
-        //         cam->get_transform().get_position() *
-        //         std::pow<float>(1.2, params._delta.y));
-        // };
+    mouse_events_refiner* me = new mouse_events_refiner;
+    auto* wnd = new window;
+    windows.push_back(wnd);
+    wnd->resize(200, 600);
+    wnd->init();
+    wnd->set_mouse_events_refiner(me);
+    struct layout_vert3 : window::layout
+    {
+        void calculate_layout(window* wnd) override
+        {
+            auto vps = wnd->get_viewports();
+            for (int i = 0; i < std::min<size_t>(vps.size(), 3); ++i)
+            {
+                auto& vp = vps[ i ];
+                vp->set_position(
+                    0, (_view_cameras.size() - i - 1) * wnd->get_height() / 3);
+                vp->set_size(wnd->get_width(), wnd->get_height() / 3);
+            }
+        }
+    };
+
+    wnd->set_layout<layout_vert3>();
+    wnd->on_window_closed += [ &windows ](window* wnd)
+    { windows.erase(std::find(windows.begin(), windows.end(), wnd)); };
+
+    // me->scroll += [ cam ](auto params)
+    // {
+    //     cam->get_transform().set_position(
+    //         cam->get_transform().get_position() *
+    //         std::pow<float>(1.2, params._delta.y));
+    // };
+    for (int i = 0; i < _view_cameras.size(); ++i)
+    {
+        auto& cam = _view_cameras[ i ];
+        cam = new camera;
+        std::shared_ptr<viewport> vp = std::make_shared<viewport>();
+        vp->init();
+        vp->set_camera(cam);
+        cam->set_ortho(true);
+        wnd->add_viewport(vp);
     }
 
     // glm::vec2 wpos = windows[ 0 ]->position();
     // windows[ 1 ]->move(wpos.x + windows[ 0 ]->width(), wpos.y);
     // windows[ 2 ]->move(wpos.x, wpos.y + windows[ 0 ]->height());
 
-    windows.push_back(new window);
-    windows.back()->init();
-    // windows.back()->move(wpos.x + windows[ 0 ]->width(),
-    //                      wpos.y + windows[ 0 ]->height());
-    windows.back()->resize(400, 400);
-    windows.back()->set_active();
-    // windows.back()->set_layout<window::layout_3t1b>();
-    windows.back()->on_window_closed += [ &windows ](window* window)
-    { windows.erase(std::find(windows.begin(), windows.end(), window)); };
-    // viewport* vp = new viewport;
-    windows.back()->main_viewport()->set_camera(main_camera);
-    // windows.back()->add_viewport(vp);
-    // vp->set_position(100, 100);
-    // vp->set_size(100, 100);
-
     game_object* selected_object = nullptr;
 
-    windows.back()->set_mouse_events_refiner(&mouse_events);
     mouse_events.click +=
         [ &selected_object ](mouse_events_refiner::mouse_event_params params)
     {
@@ -172,11 +187,11 @@ int main(int argc, char** argv)
     mouse_events.move += [](auto params)
     {
         // draw ray casted from camera
-        auto pos = params._window->main_viewport()
+        auto pos = params._window->get_main_viewport()
                        ->get_camera()
                        ->get_transform()
                        .get_position();
-        auto rot = params._window->main_viewport()
+        auto rot = params._window->get_main_viewport()
                        ->get_camera()
                        ->get_transform()
                        .get_rotation();
@@ -184,8 +199,10 @@ int main(int argc, char** argv)
             glm::vec3 { params._position.x,
                         params._window->get_height() - params._position.y,
                         0 },
-            params._window->main_viewport()->get_camera()->view_matrix(),
-            params._window->main_viewport()->get_camera()->projection_matrix(),
+            params._window->get_main_viewport()->get_camera()->view_matrix(),
+            params._window->get_main_viewport()
+                ->get_camera()
+                ->projection_matrix(),
             glm::vec4 { 0,
                         0,
                         params._window->get_width(),

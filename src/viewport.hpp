@@ -40,12 +40,6 @@ private:
     camera* render_camera() const;
     void draw() const;
 
-    // For debugging only
-    friend class window;
-    void set_as_top_view();
-    void set_as_right_view();
-    void set_as_front_view();
-
 private:
     glm::uvec2 _resolution {};
     glm::uvec2 _position {};

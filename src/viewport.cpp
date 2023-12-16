@@ -111,30 +111,3 @@ void viewport::draw() const
         }
     }
 }
-
-void viewport::set_as_top_view()
-{
-    _viewport_camera->get_transform().set_position({ 0, 100, 0 });
-    _viewport_camera->get_transform().set_rotation(glm::quatLookAt(
-        glm::normalize(_viewport_camera->get_transform().get_position()),
-        { 0, 0, 1 }));
-    _viewport_camera->set_ortho();
-}
-
-void viewport::set_as_right_view()
-{
-    _viewport_camera->get_transform().set_position({ 100, 0, 0 });
-    _viewport_camera->get_transform().set_rotation(glm::quatLookAt(
-        glm::normalize(_viewport_camera->get_transform().get_position()),
-        { 0, 0, 1 }));
-    _viewport_camera->set_ortho();
-}
-
-void viewport::set_as_front_view()
-{
-    _viewport_camera->get_transform().set_position({ 0, 0, -100 });
-    _viewport_camera->get_transform().set_rotation(glm::quatLookAt(
-        glm::normalize(_viewport_camera->get_transform().get_position()),
-        { 0, 1, 0 }));
-    _viewport_camera->set_ortho();
-}
