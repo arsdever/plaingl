@@ -25,6 +25,8 @@ add_library(
   window.cpp
   image.hpp
   image.cpp
+  input_system.hpp
+  input_system.cpp
   material.hpp
   material.cpp
   mesh.hpp
@@ -68,7 +70,9 @@ add_library(
   components/text_renderer_component.hpp
   components/text_renderer_component.cpp
   components/transform_component.hpp
-  components/transform_component.cpp)
+  components/transform_component.cpp
+  components/walking_component.hpp
+  components/walking_component.cpp)
 
 target_link_libraries(${PROJECT}_lib PUBLIC ${PROJECT}_includes glfw glm
                                             profiler::lib freetype Winmm)

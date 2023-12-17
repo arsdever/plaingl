@@ -12,6 +12,11 @@ void camera_component::set_camera(camera* m) { _camera = m; }
 
 camera* camera_component::get_camera() { return _camera; }
 
+void camera_component::update()
+{
+    _camera->get_transform() = get_game_object()->get_transform();
+}
+
 void camera_component::draw_gizmos()
 {
     // https://docs.unity3d.com/Manual/FrustumSizeAtDistance.html
