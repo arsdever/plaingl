@@ -54,6 +54,7 @@ add_library(
   asset_loaders/asset_loader.hpp
   components/camera_component.hpp
   components/camera_component.cpp
+  components/collider_component.hpp
   components/fps_show_component.hpp
   components/fps_show_component.cpp
   components/jumpy_component.hpp
@@ -65,6 +66,8 @@ add_library(
   components/ray_visualize_component.hpp
   components/ray_visualize_component.cpp
   components/renderer_component.hpp
+  components/sphere_collider_component.hpp
+  components/sphere_collider_component.cpp
   components/text_component.hpp
   components/text_component.cpp
   components/text_renderer_component.hpp

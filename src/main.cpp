@@ -27,6 +27,7 @@
 #include "components/text_component.hpp"
 #include "components/text_renderer_component.hpp"
 #include "components/walking_component.hpp"
+#include "components/sphere_collider_component.hpp"
 #include "font.hpp"
 #include "game_clock.hpp"
 #include "game_object.hpp"
@@ -344,6 +345,7 @@ void initScene()
     object->create_component<mesh_component>();
     object->create_component<mesh_renderer_component>();
     object->create_component<jumpy_component>();
+    object->create_component<sphere_collider_component>();
     object->get_component<mesh_component>()->set_mesh(am->meshes()[ 2 ]);
     object->get_component<mesh_renderer_component>()->set_material(basic_mat);
     object->set_name("susane");
