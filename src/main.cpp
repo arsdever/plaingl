@@ -253,12 +253,11 @@ int main(int argc, char** argv)
                 std::chrono::steady_clock::now().time_since_epoch())
                 .count() /
             3.0f;
-        main_camera->get_transform().set_position(
+        main_camera_object->get_transform().set_position(
             { sin(timed_fraction) * 3.0f, cos(timed_fraction) * 3.0f, 5.0f });
-        main_camera->get_transform().set_rotation(glm::quatLookAt(
-            glm::normalize(main_camera->get_transform().get_position()),
+        main_camera_object->get_transform().set_rotation(glm::quatLookAt(
+            glm::normalize(main_camera_object->get_transform().get_position()),
             glm::vec3(0, 1, 0)));
-        main_camera_object->get_transform() = main_camera->get_transform();
 
         for (int i = 0; i < windows.size(); ++i)
         {

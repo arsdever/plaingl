@@ -12,6 +12,7 @@ public:
     void set_camera(camera* m);
     camera* get_camera();
 
+    void update() override;
     void draw_gizmos() override;
 
     static constexpr std::string_view class_type_id = "camera_component";
