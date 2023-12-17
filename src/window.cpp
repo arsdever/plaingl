@@ -14,6 +14,7 @@
 #include "components/mesh_component.hpp"
 #include "game_object.hpp"
 #include "gl_error_handler.hpp"
+#include "input_system.hpp"
 #include "logging.hpp"
 #include "material.hpp"
 #include "mesh.hpp"
@@ -72,17 +73,7 @@ void window::init()
         window* _this = static_cast<window*>(glfwGetWindowUserPointer(wnd));
         _this->_size = { static_cast<size_t>(w), static_cast<size_t>(h) };
         _this->update_layout();
-        _this->_view_camera->set_render_size(w, h);
-    });
-
-    glfwSetFramebufferSizeCallback(_window,
-                                   [](GLFWwindow* wnd, int w, int h)
-    {
-        window* _this = static_cast<window*>(glfwGetWindowUserPointer(wnd));
-        _this->_size = { static_cast<size_t>(w), static_cast<size_t>(h) };
-        _this->update_layout();
         _this->on_window_resized(_this, w, h);
-        // update viewport layout
     });
 
     {
@@ -153,6 +144,11 @@ void window::update()
         return;
     }
 
+    if (input_system::is_key_down(345) && input_system::is_key_down(346))
+    {
+        glfwSetInputMode(_window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+    }
+
     set_active();
     // TODO: consider using glScissor for viewport dependent cleaning
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
@@ -221,6 +217,11 @@ void window::setup_mouse_callbacks()
         _window,
         [](GLFWwindow* wnd, int button, int action, int mods)
     {
+        if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
+        {
+            glfwSetInputMode(wnd, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        }
+
         window* _this = static_cast<window*>(glfwGetWindowUserPointer(wnd));
         auto* refiner = _this->_mouse_events;
         refiner->button_function(wnd, button, action, mods);
