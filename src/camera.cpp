@@ -79,11 +79,9 @@ glm::mat4 camera::view_matrix() const
 {
     // TODO: optimize with caching
     glm::quat rotation = get_transform().get_rotation();
-    glm::vec3 direction = rotation * glm::vec3 { 0, 0, 1 };
-    glm::vec3 cam_right =
-        glm::normalize(glm::cross(direction, glm::vec3 { 0, 1, 0 }));
-    glm::vec3 cam_up = glm::normalize(glm::cross(cam_right, direction));
-    glm::vec3 cam_forward = glm::normalize(glm::cross(cam_right, cam_up));
+    glm::vec3 cam_right = rotation * glm::vec3 { -1, 0, 0 };
+    glm::vec3 cam_up = rotation * glm::vec3 { 0, 1, 0 };
+    glm::vec3 cam_forward = rotation * glm::vec3 { 0, 0, -1 };
 
     glm::mat3 view3(cam_right, cam_up, cam_forward);
     glm::mat4 view = view3;
