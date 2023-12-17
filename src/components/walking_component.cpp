@@ -32,12 +32,12 @@ void walking_component::update()
     }
     if (input_system::is_key_down('A'))
     {
-        transformation -=
+        transformation +=
             speed * static_cast<float>(game_clock::delta().count()) * right;
     }
     if (input_system::is_key_down('D'))
     {
-        transformation +=
+        transformation -=
             speed * static_cast<float>(game_clock::delta().count()) * right;
     }
     if (input_system::is_key_down(' '))

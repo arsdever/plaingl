@@ -211,6 +211,22 @@ int main(int argc, char** argv)
                         params._window->get_width(),
                         params._window->get_height() });
         cast_ray->set_ray(pos, glm::normalize(point - pos));
+        glm::vec3 diff { params._position.y - params._old_position.y,
+                         params._position.x - params._old_position.x,
+                         0 };
+
+        diff *= .1;
+
+        glm::quat y_quat =
+            glm::angleAxis(glm::radians(diff.x), glm::vec3 { 1, 0, 0 });
+        glm::quat x_quat =
+            glm::angleAxis(glm::radians(diff.y), glm::vec3 { 0, -1, 0 });
+        auto euler_angles = glm::eulerAngles(
+            main_camera_object->get_transform().get_rotation() * x_quat *
+            y_quat);
+        euler_angles.z = glm::radians(180.0f);
+        main_camera_object->get_transform().set_rotation(
+            glm::quat(euler_angles));
     };
 
     initScene();
@@ -249,17 +265,6 @@ int main(int argc, char** argv)
 
     while (!windows.empty())
     {
-        // double timed_fraction =
-        //     std::chrono::duration_cast<std::chrono::duration<double>>(
-        //         std::chrono::steady_clock::now().time_since_epoch())
-        //         .count() /
-        //     3.0f;
-        // main_camera_object->get_transform().set_position(
-        //     { sin(timed_fraction) * 3.0f, cos(timed_fraction) * 3.0f, 5.0f });
-        // main_camera_object->get_transform().set_rotation(glm::quatLookAt(
-        //     glm::normalize(main_camera_object->get_transform().get_position()),
-        //     glm::vec3(0, 1, 0)));
-
         for (int i = 0; i < windows.size(); ++i)
         {
             auto p = prof::profile_frame(__FUNCTION__);
@@ -298,16 +303,6 @@ void initScene()
     prog->add_shader("shader.vert");
     prog->add_shader("shader.frag");
     prog->link();
-
-    // for (const auto& property : basic_mat->properties())
-    // {
-    //     log()->info("Material properties:\n\tname: {}\n\tindex: {}\n\tsize: "
-    //                 "{}\n\ttype: {}",
-    //                 property._name,
-    //                 property._index,
-    //                 property._size,
-    //                 property._type);
-    // }
 
     auto* am = asset_manager::default_asset_manager();
     am->load_asset("cube.fbx");
