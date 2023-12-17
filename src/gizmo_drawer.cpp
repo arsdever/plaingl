@@ -15,6 +15,37 @@ void gizmo_drawer::init()
     shader_program::unuse();
 }
 
+void gizmo_drawer::draw_sphere(glm::vec3 center, float radius, glm::vec4 color)
+{
+    std::vector<glm::vec3> vertices;
+    std::vector<int> indices;
+    for (int i = 0; i < 12; ++i)
+    {
+        float angle = static_cast<float>(i) / 12.0f * glm::pi<float>() * 2.0f;
+        vertices.emplace_back(
+            0, std::sin(angle) * radius, std::cos(angle) * radius);
+        vertices.emplace_back(
+            std::sin(angle) * radius, 0, std::cos(angle) * radius);
+        vertices.emplace_back(
+            std::sin(angle) * radius, std::cos(angle) * radius, 0);
+    }
+
+    for (int j = 0; j < 3; ++j)
+    {
+        for (int i = 0; i < 12; ++i)
+        {
+            indices.push_back(j + i * 3);
+            indices.push_back(j + ((i + 1) % 12) * 3);
+        }
+    }
+
+    _gizmo_shader.set_uniform(
+        "color", std::make_tuple(color.r, color.g, color.b, color.a));
+    _gizmo_shader.use();
+    draw_vertices(std::move(vertices), std::move(indices));
+    shader_program::unuse();
+}
+
 void gizmo_drawer::draw_ray(glm::vec3 pos,
                             glm::vec3 dir,
                             float length,
@@ -46,30 +77,7 @@ void gizmo_drawer::draw_line(glm::vec3 p1, glm::vec3 p2, glm::vec4 color)
     _gizmo_shader.set_uniform(
         "color", std::make_tuple(color.r, color.g, color.b, color.a));
     _gizmo_shader.use();
-    unsigned vao;
-    unsigned vbo;
-    glGenVertexArrays(1, &vao);
-    glBindVertexArray(vao);
-    glGenBuffers(1, &vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    std::array<glm::vec3, 2> verts { { p1, p2 } };
-    glBufferData(GL_ARRAY_BUFFER,
-                 // number of vertices
-                 verts.size() *
-                     // glm::vec component's type size
-                     sizeof(decltype(verts)::value_type::value_type) *
-                     // glm::vec component count
-                     sizeof(decltype(verts)::value_type::length()),
-                 verts.data(),
-                 GL_STATIC_DRAW);
-
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
-    glDrawArrays(GL_LINES, 0, 2);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glDeleteBuffers(1, &vbo);
-    glBindVertexArray(0);
-    glDeleteVertexArrays(1, &vao);
+    draw_vertices({ { p1 }, { p2 } });
     shader_program::unuse();
 }
 
@@ -78,31 +86,54 @@ void gizmo_drawer::draw_line_2d(glm::vec2 p1, glm::vec2 p2, glm::vec4 color)
     _gizmo_shader.set_uniform(
         "color", std::make_tuple(color.r, color.g, color.b, color.a));
     _gizmo_shader.use();
+    draw_vertices({ { p1, 0 }, { p2, 0 } });
+    shader_program::unuse();
+}
+
+void gizmo_drawer::draw_vertices(std::vector<glm::vec3> vertices)
+{
+    std::vector<int> indices(vertices.size(), 0);
+    for (int i = 0; i < vertices.size(); ++i)
+    {
+        indices[ i ] = i;
+    }
+    draw_vertices(std::move(vertices), std::move(indices));
+}
+
+void gizmo_drawer::draw_vertices(std::vector<glm::vec3> vertices,
+                                 std::vector<int> indices)
+{
     unsigned vao;
     unsigned vbo;
+    unsigned ebo;
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
     glGenBuffers(1, &vbo);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    std::array<glm::vec3, 2> verts { { { p1, 0 }, { p2, 0 } } };
+    glGenBuffers(1, &ebo);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
     glBufferData(GL_ARRAY_BUFFER,
                  // number of vertices
-                 verts.size() *
+                 vertices.size() *
                      // glm::vec component's type size
-                     sizeof(decltype(verts)::value_type::value_type) *
+                     sizeof(decltype(vertices)::value_type::value_type) *
                      // glm::vec component count
-                     sizeof(decltype(verts)::value_type::length()),
-                 verts.data(),
+                     sizeof(decltype(vertices)::value_type::length()),
+                 vertices.data(),
+                 GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+                 indices.size() * sizeof(decltype(vertices)::value_type),
+                 indices.data(),
                  GL_STATIC_DRAW);
 
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
-    glDrawArrays(GL_LINES, 0, 2);
+    glDrawElements(GL_LINES, indices.size(), GL_UNSIGNED_INT, 0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glDeleteBuffers(1, &ebo);
     glDeleteBuffers(1, &vbo);
     glBindVertexArray(0);
     glDeleteVertexArrays(1, &vao);
-    shader_program::unuse();
 }
 
 shader_program& gizmo_drawer::get_shader() { return _gizmo_shader; }
