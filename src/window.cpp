@@ -75,26 +75,6 @@ void window::init()
         _this->_view_camera->set_render_size(w, h);
     });
 
-    glfwSetMouseButtonCallback(
-        _window,
-        [](GLFWwindow* wnd, int button, int action, int mods)
-    {
-        window* _this = static_cast<window*>(glfwGetWindowUserPointer(wnd));
-
-        if (button == GLFW_MOUSE_BUTTON_1 && action == GLFW_RELEASE)
-        {
-            if (_this->on_mouse_clicked.has_listeners())
-            {
-                double xpos;
-                double ypos;
-                glfwGetCursorPos(wnd, &xpos, &ypos);
-                game_object* object =
-                    _this->find_game_object_at_position(xpos, ypos);
-                _this->on_mouse_clicked(object);
-            }
-        }
-    });
-
     glfwSetFramebufferSizeCallback(_window,
                                    [](GLFWwindow* wnd, int w, int h)
     {
@@ -119,7 +99,7 @@ void window::init()
 
     configure_object_index_mapping();
 
-    _layout = std::make_unique<layout_single>();
+    set_layout<layout_single>();
     update_layout();
 
     _state = state::initialized;
@@ -174,7 +154,7 @@ void window::update()
     }
 
     set_active();
-    glViewport(0, 0, get_width(), get_height());
+    // TODO: consider using glScissor for viewport dependent cleaning
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     _view_camera->set_active();
@@ -197,8 +177,6 @@ void window::update()
 }
 
 void window::toggle_indexing() { _index_rendering = !_index_rendering; }
-
-void window::set_draw_gizmos(bool value) { _should_draw_gizmos = value; }
 
 void window::add_viewport(std::shared_ptr<viewport> vp)
 {

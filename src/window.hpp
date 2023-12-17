@@ -51,7 +51,6 @@ public:
     void update();
 
     void toggle_indexing();
-    void set_draw_gizmos(bool value = true);
 
     void add_viewport(std::shared_ptr<viewport> vp);
     std::vector<std::shared_ptr<viewport>> get_viewports() const;
@@ -66,7 +65,6 @@ public:
         update_layout();
     }
 
-    event<void(game_object*)> on_mouse_clicked;
     event<void(window*)> on_window_closed;
     event<void(window*, size_t w, size_t h)> on_window_resized;
     // TODO: handling should be improved
@@ -85,21 +83,20 @@ private:
     void configure_object_index_mapping();
 
 private:
-    GLFWwindow* _window = nullptr;
+    GLFWwindow* _window { nullptr };
     state _state = state::uninitialized;
     glm::vec<2, size_t> _size { 800, 600 };
-    bool _is_main_window = false;
-    camera* _view_camera = nullptr;
-    std::unique_ptr<layout> _layout = nullptr;
-    mouse_events_refiner* _mouse_events;
-    bool _should_draw_gizmos = false;
+    bool _is_main_window { false };
+    camera* _view_camera { nullptr };
+    std::unique_ptr<layout> _layout { nullptr };
+    mouse_events_refiner* _mouse_events { nullptr };
     std::vector<std::shared_ptr<viewport>> _viewports;
 
     unsigned _object_index_map;
     unsigned _object_index_depth_map;
     unsigned _object_index_fbo;
     shader_program* _object_index_map_shader;
-    bool _index_rendering = false;
+    bool _index_rendering { false };
 
     static window* _main_window;
 };
