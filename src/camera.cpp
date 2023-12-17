@@ -101,7 +101,7 @@ glm::mat4 camera::projection_matrix() const
     {
         glm::quat rotation = get_transform().get_rotation();
         glm::vec3 direction = rotation * glm::vec3 { 0, 0, 1 };
-        float dist = glm::dot(direction, get_transform().get_position());
+        float dist = std::abs(glm::dot(direction, get_transform().get_position()));
 
         return glm::ortho(-_render_size.x / dist,
                           _render_size.x / dist,
