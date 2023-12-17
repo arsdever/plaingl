@@ -4,6 +4,8 @@
 #include "mouse_events_refiner.hpp"
 
 #include "logging.hpp"
+#include "viewport.hpp"
+#include "window.hpp"
 
 // TODO: some logic may not work in case of simultaneous multiple button actions
 // TODO: implement double click actions
@@ -155,12 +157,25 @@ void mouse_events_refiner::drop_function(GLFWwindow* window,
 }
 
 mouse_events_refiner::mouse_event_params
-mouse_events_refiner::get_default_event_parameters(GLFWwindow* window) const
+mouse_events_refiner::get_default_event_parameters(GLFWwindow* wnd) const
 {
     mouse_event_params params;
-    double x, y;
-    glfwGetCursorPos(window, &x, &y);
-    params._window = static_cast<gl_window*>(glfwGetWindowUserPointer(window));
+    double x;
+    double y;
+    glfwGetCursorPos(wnd, &x, &y);
+    params._window = static_cast<window*>(glfwGetWindowUserPointer(wnd));
+    params._viewport = nullptr;
+    for (auto& vp : params._window->get_viewports())
+    {
+        auto vp_pos = vp->get_position();
+        auto vp_size = vp->get_resolution();
+        if (x > vp_pos.x && x < vp_pos.x + vp_size.x && y > vp_pos.y &&
+            y < vp_pos.y + vp_size.y)
+        {
+            params._viewport = vp;
+            break;
+        }
+    }
     params._position = { x, y };
     params._old_position = _mouse_position;
     return params;
