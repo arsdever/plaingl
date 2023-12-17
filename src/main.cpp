@@ -26,6 +26,7 @@
 #include "components/ray_visualize_component.hpp"
 #include "components/text_component.hpp"
 #include "components/text_renderer_component.hpp"
+#include "components/walking_component.hpp"
 #include "font.hpp"
 #include "game_clock.hpp"
 #include "game_object.hpp"
@@ -148,24 +149,24 @@ int main(int argc, char** argv)
 
     game_object* selected_object = nullptr;
 
-    mouse_events.click +=
-        [ &selected_object ](mouse_events_refiner::mouse_event_params params)
-    {
-        auto* object = params._window->find_game_object_at_position(
-            params._position.x, params._position.y);
-        log()->info("Main window clicked: Object selected {}",
-                    reinterpret_cast<unsigned long long>(object));
-        if (selected_object != nullptr)
-        {
-            selected_object->set_selected(false);
-            selected_object = nullptr;
-        }
-        if (object != nullptr)
-        {
-            object->set_selected(true);
-            selected_object = object;
-        }
-    };
+    // mouse_events.click +=
+    //     [ &selected_object ](mouse_events_refiner::mouse_event_params params)
+    // {
+    //     auto* object = params._window->find_game_object_at_position(
+    //         params._position.x, params._position.y);
+    //     log()->info("Main window clicked: Object selected {}",
+    //                 reinterpret_cast<unsigned long long>(object));
+    //     if (selected_object != nullptr)
+    //     {
+    //         selected_object->set_selected(false);
+    //         selected_object = nullptr;
+    //     }
+    //     if (object != nullptr)
+    //     {
+    //         object->set_selected(true);
+    //         selected_object = object;
+    //     }
+    // };
 
     mouse_events.drag_drop_start +=
         [](mouse_events_refiner::mouse_event_params params)
@@ -248,16 +249,16 @@ int main(int argc, char** argv)
 
     while (!windows.empty())
     {
-        double timed_fraction =
-            std::chrono::duration_cast<std::chrono::duration<double>>(
-                std::chrono::steady_clock::now().time_since_epoch())
-                .count() /
-            3.0f;
-        main_camera_object->get_transform().set_position(
-            { sin(timed_fraction) * 3.0f, cos(timed_fraction) * 3.0f, 5.0f });
-        main_camera_object->get_transform().set_rotation(glm::quatLookAt(
-            glm::normalize(main_camera_object->get_transform().get_position()),
-            glm::vec3(0, 1, 0)));
+        // double timed_fraction =
+        //     std::chrono::duration_cast<std::chrono::duration<double>>(
+        //         std::chrono::steady_clock::now().time_since_epoch())
+        //         .count() /
+        //     3.0f;
+        // main_camera_object->get_transform().set_position(
+        //     { sin(timed_fraction) * 3.0f, cos(timed_fraction) * 3.0f, 5.0f });
+        // main_camera_object->get_transform().set_rotation(glm::quatLookAt(
+        //     glm::normalize(main_camera_object->get_transform().get_position()),
+        //     glm::vec3(0, 1, 0)));
 
         for (int i = 0; i < windows.size(); ++i)
         {
@@ -389,5 +390,6 @@ void initScene()
                             0.0f,
                         }));
     main_camera_object->get_transform() = main_camera->get_transform();
+    main_camera_object->create_component<walking_component>();
     main_camera->set_ortho(false);
 }
