@@ -6,6 +6,7 @@
 #include <glm/vec2.hpp>
 
 class camera;
+class window;
 
 class viewport
 {
@@ -34,6 +35,9 @@ public:
     void set_visible(bool visible_flag = true);
     bool is_visible() const;
 
+    void set_window(window* owning_window);
+    window* get_window() const;
+
     void update();
 
 private:
@@ -44,7 +48,8 @@ private:
     glm::uvec2 _resolution {};
     glm::uvec2 _position {};
     std::unique_ptr<camera> _viewport_camera { nullptr };
+    window* _window { nullptr };
     camera* _user_camera { nullptr };
     std::string _name;
-    bool _visible_flag;
+    bool _visible_flag = false;
 };

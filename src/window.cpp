@@ -202,6 +202,7 @@ void window::set_draw_gizmos(bool value) { _should_draw_gizmos = value; }
 
 void window::add_viewport(std::shared_ptr<viewport> vp)
 {
+    vp->set_window(this);
     _viewports.push_back(vp);
     _layout->calculate_layout(this);
 }
@@ -213,6 +214,7 @@ std::vector<std::shared_ptr<viewport>> window::get_viewports() const
 
 void window::remove_viewport(std::shared_ptr<viewport> vp)
 {
+    vp->set_window(nullptr);
     std::erase(_viewports, vp);
     _layout->calculate_layout(this);
 }

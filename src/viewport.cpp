@@ -5,6 +5,7 @@
 #include "gizmo_drawer.hpp"
 #include "logging.hpp"
 #include "scene.hpp"
+#include "window.hpp"
 
 namespace
 {
@@ -62,6 +63,13 @@ void viewport::set_visible(bool visible_flag) { _visible_flag = visible_flag; }
 
 bool viewport::is_visible() const { return _visible_flag; }
 
+void viewport::set_window(window* owning_window)
+{
+    _window = owning_window;
+}
+
+window* viewport::get_window() const { return _window; }
+
 void viewport::update()
 {
     if (!is_visible())
@@ -77,7 +85,7 @@ void viewport::update()
     }
 
     glViewport(static_cast<int>(_position.x),
-               static_cast<int>(_position.y),
+               static_cast<int>(_window->get_height() - _position.y - _resolution.y),
                static_cast<int>(_resolution.x),
                static_cast<int>(_resolution.y));
 

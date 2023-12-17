@@ -123,12 +123,6 @@ int main(int argc, char** argv)
     wnd->on_window_closed += [ &windows ](window* wnd)
     { windows.erase(std::find(windows.begin(), windows.end(), wnd)); };
 
-    // me->scroll += [ cam ](auto params)
-    // {
-    //     cam->get_transform().set_position(
-    //         cam->get_transform().get_position() *
-    //         std::pow<float>(1.2, params._delta.y));
-    // };
     for (int i = 0; i < _view_cameras.size(); ++i)
     {
         auto& cam = _view_cameras[ i ];
@@ -136,13 +130,21 @@ int main(int argc, char** argv)
         std::shared_ptr<viewport> vp = std::make_shared<viewport>();
         vp->init();
         vp->set_camera(cam);
+        vp->set_visible(true);
         cam->set_ortho(true);
         wnd->add_viewport(vp);
-    }
+        me->scroll += [ cam, vp ](auto params)
+        {
+            if (params._viewport != vp)
+            {
+                return;
+            }
 
-    // glm::vec2 wpos = windows[ 0 ]->position();
-    // windows[ 1 ]->move(wpos.x + windows[ 0 ]->width(), wpos.y);
-    // windows[ 2 ]->move(wpos.x, wpos.y + windows[ 0 ]->height());
+            cam->get_transform().set_position(
+                cam->get_transform().get_position() *
+                std::pow<float>(1.2, params._delta.y));
+        };
+    }
 
     game_object* selected_object = nullptr;
 

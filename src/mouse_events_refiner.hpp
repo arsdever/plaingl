@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <optional>
 
 #include <glm/vec2.hpp>
@@ -8,6 +9,7 @@
 
 struct GLFWwindow;
 class window;
+class viewport;
 
 class mouse_events_refiner
 {
@@ -15,6 +17,7 @@ public:
     struct mouse_event_params
     {
         window* _window;
+        std::shared_ptr<viewport> _viewport;
         glm::vec2 _position;
         glm::vec2 _old_position;
         glm::vec2 _delta;
