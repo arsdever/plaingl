@@ -28,11 +28,17 @@ sphere_collider_component::detect_collision(std::array<glm::vec3, 2> ray)
     glm::vec3 obj_vec =
         get_game_object()->get_transform().get_position() - ray[ 0 ];
     auto distance = glm::length(glm::cross(obj_vec, ray[ 1 ]));
-    log()->info("Distance: {}", distance);
     if (distance > _radius)
     {
         return std::nullopt;
     }
 
-    return { { glm::vec3 {}, glm::vec3 {} } };
+    glm::vec3 min_distance_point =
+        ray[ 0 ] + glm::dot(obj_vec, ray[ 1 ]) * ray[ 1 ];
+    glm::vec3 hit_point =
+        min_distance_point - ray[ 1 ] * glm::distance(_radius, distance);
+    glm::vec3 hit_normal =
+        hit_point - get_game_object()->get_transform().get_position();
+
+    return { { hit_point, hit_normal } };
 }

@@ -241,18 +241,6 @@ int main(int argc, char** argv)
                         params._window->get_width(),
                         params._window->get_height() });
         cast_ray->set_ray(pos, glm::normalize(point - pos));
-
-        auto hit = p.raycast(pos, glm::normalize(point - pos));
-
-        glm::vec3 susane_pos = s.objects()[ 0 ]->get_transform().get_position();
-        glm::vec3 pointing_pos = pos + glm::normalize(point - pos) * 10.0f;
-        float distance = glm::distance(susane_pos, pointing_pos);
-        log()->info("Real distance {}", distance);
-
-        if (hit.has_value())
-        {
-            log()->info("hit collider");
-        }
         glm::vec3 diff { params._position.y - params._old_position.y,
                          params._position.x - params._old_position.x,
                          0 };
@@ -390,7 +378,6 @@ void initScene()
     object->get_component<mesh_component>()->set_mesh(am->meshes()[ 2 ]);
     object->get_component<mesh_renderer_component>()->set_material(basic_mat);
     object->set_name("susane");
-    object->get_transform().set_position({ 5, 0, 0 });
     s.add_object(object);
 
     game_object* ray = new game_object;
