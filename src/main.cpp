@@ -18,6 +18,7 @@
 
 #include "asset_manager.hpp"
 #include "camera.hpp"
+#include "components/box_collider_component.hpp"
 #include "components/camera_component.hpp"
 #include "components/fps_show_component.hpp"
 #include "components/jumpy_component.hpp"
@@ -31,6 +32,7 @@
 #include "font.hpp"
 #include "game_clock.hpp"
 #include "game_object.hpp"
+#include "glm/gtc/random.hpp"
 #include "image.hpp"
 #include "logging.hpp"
 #include "material.hpp"
@@ -374,11 +376,14 @@ void initScene()
     object->create_component<mesh_component>();
     object->create_component<mesh_renderer_component>();
     // object->create_component<jumpy_component>();
-    object->create_component<sphere_collider_component>();
+    auto* bc = object->create_component<box_collider_component>();
     object->get_component<mesh_component>()->set_mesh(am->meshes()[ 2 ]);
     object->get_component<mesh_renderer_component>()->set_material(basic_mat);
     object->set_name("susane");
     s.add_object(object);
+    bc->set_position(glm::vec3(1, 5, 2));
+    bc->set_scale(glm::vec3(2, 1, 3));
+    bc->set_rotation(glm::quat(glm::ballRand(1.0f)));
 
     game_object* ray = new game_object;
     cast_ray = ray->create_component<ray_visualize_component>();
