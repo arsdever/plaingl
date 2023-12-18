@@ -5,6 +5,8 @@
 
 #include "gizmo_drawer.hpp"
 
+#include "glm/gtx/quaternion.hpp"
+
 void gizmo_drawer::init()
 {
     _gizmo_shader.init();
@@ -12,6 +14,35 @@ void gizmo_drawer::init()
     _gizmo_shader.add_shader("gizmo.frag");
     _gizmo_shader.link();
     _gizmo_shader.use();
+    shader_program::unuse();
+}
+
+void gizmo_drawer::draw_box(glm::vec3 position,
+                            glm::quat rotation,
+                            glm::vec3 scale,
+                            glm::vec4 color)
+{
+    std::vector<glm::vec3> vertices {
+        { -.5, -.5, -.5 }, { -.5, -.5, .5 }, { -.5, .5, -.5 }, { -.5, .5, .5 },
+        { .5, -.5, -.5 },  { .5, -.5, .5 },  { .5, .5, -.5 },  { .5, .5, .5 },
+    };
+    std::vector<int> indices { 0, 1, 1, 5, 5, 4, 4, 0, 2, 3, 3, 7,
+                               7, 6, 6, 2, 2, 0, 6, 4, 7, 5, 3, 1 };
+
+    glm::mat4 transform = glm::identity<glm::mat4>();
+    transform = glm::translate(transform, position);
+    transform = transform * glm::toMat4(rotation);
+    transform = glm::scale(transform, scale);
+
+    for (auto& v : vertices)
+    {
+        v = transform * glm::vec4 { v, 1 };
+    }
+
+    _gizmo_shader.set_uniform(
+        "color", std::make_tuple(color.r, color.g, color.b, color.a));
+    _gizmo_shader.use();
+    draw_vertices(std::move(vertices), std::move(indices));
     shader_program::unuse();
 }
 

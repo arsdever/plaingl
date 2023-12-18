@@ -10,6 +10,10 @@ class gizmo_drawer
 public:
     void init();
 
+    void draw_box(glm::vec3 position,
+                  glm::quat rotation,
+                  glm::vec3 scale,
+                  glm::vec4 color);
     void draw_sphere(glm::vec3 center, float radius, glm::vec4 color);
     void draw_ray(glm::vec3 pos, glm::vec3 dir, float length, glm::vec4 color);
     void draw_line(glm::vec3 p1, glm::vec3 p2, glm::vec4 color);
