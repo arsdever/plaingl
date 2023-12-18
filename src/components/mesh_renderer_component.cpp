@@ -30,7 +30,10 @@ void mesh_renderer_component::render()
 
         if (get_component<mesh_component>())
         {
-            get_component<mesh_component>()->get_mesh()->render();
+            if (auto* mesh = get_component<mesh_component>()->get_mesh())
+            {
+                mesh->render();
+            }
         }
         _material->deactivate();
     }
