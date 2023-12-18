@@ -24,10 +24,10 @@
 #include "components/mesh_component.hpp"
 #include "components/mesh_renderer_component.hpp"
 #include "components/ray_visualize_component.hpp"
+#include "components/sphere_collider_component.hpp"
 #include "components/text_component.hpp"
 #include "components/text_renderer_component.hpp"
 #include "components/walking_component.hpp"
-#include "components/sphere_collider_component.hpp"
 #include "font.hpp"
 #include "game_clock.hpp"
 #include "game_object.hpp"
@@ -72,10 +72,39 @@ void on_error(int error_code, const char* description)
 
 static std::atomic_int counter = 0;
 
+class physics_engine
+{
+public:
+    std::optional<collider_component::collision> raycast(glm::vec3 from,
+                                                         glm::vec3 dir)
+    {
+        if (auto* s = scene::get_active_scene())
+        {
+            for (auto* obj : s->objects())
+            {
+                auto* collider = obj->get_component<collider_component>();
+                if (!collider)
+                {
+                    continue;
+                }
+
+                auto collision = collider->detect_collision({ from, dir });
+                if (collision.has_value())
+                {
+                    return std::move(collision);
+                }
+            }
+        }
+
+        return std::nullopt;
+    }
+};
+
 int main(int argc, char** argv)
 {
     configure_levels(argc, argv);
     game_clock* clock = game_clock::init();
+    physics_engine p;
     glfwInit();
     glfwSetErrorCallback(on_error);
     adjust_timeout_accuracy_guard guard;
@@ -188,7 +217,7 @@ int main(int argc, char** argv)
     mouse_events.drag_drop_end +=
         [](mouse_events_refiner::mouse_event_params params) {};
 
-    mouse_events.move += [](auto params)
+    mouse_events.move += [ &p ](auto params)
     {
         // draw ray casted from camera
         auto pos = params._window->get_main_viewport()
@@ -212,6 +241,18 @@ int main(int argc, char** argv)
                         params._window->get_width(),
                         params._window->get_height() });
         cast_ray->set_ray(pos, glm::normalize(point - pos));
+
+        auto hit = p.raycast(pos, glm::normalize(point - pos));
+
+        glm::vec3 susane_pos = s.objects()[ 0 ]->get_transform().get_position();
+        glm::vec3 pointing_pos = pos + glm::normalize(point - pos) * 10.0f;
+        float distance = glm::distance(susane_pos, pointing_pos);
+        log()->info("Real distance {}", distance);
+
+        if (hit.has_value())
+        {
+            log()->info("hit collider");
+        }
         glm::vec3 diff { params._position.y - params._old_position.y,
                          params._position.x - params._old_position.x,
                          0 };
@@ -226,8 +267,8 @@ int main(int argc, char** argv)
             main_camera_object->get_transform().get_rotation() * x_quat *
             y_quat);
         euler_angles.z = glm::radians(180.0f);
-        main_camera_object->get_transform().set_rotation(
-            glm::quat(euler_angles));
+        // main_camera_object->get_transform().set_rotation(
+        //     glm::quat(euler_angles));
     };
 
     initScene();
@@ -247,7 +288,7 @@ int main(int argc, char** argv)
     std::atomic_bool program_exits = false;
     // TODO: make this variable
     static constexpr std::atomic<double> physics_fps = 500.0;
-    std::thread thd { [ &program_exits, clock ]
+    std::thread thd { [ &p, &program_exits, clock ]
     {
         double physics_frame_time_hint = 1.0 / physics_fps;
         while (!program_exits)
@@ -344,11 +385,12 @@ void initScene()
     game_object* object = new game_object;
     object->create_component<mesh_component>();
     object->create_component<mesh_renderer_component>();
-    object->create_component<jumpy_component>();
+    // object->create_component<jumpy_component>();
     object->create_component<sphere_collider_component>();
     object->get_component<mesh_component>()->set_mesh(am->meshes()[ 2 ]);
     object->get_component<mesh_renderer_component>()->set_material(basic_mat);
     object->set_name("susane");
+    object->get_transform().set_position({ 5, 0, 0 });
     s.add_object(object);
 
     game_object* ray = new game_object;

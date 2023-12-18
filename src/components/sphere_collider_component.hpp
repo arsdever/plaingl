@@ -15,6 +15,9 @@ public:
     static constexpr std::string_view class_type_id =
         "sphere_collider_component";
 
+protected:
+    std::optional<collision> detect_collision(std::array<glm::vec3, 2> ray) override;
+
 private:
     float _radius { 1.0f };
 };
