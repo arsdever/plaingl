@@ -1,11 +1,13 @@
-#include <array>
-
+/* clang-format off */
 #include <glad/gl.h>
+#include <GLFW/glfw3.h>
+/* clang-format on */
+
 #include <glm/ext.hpp>
+#include <glm/gtx/hash.hpp>
+#include <glm/gtx/quaternion.hpp>
 
 #include "gizmo_drawer.hpp"
-
-#include "glm/gtx/quaternion.hpp"
 
 void gizmo_drawer::init()
 {
@@ -14,6 +16,100 @@ void gizmo_drawer::init()
     _gizmo_shader.add_shader("gizmo.frag");
     _gizmo_shader.link();
     _gizmo_shader.use();
+    shader_program::unuse();
+}
+
+void gizmo_drawer::draw_grid(glm::vec3 position,
+                             glm::quat rotation,
+                             glm::vec2 scale,
+                             size_t count,
+                             float distance,
+                             glm::vec4 color,
+                             bool force)
+{
+    glm::mat4 transform = glm::identity<glm::mat4>();
+    transform = glm::translate(transform, position);
+    transform = transform * glm::toMat4(rotation);
+    transform = glm::scale(transform, { scale, 1 });
+    size_t hash = std::hash<glm::mat4> {}(transform);
+
+    if (force || _grid_cache_checksum != hash)
+    {
+        std::vector<glm::vec3> vertices;
+        float max_far = count * distance;
+        for (size_t i = 0; i <= count; ++i)
+        {
+            vertices.push_back(
+                { -max_far,
+                  (static_cast<float>(i) - static_cast<float>(count) / 2.0f) *
+                      distance * 2.0f,
+                  0 });
+            vertices.push_back(
+                { max_far,
+                  (static_cast<float>(i) - static_cast<float>(count) / 2.0f) *
+                      distance * 2.0f,
+                  0 });
+            vertices.push_back(
+                { (static_cast<float>(i) - static_cast<float>(count) / 2.0f) *
+                      distance * 2.0f,
+                  -max_far,
+                  0 });
+            vertices.push_back(
+                { (static_cast<float>(i) - static_cast<float>(count) / 2.0f) *
+                      distance * 2.0f,
+                  max_far,
+                  0 });
+        }
+
+        for (auto& v : vertices)
+        {
+            v = transform * glm::vec4 { v, 1 };
+        }
+        _grid_vertices_cache = std::move(vertices);
+
+        std::vector<int> indices(_grid_vertices_cache.size(), 0);
+        for (int i = 0; i < _grid_vertices_cache.size(); ++i)
+        {
+            indices[ i ] = i;
+        }
+        _grid_indices_cache = std::move(indices);
+    }
+
+    _gizmo_shader.set_uniform(
+        "color", std::make_tuple(color.r, color.g, color.b, color.a));
+    _gizmo_shader.use();
+    draw_vertices(
+        _grid_vertices_cache, _grid_indices_cache, _grid_vbo, _grid_ebo);
+    shader_program::unuse();
+}
+
+void gizmo_drawer::draw_plane(glm::vec3 position,
+                              glm::quat rotation,
+                              glm::vec2 scale,
+                              glm::vec4 color)
+{
+    std::vector<glm::vec3> vertices {
+        { -.5, -.5, 0 },
+        { -.5, .5, 0 },
+        { .5, -.5, 0 },
+        { .5, .5, 0 },
+    };
+    std::vector<int> indices { 0, 1, 1, 3, 3, 2, 2, 0 };
+
+    glm::mat4 transform = glm::identity<glm::mat4>();
+    transform = glm::translate(transform, position);
+    transform = transform * glm::toMat4(rotation);
+    transform = glm::scale(transform, { scale, 1 });
+
+    for (auto& v : vertices)
+    {
+        v = transform * glm::vec4 { v, 1 };
+    }
+
+    _gizmo_shader.set_uniform(
+        "color", std::make_tuple(color.r, color.g, color.b, color.a));
+    _gizmo_shader.use();
+    draw_vertices(std::move(vertices), std::move(indices), _vbo, _ebo);
     shader_program::unuse();
 }
 
@@ -42,7 +138,7 @@ void gizmo_drawer::draw_box(glm::vec3 position,
     _gizmo_shader.set_uniform(
         "color", std::make_tuple(color.r, color.g, color.b, color.a));
     _gizmo_shader.use();
-    draw_vertices(std::move(vertices), std::move(indices));
+    draw_vertices(std::move(vertices), std::move(indices), _vbo, _ebo);
     shader_program::unuse();
 }
 
@@ -73,7 +169,7 @@ void gizmo_drawer::draw_sphere(glm::vec3 center, float radius, glm::vec4 color)
     _gizmo_shader.set_uniform(
         "color", std::make_tuple(color.r, color.g, color.b, color.a));
     _gizmo_shader.use();
-    draw_vertices(std::move(vertices), std::move(indices));
+    draw_vertices(std::move(vertices), std::move(indices), _vbo, _ebo);
     shader_program::unuse();
 }
 
@@ -121,50 +217,53 @@ void gizmo_drawer::draw_line_2d(glm::vec2 p1, glm::vec2 p2, glm::vec4 color)
     shader_program::unuse();
 }
 
-void gizmo_drawer::draw_vertices(std::vector<glm::vec3> vertices)
+void gizmo_drawer::draw_vertices(const std::vector<glm::vec3>& vertices)
 {
     std::vector<int> indices(vertices.size(), 0);
     for (int i = 0; i < vertices.size(); ++i)
     {
         indices[ i ] = i;
     }
-    draw_vertices(std::move(vertices), std::move(indices));
+    draw_vertices(vertices, indices, _vbo, _ebo);
 }
 
-void gizmo_drawer::draw_vertices(std::vector<glm::vec3> vertices,
-                                 std::vector<int> indices)
+void gizmo_drawer::draw_vertices(const std::vector<glm::vec3>& vertices,
+                                 const std::vector<int>& indices,
+                                 unsigned& vbo,
+                                 unsigned& ebo)
 {
-    unsigned vao;
-    unsigned vbo;
-    unsigned ebo;
-    glGenVertexArrays(1, &vao);
-    glBindVertexArray(vao);
-    glGenBuffers(1, &vbo);
+    if (!vbo)
+    {
+        glGenBuffers(1, &vbo);
+    }
+    if (!ebo)
+    {
+        glGenBuffers(1, &ebo);
+    }
+
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glGenBuffers(1, &ebo);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-    glBufferData(GL_ARRAY_BUFFER,
-                 // number of vertices
-                 vertices.size() *
-                     // glm::vec component's type size
-                     sizeof(decltype(vertices)::value_type::value_type) *
-                     // glm::vec component count
-                     sizeof(decltype(vertices)::value_type::length()),
-                 vertices.data(),
-                 GL_STATIC_DRAW);
+    glBufferData(
+        GL_ARRAY_BUFFER,
+        // number of vertices
+        vertices.size() *
+            // glm::vec component's type size
+            sizeof(std::remove_cvref_t<
+                   decltype(vertices)>::value_type::value_type) *
+            // glm::vec component count
+            sizeof(
+                std::remove_cvref_t<decltype(vertices)>::value_type::length()),
+        vertices.data(),
+        GL_STATIC_DRAW);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER,
-                 indices.size() * sizeof(decltype(vertices)::value_type),
+                 indices.size() *
+                     sizeof(std::remove_cvref_t<decltype(indices)>::value_type),
                  indices.data(),
                  GL_STATIC_DRAW);
 
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
     glDrawElements(GL_LINES, indices.size(), GL_UNSIGNED_INT, 0);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glDeleteBuffers(1, &ebo);
-    glDeleteBuffers(1, &vbo);
-    glBindVertexArray(0);
-    glDeleteVertexArrays(1, &vao);
 }
 
 shader_program& gizmo_drawer::get_shader() { return _gizmo_shader; }
@@ -175,6 +274,24 @@ gizmo_drawer* gizmo_drawer::instance()
     {
         _instance = new gizmo_drawer;
         _instance->init();
+    }
+
+    if (!_instance->_vao_map.contains(glfwGetCurrentContext()))
+    {
+        _instance->_vao_map[ glfwGetCurrentContext() ] = 0;
+        glGenVertexArrays(1, &_instance->_vao_map[ glfwGetCurrentContext() ]);
+        glBindVertexArray(_instance->_vao_map[ glfwGetCurrentContext() ]);
+        glBindBuffer(GL_ARRAY_BUFFER, _instance->_vbo);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _instance->_ebo);
+        size_t attribute_offset = 0;
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(
+            0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
+    }
+    else
+    {
+        glBindVertexArray(_instance->_vao_map[ glfwGetCurrentContext() ]);
+        glEnableVertexAttribArray(0);
     }
 
     return _instance;
