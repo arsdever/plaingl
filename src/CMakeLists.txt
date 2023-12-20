@@ -65,6 +65,8 @@ add_library(
   components/mesh_component.cpp
   components/mesh_renderer_component.hpp
   components/mesh_renderer_component.cpp
+  components/plane_collider_component.hpp
+  components/plane_collider_component.cpp
   components/ray_visualize_component.hpp
   components/ray_visualize_component.cpp
   components/renderer_component.hpp
