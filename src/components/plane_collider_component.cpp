@@ -49,23 +49,6 @@ void plane_collider_component::draw_gizmos()
 
     gizmo_drawer::instance()->draw_plane(
         global_pos, global_rot, global_scale, { 0, 1, 0, 1 });
-    gizmo_drawer::instance()->draw_grid(
-        global_pos, global_rot, global_scale, 20, .1f);
-
-    glm::vec3 normal = collider_to_world * glm::vec4 { 0, 0, 1, 1 };
-    glm::vec3 right = collider_to_world * glm::vec4 { 1, 0, 0, 1 };
-    glm::vec3 up = collider_to_world * glm::vec4 { 0, 1, 0, 1 };
-    glm::vec3 center = collider_to_world * glm::vec4 { 0, 0, 0, 1 };
-    glm::vec3 corner = center - right / 2.0f - up / 2.0f;
-
-    gizmo_drawer::instance()->draw_ray(
-        center, normal, .5f, glm::vec4 { 0, 0, 1, 1 });
-    gizmo_drawer::instance()->draw_ray(
-        point, normal, .5f, glm::vec4 { 1, 1, 0, 1 });
-    gizmo_drawer::instance()->draw_ray(
-        corner, right, 1.0f, glm::vec4 { 1, 0, 0, 1 });
-    gizmo_drawer::instance()->draw_ray(
-        corner, up, 1.0f, glm::vec4 { 0, 1, 0, 1 });
 }
 
 void plane_collider_component::set_position(glm::vec3 position)
