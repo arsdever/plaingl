@@ -5,14 +5,6 @@
 #include "material.hpp"
 #include "mesh.hpp"
 
-namespace
-{
-static inline logger log()
-{
-    return get_logger(mesh_renderer_component::class_type_id);
-}
-} // namespace
-
 mesh_renderer_component::mesh_renderer_component(game_object* parent)
     : renderer_component(parent, class_type_id)
 {
@@ -30,7 +22,10 @@ void mesh_renderer_component::render()
 
         if (get_component<mesh_component>())
         {
-            get_component<mesh_component>()->get_mesh()->render();
+            if (auto* mesh = get_component<mesh_component>()->get_mesh())
+            {
+                mesh->render();
+            }
         }
         _material->deactivate();
     }
