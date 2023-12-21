@@ -11,14 +11,6 @@
 #include "logging.hpp"
 #include "material.hpp"
 
-namespace
-{
-static inline logger log()
-{
-    return get_logger(text_renderer_component::class_type_id);
-}
-} // namespace
-
 text_renderer_component::text_renderer_component(game_object* parent)
     : renderer_component(parent, class_type_id)
 {

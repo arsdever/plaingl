@@ -5,14 +5,6 @@
 #include "material.hpp"
 #include "mesh.hpp"
 
-namespace
-{
-static inline logger log()
-{
-    return get_logger(mesh_renderer_component::class_type_id);
-}
-} // namespace
-
 mesh_renderer_component::mesh_renderer_component(game_object* parent)
     : renderer_component(parent, class_type_id)
 {

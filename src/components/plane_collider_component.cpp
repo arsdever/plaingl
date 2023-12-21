@@ -9,14 +9,6 @@
 #include "glm/gtx/quaternion.hpp"
 #include "logging.hpp"
 
-namespace
-{
-inline logger log()
-{
-    return get_logger(plane_collider_component::class_type_id);
-}
-} // namespace
-
 plane_collider_component::plane_collider_component(game_object* parent)
     : collider_component(parent, class_type_id)
 {

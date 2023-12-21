@@ -1,15 +1,6 @@
 #include "components/box_collider_component.hpp"
 
 #include "gizmo_drawer.hpp"
-#include "logging.hpp"
-
-namespace
-{
-inline logger log()
-{
-    return get_logger(box_collider_component::class_type_id);
-}
-} // namespace
 
 box_collider_component::box_collider_component(game_object* parent)
     : collider_component(parent, class_type_id)
