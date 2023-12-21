@@ -22,6 +22,12 @@ public:
 protected:
     std::optional<collision>
     detect_collision(std::array<glm::vec3, 2> ray) override;
+    std::array<glm::vec3, 4> calculate_points_of_interest();
+    std::optional<collision> check_collision_plane(glm::vec3 center,
+                                    glm::vec3 right,
+                                    glm::vec3 up,
+                                    glm::vec3 ray_source,
+                                    glm::vec3 ray_dir);
 
 private:
     glm::vec3 _position { 0, 0, 0 };

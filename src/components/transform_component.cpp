@@ -11,6 +11,7 @@ transform_component::transform_component(game_object* parent)
 
 void transform_component::draw_gizmos()
 {
+    return;
     gizmo_drawer::instance()->draw_line(
         { 0, 0, 0 }, { 1, 0, 0 }, { 1, 0, 0, 1 });
     gizmo_drawer::instance()->draw_line(

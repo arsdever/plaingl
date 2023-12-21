@@ -387,15 +387,15 @@ void initScene()
     object->create_component<mesh_component>();
     object->create_component<mesh_renderer_component>();
     // object->create_component<jumpy_component>();
-    auto* bc = object->create_component<plane_collider_component>();
+    auto* bc = object->create_component<box_collider_component>();
     // object->get_component<mesh_component>()->set_mesh(am->meshes()[ 2 ]);
     object->get_component<mesh_renderer_component>()->set_material(basic_mat);
     object->set_name("susane");
     s.add_object(object);
-    bc->set_position(glm::vec3(0, 0, 0));
-    bc->set_scale(glm::vec3(2, 1, 1));
+    // bc->set_position(glm::vec3(0, 0, 0));
+    // bc->set_scale(glm::vec3(2, 1, 1));
     // bc->set_rotation(glm::quat(glm::ballRand(1.0f)));
-    bc->set_rotation(glm::quat(glm::radians(glm::vec3 { 0, 30, 0 })));
+    // bc->set_rotation(glm::quat(glm::radians(glm::vec3 { 0, 30, 0 })));
 
     ttf.load("font.ttf", 16);
     game_object* collision_text_object = new game_object;
@@ -406,7 +406,7 @@ void initScene()
     collision_text_object->get_component<text_renderer_component>()
         ->set_material(am->get_material("text"));
     s.add_object(collision_text_object);
-    bc->_text = ct;
+    // bc->_text = ct;
     collision_text_object->get_transform().set_scale({ 0.005f, 0.005f, 1.0f });
 
     game_object* ray = new game_object;
