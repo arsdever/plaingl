@@ -33,6 +33,8 @@ add_library(
   mesh.cpp
   mouse_events_refiner.hpp
   mouse_events_refiner.cpp
+  physics_engine.hpp
+  physics_engine.cpp
   scene.hpp
   scene.cpp
   shader.hpp

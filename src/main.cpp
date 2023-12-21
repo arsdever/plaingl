@@ -38,6 +38,7 @@
 #include "logging.hpp"
 #include "material.hpp"
 #include "mouse_events_refiner.hpp"
+#include "physics_engine.hpp"
 #include "scene.hpp"
 #include "shader.hpp"
 #include "texture.hpp"
@@ -74,34 +75,6 @@ void on_error(int error_code, const char* description)
 }
 
 static std::atomic_int counter = 0;
-
-class physics_engine
-{
-public:
-    std::optional<collider_component::collision> raycast(glm::vec3 from,
-                                                         glm::vec3 dir)
-    {
-        if (auto* s = scene::get_active_scene())
-        {
-            for (auto* obj : s->objects())
-            {
-                auto* collider = obj->get_component<collider_component>();
-                if (!collider)
-                {
-                    continue;
-                }
-
-                auto collision = collider->detect_collision({ from, dir });
-                if (collision.has_value())
-                {
-                    return std::move(collision);
-                }
-            }
-        }
-
-        return std::nullopt;
-    }
-};
 
 int main(int argc, char** argv)
 {
