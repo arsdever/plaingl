@@ -4,7 +4,6 @@
 
 #include "components/plane_collider_component.hpp"
 
-#include "components/text_component.hpp"
 #include "gizmo_drawer.hpp"
 #include "glm/gtx/quaternion.hpp"
 #include "logging.hpp"
@@ -64,7 +63,6 @@ glm::vec2 plane_collider_component::get_scale() const { return _scale; }
 std::optional<collider_component::collision>
 plane_collider_component::detect_collision(std::array<glm::vec3, 2> ray)
 {
-    _text->set_text("not hit");
     auto [ normal, corner, right, up ] = params();
 
     float dot_ray_normal = glm::dot(ray[ 1 ], normal);
@@ -85,20 +83,10 @@ plane_collider_component::detect_collision(std::array<glm::vec3, 2> ray)
     float proj_on_right =
         glm::dot(corner_to_hitpoint, right) / glm::length(right);
     float proj_on_up = glm::dot(corner_to_hitpoint, up) / glm::length(up);
-    _text->set_text(fmt::format("{:16}({:#3.3} {:#3.3} {:#3.3})",
-                                "!!! NOT HIT !!! ",
-                                corner_to_hitpoint.x,
-                                corner_to_hitpoint.y,
-                                corner_to_hitpoint.z));
 
     if (proj_on_right > 0 && proj_on_right < glm::length(right) &&
         proj_on_up > 0 && proj_on_up < glm::length(up))
     {
-        _text->set_text(fmt::format("{:16}({:#3.3} {:#3.3} {:#3.3})",
-                                    "!!! HIT !!! ",
-                                    corner_to_hitpoint.x,
-                                    corner_to_hitpoint.y,
-                                    corner_to_hitpoint.z));
         return { { hit_point_plane, normal } };
     }
 

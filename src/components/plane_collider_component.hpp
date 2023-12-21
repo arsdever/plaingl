@@ -19,11 +19,8 @@ public:
     glm::quat get_rotation() const;
     glm::vec2 get_scale() const;
 
-
     static constexpr std::string_view class_type_id =
         "plane_collider_component";
-
-    text_component* _text;
 
 protected:
     std::optional<collision>
