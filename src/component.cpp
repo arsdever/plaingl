@@ -32,4 +32,6 @@ void component::deinit()
     // by default do nothing
 }
 
+logger component::log() const { return get_logger(type_id()); }
+
 game_object* component::get_game_object() const { return _parent; }

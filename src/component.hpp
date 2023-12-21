@@ -1,8 +1,16 @@
 #pragma once
 
+#include <memory>
 #include <string_view>
 
 #include "game_object.hpp"
+
+namespace spdlog
+{
+class logger;
+} // namespace spdlog
+
+using logger = std::shared_ptr<spdlog::logger>;
 
 class component
 {
@@ -20,6 +28,8 @@ public:
     virtual void draw_gizmos();
 
     virtual void deinit();
+
+    logger log() const;
 
     game_object* get_game_object() const;
 

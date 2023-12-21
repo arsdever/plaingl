@@ -33,6 +33,8 @@ add_library(
   mesh.cpp
   mouse_events_refiner.hpp
   mouse_events_refiner.cpp
+  physics_engine.hpp
+  physics_engine.cpp
   scene.hpp
   scene.cpp
   shader.hpp
@@ -52,8 +54,11 @@ add_library(
   viewport.cpp
   glad/src/gl.c
   asset_loaders/asset_loader.hpp
+  components/box_collider_component.hpp
+  components/box_collider_component.cpp
   components/camera_component.hpp
   components/camera_component.cpp
+  components/collider_component.hpp
   components/fps_show_component.hpp
   components/fps_show_component.cpp
   components/jumpy_component.hpp
@@ -62,9 +67,13 @@ add_library(
   components/mesh_component.cpp
   components/mesh_renderer_component.hpp
   components/mesh_renderer_component.cpp
+  components/plane_collider_component.hpp
+  components/plane_collider_component.cpp
   components/ray_visualize_component.hpp
   components/ray_visualize_component.cpp
   components/renderer_component.hpp
+  components/sphere_collider_component.hpp
+  components/sphere_collider_component.cpp
   components/text_component.hpp
   components/text_component.cpp
   components/text_renderer_component.hpp
