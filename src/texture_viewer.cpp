@@ -10,6 +10,7 @@
 #include "image.hpp"
 #include "logging.hpp"
 #include "shader.hpp"
+#include "texture.hpp"
 
 namespace
 {
@@ -128,6 +129,8 @@ void texture_viewer::show_preview(image* img)
     };
     unsigned vao = 0;
     unsigned vbo = 0;
+
+    texture t = texture::from_image(img);
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
     glGenBuffers(1, &vbo);
@@ -138,29 +141,7 @@ void texture_viewer::show_preview(image* img)
                  GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), nullptr);
-
-    glActiveTexture(GL_TEXTURE0);
-    unsigned texture = 0;
-    glGenTextures(1, &texture);
-    glBindTexture(GL_TEXTURE_2D, texture);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexImage2D(GL_TEXTURE_2D,
-                 0,
-                 GL_RGBA,
-                 img->get_width(),
-                 img->get_height(),
-                 0,
-                 GL_RGB,
-                 GL_UNSIGNED_BYTE,
-                 img->get_data());
-    auto error = glGetError();
-    if (error != GL_NO_ERROR)
-    {
-        log()->error("Error while creating a texture {}", error);
-    }
+    t.bind(0);
 
     while (!glfwWindowShouldClose(window))
     {
@@ -176,7 +157,6 @@ void texture_viewer::show_preview(image* img)
     shader_program::unuse();
     glDeleteVertexArrays(1, &vao);
     glDeleteBuffers(1, &vbo);
-    glDeleteTextures(1, &texture);
 
     glfwDestroyWindow(window);
 }

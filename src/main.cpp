@@ -85,10 +85,6 @@ int main(int argc, char** argv)
     glfwSetErrorCallback(on_error);
     adjust_timeout_accuracy_guard guard;
 
-    auto* am = asset_manager::default_asset_manager();
-    am->load_asset("sample.png");
-    am->load_asset("sample_jpg.jpg");
-    // texture_viewer::show_preview(am->get_image("sample_jpg"));
     main_camera = new camera;
 
     std::vector<window*> windows;
@@ -333,10 +329,10 @@ void initScene()
     material* basic_mat = am->get_material("basic");
     txt = new texture();
     image* img = am->get_image("diffuse");
-    txt->init(img->get_width(), img->get_height(), img->get_data());
+    *txt = std::move(texture::from_image(img));
     norm_txt = new texture();
     img = am->get_image("brick");
-    norm_txt->init(img->get_width(), img->get_height(), img->get_data());
+    *norm_txt = std::move(texture::from_image(img));
     basic_mat->set_property_value("ambient_texture", txt);
     basic_mat->set_property_value("ambient_texture_strength", .8f);
     basic_mat->set_property_value("normal_texture", norm_txt);
