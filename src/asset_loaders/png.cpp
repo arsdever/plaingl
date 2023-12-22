@@ -24,57 +24,101 @@ void asset_loader_PNG::load(std::string_view path)
 
     png_read_info(png, info);
 
-    _image = new image;
     auto width = png_get_image_width(png, info);
     auto height = png_get_image_height(png, info);
-    _image->init(width, height);
     auto color_type = png_get_color_type(png, info);
     auto bit_depth = png_get_bit_depth(png, info);
 
-    // Read any color_type into 8bit depth, RGBA format.
-    // See http://www.libpng.org/pub/png/libpng-manual.txt
-
-    if (bit_depth == 16)
-        png_set_strip_16(png);
-
+    // For simplicity let the modifications when loading png images
     if (color_type == PNG_COLOR_TYPE_PALETTE)
         png_set_palette_to_rgb(png);
-
     // PNG_COLOR_TYPE_GRAY_ALPHA is always 8 or 16bit depth.
     if (color_type == PNG_COLOR_TYPE_GRAY && bit_depth < 8)
         png_set_expand_gray_1_2_4_to_8(png);
-
     if (png_get_valid(png, info, PNG_INFO_tRNS))
         png_set_tRNS_to_alpha(png);
-
-    // These color_type don't have an alpha channel then fill it with 0xff.
-    if (color_type == PNG_COLOR_TYPE_RGB || color_type == PNG_COLOR_TYPE_GRAY ||
-        color_type == PNG_COLOR_TYPE_PALETTE)
-        png_set_filler(png, 0xFF, PNG_FILLER_AFTER);
-
-    if (color_type == PNG_COLOR_TYPE_GRAY ||
-        color_type == PNG_COLOR_TYPE_GRAY_ALPHA)
-        png_set_gray_to_rgb(png);
-
     png_read_update_info(png, info);
-
-    // png_bytep* row_pointers = NULL;
-    // row_pointers = (png_bytep*)malloc(sizeof(png_bytep) * height);
-    // for (int y = 0; y < height; y++)
-    // {
-    //     row_pointers[ y ] = (png_byte*)malloc(png_get_rowbytes(png, info));
-    // }
 
     char* buffer = new char[ height * png_get_rowbytes(png, info) ];
     for (int i = 0; i < height; ++i)
     {
-        png_read_row(png, reinterpret_cast<png_bytep>(buffer + i * png_get_rowbytes(png, info)), nullptr);
+        png_read_row(png,
+                     reinterpret_cast<png_bytep>(
+                         buffer + i * png_get_rowbytes(png, info)),
+                     nullptr);
     }
-    // png_read_image(png, row_pointers);
 
     fclose(fp);
 
+    image::metadata md;
+
+    width = png_get_image_width(png, info);
+    height = png_get_image_height(png, info);
+    color_type = png_get_color_type(png, info);
+    bit_depth = png_get_bit_depth(png, info);
+
+    md._width = width;
+    md._height = height;
+
+    switch (color_type)
+    /* Color type covnersion is done based on the following table
+        0       1,2,4,8,16  Each pixel is a grayscale sample.
+        2       8,16        Each pixel is an R,G,B triple.
+        3       1,2,4,8     Each pixel is a palette index;
+                            a PLTE chunk must appear.
+        4       8,16        Each pixel is a grayscale sample,
+                            followed by an alpha sample.
+        6       8,16        Each pixel is an R,G,B triple,
+                            followed by an alpha sample.
+        http://www.libpng.org/pub/png/spec/1.2/PNG-Chunks.html
+    */
+    {
+    case 0:
+    {
+        md._color_type = image::color_type::GRAYSCALE;
+        md._channel_count = 1;
+        break;
+    }
+    case 2:
+    {
+        md._color_type = image::color_type::RGB;
+        md._channel_count = 3;
+        break;
+    }
+    case 3:
+    {
+        md._color_type = image::color_type::PALETTE;
+        md._channel_count = 3;
+        break;
+    }
+    case 4:
+    {
+        md._color_type = image::color_type::GRAYSCALE_ALPHA;
+        md._channel_count = 2;
+        break;
+    }
+    case 6:
+    {
+        md._color_type = image::color_type::RGBA;
+        md._channel_count = 4;
+        break;
+    }
+    default:
+    {
+        md._color_type = image::color_type::UNSPECIFIED;
+        md._channel_count = 0;
+        break;
+    }
+    }
+
+    md._bits_per_pixel = bit_depth * md._channel_count;
+    md._bytes_per_row = png_get_rowbytes(png, info);
+    md._file_format = image::file_format::PNG;
+
     png_destroy_read_struct(&png, &info, NULL);
+
+    _image = new image;
+    _image->init(md);
     _image->set_data(reinterpret_cast<char*>(buffer));
 }
 

@@ -70,8 +70,49 @@ void asset_loader_JPG::load(std::string_view path)
         }
     }
 
+    image::metadata md;
+    md._file_format = image::file_format::JPG;
+    md._width = cinfo.output_width;
+    md._height = cinfo.output_height;
+    md._channel_count = cinfo.out_color_components;
+    md._bits_per_pixel = 8;
+    md._bytes_per_row = cinfo.output_width * cinfo.output_components;
+    switch (cinfo.out_color_space)
+    {
+    case JCS_GRAYSCALE:
+    {
+        md._color_type = image::color_type::GRAYSCALE;
+        break;
+    }
+    case JCS_RGB:
+    {
+        md._color_type = image::color_type::RGB;
+        break;
+    }
+    case JCS_YCbCr:
+    {
+        md._color_type = image::color_type::YCbCr;
+        break;
+    }
+    case JCS_CMYK:
+    {
+        md._color_type = image::color_type::CMYK;
+        break;
+    }
+    case JCS_YCCK:
+    {
+        md._color_type = image::color_type::YCCK;
+        break;
+    }
+    default:
+    {
+        md._color_type = image::color_type::UNSPECIFIED;
+        break;
+    }
+    }
+
     _image = new image;
-    _image->init(cinfo.image_width, cinfo.image_height);
+    _image->init(md);
     _image->set_data(data);
 
     (void)jpeg_finish_decompress(&cinfo);
