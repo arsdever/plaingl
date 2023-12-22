@@ -85,11 +85,6 @@ int main(int argc, char** argv)
     glfwSetErrorCallback(on_error);
     adjust_timeout_accuracy_guard guard;
 
-    auto* am = asset_manager::default_asset_manager();
-    am->load_asset("sample.png");
-    am->load_asset("sample_transparent.png");
-    am->load_asset("sample_jpg.jpg");
-    texture_viewer::show_preview(am->get_image("sample_transparent"));
     main_camera = new camera;
 
     std::vector<window*> windows;
