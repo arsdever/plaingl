@@ -23,13 +23,14 @@ void asset_loader_FBX::load(std::string_view path)
         const aiMesh* assimp_mesh = scene->mMeshes[ i ];
 
         mesh* mesh_ = new mesh;
-        std::vector<vertex> vertices;
+        std::vector<vertex3d> vertices;
         std::vector<int> indices;
 
         for (int vertex_index = 0; vertex_index < assimp_mesh->mNumVertices;
              ++vertex_index)
         {
             vertices.push_back({});
+            constexpr char position_name[] = "position";
             vertices.back().position() = {
                 assimp_mesh->mVertices[ vertex_index ].x,
                 assimp_mesh->mVertices[ vertex_index ].y,
@@ -61,10 +62,12 @@ void asset_loader_FBX::load(std::string_view path)
     }
 }
 
-const std::vector<mesh*>& asset_loader_FBX::get_meshes() const {
+const std::vector<mesh*>& asset_loader_FBX::get_meshes() const
+{
     return _meshes;
 }
 
-std::vector<mesh*>&& asset_loader_FBX::extract_meshes() {
+std::vector<mesh*>&& asset_loader_FBX::extract_meshes()
+{
     return std::move(_meshes);
 }

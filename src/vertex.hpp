@@ -5,14 +5,17 @@
 
 namespace
 {
+
 template <typename T, size_t C>
 struct vertex_attribute
 {
-    using attribute_data_type = std::array<T, C>;
-    using attribute_element_type = T;
-    static constexpr size_t attribute_element_count = C;
+    using attribute_data_storage_type = std::array<T, C>;
+    using attribute_component_type = T;
+
+    static constexpr size_t component_count = C;
     static constexpr size_t size = sizeof(T) * C;
-    attribute_data_type _data;
+
+    attribute_data_storage_type data;
 };
 
 template <typename... ATTRIBUTES>
@@ -50,43 +53,87 @@ struct reverse_order_tuple_helper<T>
     using type = std::tuple<T>;
 };
 
-template <typename... ATTRIBUTES>
-struct vertex_helper
-{
-    using tuple_type = typename reverse_order_tuple_helper<ATTRIBUTES...>::type;
-    tuple_type _attributes;
+template <typename... T>
+using reverse_order_tuple = reverse_order_tuple_helper<T...>::type;
 
-    static constexpr size_t attributes_count = std::tuple_size_v<tuple_type>;
-    static constexpr size_t size =
-        calculate_combined_size_helper<ATTRIBUTES...>::size;
-    static constexpr std::array<int, std::tuple_size_v<tuple_type>>
-        attribute_element_counts = { ATTRIBUTES::attribute_element_count... };
-    static constexpr std::array<int, std::tuple_size_v<tuple_type>>
-        attribute_sizes = { ATTRIBUTES::size... };
-};
 } // namespace
 
 using position_3d_attribute = vertex_attribute<float, 3>;
+using position_2d_attribute = vertex_attribute<float, 2>;
 using normal_3d_attribute = vertex_attribute<float, 3>;
 using uv_attribute = vertex_attribute<float, 2>;
 
+template <typename... ATTRIBUTES>
 struct vertex
 {
-    using helper_t =
-        vertex_helper<position_3d_attribute, normal_3d_attribute, uv_attribute>;
-    using tuple_type = helper_t::tuple_type;
-    position_3d_attribute& position()
-    {
-        return std::get<2>(helper._attributes);
-    }
-    normal_3d_attribute& normal() { return std::get<1>(helper._attributes); }
-    uv_attribute& uv() { return std::get<0>(helper._attributes); }
+    using tuple_type = reverse_order_tuple<ATTRIBUTES...>;
 
-    helper_t helper;
-    static constexpr size_t size = helper_t::size;
-    static constexpr size_t attributes_count = helper_t::attributes_count;
-    static constexpr std::array<int, std::tuple_size_v<helper_t::tuple_type>>
-        attribute_elements_counts = helper_t::attribute_element_counts;
-    static constexpr std::array<int, std::tuple_size_v<helper_t::tuple_type>>
-        attribute_sizes = helper_t::attribute_sizes;
+    static constexpr size_t attribute_count = std::tuple_size_v<tuple_type>;
+    static constexpr size_t size =
+        calculate_combined_size_helper<ATTRIBUTES...>::size;
+    static constexpr std::array<int, std::tuple_size_v<tuple_type>>
+        attribute_component_counts = { ATTRIBUTES::component_count... };
+    static constexpr std::array<int, std::tuple_size_v<tuple_type>>
+        attribute_sizes = { ATTRIBUTES::size... };
+
+    tuple_type _attributes;
+
+    template <size_t I>
+    std::tuple_element<I, tuple_type>::type::attribute_data_storage_type& get()
+    {
+        return std::get<I>(_attributes).data;
+    }
+
+    static void activate_attributes()
+    {
+        for (int i = 0; i < attribute_count; ++i)
+        {
+            glEnableVertexAttribArray(i);
+        }
+    }
+
+    static void initialize_attributes()
+    {
+        size_t attribute_offset = 0;
+        for (int i = 0; i < attribute_count; ++i)
+        {
+            glVertexAttribPointer(i,
+                                  attribute_component_counts[ i ],
+                                  GL_FLOAT,
+                                  GL_FALSE,
+                                  size,
+                                  (void*)attribute_offset);
+            attribute_offset += attribute_sizes[ i ];
+        }
+    }
+};
+
+struct vertex3d
+    : vertex<position_3d_attribute, normal_3d_attribute, uv_attribute>
+{
+    position_3d_attribute::attribute_data_storage_type& position()
+    {
+        return get<2>();
+    }
+    normal_3d_attribute::attribute_data_storage_type& normal()
+    {
+        return get<1>();
+    }
+    uv_attribute::attribute_data_storage_type& uv() { return get<0>(); }
+};
+
+struct simple_vertex2d : vertex<position_2d_attribute>
+{
+    position_2d_attribute::attribute_data_storage_type& position()
+    {
+        return get<0>();
+    }
+};
+
+struct simple_vertex3d : vertex<position_3d_attribute>
+{
+    position_3d_attribute::attribute_data_storage_type& position()
+    {
+        return get<0>();
+    }
 };

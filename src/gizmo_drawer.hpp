@@ -4,6 +4,7 @@
 #include <glm/vec3.hpp>
 
 #include "shader.hpp"
+#include "vaomap.hpp"
 
 struct GLFWwindow;
 
@@ -49,7 +50,7 @@ private:
     std::vector<glm::vec3> _grid_vertices_cache;
     std::vector<int> _grid_indices_cache;
     size_t _grid_cache_checksum = 0;
-    std::unordered_map<GLFWwindow*, unsigned int> _vao_map;
+    vao_map _vao;
     unsigned _vbo = 0;
     unsigned _ebo = 0;
     unsigned _grid_vbo = 0;

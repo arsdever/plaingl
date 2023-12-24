@@ -51,6 +51,7 @@ public:
     void update();
 
     void toggle_indexing();
+    bool has_grab() const;
 
     void add_viewport(std::shared_ptr<viewport> vp);
     std::vector<std::shared_ptr<viewport>> get_viewports() const;
@@ -91,6 +92,7 @@ private:
     std::unique_ptr<layout> _layout { nullptr };
     mouse_events_refiner* _mouse_events { nullptr };
     std::vector<std::shared_ptr<viewport>> _viewports;
+    bool _has_grab = false;
 
     unsigned _object_index_map;
     unsigned _object_index_depth_map;

@@ -6,6 +6,7 @@ add_library(
   camera.cpp
   component.hpp
   component.cpp
+  context_aware_object.hpp
   color.hpp
   logging.hpp
   event.hpp
@@ -50,6 +51,8 @@ add_library(
   transform.cpp
   uniform_info.hpp
   utils.hpp
+  vaomap.hpp
+  vaomap.cpp
   viewport.hpp
   viewport.cpp
   glad/src/gl.c
@@ -83,8 +86,14 @@ add_library(
   components/walking_component.hpp
   components/walking_component.cpp)
 
-target_link_libraries(${PROJECT}_lib PUBLIC ${PROJECT}_includes glfw glm
-                                            profiler::lib freetype Winmm)
+target_link_libraries(
+  ${PROJECT}_lib
+  PUBLIC ${PROJECT}_includes
+         glfw
+         glm
+         profiler::lib
+         freetype
+         Winmm)
 
 add_library(${PROJECT}_includes INTERFACE)
 target_include_directories(${PROJECT}_includes

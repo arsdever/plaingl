@@ -9,6 +9,8 @@
 
 #include "gizmo_drawer.hpp"
 
+#include "vertex.hpp"
+
 void gizmo_drawer::init()
 {
     _gizmo_shader.init();
@@ -232,15 +234,6 @@ void gizmo_drawer::draw_vertices(const std::vector<glm::vec3>& vertices,
                                  unsigned& vbo,
                                  unsigned& ebo)
 {
-    if (!vbo)
-    {
-        glGenBuffers(1, &vbo);
-    }
-    if (!ebo)
-    {
-        glGenBuffers(1, &ebo);
-    }
-
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
     glBufferData(
@@ -261,8 +254,7 @@ void gizmo_drawer::draw_vertices(const std::vector<glm::vec3>& vertices,
                  indices.data(),
                  GL_STATIC_DRAW);
 
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
+    simple_vertex3d::activate_attributes();
     glDrawElements(GL_LINES, indices.size(), GL_UNSIGNED_INT, 0);
 }
 
@@ -274,24 +266,15 @@ gizmo_drawer* gizmo_drawer::instance()
     {
         _instance = new gizmo_drawer;
         _instance->init();
+        glGenBuffers(1, &_instance->_vbo);
+        glGenBuffers(1, &_instance->_ebo);
     }
 
-    if (!_instance->_vao_map.contains(glfwGetCurrentContext()))
+    if (!_instance->_vao.activate())
     {
-        _instance->_vao_map[ glfwGetCurrentContext() ] = 0;
-        glGenVertexArrays(1, &_instance->_vao_map[ glfwGetCurrentContext() ]);
-        glBindVertexArray(_instance->_vao_map[ glfwGetCurrentContext() ]);
         glBindBuffer(GL_ARRAY_BUFFER, _instance->_vbo);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _instance->_ebo);
-        size_t attribute_offset = 0;
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(
-            0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
-    }
-    else
-    {
-        glBindVertexArray(_instance->_vao_map[ glfwGetCurrentContext() ]);
-        glEnableVertexAttribArray(0);
+        simple_vertex3d::initialize_attributes();
     }
 
     return _instance;

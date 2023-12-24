@@ -147,6 +147,7 @@ void window::update()
     if (input_system::is_key_down(345) && input_system::is_key_down(346))
     {
         glfwSetInputMode(_window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        _has_grab = false;
     }
 
     set_active();
@@ -173,6 +174,8 @@ void window::update()
 }
 
 void window::toggle_indexing() { _index_rendering = !_index_rendering; }
+
+bool window::has_grab() const { return _has_grab; }
 
 void window::add_viewport(std::shared_ptr<viewport> vp)
 {
@@ -217,12 +220,13 @@ void window::setup_mouse_callbacks()
         _window,
         [](GLFWwindow* wnd, int button, int action, int mods)
     {
+        window* _this = static_cast<window*>(glfwGetWindowUserPointer(wnd));
         if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
         {
             glfwSetInputMode(wnd, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+            _this->_has_grab = true;
         }
 
-        window* _this = static_cast<window*>(glfwGetWindowUserPointer(wnd));
         auto* refiner = _this->_mouse_events;
         refiner->button_function(wnd, button, action, mods);
     });
