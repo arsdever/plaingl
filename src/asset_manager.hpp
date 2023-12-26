@@ -1,5 +1,6 @@
 #pragma once
 
+#include <functional>
 #include <string>
 #include <string_view>
 #include <unordered_map>
@@ -26,6 +27,10 @@ public:
     shader_program* get_shader(std::string_view name) const;
     material* get_material(std::string_view name) const;
     image* get_image(std::string_view name) const;
+    mesh* get_mesh(std::string_view name) const;
+
+    template <typename T>
+    bool for_each(std::function<bool(std::string_view, const T* const&)>) const;
 
     static asset_manager* default_asset_manager();
 
@@ -36,7 +41,7 @@ private:
 
     asset_map<std::vector<mesh*>> _meshes;
     asset_map<material*> _materials;
-    asset_map<image*> _textures;
-    asset_map<shader_program*> _shaders;
+    asset_map<image*> _images;
+    asset_map<shader_program*> _shader_programs;
     static asset_manager* _instance;
 };

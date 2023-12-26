@@ -31,8 +31,8 @@ void asset_manager::load_asset(std::string_view path)
     {
         asset_loader_SHADER shader_loader;
         shader_loader.load(path);
-        auto [ it, success ] =
-            _shaders.try_emplace(filename, shader_loader.get_shader_program());
+        auto [ it, success ] = _shader_programs.try_emplace(
+            filename, shader_loader.get_shader_program());
         return;
     }
 #endif
@@ -52,7 +52,7 @@ void asset_manager::load_asset(std::string_view path)
         asset_loader_JPG jpg_loader;
         jpg_loader.load(path);
         auto [ it, success ] =
-            _textures.try_emplace(filename, jpg_loader.get_image());
+            _images.try_emplace(filename, jpg_loader.get_image());
         return;
     }
 #endif
@@ -62,7 +62,7 @@ void asset_manager::load_asset(std::string_view path)
         asset_loader_PNG png_loader;
         png_loader.load(path);
         auto [ it, success ] =
-            _textures.try_emplace(filename, png_loader.get_image());
+            _images.try_emplace(filename, png_loader.get_image());
         return;
     }
 #endif
@@ -93,7 +93,7 @@ const std::vector<material*> asset_manager::materials() const
 const std::vector<image*> asset_manager::textures() const
 {
     std::vector<image*> result;
-    for (auto& [ _, value ] : _textures)
+    for (auto& [ _, value ] : _images)
     {
         result.push_back(value);
     }
@@ -103,7 +103,7 @@ const std::vector<image*> asset_manager::textures() const
 const std::vector<shader_program*> asset_manager::shaders() const
 {
     std::vector<shader_program*> result;
-    for (auto& [ _, value ] : _shaders)
+    for (auto& [ _, value ] : _shader_programs)
     {
         result.push_back(value);
     }
@@ -112,7 +112,8 @@ const std::vector<shader_program*> asset_manager::shaders() const
 
 shader_program* asset_manager::get_shader(std::string_view name) const
 {
-    return _shaders.contains(name) ? _shaders.find(name)->second : nullptr;
+    return _shader_programs.contains(name) ? _shader_programs.find(name)->second
+                                           : nullptr;
 }
 
 material* asset_manager::get_material(std::string_view name) const
@@ -122,8 +123,35 @@ material* asset_manager::get_material(std::string_view name) const
 
 image* asset_manager::get_image(std::string_view name) const
 {
-    return _textures.contains(name) ? _textures.find(name)->second : nullptr;
+    return _images.contains(name) ? _images.find(name)->second : nullptr;
 }
+
+mesh* asset_manager::get_mesh(std::string_view name) const
+{
+    return _meshes.contains(name) ? (_meshes.find(name)->second.empty()
+                                         ? nullptr
+                                         : _meshes.find(name)->second[ 0 ])
+                                  : nullptr;
+}
+
+#define DEFINE_ITERATOR(type)                                                 \
+    template <>                                                               \
+    bool asset_manager::for_each<type>(                                       \
+        std::function<bool(std::string_view, const type* const&)> func) const \
+    {                                                                         \
+        for (const auto& [ name, value ] : _##type##s)                        \
+        {                                                                     \
+            if (func(name, value))                                            \
+            {                                                                 \
+                continue;                                                     \
+            }                                                                 \
+        }                                                                     \
+        return true;                                                          \
+    }
+
+DEFINE_ITERATOR(image);
+DEFINE_ITERATOR(material);
+DEFINE_ITERATOR(shader_program);
 
 asset_manager* asset_manager::default_asset_manager()
 {
