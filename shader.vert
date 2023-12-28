@@ -1,6 +1,6 @@
 #version 460 core
 
-layout (location = 0) in vec3 vertex_position;
+layout(location = 0) in vec3 vertex_position;
 layout(location = 1) in vec3 vertex_normal;
 layout(location = 2) in vec2 vertex_uv;
 
@@ -13,8 +13,9 @@ out vec2 uv;
 
 void main()
 {
-    gl_Position = vp_matrix * model_matrix * vec4(vertex_position, 1.0);
-    position = vertex_position;
-    normal = vertex_normal;
+    mat4 mvp = vp_matrix * model_matrix;
+    gl_Position = mvp * vec4(vertex_position, 1.0);
+    position = vec3(model_matrix * vec4(vertex_position, 1.0));
+    normal = mat3(transpose(inverse(model_matrix))) * vertex_normal;
     uv = vertex_uv;
 }

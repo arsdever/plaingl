@@ -7,12 +7,12 @@
 			"value": [1.0, 0.0, 1.0, 1.0]
 		},
 		{
-			"name": "ambient_texture_strength",
+			"name": "albedo_texture_strength",
 			"type": "float",
 			"value": 1.0
 		},
 		{
-			"name": "ambient_texture",
+			"name": "albedo_texture",
 			"type": "image"
 		},
 		{

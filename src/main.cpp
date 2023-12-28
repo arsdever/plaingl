@@ -323,6 +323,7 @@ void initScene()
     am->load_asset("cube.fbx");
     am->load_asset("sphere.fbx");
     am->load_asset("susane_head.fbx");
+    am->load_asset("camera.fbx");
     am->load_asset("text.mat");
     am->load_asset("basic.mat");
     am->load_asset("sample.png");
@@ -336,11 +337,11 @@ void initScene()
     norm_txt = new texture();
     img = am->get_image("brick");
     *norm_txt = std::move(texture::from_image(img));
-    basic_mat->set_property_value("ambient_texture", txt);
-    basic_mat->set_property_value("ambient_texture_strength", .8f);
+    basic_mat->set_property_value("albedo_texture", txt);
+    basic_mat->set_property_value("albedo_texture_strength", 1.0f);
     basic_mat->set_property_value("normal_texture", norm_txt);
-    basic_mat->set_property_value("light_pos", 0.0f, 10.0f, 5.0f);
-    basic_mat->set_property_value("light_color", 1.0f, 0.9f, 0.8f);
+    basic_mat->set_property_value("light_pos", 0.0f, 1.0f, 0.0f);
+    basic_mat->set_property_value("light_color", 1.0f, 1.0f, 1.0f);
     basic_mat->set_property_value("light_intensity", 1.0f);
 
     game_object* object = new game_object;
@@ -376,6 +377,10 @@ void initScene()
     cast_ray->set_ray({ 0, 0, 0 }, { 0, 0, 1 });
 
     main_camera_object = new game_object();
+    main_camera_object->create_component<mesh_component>()->set_mesh(
+        am->meshes()[ 3 ]);
+    main_camera_object->create_component<mesh_renderer_component>()
+        ->set_material(am->get_material("basic"));
     main_camera_object->create_component<camera_component>();
     main_camera_object->get_component<camera_component>()->set_camera(
         main_camera);
