@@ -22,6 +22,7 @@
 #include "components/camera_component.hpp"
 #include "components/fps_show_component.hpp"
 #include "components/jumpy_component.hpp"
+#include "components/light_component.hpp"
 #include "components/mesh_component.hpp"
 #include "components/mesh_renderer_component.hpp"
 #include "components/plane_collider_component.hpp"
@@ -414,12 +415,18 @@ void initScene()
     main_camera->set_ortho(false);
 
     light* l = new light();
-    l->get_transform().set_position(glm::vec3(0.0f, 1.0f, 0.0f));
     l->set_color(glm::vec3(1.0f, 1.0f, 1.0f));
     l->set_intensity(1.0f);
+    object = new game_object;
+    object->create_component<light_component>()->set_light(l);
+    object->get_transform().set_position(glm::vec3(0.0f, 1.0f, 0.0f));
+    s.add_object(object);
 
     l = new light();
-    l->get_transform().set_position(glm::vec3(1.0f, 0.0f, 0.0f));
     l->set_color(glm::vec3(1.0f, 1.0f, 1.0f));
     l->set_intensity(1.0f);
+    object = new game_object;
+    object->create_component<light_component>()->set_light(l);
+    object->get_transform().set_position(glm::vec3(1.0f, 0.0f, 0.0f));
+    s.add_object(object);
 }

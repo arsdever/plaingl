@@ -61,6 +61,8 @@ add_library(
   asset_loaders/asset_loader.hpp
   components/box_collider_component.hpp
   components/box_collider_component.cpp
+  components/light_component.hpp
+  components/light_component.cpp
   components/camera_component.hpp
   components/camera_component.cpp
   components/collider_component.hpp
