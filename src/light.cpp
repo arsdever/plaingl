@@ -27,6 +27,10 @@ float light::get_intensity() const { return _intensity; }
 
 void light::set_intensity(float intensity) { _intensity = intensity; }
 
+float light::get_radius() const { return _radius; }
+
+void light::set_radius(float radius) { _radius = radius; }
+
 light::type light::get_type() const { return _light_type; }
 
 void light::set_type(type light_type) { _light_type = light_type; }

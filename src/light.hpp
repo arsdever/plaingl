@@ -33,6 +33,9 @@ public:
     float get_intensity() const;
     void set_intensity(float intensity);
 
+    float get_radius() const;
+    void set_radius(float radius);
+
     type get_type() const;
     void set_type(type light_type);
 
@@ -46,5 +49,6 @@ private:
     glm::vec3 _color { 1.0f, 1.0f, 1.0f };
     float _intensity { 1.0f };
     type _light_type { type::OMNI };
+    float _radius = 1.0f;
     static std::vector<light*> _lights;
 };

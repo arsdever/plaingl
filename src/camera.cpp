@@ -252,7 +252,7 @@ void camera::setup_lights()
             light->get_transform().get_rotation() * glm::vec3 { 0, 0, 1 });
         glsl_lights[ i ].color = light->get_color();
         glsl_lights[ i ].intensity = light->get_intensity();
-        glsl_lights[ i ].radius = 1.0f;
+        glsl_lights[ i ].radius = light->get_radius();
         glsl_lights[ i ].type = static_cast<uint32_t>(light->get_type());
         ++i;
     }
