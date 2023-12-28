@@ -22,7 +22,7 @@ void asset_manager::load_asset(std::string_view path)
         asset_loader_FBX fbx_loader;
         fbx_loader.load(path);
         auto [ it, success ] =
-            _meshes.try_emplace(filename, fbx_loader.get_meshes());
+            _meshs.try_emplace(filename, fbx_loader.get_mesh());
         return;
     }
 #endif
@@ -73,9 +73,9 @@ void asset_manager::load_asset(std::string_view path)
 const std::vector<mesh*> asset_manager::meshes() const
 {
     std::vector<mesh*> result;
-    for (auto& [ _, value ] : _meshes)
+    for (auto& [ _, value ] : _meshs)
     {
-        result.insert(result.end(), value.begin(), value.end());
+        result.push_back(value);
     }
     return result;
 }
@@ -128,10 +128,7 @@ image* asset_manager::get_image(std::string_view name) const
 
 mesh* asset_manager::get_mesh(std::string_view name) const
 {
-    return _meshes.contains(name) ? (_meshes.find(name)->second.empty()
-                                         ? nullptr
-                                         : _meshes.find(name)->second[ 0 ])
-                                  : nullptr;
+    return _meshs.contains(name) ? _meshs.find(name)->second : nullptr;
 }
 
 #define DEFINE_ITERATOR(type)                                                 \
@@ -149,6 +146,7 @@ mesh* asset_manager::get_mesh(std::string_view name) const
         return true;                                                          \
     }
 
+DEFINE_ITERATOR(mesh);
 DEFINE_ITERATOR(image);
 DEFINE_ITERATOR(material);
 DEFINE_ITERATOR(shader_program);

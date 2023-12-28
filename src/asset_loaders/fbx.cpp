@@ -18,13 +18,16 @@ void asset_loader_FBX::load(std::string_view path)
 
     // TODO: check if the scene was loaded
 
+    std::vector<vertex3d> vertices;
+    std::vector<int> indices;
+    std::vector<mesh::submesh_info> submeshes;
+
     for (int i = 0; i < scene->mNumMeshes; ++i)
     {
+        mesh::submesh_info info;
         const aiMesh* assimp_mesh = scene->mMeshes[ i ];
-
-        mesh* mesh_ = new mesh;
-        std::vector<vertex3d> vertices;
-        std::vector<int> indices;
+        info.material_index = assimp_mesh->mMaterialIndex;
+        info.vertex_index_offset = indices.size();
 
         for (int vertex_index = 0; vertex_index < assimp_mesh->mNumVertices;
              ++vertex_index)
@@ -55,19 +58,17 @@ void asset_loader_FBX::load(std::string_view path)
                 indices.push_back(assimp_face.mIndices[ j ]);
         }
 
-        mesh_->set_vertices(std::move(vertices));
-        mesh_->set_indices(std::move(indices));
-        mesh_->init();
-        _meshes.push_back(mesh_);
+        submeshes.push_back(std::move(info));
     }
+
+    _mesh = new mesh;
+    _mesh->set_vertices(std::move(vertices));
+    _mesh->set_indices(std::move(indices));
+    _mesh->set_submeshes(std::move(submeshes));
+    _mesh->init();
 }
 
-const std::vector<mesh*>& asset_loader_FBX::get_meshes() const
+mesh* asset_loader_FBX::get_mesh()
 {
-    return _meshes;
-}
-
-std::vector<mesh*>&& asset_loader_FBX::extract_meshes()
-{
-    return std::move(_meshes);
+    return _mesh;
 }

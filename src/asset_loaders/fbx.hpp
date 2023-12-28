@@ -1,7 +1,5 @@
 #pragma once
 
-#include <vector>
-
 #include "asset_loaders/asset_loader.hpp"
 
 class mesh;
@@ -12,9 +10,8 @@ public:
     ~asset_loader_FBX() = default;
     void load(std::string_view path) override;
 
-    const std::vector<mesh*>& get_meshes() const;
-    std::vector<mesh*>&& extract_meshes();
+    mesh* get_mesh();
 
 private:
-    std::vector<mesh*> _meshes;
+    mesh* _mesh;
 };
