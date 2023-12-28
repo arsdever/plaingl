@@ -25,6 +25,11 @@ public:
     ~texture();
 
     void init(size_t width, size_t height, format texture_format = format::RGB);
+    void reinit(size_t width, size_t height, format texture_format = format::RGB);
+    glm::uvec2 get_size() const;
+    size_t get_width() const;
+    size_t get_height() const;
+    void get_data(char* data_ptr);
     void set_data(const char* data_ptr);
     void set_rect_data(glm::vec<2, size_t> pos,
                        glm::vec<2, size_t> size,

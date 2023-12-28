@@ -55,7 +55,28 @@ void texture::init(size_t width, size_t height, format texture_format)
     }
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     return;
+}
+
+void texture::reinit(size_t width, size_t height, format texture_format)
+{
+    glDeleteTextures(1, &_texture_id);
+    init(width, height, texture_format);
+}
+
+glm::uvec2 texture::get_size() const { return { _width, _height }; }
+
+size_t texture::get_width() const { return _width; }
+
+size_t texture::get_height() const { return _height; }
+
+void texture::get_data(char* data_ptr)
+{
+    glBindTexture(GL_TEXTURE_2D, _texture_id);
+    glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, data_ptr);
+    glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 void texture::set_data(const char* data_ptr)
