@@ -4,6 +4,8 @@
 
 #include <glm/vec2.hpp>
 
+class texture;
+
 class image
 {
 public:
@@ -48,11 +50,14 @@ public:
     void set_data(const char* data, size_t size);
     template <typename T = char>
     const T* get_data() const;
+    template <typename T = char>
+    T* raw_data();
     const metadata& get_metadata() const;
 
     size_t get_width() const;
     size_t get_height() const;
-    glm::vec<2, size_t> get_size() const;
+
+    static image* from_texture(texture*);
 
 private:
     metadata _metadata;
