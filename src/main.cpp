@@ -35,6 +35,7 @@
 #include "game_object.hpp"
 #include "glm/gtc/random.hpp"
 #include "image.hpp"
+#include "light.hpp"
 #include "logging.hpp"
 #include "material.hpp"
 #include "mouse_events_refiner.hpp"
@@ -411,4 +412,14 @@ void initScene()
     main_camera_object->get_transform() = main_camera->get_transform();
     main_camera_object->create_component<walking_component>();
     main_camera->set_ortho(false);
+
+    light* l = new light();
+    l->get_transform().set_position(glm::vec3(0.0f, 1.0f, 0.0f));
+    l->set_color(glm::vec3(1.0f, 1.0f, 1.0f));
+    l->set_intensity(1.0f);
+
+    l = new light();
+    l->get_transform().set_position(glm::vec3(1.0f, 0.0f, 0.0f));
+    l->set_color(glm::vec3(1.0f, 1.0f, 1.0f));
+    l->set_intensity(1.0f);
 }

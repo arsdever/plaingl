@@ -28,6 +28,8 @@ add_library(
   image.cpp
   input_system.hpp
   input_system.cpp
+  light.hpp
+  light.cpp
   material.hpp
   material.cpp
   mesh.hpp

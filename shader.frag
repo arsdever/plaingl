@@ -9,9 +9,23 @@ uniform float albedo_texture_strength;
 uniform vec4 albedo_color;
 uniform sampler2D normal_texture;
 uniform float normal_texture_strength;
-uniform vec3 light_pos;
-uniform vec3 light_color;
-uniform float light_intensity;
+
+#define LIGHT_OMNI  0
+#define SPOTLIGHT   1
+#define SPHERICAL   2
+#define DIRECTIONAL 3
+
+struct light_t
+{
+    vec3 position;
+    float intensity;
+    vec3 direction;
+    float radius;
+    vec3 color;
+    uint type;
+};
+
+layout(std430, binding = 0) buffer lights_buffer { light_t[] lights; };
 
 out vec4 fragment_color;
 
@@ -31,25 +45,38 @@ vec4 albedo_mixed_color(vec2 uv_coord)
            texture(albedo_texture, uv_coord) * albedo_texture_strength;
 }
 
+vec3 calculate_light_ambient(light_t light)
+{
+    vec3 ambient = 0.2 * light.color;
+    return ambient;
+}
+
+vec3 calculate_light_diffuse(light_t light, vec3 fragment_normal)
+{
+    vec3 light_dir = normalize(light.position - position);
+    float diff = max(dot(fragment_normal, light_dir), 0.0);
+    vec3 diffuse = diff * light.color * light.intensity;
+
+    return diffuse;
+}
+
 void main()
 {
     vec2 converted_uv = convert_from_blenders_uv_map(uv);
-    // vec2 converted_uv = uv;
-    // vec3 norm = texture(normal_texture, converted_uv).rgb;
-    // norm = normalize(norm * 2 - 1);
-    // norm = mix(norm, normal, normal_texture_strength);
-    vec3 norm = normal;
+    vec3 norm = texture(normal_texture, converted_uv).rgb;
+    norm = normalize(norm * 2 - 1);
+    norm = mix(norm, normal, normal_texture_strength);
 
-    // vec3 light_dir = normalize(light_pos - position);
-    // vec3 view_dir = normalize(view_pos - position);
-    // vec3 halfway_dir = normalize(light_dir + view_dir);
+    vec3 combined_diffuse = vec3(0, 0, 0);
+    vec3 combined_ambient = vec3(0, 0, 0);
 
-    vec3 ambient = 0.2 * light_color;
-    vec3 light_dir = normalize(light_pos - position);
-    float diff = max(dot(norm, light_dir), 0.0);
-    vec3 diffuse = diff * light_color * light_intensity;
+    for (int i = 0; i < lights.length(); ++i)
+    {
+        combined_diffuse += calculate_light_diffuse(lights[ i ], norm);
+        combined_ambient += calculate_light_ambient(lights[ i ]);
+    }
 
-    vec3 result_color =
-        (diffuse + ambient) * albedo_mixed_color(converted_uv).rgb;
+    vec3 result_color = (combined_diffuse + combined_ambient) *
+                        albedo_mixed_color(converted_uv).rgb;
     fragment_color = vec4(result_color, 1.0);
 }

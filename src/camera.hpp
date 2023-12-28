@@ -41,7 +41,7 @@ public:
     glm::mat4 vp_matrix() const;
 
 private:
-    void draw_background();
+    void setup_lights();
 
 private:
     transform _transformation;
@@ -54,4 +54,5 @@ private:
     std::unique_ptr<texture> _background_texture = nullptr;
     std::unique_ptr<mesh> _background_quad = nullptr;
     std::unique_ptr<shader_program> _background_shader = nullptr;
+    unsigned _lights_buffer = 0;
 };

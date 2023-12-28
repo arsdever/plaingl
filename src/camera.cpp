@@ -10,6 +10,7 @@
 
 #include "components/renderer_component.hpp"
 #include "game_object.hpp"
+#include "light.hpp"
 #include "logging.hpp"
 #include "material.hpp"
 #include "mesh.hpp"
@@ -48,6 +49,8 @@ camera::camera()
     _background_shader->add_shader("camera_background_shader.vert");
     _background_shader->add_shader("camera_background_shader.frag");
     _background_shader->link();
+
+    glGenBuffers(1, &_lights_buffer);
 }
 
 camera::~camera() { std::erase(_cameras, this); }
@@ -101,6 +104,7 @@ void camera::set_background(image* img)
 
 void camera::render()
 {
+    setup_lights();
     auto* old_active_camera = set_active();
 
     _background_shader->set_uniform(
@@ -183,7 +187,7 @@ glm::mat4 camera::projection_matrix() const
     }
 
     return glm::perspective(
-        glm::radians(_fov), _render_size.x / _render_size.y, 0.01f, 10000.0f);
+        glm::radians(_fov), _render_size.x / _render_size.y, 0.1f, 10000.0f);
 }
 
 transform& camera::get_transform() { return _transformation; }
@@ -193,6 +197,46 @@ const transform& camera::get_transform() const { return _transformation; }
 camera* camera::active_camera() { return camera::_active_camera; }
 
 const std::vector<camera*>& camera::all_cameras() { return camera::_cameras; }
+
+void camera::setup_lights()
+{
+    const auto& lights = light::get_all_lights();
+    struct glsl_lights_t
+    {
+        glm::vec3 position;
+        float intensity;
+        glm::vec3 direction;
+        float radius;
+        glm::vec3 color;
+        uint32_t type;
+    };
+
+    std::vector<glsl_lights_t> glsl_lights;
+    glsl_lights.resize(lights.size());
+    size_t i = 0;
+
+    auto size_calculated = sizeof(glsl_lights_t);
+    auto size_1 = (4 * 3 * sizeof(float)) * glsl_lights.size();
+
+    for (const auto& light : lights)
+    {
+        glsl_lights[ i ].position = light->get_transform().get_position();
+        glsl_lights[ i ].direction = glm::normalize(
+            light->get_transform().get_rotation() * glm::vec3 { 0, 0, 1 });
+        glsl_lights[ i ].color = light->get_color();
+        glsl_lights[ i ].intensity = light->get_intensity();
+        glsl_lights[ i ].radius = 1.0f;
+        glsl_lights[ i ].type = static_cast<uint32_t>(light->get_type());
+        ++i;
+    }
+
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, _lights_buffer);
+    glBufferData(GL_SHADER_STORAGE_BUFFER,
+                 (4 * 3 * sizeof(float)) * glsl_lights.size(),
+                 glsl_lights.data(),
+                 GL_DYNAMIC_COPY);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, _lights_buffer);
+}
 
 camera* camera::_active_camera = nullptr;
 
