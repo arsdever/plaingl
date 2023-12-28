@@ -23,7 +23,10 @@ public:
     void set_ortho(bool ortho_flag = true);
     float get_aspect_ratio() const;
     camera* set_active();
-    void set_render_size(float width, float height);
+    void set_render_size(size_t width, size_t height);
+    void set_render_size(glm::uvec2 size);
+    void set_render_texture(texture* render_texture);
+    texture* get_render_texture() const;
 
     void set_background(glm::vec3 color);
     void set_background(image* img);
@@ -45,14 +48,16 @@ private:
 
 private:
     transform _transformation;
-    glm::vec2 _render_size;
+    glm::vec2 _render_size { 0.0f, 0.0f };
     float _fov = 60.0f;
     bool _ortho_flag = false;
-    static camera* _active_camera;
-    static std::vector<camera*> _cameras;
-    glm::vec3 _background_color;
+    texture* _render_texture = nullptr;
+    glm::vec3 _background_color { 0.0f, 0.0f, 0.0f };
     std::unique_ptr<texture> _background_texture = nullptr;
     std::unique_ptr<mesh> _background_quad = nullptr;
     std::unique_ptr<shader_program> _background_shader = nullptr;
     unsigned _lights_buffer = 0;
+
+    static camera* _active_camera;
+    static std::vector<camera*> _cameras;
 };

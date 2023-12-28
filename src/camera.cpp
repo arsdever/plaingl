@@ -73,10 +73,29 @@ camera* camera::set_active()
     return old;
 }
 
-void camera::set_render_size(float width, float height)
+void camera::set_render_size(size_t width, size_t height)
 {
-    _render_size = { width, height };
+    set_render_size({ width, height });
 }
+
+void camera::set_render_size(glm::uvec2 size)
+{
+    _render_size = std::move(size);
+    if (_render_texture)
+    {
+        _render_texture->reinit(
+            _render_size.x, _render_size.y, texture::format::RGBA);
+    }
+}
+
+void camera::set_render_texture(texture* render_texture)
+{
+    _render_texture = render_texture;
+    // _render_texture->reinit(
+    //     _render_size.x, _render_size.y, texture::format::RGBA);
+}
+
+texture* camera::get_render_texture() const { return _render_texture; }
 
 void camera::set_background(glm::vec3 color)
 {
@@ -138,6 +157,14 @@ void camera::render()
                 renderer->render();
             }
         }
+    }
+
+    if (_render_texture)
+    {
+        _render_texture->bind(0);
+        glCopyTexImage2D(
+            GL_TEXTURE_2D, 0, GL_RGBA, 0, 0, _render_size.x, _render_size.y, 0);
+        glBindTexture(GL_TEXTURE_2D, 0);
     }
 
     if (old_active_camera)
