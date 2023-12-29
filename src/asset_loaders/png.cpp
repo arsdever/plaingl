@@ -122,4 +122,51 @@ void asset_loader_PNG::load(std::string_view path)
     _image->set_data(reinterpret_cast<char*>(buffer));
 }
 
+void asset_loader_PNG::save(std::string_view path)
+{
+    FILE* fp = fopen(path.data(), "wb");
+    if (!fp)
+        abort();
+
+    png_structp png =
+        png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+    if (!png)
+        abort();
+
+    png_infop info = png_create_info_struct(png);
+    if (!info)
+        abort();
+
+    if (setjmp(png_jmpbuf(png)))
+        abort();
+
+    png_init_io(png, fp);
+
+    // Output is 8bit depth, RGBA format.
+    png_set_IHDR(png,
+                 info,
+                 _image->get_width(),
+                 _image->get_height(),
+                 8,
+                 PNG_COLOR_TYPE_RGBA,
+                 PNG_INTERLACE_NONE,
+                 PNG_COMPRESSION_TYPE_DEFAULT,
+                 PNG_FILTER_TYPE_DEFAULT);
+    png_write_info(png, info);
+
+    for (size_t i = _image->get_height(); i > 0; --i)
+    {
+        png_write_row(png,
+                      _image->get_data<unsigned char>() +
+                          (i - 1) * _image->get_metadata()._bytes_per_row);
+    }
+
+    png_write_end(png, NULL);
+    fclose(fp);
+
+    png_destroy_write_struct(&png, &info);
+}
+
 image* asset_loader_PNG::get_image() { return _image; }
+
+void asset_loader_PNG::set_image(image* img) { _image = img; }

@@ -6,6 +6,7 @@
 #include "asset_loaders/png.hpp"
 #include "asset_loaders/shader.hpp"
 #include "file.hpp"
+#include "image.hpp"
 #include "logging.hpp"
 
 namespace
@@ -68,6 +69,21 @@ void asset_manager::load_asset(std::string_view path)
 #endif
 
     log()->error("Asset manager doesn't support {} format", extension);
+}
+
+template <>
+void asset_manager::save_asset<image>(std::string_view path, const image* img)
+{
+    auto [ _, filename, extension ] = parse_path(path);
+#ifdef GAMIFY_SUPPORTS_PNG
+    if (extension == ".png")
+    {
+        asset_loader_PNG png_loader;
+        png_loader.set_image(const_cast<image*>(img));
+        png_loader.save(path);
+        return;
+    }
+#endif
 }
 
 const std::vector<mesh*> asset_manager::meshes() const
