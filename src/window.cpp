@@ -89,6 +89,7 @@ void window::init()
     _object_index_map_shader = new shader_program;
 
     configure_object_index_mapping();
+    configure_input_system();
 
     set_layout<layout_single>();
     update_layout();
@@ -262,6 +263,22 @@ void window::setup_mouse_callbacks()
         auto* refiner = _this->_mouse_events;
         refiner->drop_function(wnd, path_count, paths);
     });
+}
+
+void window::configure_input_system()
+{
+    glfwSetKeyCallback(
+        _window,
+        [](GLFWwindow* wnd, int key, int scancode, int action, int mods)
+    {
+        window* _this = static_cast<window*>(glfwGetWindowUserPointer(wnd));
+        _this->key_callback(key, scancode, action, mods);
+    });
+}
+
+void window::key_callback(int key, int scancode, int action, int mods)
+{
+    input_system::set_key_down(key, action != GLFW_RELEASE);
 }
 
 void window::configure_object_index_mapping()

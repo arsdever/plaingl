@@ -82,6 +82,9 @@ private:
     void update_layout();
     void setup_mouse_callbacks();
     void configure_object_index_mapping();
+    void configure_input_system();
+
+    static void key_callback(int key, int scancode, int action, int mods);
 
 private:
     GLFWwindow* _window { nullptr };
