@@ -51,6 +51,7 @@ camera::camera()
     _background_shader->link();
 
     glGenBuffers(1, &_lights_buffer);
+    set_background(glm::vec3 { 0.0f, 0.0f, 0.0f });
 }
 
 camera::~camera() { std::erase(_cameras, this); }
