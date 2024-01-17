@@ -1,7 +1,8 @@
 #pragma once
 
-#include <glm/vec2.hpp>
 #include <vector>
+
+#include <glm/vec2.hpp>
 
 class image;
 
@@ -26,7 +27,8 @@ public:
     ~texture();
 
     void init(size_t width, size_t height, format texture_format = format::RGB);
-    void reinit(size_t width, size_t height, format texture_format = format::RGB);
+    void
+    reinit(size_t width, size_t height, format texture_format = format::RGB);
 
     glm::uvec2 get_size() const;
     size_t get_width() const;
@@ -38,6 +40,7 @@ public:
                        glm::vec<2, size_t> size,
                        const char* data_ptr);
     void bind(size_t index) const;
+    void clone(texture* other_texture);
 
     unsigned native_id() const;
 
@@ -48,10 +51,10 @@ private:
     static int convert_to_gl_format(format f);
 
 private:
-    size_t _width;
-    size_t _height;
-    unsigned _texture_id;
-    format _format;
+    size_t _width { 0 };
+    size_t _height { 0 };
+    unsigned _texture_id { 0 };
+    format _format { format::UNSPECIFIED };
 
 public:
     // TODO: may not be the best place for this object

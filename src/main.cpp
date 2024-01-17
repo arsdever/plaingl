@@ -162,6 +162,22 @@ int main(int argc, char** argv)
             console_string += keycode;
         }
 
+        if (keycode == 'C')
+        {
+            if (console_string.empty())
+            {
+                return;
+            }
+
+            int num = std::stoi(console_string);
+            if (num >= 0 && num < texture::_textures.size())
+            {
+                (new texture)->clone(texture::_textures[ num ]);
+            }
+
+            console_string = "";
+        }
+
         if (keycode == 'P')
         {
             for (int i = 0; i < texture::_textures.size(); ++i)

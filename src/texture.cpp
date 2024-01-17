@@ -174,6 +174,34 @@ void texture::bind(size_t index) const
     glBindTexture(GL_TEXTURE_2D, _texture_id);
 }
 
+void texture::clone(texture* other_texture)
+{
+    if (get_width() != other_texture->get_width() ||
+        get_height() != other_texture->get_height() ||
+        _format != other_texture->_format)
+    {
+        reinit(other_texture->get_width(),
+               other_texture->get_height(),
+               other_texture->_format);
+    }
+
+    glCopyImageSubData(other_texture->_texture_id,
+                       GL_TEXTURE_2D,
+                       0,
+                       0,
+                       0,
+                       0,
+                       _texture_id,
+                       GL_TEXTURE_2D,
+                       0,
+                       0,
+                       0,
+                       0,
+                       get_width(),
+                       get_height(),
+                       1);
+}
+
 unsigned texture::native_id() const { return _texture_id; }
 
 int texture::convert_to_gl_internal_format(format f)
