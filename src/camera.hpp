@@ -53,9 +53,9 @@ private:
     glm::vec2 _render_size { 0.0f, 0.0f };
     float _fov = 60.0f;
     bool _ortho_flag = false;
-    texture* _render_texture = nullptr;
-    texture* _private_render_texture_color = nullptr;
-    texture* _private_render_texture_depth = nullptr;
+    texture* _user_render_texture = nullptr;
+    std::unique_ptr<texture> _private_render_texture_color = nullptr;
+    std::unique_ptr<texture> _private_render_texture_depth = nullptr;
     glm::vec3 _background_color { 0.0f, 0.0f, 0.0f };
     std::unique_ptr<texture> _background_texture = nullptr;
     std::unique_ptr<mesh> _background_quad = nullptr;

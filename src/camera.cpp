@@ -26,8 +26,8 @@ static logger log() { return get_logger("camera"); }
 camera::camera()
 {
     _cameras.push_back(this);
-    _private_render_texture_color = new texture;
-    _private_render_texture_depth = new texture;
+    _private_render_texture_color = std::make_unique<texture>();
+    _private_render_texture_depth = std::make_unique<texture>();
     log()->info("Camera uses texture {}",
                 _private_render_texture_color->native_id());
     _background_quad = std::make_unique<mesh>();
@@ -98,19 +98,19 @@ void camera::set_render_size(glm::uvec2 size)
         _render_size.x, _render_size.y, texture::format::DEPTH);
     log()->info("Camera uses texture {}",
                 _private_render_texture_color->native_id());
-    if (_render_texture)
+    if (_user_render_texture)
     {
-        _render_texture->reinit(
+        _user_render_texture->reinit(
             _render_size.x, _render_size.y, texture::format::RGBA);
     }
 }
 
 void camera::set_render_texture(texture* render_texture)
 {
-    _render_texture = render_texture;
+    _user_render_texture = render_texture;
 }
 
-texture* camera::get_render_texture() const { return _render_texture; }
+texture* camera::get_render_texture() const { return _user_render_texture; }
 
 void camera::set_background(glm::vec3 color)
 {
@@ -240,10 +240,10 @@ void camera::attach_render_texture()
     std::array<unsigned, 2> buffers { GL_COLOR_ATTACHMENT0, GL_NONE };
 
     // TODO?: probably better to copy the texture
-    if (_render_texture)
+    if (_user_render_texture)
     {
         buffers[ 1 ] = GL_COLOR_ATTACHMENT1;
-        _render_texture->bind(0);
+        _user_render_texture->bind(0);
         glFramebufferTexture2D(GL_FRAMEBUFFER,
                                GL_COLOR_ATTACHMENT1,
                                GL_TEXTURE_2D,
