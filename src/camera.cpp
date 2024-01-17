@@ -108,8 +108,6 @@ void camera::set_render_size(glm::uvec2 size)
 void camera::set_render_texture(texture* render_texture)
 {
     _render_texture = render_texture;
-    // _render_texture->reinit(
-    //     _render_size.x, _render_size.y, texture::format::RGBA);
 }
 
 texture* camera::get_render_texture() const { return _render_texture; }
@@ -143,13 +141,8 @@ void camera::render()
     auto* old_active_camera = set_active();
 
     attach_render_texture();
+    render_on_private_texture();
     setup_lights();
-
-    // TODO?: maybe better to clear with the specified background color instead
-    // of drawing background quad with that color
-    glClearColor(0, 0, 0, 0);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glEnable(GL_DEPTH_TEST);
 
     _background_shader->set_uniform(
         "camera_matrix",
@@ -163,26 +156,6 @@ void camera::render()
     _background_shader->use();
     _background_quad->render();
     shader_program::unuse();
-
-    glEnable(GL_DEPTH_TEST);
-
-    if (scene::get_active_scene())
-    {
-        for (auto* obj : scene::get_active_scene()->objects())
-        {
-            if (!obj->is_active())
-            {
-                continue;
-            }
-            if (auto* renderer = obj->get_component<renderer_component>();
-                renderer)
-            {
-                renderer->get_material()->set_property_value(
-                    "model_matrix", obj->get_transform().get_matrix());
-                renderer->render();
-            }
-        }
-    }
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
@@ -279,6 +252,33 @@ void camera::attach_render_texture()
     }
 
     glDrawBuffers(buffers.size(), buffers.data());
+}
+
+void camera::render_on_private_texture()
+{
+    // TODO?: maybe better to clear with the specified background color instead
+    // of drawing background quad with that color
+    glClearColor(0, 0, 0, 0);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glEnable(GL_DEPTH_TEST);
+
+    if (scene::get_active_scene())
+    {
+        for (auto* obj : scene::get_active_scene()->objects())
+        {
+            if (!obj->is_active())
+            {
+                continue;
+            }
+            if (auto* renderer = obj->get_component<renderer_component>();
+                renderer)
+            {
+                renderer->get_material()->set_property_value(
+                    "model_matrix", obj->get_transform().get_matrix());
+                renderer->render();
+            }
+        }
+    }
 }
 
 void camera::setup_lights()

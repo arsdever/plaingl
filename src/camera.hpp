@@ -45,6 +45,7 @@ public:
 
 private:
     void attach_render_texture();
+    void render_on_private_texture();
     void setup_lights();
 
 private:
