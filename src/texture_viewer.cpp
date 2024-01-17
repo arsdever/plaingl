@@ -78,15 +78,13 @@ static inline void gl_debug_output(GLenum source,
 }
 } // namespace
 
-void texture_viewer::show_preview(image* img)
+void texture_viewer::show_preview(texture* t)
 {
-    glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
-    glfwWindowHint(GLFW_SAMPLES, 8);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    auto* window =
-        glfwCreateWindow(200, 200, "texture preview", nullptr, nullptr);
+    auto* window = glfwCreateWindow(t->get_width(),
+                                    t->get_height(),
+                                    "texture preview",
+                                    nullptr,
+                                    glfwGetCurrentContext());
     if (window == nullptr)
     {
         log()->error("Failed to create GLFW window");
@@ -110,8 +108,7 @@ void texture_viewer::show_preview(image* img)
             GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
     }
 
-    // glViewport(0, 0, img->width(), img->height());
-    glViewport(0, 0, 200, 200);
+    glViewport(0, 0, t->get_width(), t->get_height());
 
     glfwSetWindowSizeCallback(window,
                               [](GLFWwindow*, int width, int height)
@@ -130,7 +127,6 @@ void texture_viewer::show_preview(image* img)
     unsigned vao = 0;
     unsigned vbo = 0;
 
-    texture t = texture::from_image(img);
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
     glGenBuffers(1, &vbo);
@@ -141,7 +137,7 @@ void texture_viewer::show_preview(image* img)
                  GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), nullptr);
-    t.bind(0);
+    t->bind(0);
 
     while (!glfwWindowShouldClose(window))
     {
@@ -159,4 +155,10 @@ void texture_viewer::show_preview(image* img)
     glDeleteBuffers(1, &vbo);
 
     glfwDestroyWindow(window);
+}
+
+void texture_viewer::show_preview(image* img)
+{
+    texture t = texture::from_image(img);
+    show_preview(&t);
 }
