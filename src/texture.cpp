@@ -72,6 +72,18 @@ size_t texture::get_width() const { return _width; }
 
 size_t texture::get_height() const { return _height; }
 
+size_t texture::get_channel_count() const
+{
+    switch (_format)
+    {
+    case format::GRAYSCALE:
+    case format::DEPTH: return 1;
+    case format::RGB: return 3;
+    case format::RGBA: return 4;
+    default: return 0;
+    }
+}
+
 void texture::get_data(char* data_ptr)
 {
     glBindTexture(GL_TEXTURE_2D, _texture_id);
