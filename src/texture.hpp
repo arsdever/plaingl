@@ -44,11 +44,16 @@ public:
     static texture from_image(image* img);
 
 private:
-    int convert_to_gl_format(format f);
+    static int convert_to_gl_internal_format(format f);
+    static int convert_to_gl_format(format f);
 
 private:
     size_t _width;
     size_t _height;
     unsigned _texture_id;
     format _format;
+
+public:
+    // TODO: may not be the best place for this object
+    static std::vector<texture*> _textures;
 };
