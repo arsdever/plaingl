@@ -19,7 +19,7 @@ void main()
     }
     else if (texture_type == 3)
     {
-        fragment_color = vec4(texture(texture_sampler, uv_position).xxx, 1.0);
+        fragment_color = vec4(texture(texture_sampler, uv_position).xyz, 1.0);
     }
     else
     {
