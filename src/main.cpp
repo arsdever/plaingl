@@ -146,8 +146,8 @@ int main(int argc, char** argv)
 
     std::stringstream ss;
     ss << std::this_thread::get_id();
-    prof::apply_for_data(ss.str(),
-                         [](const prof::data_sample& data) -> bool
+    prof::apply_data(ss.str(),
+                     [](const prof::data_sample& data) -> bool
     {
         log()->info("Profiling frame:\n\tfunction name: {}\n\tdepth: "
                     "{}\n\tduration: {}",
