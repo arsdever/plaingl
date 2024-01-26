@@ -31,8 +31,6 @@
 #include "components/text_component.hpp"
 #include "components/text_renderer_component.hpp"
 #include "components/walking_component.hpp"
-#include "experimental/window.hpp"
-#include "experimental/window_events.hpp"
 #include "font.hpp"
 #include "game_clock.hpp"
 #include "game_object.hpp"
@@ -90,18 +88,6 @@ int main(int argc, char** argv)
     glfwInit();
     glfwSetErrorCallback(on_error);
     adjust_timeout_accuracy_guard guard;
-
-    std::shared_ptr<experimental::window> exp_window =
-        std::make_shared<experimental::window>();
-    exp_window->set_title("Hello experimental window");
-    exp_window->init();
-
-    exp_window->get_events()->mouse_move += [](auto me)
-    {
-        log()->info("Mouse position: {}x{}",
-                    me.get_local_position().x,
-                    me.get_local_position().y);
-    };
 
     game_object* selected_object = nullptr;
 
