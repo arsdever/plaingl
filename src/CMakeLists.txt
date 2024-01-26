@@ -134,3 +134,6 @@ add_library(${PROJECT}::lib ALIAS ${PROJECT}_lib)
 
 add_executable(${PROJECT} main.cpp)
 target_link_libraries(${PROJECT} PUBLIC ${PROJECT}::lib)
+
+add_executable(${PROJECT}_window_sample samples/window.cpp)
+target_link_libraries(${PROJECT}_window_sample PUBLIC ${PROJECT}::lib)

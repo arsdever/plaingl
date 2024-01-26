@@ -20,10 +20,14 @@ public:
         Close,
         Move,
         Resize,
+        Enter,
+        Leave,
         MouseButtonPress,
         MouseButtonRelease,
+        MouseButtonClick,
         MouseButtonDoubleClick,
         MouseButtonTripleClick,
+        MouseWheel,
         MouseMove,
     };
 
@@ -55,16 +59,16 @@ private:
     modifiers _modifiers { modifiers::Unspecified };
 };
 
-class mouse_event : public input_event
+class single_point_event : public input_event
 {
 public:
-    mouse_event(type t,
-                const glm::vec2& local_pos,
-                const glm::vec2& scene_pos,
-                const glm::vec2& global_pos,
-                int button,
-                int buttons,
-                modifiers mods);
+    single_point_event(type t,
+                       const glm::vec2& local_pos,
+                       const glm::vec2& scene_pos,
+                       const glm::vec2& global_pos,
+                       int button,
+                       int buttons,
+                       modifiers mods);
 
     int get_button() const;
     int get_buttons() const;
@@ -80,6 +84,89 @@ private:
     int _buttons { 0 };
 };
 
+class mouse_event : public single_point_event
+{
+public:
+    mouse_event(type t,
+                const glm::vec2& local_pos,
+                const glm::vec2& scene_pos,
+                const glm::vec2& global_pos,
+                int button,
+                int buttons,
+                modifiers mods);
+};
+
+class wheel_event : public single_point_event
+{
+public:
+    wheel_event(type t,
+                const glm::vec2& local_pos,
+                const glm::vec2& scene_pos,
+                const glm::vec2& global_pos,
+                int button,
+                int buttons,
+                modifiers mods,
+                glm::vec2 delta,
+                bool inverted);
+
+    glm::vec2 get_delta() const;
+    bool get_is_inverted() const;
+
+private:
+    glm::vec2 _delta { 0, 0 };
+    bool _is_inverted { false };
+};
+
+class enter_event : public single_point_event
+{
+public:
+    enter_event(type t,
+                const glm::vec2& local_pos,
+                const glm::vec2& scene_pos,
+                const glm::vec2& global_pos,
+                int button,
+                int buttons,
+                modifiers mods);
+};
+
+class leave_event : public window_event
+{
+public:
+    leave_event();
+};
+
+class close_event : public window_event
+{
+public:
+    close_event();
+};
+
+class resize_event : public window_event
+{
+public:
+    resize_event(glm::vec2 old_size, glm::vec2 size);
+
+    glm::vec2 get_old_size() const;
+    glm::vec2 get_new_size() const;
+
+private:
+    glm::vec2 _old_size;
+    glm::vec2 _new_size;
+};
+
+class move_event : public window_event
+{
+public:
+    move_event(glm::vec2 old_position, glm::vec2 position);
+
+    glm::vec2 get_old_position() const;
+    glm::vec2 get_new_position() const;
+
+private:
+    glm::vec2 _old_position;
+    glm::vec2 _new_position;
+};
+
 class window_events
 {
 public:
@@ -87,24 +174,22 @@ public:
     void set_drag_distance(std::optional<float> distance);
     static void set_default_drag_distance(float distance);
 
+    event<void(close_event)> close;
+    event<void(resize_event)> resize;
+    event<void(move_event)> move;
+
+    event<void(enter_event)> enter;
+    event<void(window_event)> leave;
+
     event<void(mouse_event)> mouse_press;
-    event<void(mouse_event)> mouse_right_press;
-    event<void(mouse_event)> mouse_middle_press;
+    event<void(mouse_event)> mouse_release;
     event<void(mouse_event)> mouse_click;
     event<void(mouse_event)> mouse_double_click;
-    event<void(mouse_event)> mouse_right_click;
-    event<void(mouse_event)> mouse_double_right_click;
-    event<void(mouse_event)> mouse_middle_click;
-    event<void(mouse_event)> mouse_release;
-    event<void(mouse_event)> mouse_right_release;
-    event<void(mouse_event)> mouse_middle_release;
+    event<void(mouse_event)> mouse_triple_click;
+
     event<void(mouse_event)> mouse_move;
-    event<void(mouse_event)> mouse_drag_drop_start;
-    event<void(mouse_event)> mouse_drag_drop_move;
-    event<void(mouse_event)> mouse_drag_drop_end;
-    event<void(mouse_event)> mouse_enter;
-    event<void(mouse_event)> mouse_leave;
-    event<void(mouse_event)> mouse_scroll;
+
+    event<void(wheel_event)> mouse_scroll;
 
 private:
     bool _is_drag = false;

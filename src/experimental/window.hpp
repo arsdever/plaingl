@@ -36,12 +36,12 @@ public:
 
     void set_can_grab(bool flag = true);
     bool get_can_grab() const;
+
+    void grab_mouse(bool flag = true);
     bool get_has_grab() const;
 
     std::shared_ptr<window_events> get_events() const;
 
-    event<void(std::shared_ptr<window>)> on_closed;
-    event<void(std::shared_ptr<window>, size_t w, size_t h)> on_resized;
     event<void(std::shared_ptr<window>)> on_draw_contents;
 
     static std::shared_ptr<window> get_main_window();
