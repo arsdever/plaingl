@@ -58,6 +58,8 @@ add_library(
   window.hpp
   window.cpp
   glad/src/gl.c
+  experimental/input_system.hpp
+  experimental/input_system.cpp
   experimental/window_events.hpp
   experimental/window_events.cpp
   experimental/window.hpp

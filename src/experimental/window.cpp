@@ -43,6 +43,8 @@ struct window::window_private_data
     bool _is_main_window { false };
     bool _can_grab { false };
     bool _has_grab { false };
+    bool _is_input_source { false };
+
     struct
     {
         int _buttons;
@@ -66,6 +68,7 @@ void window::init()
     {
         _main_window = shared_from_this();
         _private_data->_is_main_window = true;
+        _private_data->_is_input_source = true;
     }
 
     glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
@@ -210,6 +213,16 @@ void window::update()
 
     glfwSwapBuffers(_private_data->_glfw_window_handle);
     glfwPollEvents();
+}
+
+void window::set_as_input_source(bool flag)
+{
+    _private_data->_is_input_source = true;
+}
+
+bool window::get_is_input_source() const
+{
+    return _private_data->_is_input_source;
 }
 
 void window::set_can_grab(bool flag)
@@ -363,6 +376,15 @@ void window::setup_mouse_callbacks()
                              button,
                              _this->_private_data->_mouse_state._buttons,
                              _this->_private_data->_mouse_state._mods));
+
+            if (_this->get_is_input_source())
+            {
+                input_system::set_mouse_button(
+                    input_system::mouse_button::MouseButton0,
+                    (_this->_private_data->_mouse_state._buttons ^= (1 << 0))
+                        ? input_system::button_state::Press
+                        : input_system::button_state::Release);
+            }
         }
     });
 
@@ -395,6 +417,12 @@ void window::setup_mouse_callbacks()
                         0,
                         _this->_private_data->_mouse_state._buttons,
                         _this->_private_data->_mouse_state._mods));
+
+        if (_this->get_is_input_source())
+        {
+            input_system::set_mouse_position(
+                _this->_private_data->_mouse_state._position);
+        }
     });
 
     glfwSetCursorEnterCallback(_private_data->_glfw_window_handle,
@@ -449,16 +477,35 @@ void window::configure_input_system()
         [](GLFWwindow* wnd, int key, int scancode, int action, int mods)
     {
         auto _this = static_cast<window*>(glfwGetWindowUserPointer(wnd));
-        _this->key_callback(key, scancode, action, mods);
-    });
-}
 
-void window::key_callback(int key, int scancode, int action, int mods)
-{
-    (void)scancode;
-    _private_data->_mouse_state._mods =
-        glfw_keyboard_modifiers_to_mouse_event_modifiers(mods);
-    input_system::set_key_down(key, action != GLFW_RELEASE);
+        window_event::type type = window_event::type::KeyRelease;
+        event<void(key_event)>* f = &_this->_private_data->_events->key_release;
+        bool is_repeat = false;
+
+        _this->_private_data->_mouse_state._mods =
+            glfw_keyboard_modifiers_to_mouse_event_modifiers(mods);
+
+        if (action == GLFW_PRESS)
+        {
+            type = window_event::type::KeyPress;
+            f = &_this->_private_data->_events->key_press;
+        }
+        else if (action == GLFW_REPEAT)
+        {
+            type = window_event::type::KeyRepeat;
+            f = &_this->_private_data->_events->key_repeat;
+            is_repeat = true;
+        }
+        (*f)(key_event(type,
+                       scancode,
+                       _this->_private_data->_mouse_state._mods,
+                       is_repeat));
+
+        if (_this->get_is_input_source())
+        {
+            input_system::set_key_down(key, action != GLFW_RELEASE);
+        }
+    });
 }
 
 std::shared_ptr<window> window::_main_window = nullptr;

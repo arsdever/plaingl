@@ -22,11 +22,10 @@ int main(int argc, char** argv)
 
     exp_window->set_can_grab(true);
 
-    exp_window->get_events()->mouse_move += [](auto me)
+    exp_window->get_events()->close += [ &windows, &exp_window ](auto ce)
     {
-        log()->info("Mouse position: {}x{}",
-                    me.get_local_position().x,
-                    me.get_local_position().y);
+        log()->info("The window is closing");
+        std::erase(windows, exp_window);
     };
 
     exp_window->get_events()->leave +=
@@ -57,6 +56,13 @@ int main(int argc, char** argv)
                     re.get_new_size().y);
     };
 
+    exp_window->get_events()->mouse_move += [](auto me)
+    {
+        log()->info("Mouse position: {}x{}",
+                    me.get_local_position().x,
+                    me.get_local_position().y);
+    };
+
     exp_window->get_events()->mouse_release +=
         [](auto me) { log()->info("Mouse release: {}", me.get_button()); };
 
@@ -74,6 +80,15 @@ int main(int argc, char** argv)
 
     exp_window->get_events()->mouse_scroll += [](auto we)
     { log()->info("Mouse scroll: {}x{}", we.get_delta().x, we.get_delta().y); };
+
+    exp_window->get_events()->key_press +=
+        [](auto ke) { log()->info("Key pressed: {}", ke.get_scancode()); };
+
+    exp_window->get_events()->key_repeat +=
+        [](auto ke) { log()->info("Key repeated: {}", ke.get_scancode()); };
+
+    exp_window->get_events()->key_release +=
+        [](auto ke) { log()->info("Key released: {}", ke.get_scancode()); };
 
     windows.push_back(exp_window);
 

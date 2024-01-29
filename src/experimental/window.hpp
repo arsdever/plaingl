@@ -34,6 +34,9 @@ public:
 
     void update();
 
+    void set_as_input_source(bool flag = true);
+    bool get_is_input_source() const;
+
     void set_can_grab(bool flag = true);
     bool get_can_grab() const;
 
@@ -50,7 +53,6 @@ private:
     void setup_gl_debug_messages() const;
     void setup_mouse_callbacks();
     void configure_input_system();
-    void key_callback(int key, int scancode, int action, int mods);
 
 private:
     struct window_private_data;
