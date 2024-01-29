@@ -46,12 +46,20 @@ public:
     std::shared_ptr<window_events> get_events() const;
 
     event<void(std::shared_ptr<window>)> on_draw_contents;
+    event<void(std::shared_ptr<window>)> on_user_initialize;
 
     static std::shared_ptr<window> get_main_window();
 
 private:
-    void setup_gl_debug_messages() const;
     void setup_mouse_callbacks();
+
+    void setup_mouse_enter_callback();
+    void setup_mouse_move_callback();
+    void setup_mouse_button_callback();
+    void setup_mouse_wheel_callback();
+
+    void check_for_drag();
+
     void configure_input_system();
 
 private:

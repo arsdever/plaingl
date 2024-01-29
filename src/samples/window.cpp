@@ -1,9 +1,13 @@
-#include <memory>
-
+/* clang-format off */
+#include <glad/gl.h>
 #include <GLFW/glfw3.h>
+/* clang-format on */
+
+#include <memory>
 
 #include "experimental/window.hpp"
 
+#include "gl_error_handler.hpp"
 #include "logging.hpp"
 
 namespace
@@ -15,8 +19,18 @@ int main(int argc, char** argv)
 {
     glfwInit();
     std::vector<std::shared_ptr<experimental::window>> windows;
-    std::shared_ptr<experimental::window> exp_window =
-        std::make_shared<experimental::window>();
+    auto exp_window = std::make_shared<experimental::window>();
+
+    exp_window->on_user_initialize += [](std::shared_ptr<experimental::window>)
+    {
+        // configure gl debug output
+        glEnable(GL_DEBUG_OUTPUT);
+        glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+        glDebugMessageCallback(gl_error_handler, nullptr);
+        glDebugMessageControl(
+            GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
+    };
+
     exp_window->set_title("Hello experimental window");
     exp_window->init();
 
@@ -24,12 +38,16 @@ int main(int argc, char** argv)
 
     exp_window->get_events()->close += [ &windows, &exp_window ](auto ce)
     {
+        (void)ce;
         log()->info("The window is closing");
         std::erase(windows, exp_window);
     };
 
-    exp_window->get_events()->leave +=
-        [](auto ee) { log()->info("Cursor left the window"); };
+    exp_window->get_events()->leave += [](auto ee)
+    {
+        (void)ee;
+        log()->info("Cursor left the window");
+    };
 
     exp_window->get_events()->enter += [](auto ee)
     {
@@ -94,10 +112,9 @@ int main(int argc, char** argv)
 
     while (!windows.empty())
     {
-        for (int i = 0; i < windows.size(); ++i)
+        for (auto wnd : windows)
         {
-            auto window = windows[ i ];
-            window->update();
+            wnd->update();
         }
     }
 

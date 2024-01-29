@@ -9,7 +9,6 @@
 #include "experimental/window.hpp"
 
 #include "experimental/window_events.hpp"
-#include "gl_error_handler.hpp"
 #include "input_system.hpp"
 #include "logging.hpp"
 
@@ -63,6 +62,12 @@ window::~window() = default;
 
 void window::init()
 {
+    if (_private_data->_glfw_window_handle != nullptr)
+    {
+        log()->error("The window is already initialized");
+        return;
+    }
+
     std::string title = _private_data->_title;
     if (!_main_window)
     {
@@ -94,16 +99,9 @@ void window::init()
     glfwSetWindowPos(_private_data->_glfw_window_handle,
                      _private_data->_position.x,
                      _private_data->_position.y);
+
     glfwSetWindowUserPointer(_main_window->_private_data->_glfw_window_handle,
                              this);
-
-    activate();
-
-    if (!gladLoadGL((GLADloadfunc)glfwGetProcAddress))
-    {
-        log()->error("Failed to initialize GLAD");
-        return;
-    }
 
     glfwSetWindowSizeCallback(_private_data->_glfw_window_handle,
                               [](GLFWwindow* wnd, int w, int h)
@@ -125,7 +123,15 @@ void window::init()
             move_event(old_pos, _this->_private_data->_position));
     });
 
-    setup_gl_debug_messages();
+    activate();
+
+    if (!gladLoadGL((GLADloadfunc)glfwGetProcAddress))
+    {
+        log()->error("Failed to initialize GLAD");
+        return;
+    }
+
+    on_user_initialize(shared_from_this());
     configure_input_system();
 }
 
@@ -217,7 +223,7 @@ void window::update()
 
 void window::set_as_input_source(bool flag)
 {
-    _private_data->_is_input_source = true;
+    _private_data->_is_input_source = flag;
 }
 
 bool window::get_is_input_source() const
@@ -253,17 +259,74 @@ std::shared_ptr<window_events> window::get_events() const
 
 std::shared_ptr<window> window::get_main_window() { return _main_window; }
 
-void window::setup_gl_debug_messages() const
+void window::setup_mouse_callbacks()
 {
-    // configure gl debug output
-    glEnable(GL_DEBUG_OUTPUT);
-    glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-    glDebugMessageCallback(gl_error_handler, nullptr);
-    glDebugMessageControl(
-        GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
+    setup_mouse_enter_callback();
+    setup_mouse_move_callback();
+    setup_mouse_button_callback();
+    setup_mouse_wheel_callback();
 }
 
-void window::setup_mouse_callbacks()
+void window::setup_mouse_enter_callback()
+{
+    glfwSetCursorEnterCallback(_private_data->_glfw_window_handle,
+                               [](GLFWwindow* wnd, int entered)
+    {
+        auto _this = static_cast<window*>(glfwGetWindowUserPointer(wnd));
+        std::shared_ptr<window_events> events = _this->get_events();
+        if (entered == 0)
+        {
+            events->leave(window_event(window_event::type::Leave));
+            return;
+        }
+
+        glm::dvec2 pos;
+        glfwGetCursorPos(wnd, &pos.x, &pos.y);
+        _this->_private_data->_mouse_state._position = pos;
+        events->enter(enter_event(window_event::type::Enter,
+                                  _this->_private_data->_mouse_state._position,
+                                  _this->_private_data->_mouse_state._position,
+                                  _this->_private_data->_mouse_state._position,
+                                  0,
+                                  _this->_private_data->_mouse_state._buttons,
+                                  _this->_private_data->_mouse_state._mods));
+    });
+}
+
+void window::setup_mouse_move_callback()
+{
+    glfwSetCursorPosCallback(
+        _private_data->_glfw_window_handle,
+        [](GLFWwindow* wnd, double x_position, double y_position)
+    {
+        auto _this = static_cast<window*>(glfwGetWindowUserPointer(wnd));
+        std::shared_ptr<window_events> events = _this->get_events();
+        _this->_private_data->_mouse_state._position = { x_position,
+                                                         y_position };
+
+        if (_this->_private_data->_mouse_state._buttons)
+        {
+            _this->check_for_drag();
+        }
+
+        events->mouse_move(
+            mouse_event(window_event::type::MouseMove,
+                        _this->_private_data->_mouse_state._position,
+                        _this->_private_data->_mouse_state._position,
+                        _this->_private_data->_mouse_state._position,
+                        0,
+                        _this->_private_data->_mouse_state._buttons,
+                        _this->_private_data->_mouse_state._mods));
+
+        if (_this->get_is_input_source())
+        {
+            input_system::set_mouse_position(
+                _this->_private_data->_mouse_state._position);
+        }
+    });
+}
+
+void window::setup_mouse_button_callback()
 {
     glfwSetMouseButtonCallback(
         _private_data->_glfw_window_handle,
@@ -387,67 +450,10 @@ void window::setup_mouse_callbacks()
             }
         }
     });
+}
 
-    glfwSetCursorPosCallback(
-        _private_data->_glfw_window_handle,
-        [](GLFWwindow* wnd, double x_position, double y_position)
-    {
-        auto _this = static_cast<window*>(glfwGetWindowUserPointer(wnd));
-        std::shared_ptr<window_events> events = _this->get_events();
-        _this->_private_data->_mouse_state._position = { x_position,
-                                                         y_position };
-
-        if (_this->_private_data->_mouse_state._buttons)
-        {
-            double distance = glm::distance(
-                _this->_private_data->_mouse_state._position,
-                _this->_private_data->_mouse_state._press_started_position);
-            if (distance > DRAG_START_DISTANCE)
-            {
-                _this->_private_data->_mouse_state._is_drag = true;
-                // drag started
-            }
-        }
-
-        events->mouse_move(
-            mouse_event(window_event::type::MouseMove,
-                        _this->_private_data->_mouse_state._position,
-                        _this->_private_data->_mouse_state._position,
-                        _this->_private_data->_mouse_state._position,
-                        0,
-                        _this->_private_data->_mouse_state._buttons,
-                        _this->_private_data->_mouse_state._mods));
-
-        if (_this->get_is_input_source())
-        {
-            input_system::set_mouse_position(
-                _this->_private_data->_mouse_state._position);
-        }
-    });
-
-    glfwSetCursorEnterCallback(_private_data->_glfw_window_handle,
-                               [](GLFWwindow* wnd, int entered)
-    {
-        auto _this = static_cast<window*>(glfwGetWindowUserPointer(wnd));
-        std::shared_ptr<window_events> events = _this->get_events();
-        if (entered == 0)
-        {
-            events->leave(window_event(window_event::type::Leave));
-            return;
-        }
-
-        glm::dvec2 pos;
-        glfwGetCursorPos(wnd, &pos.x, &pos.y);
-        _this->_private_data->_mouse_state._position = pos;
-        events->enter(enter_event(window_event::type::Enter,
-                                  _this->_private_data->_mouse_state._position,
-                                  _this->_private_data->_mouse_state._position,
-                                  _this->_private_data->_mouse_state._position,
-                                  0,
-                                  _this->_private_data->_mouse_state._buttons,
-                                  _this->_private_data->_mouse_state._mods));
-    });
-
+void window::setup_mouse_wheel_callback()
+{
     glfwSetScrollCallback(_private_data->_glfw_window_handle,
                           [](GLFWwindow* wnd, double x_offset, double y_offset)
     {
@@ -465,6 +471,18 @@ void window::setup_mouse_callbacks()
             { static_cast<float>(x_offset), static_cast<float>(y_offset) },
             false));
     });
+}
+
+void window::check_for_drag()
+{
+    double distance =
+        glm::distance(_private_data->_mouse_state._position,
+                      _private_data->_mouse_state._press_started_position);
+    if (distance > DRAG_START_DISTANCE)
+    {
+        _private_data->_mouse_state._is_drag = true;
+        // drag started
+    }
 }
 
 void window::configure_input_system()
