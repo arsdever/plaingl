@@ -29,6 +29,9 @@ public:
         MouseButtonTripleClick,
         MouseWheel,
         MouseMove,
+        KeyPress,
+        KeyRepeat,
+        KeyRelease,
     };
 
     window_event(type t);
@@ -54,6 +57,8 @@ public:
 
 public:
     input_event(type t, modifiers mod);
+
+    modifiers get_modifiers() const;
 
 private:
     modifiers _modifiers { modifiers::Unspecified };
@@ -167,6 +172,19 @@ private:
     glm::vec2 _new_position;
 };
 
+class key_event : public input_event
+{
+public:
+    key_event(type t, int scancode, modifiers mods, bool repeated = false);
+
+    int get_scancode() const;
+    bool get_is_repeated() const;
+
+private:
+    int _scancode;
+    bool _is_repeated { false };
+};
+
 class window_events
 {
 public:
@@ -190,6 +208,10 @@ public:
     event<void(mouse_event)> mouse_move;
 
     event<void(wheel_event)> mouse_scroll;
+
+    event<void(key_event)> key_press;
+    event<void(key_event)> key_release;
+    event<void(key_event)> key_repeat;
 
 private:
     bool _is_drag = false;

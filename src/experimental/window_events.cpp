@@ -31,6 +31,8 @@ input_event::input_event(type t, modifiers mod)
 {
 }
 
+input_event::modifiers input_event::get_modifiers() const { return _modifiers; }
+
 single_point_event::single_point_event(type t,
                                        const glm::vec2& local_pos,
                                        const glm::vec2& scene_pos,
@@ -135,5 +137,16 @@ move_event::move_event(glm::vec2 old_position, glm::vec2 position)
 glm::vec2 move_event::get_old_position() const { return _old_position; }
 
 glm::vec2 move_event::get_new_position() const { return _new_position; }
+
+key_event::key_event(type t, int scancode, modifiers mods, bool repeated)
+    : input_event(t, mods)
+    , _scancode(scancode)
+    , _is_repeated(repeated)
+{
+}
+
+int key_event::get_scancode() const { return _scancode; }
+
+bool key_event::get_is_repeated() const { return _is_repeated; }
 
 } // namespace experimental
