@@ -5,6 +5,8 @@
 
 #include <memory>
 
+#include <assert.h>
+
 #include "experimental/window.hpp"
 
 #include "gl_error_handler.hpp"
@@ -36,21 +38,24 @@ int main(int argc, char** argv)
 
     exp_window->set_can_grab(true);
 
-    exp_window->get_events()->close += [ &windows, &exp_window ](auto ce)
+    exp_window->get_events()->close += [ &windows ](auto ce)
     {
         (void)ce;
+        assert(ce.get_sender() != nullptr);
         log()->info("The window is closing");
-        std::erase(windows, exp_window);
+        std::erase(windows, ce.get_sender()->shared_from_this());
     };
 
     exp_window->get_events()->leave += [](auto ee)
     {
         (void)ee;
+        assert(ee.get_sender() != nullptr);
         log()->info("Cursor left the window");
     };
 
     exp_window->get_events()->enter += [](auto ee)
     {
+        assert(ee.get_sender() != nullptr);
         log()->info("Cursor entered the window at: {}x{}",
                     ee.get_local_position().x,
                     ee.get_local_position().y);
@@ -58,6 +63,7 @@ int main(int argc, char** argv)
 
     exp_window->get_events()->move += [](auto me)
     {
+        assert(me.get_sender() != nullptr);
         log()->info("Window moved from: {}x{} to: {}x{}",
                     me.get_old_position().x,
                     me.get_old_position().y,
@@ -67,6 +73,7 @@ int main(int argc, char** argv)
 
     exp_window->get_events()->resize += [](auto re)
     {
+        assert(re.get_sender() != nullptr);
         log()->info("Window resized from: {}x{} to: {}x{}",
                     re.get_old_size().x,
                     re.get_old_size().y,
@@ -76,44 +83,73 @@ int main(int argc, char** argv)
 
     exp_window->get_events()->mouse_move += [](auto me)
     {
+        assert(me.get_sender() != nullptr);
         log()->info("Mouse position: {}x{}",
                     me.get_local_position().x,
                     me.get_local_position().y);
     };
 
-    exp_window->get_events()->mouse_release +=
-        [](auto me) { log()->info("Mouse release: {}", me.get_button()); };
+    exp_window->get_events()->mouse_release += [](auto me)
+    {
+        assert(me.get_sender() != nullptr);
+        log()->info("Mouse release: {}", me.get_button());
+    };
 
-    exp_window->get_events()->mouse_press +=
-        [](auto me) { log()->info("Mouse press: {}", me.get_button()); };
+    exp_window->get_events()->mouse_press += [](auto me)
+    {
+        assert(me.get_sender() != nullptr);
+        log()->info("Mouse press: {}", me.get_button());
+    };
 
-    exp_window->get_events()->mouse_click +=
-        [](auto me) { log()->info("Mouse click: {}", me.get_button()); };
+    exp_window->get_events()->mouse_click += [](auto me)
+    {
+        assert(me.get_sender() != nullptr);
+        log()->info("Mouse click: {}", me.get_button());
+    };
 
-    exp_window->get_events()->mouse_double_click +=
-        [](auto me) { log()->info("Mouse double click: {}", me.get_button()); };
+    exp_window->get_events()->mouse_double_click += [](auto me)
+    {
+        assert(me.get_sender() != nullptr);
+        log()->info("Mouse double click: {}", me.get_button());
+    };
 
-    exp_window->get_events()->mouse_triple_click +=
-        [](auto me) { log()->info("Mouse triple click: {}", me.get_button()); };
+    exp_window->get_events()->mouse_triple_click += [](auto me)
+    {
+        assert(me.get_sender() != nullptr);
+        log()->info("Mouse triple click: {}", me.get_button());
+    };
 
     exp_window->get_events()->mouse_scroll += [](auto we)
-    { log()->info("Mouse scroll: {}x{}", we.get_delta().x, we.get_delta().y); };
+    {
+        assert(we.get_sender() != nullptr);
+        log()->info("Mouse scroll: {}x{}", we.get_delta().x, we.get_delta().y);
+    };
 
-    exp_window->get_events()->key_press +=
-        [](auto ke) { log()->info("Key pressed: {}", ke.get_scancode()); };
+    exp_window->get_events()->key_press += [](auto ke)
+    {
+        assert(ke.get_sender() != nullptr);
+        log()->info("Key pressed: {}", ke.get_scancode());
+    };
 
-    exp_window->get_events()->key_repeat +=
-        [](auto ke) { log()->info("Key repeated: {}", ke.get_scancode()); };
+    exp_window->get_events()->key_repeat += [](auto ke)
+    {
+        assert(ke.get_sender() != nullptr);
+        log()->info("Key repeated: {}", ke.get_scancode());
+    };
 
-    exp_window->get_events()->key_release +=
-        [](auto ke) { log()->info("Key released: {}", ke.get_scancode()); };
+    exp_window->get_events()->key_release += [](auto ke)
+    {
+        assert(ke.get_sender() != nullptr);
+        log()->info("Key released: {}", ke.get_scancode());
+    };
 
     windows.push_back(exp_window);
 
     while (!windows.empty())
     {
-        for (auto wnd : windows)
+        for (int i = 0; i < windows.size(); ++i)
         {
+            auto wnd = windows[ i ];
             wnd->update();
         }
     }

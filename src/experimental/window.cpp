@@ -58,7 +58,11 @@ struct window::window_private_data
 
 window::window() { _private_data = std::make_unique<window_private_data>(); }
 
-window::~window() = default;
+window::~window()
+{
+    glfwDestroyWindow(_private_data->_glfw_window_handle);
+    _private_data = nullptr;
+}
 
 void window::init()
 {
@@ -201,7 +205,7 @@ void window::update()
     {
         glfwDestroyWindow(_private_data->_glfw_window_handle);
         _private_data->_glfw_window_handle = nullptr;
-        get_events()->close(close_event());
+        get_events()->close(close_event(this));
         return;
     }
 
@@ -276,7 +280,7 @@ void window::setup_mouse_enter_callback()
         std::shared_ptr<window_events> events = _this->get_events();
         if (entered == 0)
         {
-            events->leave(window_event(window_event::type::Leave));
+            events->leave(window_event(window_event::type::Leave, _this));
             return;
         }
 
@@ -289,7 +293,8 @@ void window::setup_mouse_enter_callback()
                                   _this->_private_data->_mouse_state._position,
                                   0,
                                   _this->_private_data->_mouse_state._buttons,
-                                  _this->_private_data->_mouse_state._mods));
+                                  _this->_private_data->_mouse_state._mods,
+                                  _this));
     });
 }
 
@@ -316,7 +321,8 @@ void window::setup_mouse_move_callback()
                         _this->_private_data->_mouse_state._position,
                         0,
                         _this->_private_data->_mouse_state._buttons,
-                        _this->_private_data->_mouse_state._mods));
+                        _this->_private_data->_mouse_state._mods,
+                        _this));
 
         if (_this->get_is_input_source())
         {
@@ -346,7 +352,8 @@ void window::setup_mouse_button_callback()
                             _this->_private_data->_mouse_state._position,
                             button,
                             _this->_private_data->_mouse_state._buttons,
-                            _this->_private_data->_mouse_state._mods));
+                            _this->_private_data->_mouse_state._mods,
+                            _this));
 
             if (_this->get_can_grab())
             {
@@ -364,7 +371,8 @@ void window::setup_mouse_button_callback()
                             _this->_private_data->_mouse_state._position,
                             button,
                             _this->_private_data->_mouse_state._buttons,
-                            _this->_private_data->_mouse_state._mods));
+                            _this->_private_data->_mouse_state._mods,
+                            _this));
 
             if (_this->_private_data->_mouse_state._is_drag)
             {
@@ -438,7 +446,8 @@ void window::setup_mouse_button_callback()
                              _this->_private_data->_mouse_state._position,
                              button,
                              _this->_private_data->_mouse_state._buttons,
-                             _this->_private_data->_mouse_state._mods));
+                             _this->_private_data->_mouse_state._mods,
+                             _this));
 
             if (_this->get_is_input_source())
             {
@@ -469,7 +478,8 @@ void window::setup_mouse_wheel_callback()
             _this->_private_data->_mouse_state._buttons,
             _this->_private_data->_mouse_state._mods,
             { static_cast<float>(x_offset), static_cast<float>(y_offset) },
-            false));
+            false,
+            _this));
     });
 }
 

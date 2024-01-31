@@ -34,14 +34,17 @@ public:
         KeyRelease,
     };
 
-    window_event(type t);
+    window_event(type t, window* sender = nullptr);
 
     virtual ~window_event();
 
     type get_type() const;
 
+    window* get_sender() const;
+
 private:
     type _type;
+    window* _sender;
 };
 
 class input_event : public window_event
@@ -56,7 +59,7 @@ public:
     };
 
 public:
-    input_event(type t, modifiers mod);
+    input_event(type t, modifiers mod, window* sender = nullptr);
 
     modifiers get_modifiers() const;
 
@@ -73,7 +76,8 @@ public:
                        const glm::vec2& global_pos,
                        int button,
                        int buttons,
-                       modifiers mods);
+                       modifiers mods,
+                       window* sender = nullptr);
 
     int get_button() const;
     int get_buttons() const;
@@ -98,7 +102,8 @@ public:
                 const glm::vec2& global_pos,
                 int button,
                 int buttons,
-                modifiers mods);
+                modifiers mods,
+                window* sender = nullptr);
 };
 
 class wheel_event : public single_point_event
@@ -112,7 +117,8 @@ public:
                 int buttons,
                 modifiers mods,
                 glm::vec2 delta,
-                bool inverted);
+                bool inverted,
+                window* sender = nullptr);
 
     glm::vec2 get_delta() const;
     bool get_is_inverted() const;
@@ -131,25 +137,26 @@ public:
                 const glm::vec2& global_pos,
                 int button,
                 int buttons,
-                modifiers mods);
+                modifiers mods,
+                window* sender = nullptr);
 };
 
 class leave_event : public window_event
 {
 public:
-    leave_event();
+    leave_event(window* sender = nullptr);
 };
 
 class close_event : public window_event
 {
 public:
-    close_event();
+    close_event(window* sender = nullptr);
 };
 
 class resize_event : public window_event
 {
 public:
-    resize_event(glm::vec2 old_size, glm::vec2 size);
+    resize_event(glm::vec2 old_size, glm::vec2 size, window* sender = nullptr);
 
     glm::vec2 get_old_size() const;
     glm::vec2 get_new_size() const;
@@ -162,7 +169,9 @@ private:
 class move_event : public window_event
 {
 public:
-    move_event(glm::vec2 old_position, glm::vec2 position);
+    move_event(glm::vec2 old_position,
+               glm::vec2 position,
+               window* sender = nullptr);
 
     glm::vec2 get_old_position() const;
     glm::vec2 get_new_position() const;
@@ -175,7 +184,11 @@ private:
 class key_event : public input_event
 {
 public:
-    key_event(type t, int scancode, modifiers mods, bool repeated = false);
+    key_event(type t,
+              int scancode,
+              modifiers mods,
+              bool repeated = false,
+              window* sender = nullptr);
 
     int get_scancode() const;
     bool get_is_repeated() const;
