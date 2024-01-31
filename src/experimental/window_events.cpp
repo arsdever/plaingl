@@ -6,7 +6,6 @@
 #include "logging.hpp"
 
 // TODO: some logic may not work in case of simultaneous multiple button actions
-// TODO: implement double click actions
 
 namespace
 {
