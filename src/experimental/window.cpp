@@ -56,28 +56,28 @@ struct window::window_private_data
     } _mouse_state;
 };
 
-window::window() { _private_data = std::make_unique<window_private_data>(); }
+window::window() { _p = std::make_unique<window_private_data>(); }
 
 window::~window()
 {
-    glfwDestroyWindow(_private_data->_glfw_window_handle);
-    _private_data = nullptr;
+    glfwDestroyWindow(_p->_glfw_window_handle);
+    _p = nullptr;
 }
 
 void window::init()
 {
-    if (_private_data->_glfw_window_handle != nullptr)
+    if (_p->_glfw_window_handle != nullptr)
     {
         log()->error("The window is already initialized");
         return;
     }
 
-    std::string title = _private_data->_title;
+    std::string title = _p->_title;
     if (!_main_window)
     {
         _main_window = shared_from_this();
-        _private_data->_is_main_window = true;
-        _private_data->_is_input_source = true;
+        _p->_is_main_window = true;
+        _p->_is_input_source = true;
     }
 
     glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
@@ -86,45 +86,38 @@ void window::init()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    _private_data->_glfw_window_handle = glfwCreateWindow(
+    _p->_glfw_window_handle = glfwCreateWindow(
         static_cast<int>(get_width()),
         static_cast<int>(get_height()),
         title.c_str(),
         nullptr,
-        _private_data->_is_main_window
-            ? nullptr
-            : _main_window->_private_data->_glfw_window_handle);
-    if (_private_data->_glfw_window_handle == nullptr)
+        _p->_is_main_window ? nullptr : _main_window->_p->_glfw_window_handle);
+    if (_p->_glfw_window_handle == nullptr)
     {
         log()->error("Failed to create GLFW window");
         return;
     }
 
-    glfwSetWindowPos(_private_data->_glfw_window_handle,
-                     _private_data->_position.x,
-                     _private_data->_position.y);
+    glfwSetWindowPos(_p->_glfw_window_handle, _p->_position.x, _p->_position.y);
 
-    glfwSetWindowUserPointer(_main_window->_private_data->_glfw_window_handle,
-                             this);
+    glfwSetWindowUserPointer(_main_window->_p->_glfw_window_handle, this);
 
-    glfwSetWindowSizeCallback(_private_data->_glfw_window_handle,
+    glfwSetWindowSizeCallback(_p->_glfw_window_handle,
                               [](GLFWwindow* wnd, int w, int h)
     {
         auto _this = static_cast<window*>(glfwGetWindowUserPointer(wnd));
-        glm::uvec2 old_size = _this->_private_data->_size;
-        _this->_private_data->_size = { w, h };
-        _this->get_events()->resize(
-            resize_event(old_size, _this->_private_data->_size));
+        glm::uvec2 old_size = _this->_p->_size;
+        _this->_p->_size = { w, h };
+        _this->get_events()->resize(resize_event(old_size, _this->_p->_size));
     });
 
-    glfwSetWindowPosCallback(_private_data->_glfw_window_handle,
+    glfwSetWindowPosCallback(_p->_glfw_window_handle,
                              [](GLFWwindow* wnd, int xpos, int ypos)
     {
         auto _this = static_cast<window*>(glfwGetWindowUserPointer(wnd));
-        glm::uvec2 old_pos = _this->_private_data->_position;
-        _this->_private_data->_position = { xpos, ypos };
-        _this->get_events()->move(
-            move_event(old_pos, _this->_private_data->_position));
+        glm::uvec2 old_pos = _this->_p->_position;
+        _this->_p->_position = { xpos, ypos };
+        _this->get_events()->move(move_event(old_pos, _this->_p->_position));
     });
 
     activate();
@@ -139,126 +132,112 @@ void window::init()
     configure_input_system();
 }
 
-void window::activate()
-{
-    glfwMakeContextCurrent(_private_data->_glfw_window_handle);
-}
+void window::activate() { glfwMakeContextCurrent(_p->_glfw_window_handle); }
 
 void window::set_title(std::string_view title)
 {
-    _private_data->_title = title;
-    if (_private_data->_glfw_window_handle)
+    _p->_title = title;
+    if (_p->_glfw_window_handle)
     {
-        glfwSetWindowTitle(_private_data->_glfw_window_handle, title.data());
+        glfwSetWindowTitle(_p->_glfw_window_handle, title.data());
     }
 }
 
-std::string window::get_title() const
-{
-    return std::string(_private_data->_title);
-}
+std::string window::get_title() const { return std::string(_p->_title); }
 
-size_t window::get_width() const { return _private_data->_size.x; }
+size_t window::get_width() const { return _p->_size.x; }
 
-size_t window::get_height() const { return _private_data->_size.y; }
+size_t window::get_height() const { return _p->_size.y; }
 
-glm::uvec2 window::get_size() const { return _private_data->_size; }
+glm::uvec2 window::get_size() const { return _p->_size; }
 
 void window::resize(size_t width, size_t height)
 {
-    if (_private_data->_glfw_window_handle)
+    if (_p->_glfw_window_handle)
     {
-        glfwSetWindowSize(_private_data->_glfw_window_handle,
+        glfwSetWindowSize(_p->_glfw_window_handle,
                           static_cast<int>(width),
                           static_cast<int>(height));
     }
     else
     {
-        _private_data->_size = { width, height };
+        _p->_size = { width, height };
     }
 }
 
-glm::uvec2 window::get_position() const { return _private_data->_position; }
+glm::uvec2 window::get_position() const { return _p->_position; }
 
 void window::move(size_t x, size_t y)
 {
-    if (_private_data->_glfw_window_handle)
+    if (_p->_glfw_window_handle)
     {
-        glfwSetWindowPos(_private_data->_glfw_window_handle,
-                         static_cast<int>(x),
-                         static_cast<int>(y));
+        glfwSetWindowPos(
+            _p->_glfw_window_handle, static_cast<int>(x), static_cast<int>(y));
     }
     else
     {
-        _private_data->_position = { x, y };
+        _p->_position = { x, y };
     }
 }
 
 void window::update()
 {
-    if (_private_data->_glfw_window_handle == nullptr)
+    if (_p->_glfw_window_handle == nullptr)
     {
         return;
     }
 
-    if (glfwWindowShouldClose(_private_data->_glfw_window_handle))
+    if (glfwWindowShouldClose(_p->_glfw_window_handle))
     {
-        glfwDestroyWindow(_private_data->_glfw_window_handle);
-        _private_data->_glfw_window_handle = nullptr;
+        glfwDestroyWindow(_p->_glfw_window_handle);
+        _p->_glfw_window_handle = nullptr;
         get_events()->close(close_event(this));
         return;
     }
 
     if (input_system::is_key_down(345) && input_system::is_key_down(346))
     {
-        glfwSetInputMode(_private_data->_glfw_window_handle,
-                         GLFW_CURSOR,
-                         GLFW_CURSOR_NORMAL);
-        _private_data->_has_grab = false;
+        glfwSetInputMode(
+            _p->_glfw_window_handle, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        _p->_has_grab = false;
     }
 
     activate();
 
     on_draw_contents(shared_from_this());
 
-    glfwSwapBuffers(_private_data->_glfw_window_handle);
+    glfwSwapBuffers(_p->_glfw_window_handle);
     glfwPollEvents();
 }
 
-void window::set_as_input_source(bool flag)
-{
-    _private_data->_is_input_source = flag;
-}
+void window::set_as_input_source(bool flag) { _p->_is_input_source = flag; }
 
-bool window::get_is_input_source() const
-{
-    return _private_data->_is_input_source;
-}
+bool window::get_is_input_source() const { return _p->_is_input_source; }
 
 void window::set_can_grab(bool flag)
 {
-    _private_data->_can_grab = flag;
+    _p->_can_grab = flag;
     if (!flag)
     {
         grab_mouse(flag);
     }
 }
 
-bool window::get_can_grab() const { return _private_data->_can_grab; }
+bool window::get_can_grab() const { return _p->_can_grab; }
 
 void window::grab_mouse(bool flag)
 {
-    glfwSetInputMode(_private_data->_glfw_window_handle,
+    glfwSetInputMode(_p->_glfw_window_handle,
                      GLFW_CURSOR,
                      flag ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
-    _private_data->_has_grab = flag;
+    _p->_has_grab = flag;
 }
 
-bool window::get_has_grab() const { return _private_data->_has_grab; }
+bool window::get_has_grab() const { return _p->_has_grab; }
 
 std::shared_ptr<window_events> window::get_events() const
 {
-    return _private_data->_events;
+    return _p->_events;
 }
 
 std::shared_ptr<window> window::get_main_window() { return _main_window; }
@@ -273,7 +252,7 @@ void window::setup_mouse_callbacks()
 
 void window::setup_mouse_enter_callback()
 {
-    glfwSetCursorEnterCallback(_private_data->_glfw_window_handle,
+    glfwSetCursorEnterCallback(_p->_glfw_window_handle,
                                [](GLFWwindow* wnd, int entered)
     {
         auto _this = static_cast<window*>(glfwGetWindowUserPointer(wnd));
@@ -286,14 +265,14 @@ void window::setup_mouse_enter_callback()
 
         glm::dvec2 pos;
         glfwGetCursorPos(wnd, &pos.x, &pos.y);
-        _this->_private_data->_mouse_state._position = pos;
+        _this->_p->_mouse_state._position = pos;
         events->enter(enter_event(window_event::type::Enter,
-                                  _this->_private_data->_mouse_state._position,
-                                  _this->_private_data->_mouse_state._position,
-                                  _this->_private_data->_mouse_state._position,
+                                  _this->_p->_mouse_state._position,
+                                  _this->_p->_mouse_state._position,
+                                  _this->_p->_mouse_state._position,
                                   0,
-                                  _this->_private_data->_mouse_state._buttons,
-                                  _this->_private_data->_mouse_state._mods,
+                                  _this->_p->_mouse_state._buttons,
+                                  _this->_p->_mouse_state._mods,
                                   _this));
     });
 }
@@ -301,33 +280,30 @@ void window::setup_mouse_enter_callback()
 void window::setup_mouse_move_callback()
 {
     glfwSetCursorPosCallback(
-        _private_data->_glfw_window_handle,
+        _p->_glfw_window_handle,
         [](GLFWwindow* wnd, double x_position, double y_position)
     {
         auto _this = static_cast<window*>(glfwGetWindowUserPointer(wnd));
         std::shared_ptr<window_events> events = _this->get_events();
-        _this->_private_data->_mouse_state._position = { x_position,
-                                                         y_position };
+        _this->_p->_mouse_state._position = { x_position, y_position };
 
-        if (_this->_private_data->_mouse_state._buttons)
+        if (_this->_p->_mouse_state._buttons)
         {
             _this->check_for_drag();
         }
 
-        events->mouse_move(
-            mouse_event(window_event::type::MouseMove,
-                        _this->_private_data->_mouse_state._position,
-                        _this->_private_data->_mouse_state._position,
-                        _this->_private_data->_mouse_state._position,
-                        0,
-                        _this->_private_data->_mouse_state._buttons,
-                        _this->_private_data->_mouse_state._mods,
-                        _this));
+        events->mouse_move(mouse_event(window_event::type::MouseMove,
+                                       _this->_p->_mouse_state._position,
+                                       _this->_p->_mouse_state._position,
+                                       _this->_p->_mouse_state._position,
+                                       0,
+                                       _this->_p->_mouse_state._buttons,
+                                       _this->_p->_mouse_state._mods,
+                                       _this));
 
         if (_this->get_is_input_source())
         {
-            input_system::set_mouse_position(
-                _this->_private_data->_mouse_state._position);
+            input_system::set_mouse_position(_this->_p->_mouse_state._position);
         }
     });
 }
@@ -335,24 +311,24 @@ void window::setup_mouse_move_callback()
 void window::setup_mouse_button_callback()
 {
     glfwSetMouseButtonCallback(
-        _private_data->_glfw_window_handle,
+        _p->_glfw_window_handle,
         [](GLFWwindow* wnd, int button, int action, int mods)
     {
         auto _this = static_cast<window*>(glfwGetWindowUserPointer(wnd));
         std::shared_ptr<window_events> events = _this->get_events();
         if (action == GLFW_PRESS)
         {
-            _this->_private_data->_mouse_state._press_started_position =
-                _this->_private_data->_mouse_state._position;
-            _this->_private_data->_mouse_state._buttons |= (1 << button);
+            _this->_p->_mouse_state._press_started_position =
+                _this->_p->_mouse_state._position;
+            _this->_p->_mouse_state._buttons |= (1 << button);
             events->mouse_press(
                 mouse_event(window_event::type::MouseButtonPress,
-                            _this->_private_data->_mouse_state._position,
-                            _this->_private_data->_mouse_state._position,
-                            _this->_private_data->_mouse_state._position,
+                            _this->_p->_mouse_state._position,
+                            _this->_p->_mouse_state._position,
+                            _this->_p->_mouse_state._position,
                             button,
-                            _this->_private_data->_mouse_state._buttons,
-                            _this->_private_data->_mouse_state._mods,
+                            _this->_p->_mouse_state._buttons,
+                            _this->_p->_mouse_state._mods,
                             _this));
 
             if (_this->get_can_grab())
@@ -360,47 +336,45 @@ void window::setup_mouse_button_callback()
                 _this->grab_mouse();
             }
         }
-        else if (_this->_private_data->_mouse_state._buttons & (1 << button))
+        else if (_this->_p->_mouse_state._buttons & (1 << button))
         {
-            _this->_private_data->_mouse_state._buttons ^= (1 << button);
+            _this->_p->_mouse_state._buttons ^= (1 << button);
 
             events->mouse_release(
                 mouse_event(window_event::type::MouseButtonRelease,
-                            _this->_private_data->_mouse_state._position,
-                            _this->_private_data->_mouse_state._position,
-                            _this->_private_data->_mouse_state._position,
+                            _this->_p->_mouse_state._position,
+                            _this->_p->_mouse_state._position,
+                            _this->_p->_mouse_state._position,
                             button,
-                            _this->_private_data->_mouse_state._buttons,
-                            _this->_private_data->_mouse_state._mods,
+                            _this->_p->_mouse_state._buttons,
+                            _this->_p->_mouse_state._mods,
                             _this));
 
-            if (_this->_private_data->_mouse_state._is_drag)
+            if (_this->_p->_mouse_state._is_drag)
             {
-                _this->_private_data->_mouse_state._is_drag = false;
+                _this->_p->_mouse_state._is_drag = false;
                 // drag stopped
                 return;
             }
 
-            auto double_dur =
-                std::chrono::steady_clock::now() -
-                _this->_private_data->_mouse_state._last_click_time;
-            auto triple_dur =
-                std::chrono::steady_clock::now() -
-                _this->_private_data->_mouse_state._last_double_click_time;
+            auto double_dur = std::chrono::steady_clock::now() -
+                              _this->_p->_mouse_state._last_click_time;
+            auto triple_dur = std::chrono::steady_clock::now() -
+                              _this->_p->_mouse_state._last_double_click_time;
 
             int clicks = 0;
 
-            if (!_this->_private_data->_mouse_state._is_drag)
+            if (!_this->_p->_mouse_state._is_drag)
             {
                 clicks = 1;
-                _this->_private_data->_mouse_state._last_click_time =
+                _this->_p->_mouse_state._last_click_time =
                     std::chrono::steady_clock::now();
             }
 
             if (double_dur < MAX_CLICK_REACTION_TIME)
             {
                 clicks = 2;
-                _this->_private_data->_mouse_state._last_double_click_time =
+                _this->_p->_mouse_state._last_double_click_time =
                     std::chrono::steady_clock::now();
             }
 
@@ -441,19 +415,19 @@ void window::setup_mouse_button_callback()
             }
 
             (*f)(mouse_event(event_type,
-                             _this->_private_data->_mouse_state._position,
-                             _this->_private_data->_mouse_state._position,
-                             _this->_private_data->_mouse_state._position,
+                             _this->_p->_mouse_state._position,
+                             _this->_p->_mouse_state._position,
+                             _this->_p->_mouse_state._position,
                              button,
-                             _this->_private_data->_mouse_state._buttons,
-                             _this->_private_data->_mouse_state._mods,
+                             _this->_p->_mouse_state._buttons,
+                             _this->_p->_mouse_state._mods,
                              _this));
 
             if (_this->get_is_input_source())
             {
                 input_system::set_mouse_button(
                     input_system::mouse_button::MouseButton0,
-                    (_this->_private_data->_mouse_state._buttons ^= (1 << 0))
+                    (_this->_p->_mouse_state._buttons ^= (1 << 0))
                         ? input_system::button_state::Press
                         : input_system::button_state::Release);
             }
@@ -463,7 +437,7 @@ void window::setup_mouse_button_callback()
 
 void window::setup_mouse_wheel_callback()
 {
-    glfwSetScrollCallback(_private_data->_glfw_window_handle,
+    glfwSetScrollCallback(_p->_glfw_window_handle,
                           [](GLFWwindow* wnd, double x_offset, double y_offset)
     {
         auto _this = static_cast<window*>(glfwGetWindowUserPointer(wnd));
@@ -471,12 +445,12 @@ void window::setup_mouse_wheel_callback()
 
         events->mouse_scroll(wheel_event(
             window_event::type::MouseWheel,
-            _this->_private_data->_mouse_state._position,
-            _this->_private_data->_mouse_state._position,
-            _this->_private_data->_mouse_state._position,
+            _this->_p->_mouse_state._position,
+            _this->_p->_mouse_state._position,
+            _this->_p->_mouse_state._position,
             0,
-            _this->_private_data->_mouse_state._buttons,
-            _this->_private_data->_mouse_state._mods,
+            _this->_p->_mouse_state._buttons,
+            _this->_p->_mouse_state._mods,
             { static_cast<float>(x_offset), static_cast<float>(y_offset) },
             false,
             _this));
@@ -485,49 +459,46 @@ void window::setup_mouse_wheel_callback()
 
 void window::check_for_drag()
 {
-    double distance =
-        glm::distance(_private_data->_mouse_state._position,
-                      _private_data->_mouse_state._press_started_position);
+    double distance = glm::distance(_p->_mouse_state._position,
+                                    _p->_mouse_state._press_started_position);
     if (distance > DRAG_START_DISTANCE)
     {
-        _private_data->_mouse_state._is_drag = true;
+        _p->_mouse_state._is_drag = true;
         // drag started
     }
 }
 
 void window::configure_input_system()
 {
-    _private_data->_events = std::make_shared<window_events>();
+    _p->_events = std::make_shared<window_events>();
     setup_mouse_callbacks();
 
     glfwSetKeyCallback(
-        _private_data->_glfw_window_handle,
+        _p->_glfw_window_handle,
         [](GLFWwindow* wnd, int key, int scancode, int action, int mods)
     {
         auto _this = static_cast<window*>(glfwGetWindowUserPointer(wnd));
 
         window_event::type type = window_event::type::KeyRelease;
-        event<void(key_event)>* f = &_this->_private_data->_events->key_release;
+        event<void(key_event)>* f = &_this->_p->_events->key_release;
         bool is_repeat = false;
 
-        _this->_private_data->_mouse_state._mods =
+        _this->_p->_mouse_state._mods =
             glfw_keyboard_modifiers_to_mouse_event_modifiers(mods);
 
         if (action == GLFW_PRESS)
         {
             type = window_event::type::KeyPress;
-            f = &_this->_private_data->_events->key_press;
+            f = &_this->_p->_events->key_press;
         }
         else if (action == GLFW_REPEAT)
         {
             type = window_event::type::KeyRepeat;
-            f = &_this->_private_data->_events->key_repeat;
+            f = &_this->_p->_events->key_repeat;
             is_repeat = true;
         }
-        (*f)(key_event(type,
-                       scancode,
-                       _this->_private_data->_mouse_state._mods,
-                       is_repeat));
+        (*f)(key_event(
+            type, scancode, _this->_p->_mouse_state._mods, is_repeat));
 
         if (_this->get_is_input_source())
         {

@@ -11,6 +11,12 @@
 namespace experimental
 {
 
+/**
+ * @brief Class representing each window in the engine.
+ *
+ * The window class itself represents a physical window that is open and
+ * running.
+ */
 class window : public std::enable_shared_from_this<window>
 {
 public:
@@ -64,7 +70,7 @@ private:
 
 private:
     struct window_private_data;
-    std::unique_ptr<window_private_data> _private_data { nullptr };
+    std::unique_ptr<window_private_data> _p { nullptr };
 
     static std::shared_ptr<window> _main_window;
 };
