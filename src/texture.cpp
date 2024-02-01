@@ -8,8 +8,20 @@
 #include "texture.hpp"
 
 #include "image.hpp"
+#include "logging.hpp"
 
-texture::texture() = default;
+namespace
+{
+logger log() { return get_logger("texture"); }
+} // namespace
+
+texture::texture()
+{
+    _textures.push_back(this);
+    log()->info("New texture created {}. Total number of textures {}",
+                _texture_id,
+                _textures.size());
+}
 
 texture::texture(texture&& other)
 {
@@ -18,6 +30,10 @@ texture::texture(texture&& other)
     _height = other._height;
     _format = other._format;
     other._texture_id = 0;
+    _textures.push_back(this);
+    log()->info("New texture created {}. Total number of textures {}",
+                _texture_id,
+                _textures.size());
 }
 
 texture& texture::operator=(texture&& other)
@@ -30,7 +46,15 @@ texture& texture::operator=(texture&& other)
     return *this;
 }
 
-texture::~texture() { glDeleteTextures(1, &_texture_id); }
+texture::~texture()
+{
+    int old_id = _texture_id;
+    glDeleteTextures(1, &_texture_id);
+    _textures.erase(std::find(_textures.begin(), _textures.end(), this));
+    log()->info("Texture deleted {}. Total number of textures {}",
+                old_id,
+                _textures.size());
+}
 
 void texture::init(size_t width, size_t height, format texture_format)
 {
@@ -41,7 +65,7 @@ void texture::init(size_t width, size_t height, format texture_format)
     glBindTexture(GL_TEXTURE_2D, _texture_id);
     glTexImage2D(GL_TEXTURE_2D,
                  0,
-                 GL_RGBA,
+                 convert_to_gl_internal_format(texture_format),
                  _width,
                  _height,
                  0,
@@ -71,6 +95,18 @@ glm::uvec2 texture::get_size() const { return { _width, _height }; }
 size_t texture::get_width() const { return _width; }
 
 size_t texture::get_height() const { return _height; }
+
+size_t texture::get_channel_count() const
+{
+    switch (_format)
+    {
+    case format::GRAYSCALE:
+    case format::DEPTH: return 1;
+    case format::RGB: return 3;
+    case format::RGBA: return 4;
+    default: return 0;
+    }
+}
 
 void texture::get_data(char* data_ptr)
 {
@@ -138,11 +174,39 @@ void texture::bind(size_t index) const
     glBindTexture(GL_TEXTURE_2D, _texture_id);
 }
 
+void texture::clone(texture* other_texture)
+{
+    if (get_width() != other_texture->get_width() ||
+        get_height() != other_texture->get_height() ||
+        _format != other_texture->_format)
+    {
+        reinit(other_texture->get_width(),
+               other_texture->get_height(),
+               other_texture->_format);
+    }
+
+    glCopyImageSubData(other_texture->_texture_id,
+                       GL_TEXTURE_2D,
+                       0,
+                       0,
+                       0,
+                       0,
+                       _texture_id,
+                       GL_TEXTURE_2D,
+                       0,
+                       0,
+                       0,
+                       0,
+                       get_width(),
+                       get_height(),
+                       1);
+}
+
 unsigned texture::native_id() const { return _texture_id; }
 
-int texture::convert_to_gl_format(format f)
+int texture::convert_to_gl_internal_format(format f)
 {
-    switch (_format)
+    switch (f)
     {
     case format::DEPTH: return GL_DEPTH_COMPONENT;
     case format::GRAYSCALE: return GL_RED;
@@ -151,3 +215,17 @@ int texture::convert_to_gl_format(format f)
     default: return GL_NONE;
     }
 }
+
+int texture::convert_to_gl_format(format f)
+{
+    switch (f)
+    {
+    case format::DEPTH: return GL_DEPTH_COMPONENT;
+    case format::GRAYSCALE: return GL_RED;
+    case format::RGB: return GL_RGB;
+    case format::RGBA: return GL_RGBA;
+    default: return GL_NONE;
+    }
+}
+
+std::vector<texture*> texture::_textures;

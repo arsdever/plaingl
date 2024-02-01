@@ -26,6 +26,10 @@ static logger log() { return get_logger("camera"); }
 camera::camera()
 {
     _cameras.push_back(this);
+    _private_render_texture_color = std::make_unique<texture>();
+    _private_render_texture_depth = std::make_unique<texture>();
+    log()->info("Camera uses texture {}",
+                _private_render_texture_color->native_id());
     _background_quad = std::make_unique<mesh>();
     std::array<glm::vec2, 4> verts {
         { { -1, -1 }, { -1, 1 }, { 1, 1 }, { 1, -1 } }
@@ -50,6 +54,7 @@ camera::camera()
     _background_shader->add_shader("camera_background_shader.frag");
     _background_shader->link();
 
+    glGenFramebuffers(1, &_fbo);
     glGenBuffers(1, &_lights_buffer);
     set_background(glm::vec3 { 0.0f, 0.0f, 0.0f });
 }
@@ -81,22 +86,31 @@ void camera::set_render_size(size_t width, size_t height)
 
 void camera::set_render_size(glm::uvec2 size)
 {
-    _render_size = std::move(size);
-    if (_render_texture)
+    if (_render_size == glm::vec2(size))
     {
-        _render_texture->reinit(
+        return;
+    }
+
+    _render_size = std::move(size);
+    _private_render_texture_color->reinit(
+        _render_size.x, _render_size.y, texture::format::RGBA);
+    _private_render_texture_depth->reinit(
+        _render_size.x, _render_size.y, texture::format::DEPTH);
+    log()->info("Camera uses texture {}",
+                _private_render_texture_color->native_id());
+    if (_user_render_texture)
+    {
+        _user_render_texture->reinit(
             _render_size.x, _render_size.y, texture::format::RGBA);
     }
 }
 
 void camera::set_render_texture(texture* render_texture)
 {
-    _render_texture = render_texture;
-    // _render_texture->reinit(
-    //     _render_size.x, _render_size.y, texture::format::RGBA);
+    _user_render_texture = render_texture;
 }
 
-texture* camera::get_render_texture() const { return _render_texture; }
+texture* camera::get_render_texture() const { return _user_render_texture; }
 
 void camera::set_background(glm::vec3 color)
 {
@@ -124,10 +138,11 @@ void camera::set_background(image* img)
 
 void camera::render()
 {
-    setup_lights();
     auto* old_active_camera = set_active();
 
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    attach_render_texture();
+    render_on_private_texture();
+    setup_lights();
 
     _background_shader->set_uniform(
         "camera_matrix",
@@ -142,33 +157,7 @@ void camera::render()
     _background_quad->render();
     shader_program::unuse();
 
-    glEnable(GL_DEPTH_TEST);
-
-    if (scene::get_active_scene())
-    {
-        for (auto* obj : scene::get_active_scene()->objects())
-        {
-            if (!obj->is_active())
-            {
-                continue;
-            }
-            if (auto* renderer = obj->get_component<renderer_component>();
-                renderer)
-            {
-                renderer->get_material()->set_property_value(
-                    "model_matrix", obj->get_transform().get_matrix());
-                renderer->render();
-            }
-        }
-    }
-
-    if (_render_texture)
-    {
-        _render_texture->bind(0);
-        glCopyTexImage2D(
-            GL_TEXTURE_2D, 0, GL_RGBA, 0, 0, _render_size.x, _render_size.y, 0);
-        glBindTexture(GL_TEXTURE_2D, 0);
-    }
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     if (old_active_camera)
     {
@@ -227,6 +216,70 @@ const transform& camera::get_transform() const { return _transformation; }
 camera* camera::active_camera() { return camera::_active_camera; }
 
 const std::vector<camera*>& camera::all_cameras() { return camera::_cameras; }
+
+void camera::attach_render_texture()
+{
+    glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
+    glFramebufferTexture2D(GL_FRAMEBUFFER,
+                           GL_COLOR_ATTACHMENT0,
+                           GL_TEXTURE_2D,
+                           _private_render_texture_color->native_id(),
+                           0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER,
+                           GL_DEPTH_ATTACHMENT,
+                           GL_TEXTURE_2D,
+                           _private_render_texture_depth->native_id(),
+                           0);
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+    {
+        log()->error("Framebuffer is not complete!");
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        return;
+    }
+
+    std::array<unsigned, 2> buffers { GL_COLOR_ATTACHMENT0, GL_NONE };
+
+    // TODO?: probably better to copy the texture
+    if (_user_render_texture)
+    {
+        buffers[ 1 ] = GL_COLOR_ATTACHMENT1;
+        _user_render_texture->bind(0);
+        glFramebufferTexture2D(GL_FRAMEBUFFER,
+                               GL_COLOR_ATTACHMENT1,
+                               GL_TEXTURE_2D,
+                               _private_render_texture_color->native_id(),
+                               0);
+    }
+
+    glDrawBuffers(buffers.size(), buffers.data());
+}
+
+void camera::render_on_private_texture()
+{
+    // TODO?: maybe better to clear with the specified background color instead
+    // of drawing background quad with that color
+    glClearColor(0, 0, 0, 0);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glEnable(GL_DEPTH_TEST);
+
+    if (scene::get_active_scene())
+    {
+        for (auto* obj : scene::get_active_scene()->objects())
+        {
+            if (!obj->is_active())
+            {
+                continue;
+            }
+            if (auto* renderer = obj->get_component<renderer_component>();
+                renderer)
+            {
+                renderer->get_material()->set_property_value(
+                    "model_matrix", obj->get_transform().get_matrix());
+                renderer->render();
+            }
+        }
+    }
+}
 
 void camera::setup_lights()
 {

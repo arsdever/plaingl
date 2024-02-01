@@ -36,6 +36,7 @@
 #include "game_object.hpp"
 #include "glm/gtc/random.hpp"
 #include "image.hpp"
+#include "input_system.hpp"
 #include "light.hpp"
 #include "logging.hpp"
 #include "material.hpp"
@@ -65,6 +66,7 @@ texture* norm_txt;
 ray_visualize_component* cast_ray;
 std::vector<window*> windows;
 std::array<camera*, 3> _view_cameras { nullptr };
+std::string console_string;
 
 physics_engine p;
 } // namespace
@@ -131,6 +133,61 @@ int main(int argc, char** argv)
     asset_manager::default_asset_manager()->load_asset("env.jpg");
     main_camera->set_background(
         asset_manager::default_asset_manager()->get_image("env"));
+    // texture* txt = new texture;
+    // main_camera->set_render_texture(txt);
+
+    int trigger_show = -1;
+
+    input_system::on_keypress += [ &trigger_show ](int keycode)
+    {
+        if (keycode == GLFW_KEY_ENTER)
+        {
+            if (console_string.empty())
+            {
+                return;
+            }
+
+            int num = std::stoi(console_string);
+
+            if (num >= 0 && num < texture::_textures.size())
+            {
+                trigger_show = num;
+            }
+
+            console_string = "";
+        }
+
+        if (keycode >= '0' && keycode <= '9')
+        {
+            console_string += keycode;
+        }
+
+        if (keycode == 'C')
+        {
+            if (console_string.empty())
+            {
+                return;
+            }
+
+            int num = std::stoi(console_string);
+            if (num >= 0 && num < texture::_textures.size())
+            {
+                (new texture)->clone(texture::_textures[ num ]);
+            }
+
+            console_string = "";
+        }
+
+        if (keycode == 'P')
+        {
+            for (int i = 0; i < texture::_textures.size(); ++i)
+            {
+                log()->info("Texture {}: id {}",
+                            i,
+                            texture::_textures[ i ]->native_id());
+            }
+        }
+    };
 
     while (!windows.empty())
     {
@@ -142,6 +199,16 @@ int main(int argc, char** argv)
             window->update();
         }
         clock->frame();
+
+        if (trigger_show >= 0)
+        {
+            texture* txt = texture::_textures[ trigger_show ];
+            log()->info("Showing texture at {} with id {}",
+                        trigger_show,
+                        txt->native_id());
+            texture_viewer::show_preview(txt);
+            trigger_show = -1;
+        }
     }
 
     std::stringstream ss;
@@ -307,7 +374,7 @@ void setupMouseEvents()
 
             if (hit.has_value())
             {
-                log()->info("hit collider");
+                // log()->info("hit collider");
             }
         }
     };
