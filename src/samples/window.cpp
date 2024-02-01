@@ -9,6 +9,7 @@
 
 #include "experimental/window.hpp"
 
+#include "experimental/viewport.hpp"
 #include "gl_error_handler.hpp"
 #include "logging.hpp"
 
@@ -23,7 +24,8 @@ int main(int argc, char** argv)
     std::vector<std::shared_ptr<experimental::window>> windows;
     auto exp_window = std::make_shared<experimental::window>();
 
-    exp_window->on_user_initialize += [](std::shared_ptr<experimental::window>)
+    exp_window->on_user_initialize +=
+        [](std::shared_ptr<experimental::window> wnd)
     {
         // configure gl debug output
         glEnable(GL_DEBUG_OUTPUT);
@@ -31,6 +33,7 @@ int main(int argc, char** argv)
         glDebugMessageCallback(gl_error_handler, nullptr);
         glDebugMessageControl(
             GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
+        wnd->add_viewport(std::make_shared<experimental::viewport>());
     };
 
     exp_window->set_title("Hello experimental window");
@@ -141,6 +144,17 @@ int main(int argc, char** argv)
     {
         assert(ke.get_sender() != nullptr);
         log()->info("Key released: {}", ke.get_scancode());
+    };
+
+    exp_window->get_events()->render += [](auto re)
+    {
+        int i = 0;
+        for (auto vp : re.get_sender()->get_viewports())
+        {
+            vp->render();
+            vp->take_screenshot(std::format("screenshot_{}.png", i));
+            ++i;
+        }
     };
 
     windows.push_back(exp_window);

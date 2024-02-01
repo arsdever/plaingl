@@ -38,6 +38,7 @@ struct window::window_private_data
     glm::uvec2 _size { 800, 600 };
     glm::uvec2 _position { 200, 200 };
     std::shared_ptr<window_events> _events { nullptr };
+    std::vector<std::shared_ptr<viewport>> _viewports;
     std::string _title { "Window" };
     bool _is_main_window { false };
     bool _can_grab { false };
@@ -204,7 +205,7 @@ void window::update()
 
     activate();
 
-    on_draw_contents(shared_from_this());
+    get_events()->render(render_event(window_event::type::Render, this));
 
     glfwSwapBuffers(_p->_glfw_window_handle);
     glfwPollEvents();
@@ -234,6 +235,21 @@ void window::grab_mouse(bool flag)
 }
 
 bool window::get_has_grab() const { return _p->_has_grab; }
+
+void window::add_viewport(std::shared_ptr<viewport> vp)
+{
+    _p->_viewports.push_back(vp);
+}
+
+void window::remove_viewport(std::shared_ptr<viewport> vp)
+{
+    std::erase(_p->_viewports, vp);
+}
+
+std::vector<std::shared_ptr<viewport>> window::get_viewports()
+{
+    return _p->_viewports;
+}
 
 std::shared_ptr<window_events> window::get_events() const
 {
@@ -498,7 +514,7 @@ void window::configure_input_system()
             is_repeat = true;
         }
         (*f)(key_event(
-            type, scancode, _this->_p->_mouse_state._mods, is_repeat));
+            type, scancode, _this->_p->_mouse_state._mods, is_repeat, _this));
 
         if (_this->get_is_input_source())
         {

@@ -124,6 +124,11 @@ void asset_loader_PNG::load(std::string_view path)
 
 void asset_loader_PNG::save(std::string_view path)
 {
+    if (_image->get_width() == 0 || _image->get_height() == 0)
+    {
+        return;
+    }
+
     FILE* fp = fopen(path.data(), "wb");
     if (!fp)
         abort();

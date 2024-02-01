@@ -11,6 +11,8 @@
 namespace experimental
 {
 
+class viewport;
+
 /**
  * @brief Class representing each window in the engine.
  *
@@ -49,9 +51,12 @@ public:
     void grab_mouse(bool flag = true);
     bool get_has_grab() const;
 
+    void add_viewport(std::shared_ptr<viewport> vp);
+    void remove_viewport(std::shared_ptr<viewport> vp);
+    std::vector<std::shared_ptr<viewport>> get_viewports();
+
     std::shared_ptr<window_events> get_events() const;
 
-    event<void(std::shared_ptr<window>)> on_draw_contents;
     event<void(std::shared_ptr<window>)> on_user_initialize;
 
     static std::shared_ptr<window> get_main_window();

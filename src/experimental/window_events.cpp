@@ -27,6 +27,11 @@ window_event::type window_event::get_type() const { return _type; }
 
 window* window_event::get_sender() const { return _sender; }
 
+render_event::render_event(type t, window* sender)
+    : window_event(t, sender)
+{
+}
+
 input_event::input_event(type t, modifiers mod, window* sender)
     : window_event(t, sender)
     , _modifiers(mod)

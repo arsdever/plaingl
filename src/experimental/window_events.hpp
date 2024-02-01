@@ -20,6 +20,7 @@ public:
         Close,
         Move,
         Resize,
+        Render,
         Enter,
         Leave,
         MouseButtonPress,
@@ -45,6 +46,12 @@ public:
 private:
     type _type;
     window* _sender;
+};
+
+class render_event : public window_event
+{
+public:
+    render_event(type t, window* sender = nullptr);
 };
 
 class input_event : public window_event
@@ -207,6 +214,7 @@ public:
 
     event<void(close_event)> close;
     event<void(resize_event)> resize;
+    event<void(render_event)> render;
     event<void(move_event)> move;
 
     event<void(enter_event)> enter;
