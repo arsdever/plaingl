@@ -127,6 +127,8 @@ void camera::render()
     setup_lights();
     auto* old_active_camera = set_active();
 
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
     _background_shader->set_uniform(
         "camera_matrix",
         std::make_tuple(glm::toMat4(get_transform().get_rotation()) *

@@ -1,3 +1,4 @@
+#include <glad/gl.h>
 #include <glm/vec2.hpp>
 
 #include "experimental/viewport.hpp"
@@ -52,6 +53,8 @@ void viewport::render()
         return;
     }
 
+    glViewport(get_position().x, get_position().y, get_size().x, get_size().y);
+    cam->set_render_size(get_size());
     cam->set_render_texture(&_p->_surface_texture);
     cam->render();
 }

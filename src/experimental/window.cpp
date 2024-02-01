@@ -109,7 +109,8 @@ void window::init()
         auto _this = static_cast<window*>(glfwGetWindowUserPointer(wnd));
         glm::uvec2 old_size = _this->_p->_size;
         _this->_p->_size = { w, h };
-        _this->get_events()->resize(resize_event(old_size, _this->_p->_size));
+        _this->get_events()->resize(
+            resize_event(old_size, _this->_p->_size, _this));
     });
 
     glfwSetWindowPosCallback(_p->_glfw_window_handle,
@@ -118,7 +119,8 @@ void window::init()
         auto _this = static_cast<window*>(glfwGetWindowUserPointer(wnd));
         glm::uvec2 old_pos = _this->_p->_position;
         _this->_p->_position = { xpos, ypos };
-        _this->get_events()->move(move_event(old_pos, _this->_p->_position));
+        _this->get_events()->move(
+            move_event(old_pos, _this->_p->_position, _this));
     });
 
     activate();
