@@ -28,7 +28,6 @@ struct light_t
 layout(std430, binding = 0) buffer lights_buffer { light_t[] lights; };
 
 out vec4 fragment_color;
-out vec4 render_texture_fragment_color;
 
 vec2 convert_from_blenders_uv_map(vec2 blender_uv)
 {
@@ -80,5 +79,4 @@ void main()
     vec3 result_color = (combined_diffuse + combined_ambient) *
                         albedo_mixed_color(converted_uv).rgb;
     fragment_color = vec4(result_color, 1.0);
-    render_texture_fragment_color = fragment_color;
 }
