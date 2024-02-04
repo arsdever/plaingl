@@ -137,7 +137,7 @@ void texture_viewer::show_preview(texture* t)
                  GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), nullptr);
-    t->bind(0);
+    t->set_active_texture(0);
 
     while (!glfwWindowShouldClose(window))
     {

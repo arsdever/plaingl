@@ -30,15 +30,13 @@ void framebuffer::initialize()
         glGenFramebuffers(1, &_p->_fbo);
     }
 
+    bind();
+    _p->_color_texture->init(_p->_size.x, _p->_size.y, texture::format::RGBA);
+    _p->_depth_texture->init(_p->_size.x, _p->_size.y, texture::format::DEPTH);
     log()->info("Framebuffer {}:\n\ttextures::color {}\n\ttextures::depth{}",
                 _p->_fbo,
                 _p->_color_texture->native_id(),
                 _p->_depth_texture->native_id());
-
-    bind();
-    _p->_color_texture->reinit(_p->_size.x, _p->_size.y, texture::format::RGBA);
-    _p->_depth_texture->reinit(
-        _p->_size.x, _p->_size.y, texture::format::DEPTH);
     glFramebufferTexture2D(GL_FRAMEBUFFER,
                            GL_COLOR_ATTACHMENT0,
                            GL_TEXTURE_2D,
@@ -78,8 +76,8 @@ void framebuffer::resize(glm::uvec2 size)
     if (_p->_size != size)
     {
         _p->_size = size;
-        _p->_color_texture->reinit(size.x, size.y, texture::format::RGBA);
-        _p->_depth_texture->reinit(size.x, size.y, texture::format::DEPTH);
+        _p->_color_texture->init(size.x, size.y, texture::format::RGBA);
+        _p->_depth_texture->init(size.x, size.y, texture::format::DEPTH);
     }
 }
 

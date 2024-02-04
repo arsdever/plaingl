@@ -52,6 +52,7 @@ camera::camera()
     _background_shader->link();
 
     _framebuffer = std::make_unique<framebuffer>();
+    _framebuffer->resize(_render_size);
     _framebuffer->initialize();
     glGenBuffers(1, &_lights_buffer);
     set_background(glm::vec3 { 0.0f, 0.0f, 0.0f });
@@ -85,13 +86,14 @@ void camera::set_render_size(size_t width, size_t height)
 
 void camera::set_render_size(glm::uvec2 size)
 {
-    if (_render_size == size)
+    glm::uvec2 new_size = glm::max(glm::uvec2 { 1, 1 }, size);
+    if (_render_size == new_size)
     {
         return;
     }
 
-    _framebuffer->resize(size);
-    _render_size = size;
+    _render_size = new_size;
+    _framebuffer->resize(_render_size);
 }
 
 void camera::set_render_texture(std::weak_ptr<texture> render_texture)
@@ -141,7 +143,7 @@ void camera::render()
                         glm::inverse(projection_matrix())));
     if (_background_texture)
     {
-        _background_texture->bind(0);
+        _background_texture->set_active_texture(0);
     }
 
     _background_shader->use();

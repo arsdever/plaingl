@@ -50,7 +50,7 @@ private:
 
 private:
     transform _transformation;
-    glm::uvec2 _render_size { 0, 0 };
+    glm::uvec2 _render_size { 1, 1 };
     float _fov = 60.0f;
     bool _ortho_flag = false;
     std::weak_ptr<texture> _user_render_texture {};

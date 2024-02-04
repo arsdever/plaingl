@@ -27,8 +27,6 @@ public:
     ~texture();
 
     void init(size_t width, size_t height, format texture_format = format::RGB);
-    void
-    reinit(size_t width, size_t height, format texture_format = format::RGB);
 
     glm::uvec2 get_size() const;
     size_t get_width() const;
@@ -39,12 +37,18 @@ public:
     void set_rect_data(glm::vec<2, size_t> pos,
                        glm::vec<2, size_t> size,
                        const char* data_ptr);
-    void bind(size_t index) const;
+    void bind() const;
+    void unbind() const;
+    void set_active_texture(size_t index) const;
+
     void clone(const texture* other_texture);
 
     unsigned native_id() const;
 
     static texture from_image(image* img);
+
+    static void static_bind(size_t id);
+    static void static_unbind();
 
 private:
     static int convert_to_gl_internal_format(format f);

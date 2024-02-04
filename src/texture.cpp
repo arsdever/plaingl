@@ -17,6 +17,7 @@ logger log() { return get_logger("texture"); }
 
 texture::texture()
 {
+    glGenTextures(1, &_texture_id);
     _textures.push_back(this);
     log()->info("New texture created {}. Total number of textures {}",
                 _texture_id,
@@ -61,7 +62,6 @@ void texture::init(size_t width, size_t height, format texture_format)
     _width = width;
     _height = height;
     _format = texture_format;
-    glGenTextures(1, &_texture_id);
     glBindTexture(GL_TEXTURE_2D, _texture_id);
     glTexImage2D(GL_TEXTURE_2D,
                  0,
@@ -82,12 +82,6 @@ void texture::init(size_t width, size_t height, format texture_format)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     return;
-}
-
-void texture::reinit(size_t width, size_t height, format texture_format)
-{
-    glDeleteTextures(1, &_texture_id);
-    init(width, height, texture_format);
 }
 
 glm::uvec2 texture::get_size() const { return { _width, _height }; }
@@ -136,6 +130,46 @@ void texture::set_rect_data(glm::vec<2, size_t> pos,
                     data_ptr);
 }
 
+void texture::bind() const { static_bind(_texture_id); }
+
+void texture::unbind() const { static_unbind(); }
+
+void texture::set_active_texture(size_t index) const
+{
+    glActiveTexture(GL_TEXTURE0 + index);
+    glBindTexture(GL_TEXTURE_2D, _texture_id);
+}
+
+void texture::clone(const texture* other_texture)
+{
+    if (get_width() != other_texture->get_width() ||
+        get_height() != other_texture->get_height() ||
+        _format != other_texture->_format)
+    {
+        init(other_texture->get_width(),
+             other_texture->get_height(),
+             other_texture->_format);
+    }
+
+    glCopyImageSubData(other_texture->_texture_id,
+                       GL_TEXTURE_2D,
+                       0,
+                       0,
+                       0,
+                       0,
+                       _texture_id,
+                       GL_TEXTURE_2D,
+                       0,
+                       0,
+                       0,
+                       0,
+                       get_width(),
+                       get_height(),
+                       1);
+}
+
+unsigned texture::native_id() const { return _texture_id; }
+
 texture texture::from_image(image* img)
 {
     auto md = img->get_metadata();
@@ -168,41 +202,9 @@ texture texture::from_image(image* img)
     return result;
 }
 
-void texture::bind(size_t index) const
-{
-    glActiveTexture(GL_TEXTURE0 + index);
-    glBindTexture(GL_TEXTURE_2D, _texture_id);
-}
+void texture::static_bind(size_t id) { glBindTexture(GL_TEXTURE_2D, id); }
 
-void texture::clone(const texture* other_texture)
-{
-    if (get_width() != other_texture->get_width() ||
-        get_height() != other_texture->get_height() ||
-        _format != other_texture->_format)
-    {
-        reinit(other_texture->get_width(),
-               other_texture->get_height(),
-               other_texture->_format);
-    }
-
-    glCopyImageSubData(other_texture->_texture_id,
-                       GL_TEXTURE_2D,
-                       0,
-                       0,
-                       0,
-                       0,
-                       _texture_id,
-                       GL_TEXTURE_2D,
-                       0,
-                       0,
-                       0,
-                       0,
-                       get_width(),
-                       get_height(),
-                       1);
-}
-
-unsigned texture::native_id() const { return _texture_id; }
+void texture::static_unbind() { glBindTexture(GL_TEXTURE_2D, 0); }
 
 int texture::convert_to_gl_internal_format(format f)
 {
