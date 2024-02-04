@@ -134,8 +134,8 @@ void camera::render()
 {
     auto* old_active_camera = set_active();
 
-    render_on_private_texture();
     setup_lights();
+    render_on_private_texture();
 
     _background_shader->set_uniform(
         "camera_matrix",
