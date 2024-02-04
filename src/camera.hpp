@@ -7,6 +7,7 @@
 
 #include "transform.hpp"
 
+class framebuffer;
 class image;
 class texture;
 class mesh;
@@ -25,8 +26,8 @@ public:
     camera* set_active();
     void set_render_size(size_t width, size_t height);
     void set_render_size(glm::uvec2 size);
-    void set_render_texture(texture* render_texture);
-    texture* get_render_texture() const;
+    void set_render_texture(std::weak_ptr<texture> render_texture);
+    std::shared_ptr<texture> get_render_texture() const;
 
     void set_background(glm::vec3 color);
     void set_background(image* img);
@@ -44,8 +45,7 @@ public:
     glm::mat4 vp_matrix() const;
 
 private:
-    void attach_render_texture();
-    void render_on_private_texture();
+    void render_on_private_texture() const;
     void setup_lights();
 
 private:
@@ -53,15 +53,13 @@ private:
     glm::vec2 _render_size { 0.0f, 0.0f };
     float _fov = 60.0f;
     bool _ortho_flag = false;
-    texture* _user_render_texture = nullptr;
-    std::unique_ptr<texture> _private_render_texture_color = nullptr;
-    std::unique_ptr<texture> _private_render_texture_depth = nullptr;
+    std::weak_ptr<texture> _user_render_texture {};
     glm::vec3 _background_color { 0.0f, 0.0f, 0.0f };
     std::unique_ptr<texture> _background_texture = nullptr;
     std::unique_ptr<mesh> _background_quad = nullptr;
     std::unique_ptr<shader_program> _background_shader = nullptr;
     unsigned _lights_buffer = 0;
-    unsigned _fbo = 0;
+    std::unique_ptr<framebuffer> _framebuffer { nullptr };
 
     static camera* _active_camera;
     static std::vector<camera*> _cameras;

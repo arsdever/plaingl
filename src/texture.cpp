@@ -174,7 +174,7 @@ void texture::bind(size_t index) const
     glBindTexture(GL_TEXTURE_2D, _texture_id);
 }
 
-void texture::clone(texture* other_texture)
+void texture::clone(const texture* other_texture)
 {
     if (get_width() != other_texture->get_width() ||
         get_height() != other_texture->get_height() ||

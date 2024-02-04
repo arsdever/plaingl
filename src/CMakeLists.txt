@@ -14,6 +14,8 @@ add_library(
   file.cpp
   font.hpp
   font.cpp
+  framebuffer.hpp
+  framebuffer.cpp
   game_clock.hpp
   game_clock.cpp
   game_object.hpp

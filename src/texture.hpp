@@ -40,7 +40,7 @@ public:
                        glm::vec<2, size_t> size,
                        const char* data_ptr);
     void bind(size_t index) const;
-    void clone(texture* other_texture);
+    void clone(const texture* other_texture);
 
     unsigned native_id() const;
 

@@ -9,6 +9,7 @@
 #include "camera.hpp"
 
 #include "components/renderer_component.hpp"
+#include "framebuffer.hpp"
 #include "game_object.hpp"
 #include "light.hpp"
 #include "logging.hpp"
@@ -26,10 +27,6 @@ static logger log() { return get_logger("camera"); }
 camera::camera()
 {
     _cameras.push_back(this);
-    _private_render_texture_color = std::make_unique<texture>();
-    _private_render_texture_depth = std::make_unique<texture>();
-    log()->info("Camera uses texture {}",
-                _private_render_texture_color->native_id());
     _background_quad = std::make_unique<mesh>();
     std::array<glm::vec2, 4> verts {
         { { -1, -1 }, { -1, 1 }, { 1, 1 }, { 1, -1 } }
@@ -54,7 +51,8 @@ camera::camera()
     _background_shader->add_shader("camera_background_shader.frag");
     _background_shader->link();
 
-    glGenFramebuffers(1, &_fbo);
+    _framebuffer = std::make_unique<framebuffer>();
+    _framebuffer->initialize();
     glGenBuffers(1, &_lights_buffer);
     set_background(glm::vec3 { 0.0f, 0.0f, 0.0f });
 }
@@ -91,26 +89,19 @@ void camera::set_render_size(glm::uvec2 size)
         return;
     }
 
+    _framebuffer->resize(size);
     _render_size = std::move(size);
-    _private_render_texture_color->reinit(
-        _render_size.x, _render_size.y, texture::format::RGBA);
-    _private_render_texture_depth->reinit(
-        _render_size.x, _render_size.y, texture::format::DEPTH);
-    log()->info("Camera uses texture {}",
-                _private_render_texture_color->native_id());
-    if (_user_render_texture)
-    {
-        _user_render_texture->reinit(
-            _render_size.x, _render_size.y, texture::format::RGBA);
-    }
 }
 
-void camera::set_render_texture(texture* render_texture)
+void camera::set_render_texture(std::weak_ptr<texture> render_texture)
 {
     _user_render_texture = render_texture;
 }
 
-texture* camera::get_render_texture() const { return _user_render_texture; }
+std::shared_ptr<texture> camera::get_render_texture() const
+{
+    return _user_render_texture.lock();
+}
 
 void camera::set_background(glm::vec3 color)
 {
@@ -140,7 +131,6 @@ void camera::render()
 {
     auto* old_active_camera = set_active();
 
-    attach_render_texture();
     render_on_private_texture();
     setup_lights();
 
@@ -158,6 +148,11 @@ void camera::render()
     shader_program::unuse();
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    if (auto urt = _user_render_texture.lock())
+    {
+        urt->clone(_framebuffer->color_texture().get());
+    }
 
     if (old_active_camera)
     {
@@ -217,45 +212,9 @@ camera* camera::active_camera() { return camera::_active_camera; }
 
 const std::vector<camera*>& camera::all_cameras() { return camera::_cameras; }
 
-void camera::attach_render_texture()
+void camera::render_on_private_texture() const
 {
-    glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
-    glFramebufferTexture2D(GL_FRAMEBUFFER,
-                           GL_COLOR_ATTACHMENT0,
-                           GL_TEXTURE_2D,
-                           _private_render_texture_color->native_id(),
-                           0);
-    glFramebufferTexture2D(GL_FRAMEBUFFER,
-                           GL_DEPTH_ATTACHMENT,
-                           GL_TEXTURE_2D,
-                           _private_render_texture_depth->native_id(),
-                           0);
-    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-    {
-        log()->error("Framebuffer is not complete!");
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        return;
-    }
-
-    std::array<unsigned, 2> buffers { GL_COLOR_ATTACHMENT0, GL_NONE };
-
-    // TODO?: probably better to copy the texture
-    if (_user_render_texture)
-    {
-        buffers[ 1 ] = GL_COLOR_ATTACHMENT1;
-        _user_render_texture->bind(0);
-        glFramebufferTexture2D(GL_FRAMEBUFFER,
-                               GL_COLOR_ATTACHMENT1,
-                               GL_TEXTURE_2D,
-                               _private_render_texture_color->native_id(),
-                               0);
-    }
-
-    glDrawBuffers(buffers.size(), buffers.data());
-}
-
-void camera::render_on_private_texture()
-{
+    _framebuffer->bind();
     // TODO?: maybe better to clear with the specified background color instead
     // of drawing background quad with that color
     glClearColor(0, 0, 0, 0);
@@ -279,6 +238,7 @@ void camera::render_on_private_texture()
             }
         }
     }
+    _framebuffer->unbind();
 }
 
 void camera::setup_lights()

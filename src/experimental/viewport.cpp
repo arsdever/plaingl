@@ -13,10 +13,10 @@ namespace experimental
 
 struct viewport::viewport_private
 {
-    glm::vec2 _position;
-    glm::vec2 _size;
-    texture _surface_texture;
-    std::weak_ptr<camera> _camera;
+    glm::vec2 _position { 0, 0 };
+    glm::vec2 _size { 0, 0 };
+    std::shared_ptr<texture> _surface_texture { std::make_shared<texture>() };
+    std::weak_ptr<camera> _camera {};
 };
 
 viewport::viewport() { _p = std::make_unique<viewport_private>(); }
@@ -33,7 +33,6 @@ void viewport::set_size(glm::vec2 size)
 {
     _p->_size = size;
     glm::uvec2 usize = size;
-    _p->_surface_texture.reinit(usize.x, usize.y);
 }
 
 glm::vec2 viewport::get_size() const { return _p->_size; }
@@ -55,13 +54,13 @@ void viewport::render()
 
     glViewport(get_position().x, get_position().y, get_size().x, get_size().y);
     cam->set_render_size(get_size());
-    cam->set_render_texture(&_p->_surface_texture);
+    cam->set_render_texture(_p->_surface_texture);
     cam->render();
 }
 
 void viewport::take_screenshot(std::string_view path)
 {
-    auto screenshot = image::from_texture(&_p->_surface_texture);
+    auto screenshot = image::from_texture(_p->_surface_texture.get());
     asset_manager::default_asset_manager()->save_asset(path, screenshot);
     delete screenshot;
 }
