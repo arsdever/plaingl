@@ -9,6 +9,7 @@
 #include "camera.hpp"
 
 #include "components/renderer_component.hpp"
+#include "framebuffer.hpp"
 #include "game_object.hpp"
 #include "light.hpp"
 #include "logging.hpp"
@@ -50,6 +51,9 @@ camera::camera()
     _background_shader->add_shader("camera_background_shader.frag");
     _background_shader->link();
 
+    _framebuffer = std::make_unique<framebuffer>();
+    _framebuffer->resize(_render_size);
+    _framebuffer->initialize();
     glGenBuffers(1, &_lights_buffer);
     set_background(glm::vec3 { 0.0f, 0.0f, 0.0f });
 }
@@ -64,7 +68,8 @@ void camera::set_ortho(bool ortho_flag) { _ortho_flag = ortho_flag; }
 
 float camera::get_aspect_ratio() const
 {
-    return _render_size.x / _render_size.y;
+    glm::vec2 size = _render_size;
+    return size.x / size.y;
 }
 
 camera* camera::set_active()
@@ -81,22 +86,25 @@ void camera::set_render_size(size_t width, size_t height)
 
 void camera::set_render_size(glm::uvec2 size)
 {
-    _render_size = std::move(size);
-    if (_render_texture)
+    glm::uvec2 new_size = glm::max(glm::uvec2 { 1, 1 }, size);
+    if (_render_size == new_size)
     {
-        _render_texture->reinit(
-            _render_size.x, _render_size.y, texture::format::RGBA);
+        return;
     }
+
+    _render_size = new_size;
+    _framebuffer->resize(_render_size);
 }
 
-void camera::set_render_texture(texture* render_texture)
+void camera::set_render_texture(std::weak_ptr<texture> render_texture)
 {
-    _render_texture = render_texture;
-    // _render_texture->reinit(
-    //     _render_size.x, _render_size.y, texture::format::RGBA);
+    _user_render_texture = render_texture;
 }
 
-texture* camera::get_render_texture() const { return _render_texture; }
+std::shared_ptr<texture> camera::get_render_texture() const
+{
+    return _user_render_texture.lock();
+}
 
 void camera::set_background(glm::vec3 color)
 {
@@ -124,8 +132,10 @@ void camera::set_background(image* img)
 
 void camera::render()
 {
-    setup_lights();
     auto* old_active_camera = set_active();
+
+    setup_lights();
+    render_on_private_texture();
 
     _background_shader->set_uniform(
         "camera_matrix",
@@ -133,39 +143,18 @@ void camera::render()
                         glm::inverse(projection_matrix())));
     if (_background_texture)
     {
-        _background_texture->bind(0);
+        _background_texture->set_active_texture(0);
     }
 
     _background_shader->use();
     _background_quad->render();
     shader_program::unuse();
 
-    glEnable(GL_DEPTH_TEST);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-    if (scene::get_active_scene())
+    if (auto urt = _user_render_texture.lock())
     {
-        for (auto* obj : scene::get_active_scene()->objects())
-        {
-            if (!obj->is_active())
-            {
-                continue;
-            }
-            if (auto* renderer = obj->get_component<renderer_component>();
-                renderer)
-            {
-                renderer->get_material()->set_property_value(
-                    "model_matrix", obj->get_transform().get_matrix());
-                renderer->render();
-            }
-        }
-    }
-
-    if (_render_texture)
-    {
-        _render_texture->bind(0);
-        glCopyTexImage2D(
-            GL_TEXTURE_2D, 0, GL_RGBA, 0, 0, _render_size.x, _render_size.y, 0);
-        glBindTexture(GL_TEXTURE_2D, 0);
+        urt->clone(_framebuffer->color_texture().get());
     }
 
     if (old_active_camera)
@@ -199,6 +188,8 @@ glm::mat4 camera::view_matrix() const
 glm::mat4 camera::projection_matrix() const
 {
     // TODO: optimize with caching
+    // copy into floating point vec2
+    glm::vec2 size = _render_size;
     if (_ortho_flag)
     {
         glm::quat rotation = get_transform().get_rotation();
@@ -206,16 +197,16 @@ glm::mat4 camera::projection_matrix() const
         float dist =
             std::abs(glm::dot(direction, get_transform().get_position()));
 
-        return glm::ortho(-_render_size.x / dist,
-                          _render_size.x / dist,
-                          -_render_size.y / dist,
-                          _render_size.y / dist,
+        return glm::ortho(-size.x / dist,
+                          size.x / dist,
+                          -size.y / dist,
+                          size.y / dist,
                           0.01f,
                           10000.0f);
     }
 
     return glm::perspective(
-        glm::radians(_fov), _render_size.x / _render_size.y, 0.1f, 10000.0f);
+        glm::radians(_fov), size.x / size.y, 0.1f, 10000.0f);
 }
 
 transform& camera::get_transform() { return _transformation; }
@@ -225,6 +216,35 @@ const transform& camera::get_transform() const { return _transformation; }
 camera* camera::active_camera() { return camera::_active_camera; }
 
 const std::vector<camera*>& camera::all_cameras() { return camera::_cameras; }
+
+void camera::render_on_private_texture() const
+{
+    _framebuffer->bind();
+    // TODO?: maybe better to clear with the specified background color instead
+    // of drawing background quad with that color
+    glClearColor(0, 0, 0, 0);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glEnable(GL_DEPTH_TEST);
+
+    if (scene::get_active_scene())
+    {
+        for (auto* obj : scene::get_active_scene()->objects())
+        {
+            if (!obj->is_active())
+            {
+                continue;
+            }
+            if (auto* renderer = obj->get_component<renderer_component>();
+                renderer)
+            {
+                renderer->get_material()->set_property_value(
+                    "model_matrix", obj->get_transform().get_matrix());
+                renderer->render();
+            }
+        }
+    }
+    _framebuffer->unbind();
+}
 
 void camera::setup_lights()
 {

@@ -14,6 +14,8 @@ add_library(
   file.cpp
   font.hpp
   font.cpp
+  framebuffer.hpp
+  framebuffer.cpp
   game_clock.hpp
   game_clock.cpp
   game_object.hpp
@@ -22,8 +24,6 @@ add_library(
   gizmo_drawer.cpp
   gl_error_handler.hpp
   gl_error_handler.cpp
-  window.hpp
-  window.cpp
   image.hpp
   image.cpp
   input_system.hpp
@@ -57,7 +57,17 @@ add_library(
   vaomap.cpp
   viewport.hpp
   viewport.cpp
+  window.hpp
+  window.cpp
   glad/src/gl.c
+  experimental/input_system.hpp
+  experimental/input_system.cpp
+  experimental/viewport.hpp
+  experimental/viewport.cpp
+  experimental/window_events.hpp
+  experimental/window_events.cpp
+  experimental/window.hpp
+  experimental/window.cpp
   asset_loaders/asset_loader.hpp
   components/box_collider_component.hpp
   components/box_collider_component.cpp
@@ -93,15 +103,15 @@ add_library(
 target_link_libraries(
   ${PROJECT}_lib
   PUBLIC ${PROJECT}_includes
-         glfw
-         glm
-         profiler::lib
-         freetype
-         Winmm)
+  glfw
+  glm
+  profiler::lib
+  freetype
+  Winmm)
 
 add_library(${PROJECT}_includes INTERFACE)
 target_include_directories(${PROJECT}_includes
-                           INTERFACE ${CMAKE_CURRENT_SOURCE_DIR} glad/include)
+  INTERFACE ${CMAKE_CURRENT_SOURCE_DIR} glad/include)
 
 link_libraries(spdlog::spdlog)
 
@@ -109,15 +119,16 @@ macro(enable_asset_type)
   if(NOT ${PROJECT}_asset_loaders)
     add_custom_target(${PROJECT}_asset_loaders)
   endif()
+
   foreach(asset_type ${ARGN})
     string(TOLOWER ${asset_type} asset_type_lower)
     string(TOUPPER ${asset_type} asset_type_upper)
     message(STATUS "Enabling ${asset_type_upper} support")
     set(${PROJECT}_SUPPORT_${asset_type_upper} ON)
     target_link_libraries(${PROJECT}_lib
-                          PRIVATE ${PROJECT}::asset::${asset_type_lower})
+      PRIVATE ${PROJECT}::asset::${asset_type_lower})
     add_dependencies(${PROJECT}_asset_loaders
-                     ${PROJECT}::asset::${asset_type_lower})
+      ${PROJECT}::asset::${asset_type_lower})
   endforeach()
 endmacro()
 
@@ -129,3 +140,5 @@ add_library(${PROJECT}::lib ALIAS ${PROJECT}_lib)
 
 add_executable(${PROJECT} main.cpp)
 target_link_libraries(${PROJECT} PUBLIC ${PROJECT}::lib)
+
+add_subdirectory(samples)

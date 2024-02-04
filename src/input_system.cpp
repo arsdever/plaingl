@@ -19,6 +19,7 @@ void input_system::set_key_down(int keycode, bool state)
     if (state)
     {
         _pressed_keys.emplace(keycode);
+        on_keypress(keycode);
     }
     else
     {
@@ -26,4 +27,5 @@ void input_system::set_key_down(int keycode, bool state)
     }
 }
 
+event<void(int)> input_system::on_keypress;
 std::unordered_set<int> input_system::_pressed_keys;
