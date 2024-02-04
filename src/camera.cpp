@@ -67,7 +67,8 @@ void camera::set_ortho(bool ortho_flag) { _ortho_flag = ortho_flag; }
 
 float camera::get_aspect_ratio() const
 {
-    return _render_size.x / _render_size.y;
+    glm::vec2 size = _render_size;
+    return size.x / size.y;
 }
 
 camera* camera::set_active()
@@ -84,13 +85,13 @@ void camera::set_render_size(size_t width, size_t height)
 
 void camera::set_render_size(glm::uvec2 size)
 {
-    if (_render_size == glm::vec2(size))
+    if (_render_size == size)
     {
         return;
     }
 
     _framebuffer->resize(size);
-    _render_size = std::move(size);
+    _render_size = size;
 }
 
 void camera::set_render_texture(std::weak_ptr<texture> render_texture)
@@ -185,6 +186,8 @@ glm::mat4 camera::view_matrix() const
 glm::mat4 camera::projection_matrix() const
 {
     // TODO: optimize with caching
+    // copy into floating point vec2
+    glm::vec2 size = _render_size;
     if (_ortho_flag)
     {
         glm::quat rotation = get_transform().get_rotation();
@@ -192,16 +195,16 @@ glm::mat4 camera::projection_matrix() const
         float dist =
             std::abs(glm::dot(direction, get_transform().get_position()));
 
-        return glm::ortho(-_render_size.x / dist,
-                          _render_size.x / dist,
-                          -_render_size.y / dist,
-                          _render_size.y / dist,
+        return glm::ortho(-size.x / dist,
+                          size.x / dist,
+                          -size.y / dist,
+                          size.y / dist,
                           0.01f,
                           10000.0f);
     }
 
     return glm::perspective(
-        glm::radians(_fov), _render_size.x / _render_size.y, 0.1f, 10000.0f);
+        glm::radians(_fov), size.x / size.y, 0.1f, 10000.0f);
 }
 
 transform& camera::get_transform() { return _transformation; }
