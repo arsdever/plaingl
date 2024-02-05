@@ -1,3 +1,5 @@
+#include <filesystem>
+
 #include "asset_manager.hpp"
 
 #include "asset_loaders/fbx.hpp"
@@ -8,6 +10,8 @@
 #include "file.hpp"
 #include "image.hpp"
 #include "logging.hpp"
+#include "mesh.hpp"
+#include "shader.hpp"
 
 namespace
 {
@@ -126,6 +130,14 @@ const std::vector<shader_program*> asset_manager::shaders() const
     return result;
 }
 
+mesh* asset_manager::get_mesh(std::string_view name) const
+{
+    auto it = _meshes.find(name);
+    return it == _meshes.end()
+               ? nullptr
+               : (it->second.empty() ? nullptr : it->second[ 0 ]);
+}
+
 shader_program* asset_manager::get_shader(std::string_view name) const
 {
     return _shaders.contains(name) ? _shaders.find(name)->second : nullptr;
@@ -145,10 +157,54 @@ asset_manager* asset_manager::default_asset_manager()
 {
     if (_instance == nullptr)
     {
-        _instance = new asset_manager;
+        initialize();
     }
 
     return _instance;
 }
+
+void asset_manager::initialize()
+{
+    _instance = new asset_manager;
+    initialize_quad_mesh();
+    initialize_quad_shader();
+}
+
+void asset_manager::initialize_quad_mesh()
+{
+    auto quad_mesh = new mesh();
+    std::array<glm::vec2, 4> verts {
+        { { -1, -1 }, { -1, 1 }, { 1, 1 }, { 1, -1 } }
+    };
+
+    std::vector<vertex3d> vertices;
+    for (auto& v : verts)
+    {
+        vertex3d single_vertex;
+        single_vertex.position() = { v.x, v.y, 0 };
+        single_vertex.uv() = { v.x, v.y };
+        vertices.push_back(std::move(single_vertex));
+    }
+    quad_mesh->set_vertices(std::move(vertices));
+    quad_mesh->set_indices({ 0, 1, 2, 0, 2, 3 });
+    quad_mesh->init();
+    _instance->_meshes.try_emplace("quad", std::vector<mesh*> { quad_mesh });
+}
+
+void asset_manager::initialize_quad_shader()
+{
+    auto quad_shader = new shader_program();
+    quad_shader->init();
+    auto vpath =
+        std::filesystem::path(internal_resource_path()) / "quad_shader.vert";
+    quad_shader->add_shader(vpath.string());
+    auto fpath =
+        std::filesystem::path(internal_resource_path()) / "quad_shader.frag";
+    quad_shader->add_shader(fpath.string());
+    quad_shader->link();
+    _instance->_shaders.try_emplace("quad", quad_shader);
+}
+
+std::string_view asset_manager::internal_resource_path() { return ""; }
 
 asset_manager* asset_manager::_instance = nullptr;

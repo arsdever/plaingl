@@ -5,17 +5,16 @@
 
 #include <memory>
 
-#include <assert.h>
-
-#include "experimental/window.hpp"
+#include "experimental/viewport.hpp"
 
 #include "asset_manager.hpp"
 #include "camera.hpp"
 #include "components/mesh_component.hpp"
 #include "components/mesh_renderer_component.hpp"
-#include "experimental/viewport.hpp"
+#include "experimental/window.hpp"
 #include "game_object.hpp"
 #include "gl_error_handler.hpp"
+#include "light.hpp"
 #include "logging.hpp"
 #include "material.hpp"
 #include "scene.hpp"
@@ -64,9 +63,7 @@ int main(int argc, char** argv)
     exp_window->set_can_grab(true);
 
     exp_window->get_events()->close += [ &windows ](auto ce)
-    {
-        std::erase(windows, ce.get_sender()->shared_from_this());
-    };
+    { std::erase(windows, ce.get_sender()->shared_from_this()); };
 
     exp_window->get_events()->resize += [](auto re)
     {
@@ -82,6 +79,7 @@ int main(int argc, char** argv)
     {
         if (frame_counter % 30 == 0)
         {
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             int i = 0;
             for (auto vp : re.get_sender()->get_viewports())
             {
@@ -123,12 +121,9 @@ void init_scene()
     auto norm_txt = new texture();
     img = am->get_image("brick");
     *norm_txt = std::move(texture::from_image(img));
-    basic_mat->set_property_value("albedo_texture", txt);
-    basic_mat->set_property_value("albedo_texture_strength", 1.0f);
-    basic_mat->set_property_value("normal_texture", norm_txt);
-    basic_mat->set_property_value("light_pos", 0.0f, 1.0f, 0.0f);
-    basic_mat->set_property_value("light_color", 1.0f, 1.0f, 1.0f);
-    basic_mat->set_property_value("light_intensity", 1.0f);
+    basic_mat->set_property_value("albedo_texture_strength", 0.0f);
+    basic_mat->set_property_value("albedo_color", 1.0f, 0.8f, 0.2f);
+    basic_mat->set_property_value("normal_texture_strength", 0.0f);
 
     camera::active_camera()->get_transform().set_position({ 0, 0, 3 });
     camera::active_camera()->get_transform().set_rotation(
@@ -144,8 +139,13 @@ void init_scene()
     game_object* object = new game_object;
     object->create_component<mesh_component>();
     object->create_component<mesh_renderer_component>();
-    object->get_component<mesh_component>()->set_mesh(am->meshes()[ 0 ]);
+    object->get_component<mesh_component>()->set_mesh(
+        am->get_mesh("susane_head"));
     object->get_component<mesh_renderer_component>()->set_material(basic_mat);
     object->set_name("susane");
     scene::get_active_scene()->add_object(object);
+
+    auto l = new light();
+    l->set_color(glm::vec3(1.0f, 1.0f, 1.0f));
+    l->set_intensity(5.0f);
 }

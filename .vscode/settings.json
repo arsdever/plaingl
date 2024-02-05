@@ -108,7 +108,8 @@
 		"strstream": "cpp",
 		"typeindex": "cpp",
 		"valarray": "cpp",
-		"*.ipp": "cpp"
+		"*.ipp": "cpp",
+		"numbers": "cpp"
 	},
 	"dotnet.defaultSolution": "disable"
 }

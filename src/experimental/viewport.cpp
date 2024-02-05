@@ -6,7 +6,24 @@
 #include "asset_manager.hpp"
 #include "camera.hpp"
 #include "image.hpp"
+#include "mesh.hpp"
+#include "shader.hpp"
 #include "texture.hpp"
+
+namespace
+{
+void render_quad(texture* _p)
+{
+    shader_program* quad_shader =
+        asset_manager::default_asset_manager()->get_shader("quad");
+    mesh* quad_mesh = asset_manager::default_asset_manager()->get_mesh("quad");
+    quad_shader->set_uniform("_i_input_image", std::make_tuple(0));
+    _p->set_active_texture(0);
+    quad_shader->use();
+    quad_mesh->render();
+    shader_program::unuse();
+}
+} // namespace
 
 namespace experimental
 {
@@ -56,6 +73,9 @@ void viewport::render()
     cam->set_render_size(get_size());
     cam->set_render_texture(_p->_surface_texture);
     cam->render();
+
+    // TODO: move to renderer
+    render_quad(_p->_surface_texture.get());
 }
 
 void viewport::take_screenshot(std::string_view path)
