@@ -10,6 +10,8 @@ class camera;
 namespace experimental
 {
 
+class window;
+
 /**
  * @brief Class representing a viewport inside the window.
  *
