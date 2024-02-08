@@ -72,12 +72,15 @@ void viewport::render()
 
     glViewport(0, 0, get_size().x, get_size().y);
     cam->set_render_size(get_size());
+    cam->set_gizmos_enabled(true);
     cam->set_render_texture(_p->_surface_texture);
     cam->render();
 
     glViewport(get_position().x, get_position().y, get_size().x, get_size().y);
     // TODO: move to renderer
     render_quad(_p->_surface_texture.get());
+
+    cam->set_active();
 }
 
 void viewport::take_screenshot(std::string_view path)

@@ -101,7 +101,7 @@ void window::init()
 
     glfwSetWindowPos(_p->_glfw_window_handle, _p->_position.x, _p->_position.y);
 
-    glfwSetWindowUserPointer(_main_window->_p->_glfw_window_handle, this);
+    glfwSetWindowUserPointer(_p->_glfw_window_handle, this);
 
     glfwSetWindowSizeCallback(_p->_glfw_window_handle,
                               [](GLFWwindow* wnd, int w, int h)
@@ -167,6 +167,8 @@ void window::resize(size_t width, size_t height)
         _p->_size = { width, height };
     }
 }
+
+void window::set_position(size_t x, size_t y) { move(x, y); }
 
 glm::uvec2 window::get_position() const { return _p->_position; }
 
