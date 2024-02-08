@@ -11,6 +11,7 @@
 #include "components/renderer_component.hpp"
 #include "framebuffer.hpp"
 #include "game_object.hpp"
+#include "gizmo_drawer.hpp"
 #include "light.hpp"
 #include "logging.hpp"
 #include "material.hpp"
@@ -106,6 +107,10 @@ std::shared_ptr<texture> camera::get_render_texture() const
     return _user_render_texture.lock();
 }
 
+void camera::set_gizmos_enabled(bool flag) { _gizmos_enabled = flag; }
+
+bool camera::get_gizmos_enabled() const { return _gizmos_enabled; }
+
 void camera::set_background(glm::vec3 color)
 {
     _background_color = color;
@@ -149,6 +154,11 @@ void camera::render()
     _background_shader->use();
     _background_quad->render();
     shader_program::unuse();
+
+    if (get_gizmos_enabled())
+    {
+        render_gizmos();
+    }
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
@@ -243,6 +253,28 @@ void camera::render_on_private_texture() const
             }
         }
     }
+    _framebuffer->unbind();
+}
+
+void camera::render_gizmos() const
+{
+    _framebuffer->bind();
+    glEnable(GL_BLEND);
+    if (scene::get_active_scene())
+    {
+        for (auto* obj : scene::get_active_scene()->objects())
+        {
+            if (!obj->is_active())
+            {
+                continue;
+            }
+            gizmo_drawer::instance()->get_shader().set_uniform(
+                "model_matrix",
+                std::make_tuple(obj->get_transform().get_matrix()));
+            obj->draw_gizmos();
+        }
+    }
+    glDisable(GL_BLEND);
     _framebuffer->unbind();
 }
 
