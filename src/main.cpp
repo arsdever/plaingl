@@ -273,21 +273,6 @@ void initViewports()
     auto wnd = windows.back();
     wnd->init();
     wnd->resize(400, 1200);
-    // struct layout_vert3
-    // {
-    //     void calculate_layout(window* wnd) override
-    //     {
-    //         auto vps = wnd->get_viewports();
-    //         for (int i = 0; i < std::min<size_t>(vps.size(), 3); ++i)
-    //         {
-    //             auto& vp = vps[ i ];
-    //             vp->set_position(
-    //                 0, (_view_cameras.size() - i - 1) * wnd->get_height() /
-    //                 3);
-    //             vp->set_size(wnd->get_width(), wnd->get_height() / 3);
-    //         }
-    //     }
-    // };
     windows[ 0 ]->set_position(windows[ 1 ]->get_position().x +
                                    windows[ 1 ]->get_width(),
                                windows[ 1 ]->get_position().y);
@@ -352,26 +337,6 @@ void initViewports()
 
 void setupMouseEvents()
 {
-    // mouse_events.drag_drop_start +=
-    //     [](mouse_events_refiner::mouse_event_params params)
-    // {
-    //     glm::vec2 from = params._old_position;
-    //     glm::vec2 to = params._position;
-    //     from.y = params._window->get_height() - from.y;
-    //     to.y = params._window->get_height() - to.y;
-    //     log()->trace("dragging started from position ({}, {})", from.x,
-    //     from.y);
-    // };
-    // mouse_events.drag_drop_move +=
-    //     [](mouse_events_refiner::mouse_event_params params)
-    // {
-    //     glm::vec2 to = params._position;
-    //     to.y = params._window->get_height() - to.y;
-    //     log()->trace("dragging to position ({}, {})", to.x, to.y);
-    // };
-    // mouse_events.drag_drop_end +=
-    //     [](mouse_events_refiner::mouse_event_params params) {};
-
     experimental::window::get_main_window()->get_events()->mouse_move +=
         [](auto me)
     {
