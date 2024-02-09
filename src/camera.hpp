@@ -59,7 +59,6 @@ private:
     std::weak_ptr<texture> _user_render_texture {};
     glm::vec3 _background_color { 0.0f, 0.0f, 0.0f };
     std::unique_ptr<texture> _background_texture = nullptr;
-    std::unique_ptr<mesh> _background_quad = nullptr;
     std::unique_ptr<shader_program> _background_shader = nullptr;
     unsigned _lights_buffer = 0;
     bool _gizmos_enabled = false;

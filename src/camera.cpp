@@ -8,6 +8,7 @@
 
 #include "camera.hpp"
 
+#include "asset_manager.hpp"
 #include "components/renderer_component.hpp"
 #include "framebuffer.hpp"
 #include "game_object.hpp"
@@ -28,23 +29,6 @@ static logger log() { return get_logger("camera"); }
 camera::camera()
 {
     _cameras.push_back(this);
-    _background_quad = std::make_unique<mesh>();
-    std::array<glm::vec2, 4> verts {
-        { { -1, -1 }, { -1, 1 }, { 1, 1 }, { 1, -1 } }
-    };
-
-    std::vector<vertex3d> vertices;
-    for (auto& v : verts)
-    {
-        vertex3d single_vertex;
-        single_vertex.position() = { v.x, v.y, 0 };
-        single_vertex.uv() = { v.x, v.y };
-        vertices.push_back(std::move(single_vertex));
-    }
-
-    _background_quad->set_vertices(std::move(vertices));
-    _background_quad->set_indices({ 0, 1, 2, 0, 2, 3 });
-    _background_quad->init();
 
     _background_shader = std::make_unique<shader_program>();
     _background_shader->init();
@@ -152,7 +136,8 @@ void camera::render()
     }
 
     _background_shader->use();
-    _background_quad->render();
+    mesh* quad_mesh = asset_manager::default_asset_manager()->get_mesh("quad");
+    quad_mesh->render();
     shader_program::unuse();
 
     if (get_gizmos_enabled())
