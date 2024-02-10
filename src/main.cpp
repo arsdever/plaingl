@@ -21,13 +21,11 @@
 #include "components/box_collider_component.hpp"
 #include "components/camera_component.hpp"
 #include "components/fps_show_component.hpp"
-#include "components/jumpy_component.hpp"
 #include "components/light_component.hpp"
 #include "components/mesh_component.hpp"
 #include "components/mesh_renderer_component.hpp"
 #include "components/plane_collider_component.hpp"
 #include "components/ray_visualize_component.hpp"
-#include "components/sphere_collider_component.hpp"
 #include "components/text_component.hpp"
 #include "components/text_renderer_component.hpp"
 #include "components/walking_component.hpp"
@@ -37,7 +35,6 @@
 #include "font.hpp"
 #include "game_clock.hpp"
 #include "game_object.hpp"
-#include "glm/gtc/random.hpp"
 #include "image.hpp"
 #include "input_system.hpp"
 #include "light.hpp"
@@ -490,31 +487,6 @@ void initScene()
                         }));
     main_camera_object->get_transform() = main_camera->get_transform();
     main_camera_object->create_component<walking_component>();
-    class log_component : public component
-    {
-    public:
-        log_component(game_object* parent)
-            : component(parent, "log_component")
-        {
-        }
-
-        void update() override
-        {
-            glm::quat rot = get_game_object()->get_transform().get_rotation();
-            log()->info("camera object transform {},{},{},{}",
-                        rot.x,
-                        rot.y,
-                        rot.z,
-                        rot.w);
-            rot = get_component<camera_component>()
-                      ->get_camera()
-                      ->get_transform()
-                      .get_rotation();
-            log()->info(
-                "camera transform {},{},{},{}", rot.x, rot.y, rot.z, rot.w);
-        }
-    };
-    main_camera_object->create_component<log_component>();
     main_camera->set_ortho(false);
 
     light* l = new light();
