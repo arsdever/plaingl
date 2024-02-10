@@ -16,7 +16,7 @@ namespace
 void render_quad(texture* _p)
 {
     shader_program* quad_shader =
-        asset_manager::default_asset_manager()->get_shader("quad");
+        asset_manager::default_asset_manager()->get_shader("surface");
     mesh* quad_mesh = asset_manager::default_asset_manager()->get_mesh("quad");
     quad_shader->set_uniform("_i_input_image", std::make_tuple(0));
     _p->set_active_texture(0);
@@ -72,6 +72,7 @@ void viewport::render()
 
     glViewport(0, 0, get_size().x, get_size().y);
     cam->set_render_size(get_size());
+    cam->set_gizmos_enabled(true);
     cam->set_render_texture(_p->_surface_texture);
     cam->render();
 

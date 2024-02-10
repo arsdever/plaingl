@@ -193,16 +193,7 @@ void asset_manager::initialize_quad_mesh()
 
 void asset_manager::initialize_surface_shader()
 {
-    auto quad_shader = new shader_program();
-    quad_shader->init();
-    auto vpath =
-        std::filesystem::path(internal_resource_path()) / "quad_shader.vert";
-    quad_shader->add_shader(vpath.string());
-    auto fpath =
-        std::filesystem::path(internal_resource_path()) / "quad_shader.frag";
-    quad_shader->add_shader(fpath.string());
-    quad_shader->link();
-    _instance->_shaders.try_emplace("quad", quad_shader);
+    _instance->load_asset("surface.shader");
 }
 
 std::string_view asset_manager::internal_resource_path() { return ""; }
