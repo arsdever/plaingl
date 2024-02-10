@@ -35,7 +35,7 @@ public:
 
 private:
     static void initialize_quad_mesh();
-    static void initialize_quad_shader();
+    static void initialize_surface_shader();
     static std::string_view internal_resource_path();
 
 private:

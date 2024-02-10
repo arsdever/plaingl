@@ -167,7 +167,7 @@ void asset_manager::initialize()
 {
     _instance = new asset_manager;
     initialize_quad_mesh();
-    initialize_quad_shader();
+    initialize_surface_shader();
 }
 
 void asset_manager::initialize_quad_mesh()
@@ -191,7 +191,7 @@ void asset_manager::initialize_quad_mesh()
     _instance->_meshes.try_emplace("quad", std::vector<mesh*> { quad_mesh });
 }
 
-void asset_manager::initialize_quad_shader()
+void asset_manager::initialize_surface_shader()
 {
     auto quad_shader = new shader_program();
     quad_shader->init();
