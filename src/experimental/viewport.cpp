@@ -5,8 +5,26 @@
 
 #include "asset_manager.hpp"
 #include "camera.hpp"
+#include "experimental/window.hpp"
 #include "image.hpp"
+#include "mesh.hpp"
+#include "shader.hpp"
 #include "texture.hpp"
+
+namespace
+{
+void render_quad(texture* _p)
+{
+    shader_program* quad_shader =
+        asset_manager::default_asset_manager()->get_shader("surface");
+    mesh* quad_mesh = asset_manager::default_asset_manager()->get_mesh("quad");
+    quad_shader->set_uniform("_i_input_image", std::make_tuple(0));
+    _p->set_active_texture(0);
+    quad_shader->use();
+    quad_mesh->render();
+    shader_program::unuse();
+}
+} // namespace
 
 namespace experimental
 {
@@ -52,10 +70,17 @@ void viewport::render()
         return;
     }
 
-    glViewport(get_position().x, get_position().y, get_size().x, get_size().y);
+    glViewport(0, 0, get_size().x, get_size().y);
     cam->set_render_size(get_size());
+    cam->set_gizmos_enabled(true);
     cam->set_render_texture(_p->_surface_texture);
     cam->render();
+
+    glViewport(get_position().x, get_position().y, get_size().x, get_size().y);
+    // TODO: move to renderer
+    render_quad(_p->_surface_texture.get());
+
+    cam->set_active();
 }
 
 void viewport::take_screenshot(std::string_view path)

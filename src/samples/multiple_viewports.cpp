@@ -3,6 +3,7 @@
 #include <GLFW/glfw3.h>
 /* clang-format on */
 
+#include <array>
 #include <memory>
 
 #include "experimental/viewport.hpp"
@@ -25,7 +26,7 @@ namespace
 logger log() { return get_logger("window example"); }
 } // namespace
 
-void init_scene();
+void init_scene(std::array<camera*, 2> cameras);
 
 int main(int argc, char** argv)
 {
@@ -34,11 +35,12 @@ int main(int argc, char** argv)
     auto exp_window = std::make_shared<experimental::window>();
 
     std::shared_ptr<camera> main_camera = nullptr;
+    std::shared_ptr<camera> camera2 = nullptr;
     std::shared_ptr<scene> current_scene = nullptr;
 
     exp_window->on_user_initialize +=
-        [ &current_scene,
-          &main_camera ](std::shared_ptr<experimental::window> wnd)
+        [ &current_scene, &main_camera, &camera2 ](
+            std::shared_ptr<experimental::window> wnd)
     {
         // configure gl debug output
         glEnable(GL_DEBUG_OUTPUT);
@@ -48,12 +50,18 @@ int main(int argc, char** argv)
             GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
 
         main_camera = std::make_shared<camera>();
+        camera2 = std::make_shared<camera>();
         current_scene = std::make_shared<scene>();
         main_camera->set_active();
-        init_scene();
+        init_scene({ main_camera.get(), camera2.get() });
         auto vp = std::make_shared<experimental::viewport>();
         vp->set_camera(main_camera);
-        vp->set_size(wnd->get_size());
+        vp->set_size(glm::uvec2(wnd->get_size().x / 2, wnd->get_size().y));
+        wnd->add_viewport(vp);
+        vp = std::make_shared<experimental::viewport>();
+        vp->set_camera(camera2);
+        vp->set_size(glm::uvec2(wnd->get_size().x / 2, wnd->get_size().y));
+        vp->set_position(glm::uvec2(wnd->get_size().x / 2, 0));
         wnd->add_viewport(vp);
     };
 
@@ -106,7 +114,7 @@ int main(int argc, char** argv)
     return 0;
 }
 
-void init_scene()
+void init_scene(std::array<camera*, 2> cameras)
 {
     auto* am = asset_manager::default_asset_manager();
     am->load_asset("susane_head.fbx");
@@ -125,16 +133,28 @@ void init_scene()
     basic_mat->set_property_value("albedo_color", 1.0f, 0.8f, 0.2f);
     basic_mat->set_property_value("normal_texture_strength", 0.0f);
 
-    camera::active_camera()->get_transform().set_position({ 0, 0, 3 });
-    camera::active_camera()->get_transform().set_rotation(
+    cameras[ 0 ]->get_transform().set_position({ 0, 0, 3 });
+    cameras[ 0 ]->get_transform().set_rotation(
         glm::quatLookAt(glm::vec3 { 0.0f, 0.0f, 1.0f },
                         glm::vec3 {
                             0.0f,
                             1.0f,
                             0.0f,
                         }));
-    camera::active_camera()->set_ortho(false);
-    camera::active_camera()->set_background(glm::vec3(.3, .6, .7));
+    cameras[ 0 ]->set_ortho(false);
+    cameras[ 0 ]->set_background(glm::vec3(.3, .6, .7));
+
+    cameras[ 1 ]->get_transform().set_position({ 3, 0, 0 });
+    cameras[ 1 ]->get_transform().set_rotation(
+        glm::quatLookAt(glm::vec3 { 1.0f, 0.0f, 0.0f },
+                        glm::vec3 {
+                            0.0f,
+                            1.0f,
+                            0.0f,
+                        }));
+    cameras[ 1 ]->set_ortho(false);
+    cameras[ 1 ]->set_fov(90);
+    cameras[ 1 ]->set_background(glm::vec3(.7, .6, .1));
 
     game_object* object = new game_object;
     object->create_component<mesh_component>();

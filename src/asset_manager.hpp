@@ -25,11 +25,18 @@ public:
     const std::vector<image*> textures() const;
     const std::vector<shader_program*> shaders() const;
 
+    mesh* get_mesh(std::string_view name) const;
     shader_program* get_shader(std::string_view name) const;
     material* get_material(std::string_view name) const;
     image* get_image(std::string_view name) const;
 
     static asset_manager* default_asset_manager();
+    static void initialize();
+
+private:
+    static void initialize_quad_mesh();
+    static void initialize_quad_shader();
+    static std::string_view internal_resource_path();
 
 private:
     template <typename T>
