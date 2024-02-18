@@ -3,7 +3,10 @@
 #include <GLFW/glfw3.h>
 /* clang-format on */
 
+#include <any>
+#include <functional>
 #include <memory>
+#include <vector>
 
 #include "experimental/viewport.hpp"
 

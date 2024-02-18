@@ -1,10 +1,3 @@
-/* clang-format off */
-#include <glad/gl.h>
-#include <GLFW/glfw3.h>
-/* clang-format on */
-
-#include <glm/ext.hpp>
-#include <glm/gtx/string_cast.hpp>
 #include <prof/profiler.hpp>
 
 #include "window.hpp"

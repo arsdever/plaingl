@@ -1,7 +1,5 @@
 #pragma once
 
-#include <unordered_map>
-
 #include "material_property.hpp"
 #include "utils.hpp"
 

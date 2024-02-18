@@ -1,10 +1,5 @@
 #pragma once
 
-#include <any>
-#include <string>
-
-#include <glad/gl.h>
-
 struct uniform_info
 {
     enum type

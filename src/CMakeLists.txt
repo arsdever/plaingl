@@ -109,6 +109,8 @@ target_link_libraries(
   freetype
   Winmm)
 
+target_precompile_headers(${PROJECT}_lib PUBLIC "$<$<COMPILE_LANGUAGE:CXX>:precompile.hpp>")
+
 add_library(${PROJECT}_includes INTERFACE)
 target_include_directories(${PROJECT}_includes
   INTERFACE ${CMAKE_CURRENT_SOURCE_DIR} glad/include)

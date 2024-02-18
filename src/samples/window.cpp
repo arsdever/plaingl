@@ -4,6 +4,8 @@
 /* clang-format on */
 
 #include <memory>
+#include <vector>
+#include <functional>
 
 #include <assert.h>
 

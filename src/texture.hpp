@@ -1,9 +1,5 @@
 #pragma once
 
-#include <vector>
-
-#include <glm/vec2.hpp>
-
 class image;
 
 class texture

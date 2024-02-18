@@ -1,10 +1,5 @@
 #pragma once
 
-#include <memory>
-#include <vector>
-
-#include <glm/ext.hpp>
-
 #include "transform.hpp"
 
 class framebuffer;

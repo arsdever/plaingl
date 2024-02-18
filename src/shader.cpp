@@ -1,6 +1,3 @@
-#include <glad/gl.h>
-#include <glm/ext.hpp>
-
 #include "shader.hpp"
 
 #include "camera.hpp"

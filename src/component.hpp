@@ -1,8 +1,5 @@
 #pragma once
 
-#include <memory>
-#include <string_view>
-
 #include "game_object.hpp"
 
 namespace spdlog

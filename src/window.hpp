@@ -1,10 +1,5 @@
 #pragma once
 
-#include <chrono>
-#include <functional>
-#include <memory>
-#include <unordered_map>
-
 #include "event.hpp"
 #include "mouse_events_refiner.hpp"
 

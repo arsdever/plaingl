@@ -1,10 +1,3 @@
-/* clang-format off */
-#include <glad/gl.h>
-#include <GLFW/glfw3.h>
-/* clang-format on */
-
-#include <array>
-
 #include "texture_viewer.hpp"
 
 #include "image.hpp"
@@ -144,7 +137,8 @@ void texture_viewer::show_preview(texture* t)
         glBindVertexArray(vao);
         prog.use();
         glUniform1i(glGetUniformLocation(prog.id(), "texture_sampler"), 0);
-        glUniform1ui(glGetUniformLocation(prog.id(), "texture_type"), t->get_channel_count());
+        glUniform1ui(glGetUniformLocation(prog.id(), "texture_type"),
+                     t->get_channel_count());
         glDrawArrays(GL_TRIANGLES, 0, points.size());
         glfwSwapBuffers(window);
         glfwPollEvents();

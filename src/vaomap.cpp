@@ -1,10 +1,5 @@
-/* clang-format off*/
-#include <glad/gl.h>
-/* clang-format on*/
-
-#include <GLFW/glfw3.h>
-
 #include "vaomap.hpp"
+
 #include "vertex.hpp"
 
 class GLFWwindow;

@@ -1,7 +1,5 @@
 #pragma once
 
-#include <vector>
-
 // TODO: the implementation is very draft and needs redoing
 
 class game_object;

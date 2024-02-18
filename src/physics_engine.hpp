@@ -1,9 +1,5 @@
 #pragma once
 
-#include <optional>
-
-#include <glm/glm.hpp>
-
 #include "components/collider_component.hpp"
 
 class physics_engine

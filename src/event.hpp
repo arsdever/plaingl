@@ -1,9 +1,5 @@
 #pragma once
 
-#include <functional>
-#include <tuple>
-#include <vector>
-
 template <typename T>
 class event
 {

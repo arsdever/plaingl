@@ -1,5 +1,3 @@
-#include <filesystem>
-
 #include "asset_manager.hpp"
 
 #include "asset_loaders/fbx.hpp"

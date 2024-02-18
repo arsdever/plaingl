@@ -1,12 +1,7 @@
 #pragma once
 
-#include <unordered_map>
-#include <vector>
-
-#include <glm/vec3.hpp>
-
-#include "vertex.hpp"
 #include "vaomap.hpp"
+#include "vertex.hpp"
 
 struct GLFWwindow;
 
