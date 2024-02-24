@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <string>
 #include <string_view>
 #include <unordered_map>
@@ -43,7 +44,7 @@ private:
     using asset_map =
         std::unordered_map<std::string, T, string_hash, std::equal_to<>>;
 
-    asset_map<std::vector<mesh*>> _meshes;
+    asset_map<mesh*> _meshes;
     asset_map<material*> _materials;
     asset_map<image*> _textures;
     asset_map<shader_program*> _shaders;

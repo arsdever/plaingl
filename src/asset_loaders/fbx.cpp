@@ -17,14 +17,15 @@ void asset_loader_FBX::load(std::string_view path)
                               aiProcess_SortByPType | aiProcess_EmbedTextures);
 
     // TODO: check if the scene was loaded
+    _mesh = new mesh;
+    std::vector<vertex3d> vertices;
+    std::vector<int> indices;
+    std::vector<mesh::sub_mesh_information> submeshes;
+    int submesh_offset = 0;
 
     for (int i = 0; i < scene->mNumMeshes; ++i)
     {
         const aiMesh* assimp_mesh = scene->mMeshes[ i ];
-
-        mesh* mesh_ = new mesh;
-        std::vector<vertex3d> vertices;
-        std::vector<int> indices;
 
         for (int vertex_index = 0; vertex_index < assimp_mesh->mNumVertices;
              ++vertex_index)
@@ -54,20 +55,13 @@ void asset_loader_FBX::load(std::string_view path)
             for (int j = 0; j < assimp_face.mNumIndices; ++j)
                 indices.push_back(assimp_face.mIndices[ j ]);
         }
-
-        mesh_->set_vertices(std::move(vertices));
-        mesh_->set_indices(std::move(indices));
-        mesh_->init();
-        _meshes.push_back(mesh_);
+        submeshes.emplace_back(submesh_offset, indices.size() - submesh_offset);
+        submesh_offset = indices.size();
     }
+    _mesh->set_vertices(std::move(vertices));
+    _mesh->set_indices(std::move(indices));
+    _mesh->set_sub_meshes(std::move(submeshes));
+    _mesh->init();
 }
 
-const std::vector<mesh*>& asset_loader_FBX::get_meshes() const
-{
-    return _meshes;
-}
-
-std::vector<mesh*>&& asset_loader_FBX::extract_meshes()
-{
-    return std::move(_meshes);
-}
+mesh* asset_loader_FBX::get_mesh() { return _mesh; }

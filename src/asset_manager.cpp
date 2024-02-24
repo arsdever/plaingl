@@ -27,7 +27,7 @@ void asset_manager::load_asset(std::string_view path)
         asset_loader_FBX fbx_loader;
         fbx_loader.load(path);
         auto [ it, success ] =
-            _meshes.try_emplace(filename, fbx_loader.get_meshes());
+            _meshes.try_emplace(filename, fbx_loader.get_mesh());
         return;
     }
 #endif
@@ -95,7 +95,7 @@ const std::vector<mesh*> asset_manager::meshes() const
     std::vector<mesh*> result;
     for (auto& [ _, value ] : _meshes)
     {
-        result.insert(result.end(), value.begin(), value.end());
+        result.push_back(value);
     }
     return result;
 }
@@ -132,10 +132,7 @@ const std::vector<shader_program*> asset_manager::shaders() const
 
 mesh* asset_manager::get_mesh(std::string_view name) const
 {
-    auto it = _meshes.find(name);
-    return it == _meshes.end()
-               ? nullptr
-               : (it->second.empty() ? nullptr : it->second[ 0 ]);
+    return _meshes.contains(name) ? _meshes.find(name)->second : nullptr;
 }
 
 shader_program* asset_manager::get_shader(std::string_view name) const
@@ -188,7 +185,7 @@ void asset_manager::initialize_quad_mesh()
     quad_mesh->set_vertices(std::move(vertices));
     quad_mesh->set_indices({ 0, 1, 2, 0, 2, 3 });
     quad_mesh->init();
-    _instance->_meshes.try_emplace("quad", std::vector<mesh*> { quad_mesh });
+    _instance->_meshes.try_emplace("quad", quad_mesh);
 }
 
 void asset_manager::initialize_surface_shader()

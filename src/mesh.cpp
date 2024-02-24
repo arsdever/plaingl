@@ -69,6 +69,22 @@ void mesh::set_indices(std::vector<int> indices)
     _indices = std::move(indices);
 }
 
+void mesh::add_sub_mesh(sub_mesh_information submesh_info)
+{
+    _sub_meshes.push_back(std::move(submesh_info));
+}
+
+void mesh::set_sub_mesh(size_t index, sub_mesh_information submesh_info)
+{
+    _sub_meshes.resize(std::max(index + 1, _sub_meshes.size()));
+    _sub_meshes[ index ] = std::move(submesh_info);
+}
+
+void mesh::set_sub_meshes(std::vector<sub_mesh_information> submeshes)
+{
+    _sub_meshes = std::move(submeshes);
+}
+
 void mesh::render()
 {
     if (_vao.activate())
