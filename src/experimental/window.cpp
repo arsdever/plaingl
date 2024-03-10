@@ -61,7 +61,10 @@ window::window() { _p = std::make_unique<window_private_data>(); }
 
 window::~window()
 {
-    glfwDestroyWindow(_p->_glfw_window_handle);
+    if (_p && _p->_glfw_window_handle)
+    {
+        glfwDestroyWindow(_p->_glfw_window_handle);
+    }
     _p = nullptr;
 }
 
@@ -135,7 +138,12 @@ void window::init()
     configure_input_system();
 }
 
-void window::activate() { glfwMakeContextCurrent(_p->_glfw_window_handle); }
+void window::activate() const
+{
+    glfwMakeContextCurrent(_p->_glfw_window_handle);
+}
+
+void window::deactivate() const { glfwMakeContextCurrent(nullptr); }
 
 void window::set_title(std::string_view title)
 {

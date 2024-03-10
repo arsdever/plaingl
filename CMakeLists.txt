@@ -37,6 +37,8 @@ set(ASSIMP_BUILD_TESTS
 add_subdirectory(thirdparty/assimp)
 add_subdirectory(thirdparty/spdlog)
 add_subdirectory(thirdparty/freetype)
+
+set(PROF_OPENGL ON)
 add_subdirectory(thirdparty/prof)
 remove_definitions(-w)
 

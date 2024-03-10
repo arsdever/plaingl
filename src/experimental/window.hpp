@@ -26,7 +26,8 @@ public:
     ~window();
 
     void init();
-    void activate();
+    void activate() const;
+    void deactivate() const;
 
     void set_title(std::string_view title);
     std::string get_title() const;
@@ -60,6 +61,8 @@ public:
     event<void(std::shared_ptr<window>)> on_user_initialize;
 
     static std::shared_ptr<window> get_main_window();
+
+    static void create_window();
 
 private:
     void setup_mouse_callbacks();

@@ -59,16 +59,23 @@ add_library(
   viewport.cpp
   window.hpp
   window.cpp
-  glad/src/gl.c
+  asset_loaders/asset_loader.hpp
   experimental/input_system.hpp
   experimental/input_system.cpp
   experimental/viewport.hpp
   experimental/viewport.cpp
   experimental/window_events.hpp
   experimental/window_events.cpp
+  experimental/window_manager.hpp
+  experimental/window_manager.cpp
   experimental/window.hpp
   experimental/window.cpp
-  asset_loaders/asset_loader.hpp
+  experimental/console/commands/command.hpp
+  experimental/console/commands/new.hpp
+  experimental/console/commands/new.cpp
+  experimental/console/commands/noop.hpp
+  experimental/console/commands.hpp
+  experimental/console/commands.cpp
   components/box_collider_component.hpp
   components/box_collider_component.cpp
   components/light_component.hpp
@@ -100,9 +107,15 @@ add_library(
   components/walking_component.hpp
   components/walking_component.cpp)
 
+add_library(GLAD STATIC
+  glad/src/gl.c
+)
+target_include_directories(GLAD PUBLIC glad/include)
+
 target_link_libraries(
   ${PROJECT}_lib
   PUBLIC ${PROJECT}_includes
+  GLAD
   glfw
   glm
   profiler::lib

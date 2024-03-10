@@ -2,8 +2,10 @@
 	"cmake.debugConfig": {
 		"args": [
 			"SPDLOG_LEVEL=trace"
-		]
+		],
+		"console": "integratedTerminal"
 	},
+	"cmake.exportCompileCommandsFile": true,
 	"sonarlint.pathToCompileCommands": "${workspaceFolder}\\build\\compile_commands.json",
 	"C_Cpp.default.compileCommands": "${workspaceFolder}\\build\\compile_commands.json",
 	"files.associations": {
@@ -109,7 +111,9 @@
 		"typeindex": "cpp",
 		"valarray": "cpp",
 		"*.ipp": "cpp",
-		"numbers": "cpp"
+		"numbers": "cpp",
+		"expected": "cpp",
+		"*.glsl": "cpp"
 	},
 	"dotnet.defaultSolution": "disable"
 }
