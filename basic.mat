@@ -2,7 +2,7 @@
 	"shader": "base",
 	"properties": [
 		{
-			"name": "ambient_color",
+			"name": "albedo_color",
 			"type": "vec4",
 			"value": [1.0, 0.0, 1.0, 1.0]
 		},
