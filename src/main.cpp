@@ -413,8 +413,8 @@ void initScene()
     norm_txt = new texture();
     img = am->get_image("brick");
     *norm_txt = std::move(texture::from_image(img));
-    basic_mat->set_property_value("albedo_texture", txt);
-    basic_mat->set_property_value("albedo_texture_strength", 1.0f);
+    basic_mat->set_property_value("ambient_texture", txt);
+    basic_mat->set_property_value("ambient_texture_strength", 1.0f);
     basic_mat->set_property_value("normal_texture", norm_txt);
     basic_mat->set_property_value("light_pos", 0.0f, 1.0f, 0.0f);
     basic_mat->set_property_value("light_color", 1.0f, 1.0f, 1.0f);
