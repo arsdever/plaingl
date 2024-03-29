@@ -30,7 +30,6 @@ public:
     shader_program* get_shader(std::string_view name) const;
     material* get_material(std::string_view name) const;
     image* get_image(std::string_view name) const;
-    mesh* get_mesh(std::string_view name) const;
 
     template <typename T>
     bool for_each(std::function<bool(std::string_view, const T* const&)>) const;
