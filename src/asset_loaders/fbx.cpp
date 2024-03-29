@@ -5,7 +5,19 @@
 
 #include "asset_loaders/fbx.hpp"
 
+#include "assimp/quaternion.h"
+#include "camera.hpp"
 #include "mesh.hpp"
+
+glm::vec3 convert(aiVector3D ai_vec3)
+{
+    return { ai_vec3.x, ai_vec3.y, ai_vec3.z };
+}
+
+glm::quat convert(aiQuaternion ai_quat)
+{
+    return { ai_quat.w, ai_quat.x, ai_quat.y, ai_quat.z };
+}
 
 void asset_loader_FBX::load(std::string_view path)
 {
@@ -21,6 +33,8 @@ void asset_loader_FBX::load(std::string_view path)
     std::vector<vertex3d> vertices;
     std::vector<int> indices;
     std::vector<mesh::submesh_info> submeshes;
+
+    // TODO: there can be multiple separate meshes
 
     for (int i = 0; i < scene->mNumMeshes; ++i)
     {
@@ -66,9 +80,27 @@ void asset_loader_FBX::load(std::string_view path)
     _mesh->set_indices(std::move(indices));
     _mesh->set_submeshes(std::move(submeshes));
     _mesh->init();
+
+    for (int i = 0; i < scene->mNumCameras; ++i)
+    {
+        auto cam = new camera;
+        const auto& aiCam = *scene->mCameras[ i ];
+        const auto& aiCamNode = *scene->mRootNode->FindNode(aiCam.mName);
+        aiMatrix4x4 camMat;
+        aiCam.GetCameraMatrix(camMat);
+        aiMatrix4x4 final = aiCamNode.mTransformation;
+        final *= camMat;
+        aiVector3D pos;
+        aiVector3D scale;
+        aiQuaternion rot;
+        // aiCamNode.mTransformation.Decompose(scale, rot, pos);
+        final.Decompose(scale, rot, pos);
+        cam->set_fov(aiCam.mHorizontalFOV * 2.0f);
+        cam->set_ortho(false);
+        auto& t = cam->get_transform();
+        t.set_position(convert(pos) / convert(scale));
+        t.set_rotation(convert(rot));
+    }
 }
 
-mesh* asset_loader_FBX::get_mesh()
-{
-    return _mesh;
-}
+mesh* asset_loader_FBX::get_mesh() { return _mesh; }
