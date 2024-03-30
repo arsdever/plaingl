@@ -7,6 +7,7 @@
 
 #include "assimp/quaternion.h"
 #include "camera.hpp"
+#include "light.hpp"
 #include "mesh.hpp"
 
 glm::vec3 convert(aiVector3D ai_vec3)
@@ -17,6 +18,11 @@ glm::vec3 convert(aiVector3D ai_vec3)
 glm::quat convert(aiQuaternion ai_quat)
 {
     return { ai_quat.w, ai_quat.x, ai_quat.y, ai_quat.z };
+}
+
+glm::vec3 convert(aiColor3D ai_quat)
+{
+    return { ai_quat.r, ai_quat.g, ai_quat.b };
 }
 
 void asset_loader_FBX::load(std::string_view path)
@@ -93,13 +99,31 @@ void asset_loader_FBX::load(std::string_view path)
         aiVector3D pos;
         aiVector3D scale;
         aiQuaternion rot;
-        // aiCamNode.mTransformation.Decompose(scale, rot, pos);
         final.Decompose(scale, rot, pos);
         cam->set_fov(aiCam.mHorizontalFOV * 2.0f);
         cam->set_ortho(false);
         auto& t = cam->get_transform();
         t.set_position(convert(pos) / convert(scale));
         t.set_rotation(convert(rot));
+    }
+
+    for (int i = 0; i < scene->mNumLights; ++i)
+    {
+        auto l = new light;
+        const auto& al = *scene->mLights[ i ];
+        const auto& aln = *scene->mRootNode->FindNode(al.mName);
+        aiMatrix4x4 mat = aln.mTransformation;
+        aiVector3D pos;
+        aiVector3D scale;
+        aiQuaternion rot;
+        mat.Decompose(scale, rot, pos);
+        l->get_transform().set_position(convert(al.mPosition + pos) / 100.0f);
+        glm::vec3 combined_intensity_color = convert(al.mColorDiffuse);
+        auto intensity = std::max(
+            std::max(combined_intensity_color.x, combined_intensity_color.y),
+            combined_intensity_color.z);
+        l->set_color(combined_intensity_color / intensity);
+        l->set_intensity(intensity / 100);
     }
 }
 

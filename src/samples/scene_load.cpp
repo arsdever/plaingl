@@ -116,7 +116,7 @@ void init_scene()
 
     material* basic_mat = am->get_material("basic");
     basic_mat->set_property_value("albedo_texture_strength", 0.0f);
-    basic_mat->set_property_value("albedo_color", 1.0f, 0.8f, 0.2f, 1.0f);
+    basic_mat->set_property_value("albedo_color", 0.8f, 0.8f, 0.8f, 1.0f);
     basic_mat->set_property_value("normal_texture_strength", 0.0f);
 
     camera::active_camera()->set_background(glm::vec3(.3, .6, .7));
@@ -129,8 +129,8 @@ void init_scene()
     object->create_component<transform_component>();
     scene::get_active_scene()->add_object(object);
 
-    auto l = new light();
-    l->set_color(glm::vec3(0.3f, 0.3f, 0.3f));
-    l->get_transform().set_position({ 0, 0, 5 });
-    l->set_intensity(5.0f);
+    // auto l = new light();
+    // l->set_color(glm::vec3(0.3f, 0.3f, 0.3f));
+    // l->get_transform().set_position({ 0, 0, 5 });
+    // l->set_intensity(5.0f);
 }
