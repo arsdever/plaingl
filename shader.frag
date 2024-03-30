@@ -56,7 +56,10 @@ vec3 calculate_light_diffuse(light_t light, vec3 fragment_normal)
 {
     vec3 light_dir = normalize(light.position - position);
     float diff = max(dot(fragment_normal, light_dir), 0.0);
-    vec3 diffuse = diff * light.color * light.intensity;
+
+    float dist = distance(light.position, position);
+    float intensity = light.intensity / (dist * dist);
+    vec3 diffuse = diff * light.color * intensity;
 
     return diffuse;
 }
