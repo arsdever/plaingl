@@ -7,18 +7,10 @@
 
 #include "asset_manager.hpp"
 #include "camera.hpp"
-#include "components/mesh_component.hpp"
-#include "components/mesh_renderer_component.hpp"
-#include "components/transform_component.hpp"
 #include "experimental/viewport.hpp"
 #include "experimental/window.hpp"
-#include "game_object.hpp"
 #include "gl_error_handler.hpp"
-#include "light.hpp"
 #include "logging.hpp"
-#include "material.hpp"
-#include "scene.hpp"
-#include "texture.hpp"
 
 namespace
 {
@@ -34,11 +26,9 @@ int main(int argc, char** argv)
     auto exp_window = std::make_shared<experimental::window>();
 
     std::shared_ptr<camera> main_camera = nullptr;
-    std::shared_ptr<scene> current_scene = nullptr;
 
     exp_window->on_user_initialize +=
-        [ &current_scene,
-          &main_camera ](std::shared_ptr<experimental::window> wnd)
+        [ &main_camera ](std::shared_ptr<experimental::window> wnd)
     {
         // configure gl debug output
         glEnable(GL_DEBUG_OUTPUT);
@@ -47,10 +37,11 @@ int main(int argc, char** argv)
         glDebugMessageControl(
             GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
 
-        asset_manager::default_asset_manager()->load_asset("shader_ball.fbx");
+        auto* am = asset_manager::default_asset_manager();
+        am->load_asset("standard.shader");
+        am->load_asset("shader_ball.fbx");
 
         main_camera = std::shared_ptr<camera>(camera::all_cameras()[ 0 ]);
-        current_scene = std::make_shared<scene>();
         main_camera->set_active();
         init_scene();
         auto vp = std::make_shared<experimental::viewport>();
@@ -111,27 +102,5 @@ int main(int argc, char** argv)
 
 void init_scene()
 {
-    auto* am = asset_manager::default_asset_manager();
-    am->load_asset("standard.shader");
-    am->load_asset("basic.mat");
-
-    material* basic_mat = am->get_material("basic");
-    basic_mat->set_property_value("albedo_texture_strength", 0.0f);
-    basic_mat->set_property_value("albedo_color", 0.8f, 0.353f, 0.088f, 1.0f);
-    basic_mat->set_property_value("normal_texture_strength", 0.0f);
-
     camera::active_camera()->set_background(glm::vec3(.3, .6, .7));
-
-    game_object* object = new game_object;
-    object->create_component<mesh_component>();
-    object->create_component<mesh_renderer_component>();
-    object->get_component<mesh_component>()->set_mesh(am->meshes()[ 1 ]);
-    object->get_component<mesh_renderer_component>()->set_material(basic_mat);
-    object->create_component<transform_component>();
-    scene::get_active_scene()->add_object(object);
-
-    // auto l = new light();
-    // l->set_color(glm::vec3(0.3f, 0.3f, 0.3f));
-    // l->get_transform().set_position({ 0, 0, 5 });
-    // l->set_intensity(5.0f);
 }

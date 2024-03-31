@@ -1,3 +1,5 @@
+#include <queue>
+
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
@@ -5,10 +7,17 @@
 
 #include "asset_loaders/fbx.hpp"
 
+#include "asset_manager.hpp"
 #include "assimp/quaternion.h"
 #include "camera.hpp"
+#include "components/mesh_component.hpp"
+#include "components/mesh_renderer_component.hpp"
+#include "game_object.hpp"
 #include "light.hpp"
+#include "logging.hpp"
+#include "material.hpp"
 #include "mesh.hpp"
+#include "scene.hpp"
 
 glm::vec3 convert(aiVector3D ai_vec3)
 {
@@ -28,97 +37,99 @@ glm::vec3 convert(aiColor3D ai_quat)
 void asset_loader_FBX::load(std::string_view path)
 {
     Assimp::Importer importer;
-    const aiScene* scene =
+    const aiScene* ai_scene =
         importer.ReadFile(path.data(),
                           aiProcess_CalcTangentSpace | aiProcess_Triangulate |
                               aiProcess_JoinIdenticalVertices |
                               aiProcess_SortByPType | aiProcess_EmbedTextures);
+    scene* s = new scene;
 
-    // TODO: check if the scene was loaded
-
-    std::vector<vertex3d> vertices;
-    std::vector<int> indices;
-    std::vector<mesh::submesh_info> submeshes;
-
-    // TODO: there can be multiple separate meshes
-
-    for (int i = 0; i < scene->mNumMeshes; ++i)
+    auto log = get_logger("fbx_loader");
+    std::queue<aiNode*> dfs_queue;
+    dfs_queue.push(ai_scene->mRootNode);
+    while (!dfs_queue.empty())
     {
-        mesh::submesh_info info;
-        const aiMesh* assimp_mesh = scene->mMeshes[ i ];
-        info.material_index = assimp_mesh->mMaterialIndex;
-        info.vertex_index_offset = indices.size();
-
-        for (int vertex_index = 0; vertex_index < assimp_mesh->mNumVertices;
-             ++vertex_index)
+        aiNode* node = dfs_queue.front();
+        dfs_queue.pop();
+        for (int i = 0; i < node->mNumChildren; ++i)
         {
-            vertices.push_back({});
-            constexpr char position_name[] = "position";
-            vertices.back().position() = {
-                assimp_mesh->mVertices[ vertex_index ].x,
-                assimp_mesh->mVertices[ vertex_index ].y,
-                assimp_mesh->mVertices[ vertex_index ].z
-            };
-            vertices.back().normal() = {
-                assimp_mesh->mNormals[ vertex_index ].x,
-                assimp_mesh->mNormals[ vertex_index ].y,
-                assimp_mesh->mNormals[ vertex_index ].z
-            };
-            vertices.back().uv() = {
-                assimp_mesh->mTextureCoords[ 0 ][ vertex_index ].x,
-                assimp_mesh->mTextureCoords[ 0 ][ vertex_index ].y,
-            };
+            dfs_queue.push(node->mChildren[ i ]);
         }
 
-        for (int face_index = 0; face_index < assimp_mesh->mNumFaces;
-             ++face_index)
+        log->info("Node: {} meshes: {}", node->mName.C_Str(), node->mNumMeshes);
+        if (node->mNumMeshes > 0)
         {
-            const aiFace& assimp_face = assimp_mesh->mFaces[ face_index ];
-            for (int j = 0; j < assimp_face.mNumIndices; ++j)
-                indices.push_back(assimp_face.mIndices[ j ]);
-        }
+            game_object* obj = new game_object;
+            mesh* m = nullptr;
+            {
+                std::vector<const aiMesh*> ai_submeshes;
+                for (int i = 0; i < node->mNumMeshes; ++i)
+                {
+                    ai_submeshes.push_back(
+                        ai_scene->mMeshes[ node->mMeshes[ i ] ]);
+                }
 
-        submeshes.push_back(std::move(info));
+                m = load_mesh(std::move(ai_submeshes));
+            }
+            material* mat = new material;
+            mat->set_shader_program(
+                asset_manager::default_asset_manager()->get_shader("standard"));
+            mat->declare_property("albedo_texture_strength",
+                                  material_property::data_type::type_float);
+            mat->declare_property(
+                "albedo_color",
+                material_property::data_type::type_float_vector_4);
+            mat->declare_property("normal_texture_strength",
+                                  material_property::data_type::type_float);
+            mat->declare_property("model_matrix",
+                                  material_property::data_type::unknown);
+            mat->declare_property("vp_matrix",
+                                  material_property::data_type::unknown);
+            mat->set_property_value("albedo_texture_strength", 0.0f);
+            mat->set_property_value("albedo_color", 0.8f, 0.353f, 0.088f, 1.0f);
+            mat->set_property_value("normal_texture_strength", 0.0f);
+
+            obj->create_component<mesh_renderer_component>()->set_material(mat);
+            obj->create_component<mesh_component>()->set_mesh(m);
+            obj->set_name(node->mName.C_Str());
+            s->add_object(obj);
+        }
     }
 
-    _mesh = new mesh;
-    _mesh->set_vertices(std::move(vertices));
-    _mesh->set_indices(std::move(indices));
-    _mesh->set_submeshes(std::move(submeshes));
-    _mesh->init();
-
-    for (int i = 0; i < scene->mNumCameras; ++i)
+    for (int i = 0; i < ai_scene->mNumCameras; ++i)
     {
-        auto cam = new camera;
-        const auto& aiCam = *scene->mCameras[ i ];
-        const auto& aiCamNode = *scene->mRootNode->FindNode(aiCam.mName);
+        auto cam = load_camera(ai_scene->mCameras[ i ]);
+        const auto& ai_camera = *ai_scene->mCameras[ i ];
+        const auto& ai_camera_node =
+            *ai_scene->mRootNode->FindNode(ai_camera.mName);
         aiMatrix4x4 camMat;
-        aiCam.GetCameraMatrix(camMat);
-        aiMatrix4x4 final = aiCamNode.mTransformation;
+        ai_camera.GetCameraMatrix(camMat);
+        aiMatrix4x4 final = ai_camera_node.mTransformation;
         final *= camMat;
         aiVector3D pos;
         aiVector3D scale;
         aiQuaternion rot;
         final.Decompose(scale, rot, pos);
-        cam->set_fov(aiCam.mHorizontalFOV * 2.0f);
-        cam->set_ortho(false);
         auto& t = cam->get_transform();
         t.set_position(convert(pos) / convert(scale));
         t.set_rotation(convert(rot));
+        log->info("Camera: {}", ai_camera.mName.C_Str());
     }
 
-    for (int i = 0; i < scene->mNumLights; ++i)
+    for (int i = 0; i < ai_scene->mNumLights; ++i)
     {
         auto l = new light;
-        const auto& al = *scene->mLights[ i ];
-        const auto& aln = *scene->mRootNode->FindNode(al.mName);
-        aiMatrix4x4 mat = aln.mTransformation;
+        const auto& ai_light = *ai_scene->mLights[ i ];
+        const auto& ai_light_node =
+            *ai_scene->mRootNode->FindNode(ai_light.mName);
+        aiMatrix4x4 mat = ai_light_node.mTransformation;
         aiVector3D pos;
         aiVector3D scale;
         aiQuaternion rot;
         mat.Decompose(scale, rot, pos);
-        l->get_transform().set_position(convert(al.mPosition + pos) / 100.0f);
-        glm::vec3 combined_intensity_color = convert(al.mColorDiffuse);
+        l->get_transform().set_position(convert(ai_light.mPosition + pos) /
+                                        100.0f);
+        glm::vec3 combined_intensity_color = convert(ai_light.mColorDiffuse);
         auto intensity = std::max(
             std::max(combined_intensity_color.x, combined_intensity_color.y),
             combined_intensity_color.z);
@@ -127,4 +138,68 @@ void asset_loader_FBX::load(std::string_view path)
     }
 }
 
-mesh* asset_loader_FBX::get_mesh() { return _mesh; }
+mesh* asset_loader_FBX::load_mesh(std::vector<const aiMesh*> ai_submeshes)
+{
+    mesh* result;
+    std::vector<vertex3d> vertices;
+    std::vector<int> indices;
+    std::vector<mesh::submesh_info> submeshes;
+
+    for (auto ai_mesh : ai_submeshes)
+    {
+        mesh::submesh_info info;
+        info.material_index = ai_mesh->mMaterialIndex;
+        info.vertex_index_offset = indices.size();
+
+        for (int vertex_index = 0; vertex_index < ai_mesh->mNumVertices;
+             ++vertex_index)
+        {
+            vertices.push_back({});
+            constexpr char position_name[] = "position";
+            vertices.back().position() = {
+                ai_mesh->mVertices[ vertex_index ].x,
+                ai_mesh->mVertices[ vertex_index ].y,
+                ai_mesh->mVertices[ vertex_index ].z
+            };
+            vertices.back().normal() = { ai_mesh->mNormals[ vertex_index ].x,
+                                         ai_mesh->mNormals[ vertex_index ].y,
+                                         ai_mesh->mNormals[ vertex_index ].z };
+            vertices.back().uv() = {
+                ai_mesh->mTextureCoords[ 0 ][ vertex_index ].x,
+                ai_mesh->mTextureCoords[ 0 ][ vertex_index ].y,
+            };
+        }
+
+        for (int face_index = 0; face_index < ai_mesh->mNumFaces; ++face_index)
+        {
+            const aiFace& assimp_face = ai_mesh->mFaces[ face_index ];
+            for (int j = 0; j < assimp_face.mNumIndices; ++j)
+                indices.push_back(assimp_face.mIndices[ j ] +
+                                  info.vertex_index_offset);
+        }
+
+        submeshes.push_back(std::move(info));
+    }
+
+    result = new mesh;
+    result->set_vertices(std::move(vertices));
+    result->set_indices(std::move(indices));
+    result->set_submeshes(std::move(submeshes));
+    result->init();
+
+    return result;
+}
+
+camera* asset_loader_FBX::load_camera(const aiCamera* ai_camera)
+{
+    camera* result = new camera;
+    result->set_fov(ai_camera->mHorizontalFOV * 2.0f);
+    result->set_ortho(false);
+    return result;
+}
+
+light* asset_loader_FBX::load_light(const aiLight* ai_light)
+{
+    light* result = new light;
+    return result;
+}

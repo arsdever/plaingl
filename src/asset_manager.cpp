@@ -26,8 +26,6 @@ void asset_manager::load_asset(std::string_view path)
     {
         asset_loader_FBX fbx_loader;
         fbx_loader.load(path);
-        auto [ it, success ] =
-            _meshs.try_emplace(filename, fbx_loader.get_mesh());
         return;
     }
 #endif
