@@ -1,2 +1,0 @@
-./shader.frag
-./shader.vert

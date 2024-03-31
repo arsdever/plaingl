@@ -112,11 +112,12 @@ int main(int argc, char** argv)
 void init_scene()
 {
     auto* am = asset_manager::default_asset_manager();
+    am->load_asset("standard.shader");
     am->load_asset("basic.mat");
 
     material* basic_mat = am->get_material("basic");
     basic_mat->set_property_value("albedo_texture_strength", 0.0f);
-    basic_mat->set_property_value("albedo_color", 0.8f, 0.8f, 0.8f, 1.0f);
+    basic_mat->set_property_value("albedo_color", 0.8f, 0.353f, 0.088f, 1.0f);
     basic_mat->set_property_value("normal_texture_strength", 0.0f);
 
     camera::active_camera()->set_background(glm::vec3(.3, .6, .7));

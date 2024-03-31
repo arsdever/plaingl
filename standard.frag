@@ -48,7 +48,7 @@ vec4 albedo_mixed_color(vec2 uv_coord)
 
 vec3 calculate_light_ambient(light_t light)
 {
-    vec3 ambient = 0.2 * light.color;
+    vec3 ambient = 0.1 * light.color;
     return ambient;
 }
 
