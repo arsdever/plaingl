@@ -167,9 +167,9 @@ glm::mat4 camera::view_matrix() const
 {
     // TODO: optimize with caching
     glm::quat rotation = get_transform().get_rotation();
-    glm::vec3 cam_right = rotation * glm::vec3 { -1, 0, 0 };
+    glm::vec3 cam_right = rotation * glm::vec3 { 1, 0, 0 };
     glm::vec3 cam_up = rotation * glm::vec3 { 0, 1, 0 };
-    glm::vec3 cam_forward = rotation * glm::vec3 { 0, 0, -1 };
+    glm::vec3 cam_forward = rotation * glm::vec3 { 0, 0, 1 };
 
     glm::mat3 view3(cam_right, cam_up, cam_forward);
     glm::mat4 view = view3;
@@ -201,7 +201,7 @@ glm::mat4 camera::projection_matrix() const
     }
 
     return glm::perspective(
-        glm::radians(_fov), size.x / size.y, 0.1f, 10000.0f);
+        _fov, size.x / size.y, 0.1f, 10000.0f);
 }
 
 transform& camera::get_transform() { return _transformation; }
