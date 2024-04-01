@@ -1,48 +1,53 @@
 {
-	"shader": "standard",
-	"properties": [
-		{
-			"name": "albedo_color",
-			"type": "vec4",
-			"value": [1.0, 0.0, 1.0, 1.0]
-		},
-		{
-			"name": "albedo_texture_strength",
-			"type": "float",
-			"value": 1.0
-		},
-		{
-			"name": "albedo_texture",
-			"type": "image"
-		},
-		{
-			"name": "normal_texture_strength",
-			"type": "float",
-			"value": 1.0
-		},
-		{
-			"name": "normal_texture",
-			"type": "image"
-		},
-		{
-			"name": "model_matrix",
-			"type": "mat44"
-		},
-		{
-			"name": "vp_matrix",
-			"type": "mat44"
-		},
-		{
-			"name": "light_intensity",
-			"type": "float"
-		},
-		{
-			"name": "light_pos",
-			"type": "vec3"
-		},
-		{
-			"name": "light_color",
-			"type": "vec3"
-		}
-	]
+  "shader": "base",
+  "properties": [
+    {
+      "name": "albedo_color",
+      "type": "vec4",
+      "value": [
+        1,
+        0,
+        1,
+        1
+      ]
+    },
+    {
+      "name": "albedo_texture_strength",
+      "type": "float",
+      "value": 1
+    },
+    {
+      "name": "albedo_texture",
+      "type": "image"
+    },
+    {
+      "name": "normal_texture_strength",
+      "type": "float",
+      "value": 1
+    },
+    {
+      "name": "normal_texture",
+      "type": "image"
+    },
+    {
+      "name": "model_matrix",
+      "type": "mat44"
+    },
+    {
+      "name": "vp_matrix",
+      "type": "mat44"
+    },
+    {
+      "name": "light_intensity",
+      "type": "float"
+    },
+    {
+      "name": "light_pos",
+      "type": "vec3"
+    },
+    {
+      "name": "light_color",
+      "type": "vec3"
+    }
+  ]
 }
