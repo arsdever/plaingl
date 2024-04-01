@@ -21,41 +21,40 @@ void camera_component::draw_gizmos()
 {
     // https://docs.unity3d.com/Manual/FrustumSizeAtDistance.html
     float distance = 20.0f;
-    double frustumHeight =
-        2.0 * distance * std::tan(glm::radians(_camera->get_fov() * 0.5));
+    double frustumHeight = 2.0 * distance * std::tan(_camera->get_fov() * 0.5);
     double frustumWidth = frustumHeight * _camera->get_aspect_ratio();
 
     gizmo_drawer::instance()->draw_line(
         { 0, 0, 0 },
-        { frustumWidth / 2, frustumHeight / 2, distance },
+        { frustumWidth / 2, frustumHeight / 2, -distance },
         { 1.0f, 1.0f, 0.0f, 1.0f });
     gizmo_drawer::instance()->draw_line(
         { 0, 0, 0 },
-        { -frustumWidth / 2, frustumHeight / 2, distance },
+        { -frustumWidth / 2, frustumHeight / 2, -distance },
         { 1.0f, 1.0f, 0.0f, 1.0f });
     gizmo_drawer::instance()->draw_line(
         { 0, 0, 0 },
-        { -frustumWidth / 2, -frustumHeight / 2, distance },
+        { -frustumWidth / 2, -frustumHeight / 2, -distance },
         { 1.0f, 1.0f, 0.0f, 1.0f });
     gizmo_drawer::instance()->draw_line(
         { 0, 0, 0 },
-        { frustumWidth / 2, -frustumHeight / 2, distance },
+        { frustumWidth / 2, -frustumHeight / 2, -distance },
         { 1.0f, 1.0f, 0.0f, 1.0f });
 
     gizmo_drawer::instance()->draw_line(
-        { frustumWidth / 2, frustumHeight / 2, distance },
-        { -frustumWidth / 2, frustumHeight / 2, distance },
+        { frustumWidth / 2, frustumHeight / 2, -distance },
+        { -frustumWidth / 2, frustumHeight / 2, -distance },
         { 1.0f, 1.0f, 0.0f, 1.0f });
     gizmo_drawer::instance()->draw_line(
-        { -frustumWidth / 2, frustumHeight / 2, distance },
-        { -frustumWidth / 2, -frustumHeight / 2, distance },
+        { -frustumWidth / 2, frustumHeight / 2, -distance },
+        { -frustumWidth / 2, -frustumHeight / 2, -distance },
         { 1.0f, 1.0f, 0.0f, 1.0f });
     gizmo_drawer::instance()->draw_line(
-        { -frustumWidth / 2, -frustumHeight / 2, distance },
-        { frustumWidth / 2, -frustumHeight / 2, distance },
+        { -frustumWidth / 2, -frustumHeight / 2, -distance },
+        { frustumWidth / 2, -frustumHeight / 2, -distance },
         { 1.0f, 1.0f, 0.0f, 1.0f });
     gizmo_drawer::instance()->draw_line(
-        { frustumWidth / 2, -frustumHeight / 2, distance },
-        { frustumWidth / 2, frustumHeight / 2, distance },
+        { frustumWidth / 2, -frustumHeight / 2, -distance },
+        { frustumWidth / 2, frustumHeight / 2, -distance },
         { 1.0f, 1.0f, 0.0f, 1.0f });
 }

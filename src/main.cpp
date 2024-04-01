@@ -32,6 +32,7 @@
 #include "experimental/viewport.hpp"
 #include "experimental/window.hpp"
 #include "experimental/window_events.hpp"
+#include "feature_flags.hpp"
 #include "font.hpp"
 #include "game_clock.hpp"
 #include "game_object.hpp"
@@ -321,15 +322,15 @@ void initViewports()
     };
     _view_cameras[ 0 ]->get_transform().set_position({ 100, 0, 0 });
     _view_cameras[ 0 ]->get_transform().set_rotation(glm::quatLookAt(
-        glm::vec3 { 1.0f, 0.0f, 0.0f }, glm::vec3 { 0.0f, 1.0f, 0.0f }));
+        glm::vec3 { -1.0f, 0.0f, 0.0f }, glm::vec3 { 0.0f, 1.0f, 0.0f }));
 
     _view_cameras[ 1 ]->get_transform().set_position({ 0, 100, 0 });
     _view_cameras[ 1 ]->get_transform().set_rotation(glm::quatLookAt(
-        glm::vec3 { 0.0f, 1.0f, 0.0f }, glm::vec3 { 0.0f, 0.0f, 1.0f }));
+        glm::vec3 { 0.0f, -1.0f, 0.0f }, glm::vec3 { 0.0f, 0.0f, 1.0f }));
 
     _view_cameras[ 2 ]->get_transform().set_position({ 0, 0, 100 });
     _view_cameras[ 2 ]->get_transform().set_rotation(glm::quatLookAt(
-        glm::vec3 { 0.0f, 0.0f, 1.0f }, glm::vec3 { 0.0f, 1.0f, 0.0f }));
+        glm::vec3 { 0.0f, 0.0f, -1.0f }, glm::vec3 { 0.0f, 1.0f, 0.0f }));
 }
 
 void setupMouseEvents()
@@ -389,12 +390,7 @@ void setupMouseEvents()
 
 void initScene()
 {
-    shader_program* prog = new shader_program;
-    prog->init();
-    prog->add_shader("shader.vert");
-    prog->add_shader("shader.frag");
-    prog->link();
-
+    feature_flags::set_flag(feature_flags::flag_name::load_fbx_as_scene, false);
     auto* am = asset_manager::default_asset_manager();
     am->load_asset("cube.fbx");
     am->load_asset("sphere.fbx");
@@ -426,7 +422,7 @@ void initScene()
     // object->create_component<jumpy_component>();
     auto* bc = object->create_component<box_collider_component>();
     object->get_component<mesh_component>()->set_mesh(
-        am->get_mesh("susane_head"));
+        am->get_mesh("Suzanne_mesh"));
     object->get_component<mesh_renderer_component>()->set_material(basic_mat);
     object->set_name("susane");
     s.add_object(object);

@@ -41,13 +41,14 @@ vec2 convert_from_blenders_uv_map(vec2 blender_uv)
 
 vec4 albedo_mixed_color(vec2 uv_coord)
 {
-    return albedo_color * (1 - albedo_texture_strength) +
-           texture(albedo_texture, uv_coord) * albedo_texture_strength;
+    return mix(albedo_color,
+               texture(albedo_texture, uv_coord),
+               albedo_texture_strength);
 }
 
 vec3 calculate_light_ambient(light_t light)
 {
-    vec3 ambient = 0.2 * light.color;
+    vec3 ambient = 0.1 * light.color;
     return ambient;
 }
 
@@ -55,7 +56,10 @@ vec3 calculate_light_diffuse(light_t light, vec3 fragment_normal)
 {
     vec3 light_dir = normalize(light.position - position);
     float diff = max(dot(fragment_normal, light_dir), 0.0);
-    vec3 diffuse = diff * light.color * light.intensity;
+
+    float dist = distance(light.position, position);
+    float intensity = light.intensity / (dist * dist);
+    vec3 diffuse = diff * light.color * intensity;
 
     return diffuse;
 }
@@ -65,7 +69,7 @@ void main()
     vec2 converted_uv = convert_from_blenders_uv_map(uv);
     vec3 norm = texture(normal_texture, converted_uv).rgb;
     norm = normalize(norm * 2 - 1);
-    norm = mix(norm, normal, normal_texture_strength);
+    norm = mix(normal, norm, normal_texture_strength);
 
     vec3 combined_diffuse = vec3(0, 0, 0);
     vec3 combined_ambient = vec3(0, 0, 0);

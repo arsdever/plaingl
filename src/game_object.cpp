@@ -55,7 +55,8 @@ void game_object::set_active(bool active_flag) { _is_active = active_flag; }
 
 bool game_object::is_active() const { return _is_active; }
 
-void game_object::set_name(std::string_view name) {
+void game_object::set_name(std::string_view name)
+{
     _name = std::string { name };
 }
 
@@ -64,3 +65,15 @@ std::string_view game_object::get_name() const { return _name; }
 transform& game_object::get_transform() { return _transformation; }
 
 const transform& game_object::get_transform() const { return _transformation; }
+
+void game_object::add_child(game_object* child)
+{
+    child->set_parent(this);
+    _children.push_back(child);
+}
+
+std::vector<game_object*>& game_object::get_children() { return _children; }
+
+void game_object::set_parent(game_object* parent) { _parent = parent; }
+
+game_object* game_object::get_parent() { return _parent; }

@@ -10,6 +10,7 @@ add_library(
   color.hpp
   logging.hpp
   event.hpp
+  feature_flags.hpp
   file.hpp
   file.cpp
   font.hpp
