@@ -21,6 +21,10 @@ public:
     void load_asset(std::string_view path);
     template <typename T>
     void save_asset(std::string_view path, const T* asset);
+
+    template <typename T>
+    void register_asset(std::string_view name, T* asset);
+
     const std::vector<mesh*> meshes() const;
     const std::vector<material*> materials() const;
     const std::vector<image*> textures() const;

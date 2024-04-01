@@ -9,6 +9,7 @@
 #include "camera.hpp"
 #include "experimental/viewport.hpp"
 #include "experimental/window.hpp"
+#include "feature_flags.hpp"
 #include "gl_error_handler.hpp"
 #include "logging.hpp"
 
@@ -26,6 +27,8 @@ int main(int argc, char** argv)
     auto exp_window = std::make_shared<experimental::window>();
 
     std::shared_ptr<camera> main_camera = nullptr;
+
+    feature_flags::set_flag(feature_flags::flag_name::load_fbx_as_scene, true);
 
     exp_window->on_user_initialize +=
         [ &main_camera ](std::shared_ptr<experimental::window> wnd)

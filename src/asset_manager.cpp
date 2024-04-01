@@ -88,6 +88,13 @@ void asset_manager::save_asset<image>(std::string_view path, const image* img)
 #endif
 }
 
+template <>
+void asset_manager::register_asset<mesh>(std::string_view name,
+                                         mesh* asset)
+{
+    _meshs.emplace(std::string(name), asset);
+}
+
 const std::vector<mesh*> asset_manager::meshes() const
 {
     std::vector<mesh*> result;

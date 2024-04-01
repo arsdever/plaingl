@@ -12,6 +12,7 @@
 #include "camera.hpp"
 #include "components/mesh_component.hpp"
 #include "components/mesh_renderer_component.hpp"
+#include "feature_flags.hpp"
 #include "game_object.hpp"
 #include "light.hpp"
 #include "logging.hpp"
@@ -42,7 +43,12 @@ void asset_loader_FBX::load(std::string_view path)
                           aiProcess_CalcTangentSpace | aiProcess_Triangulate |
                               aiProcess_JoinIdenticalVertices |
                               aiProcess_SortByPType | aiProcess_EmbedTextures);
-    scene* s = new scene;
+
+    scene* s = nullptr;
+    if (feature_flags::get_flag(feature_flags::flag_name::load_fbx_as_scene))
+    {
+        s = new scene;
+    }
 
     auto log = get_logger("fbx_loader");
     std::queue<aiNode*> dfs_queue;
@@ -70,6 +76,8 @@ void asset_loader_FBX::load(std::string_view path)
                 }
 
                 m = load_mesh(std::move(ai_submeshes));
+                asset_manager::default_asset_manager()->register_asset(
+                    std::format("{}_mesh", node->mName.C_Str()), m);
             }
             material* mat = new material;
             mat->set_shader_program(
@@ -92,7 +100,10 @@ void asset_loader_FBX::load(std::string_view path)
             obj->create_component<mesh_renderer_component>()->set_material(mat);
             obj->create_component<mesh_component>()->set_mesh(m);
             obj->set_name(node->mName.C_Str());
-            s->add_object(obj);
+            if (s)
+            {
+                s->add_object(obj);
+            }
         }
     }
 
