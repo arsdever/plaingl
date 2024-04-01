@@ -136,7 +136,8 @@ void camera::render()
     }
 
     _background_shader->use();
-    mesh* quad_mesh = asset_manager::default_asset_manager()->get_mesh("quad");
+    mesh* quad_mesh =
+    asset_manager::default_asset_manager()->get_mesh("quad");
     quad_mesh->render();
     shader_program::unuse();
 
@@ -149,7 +150,8 @@ void camera::render()
 
     if (auto urt = _user_render_texture.lock())
     {
-        urt->clone(_framebuffer->color_texture().get());
+        _framebuffer->copy_texture(urt.get());
+        //     urt->clone(_framebuffer->color_texture().get());
     }
 
     if (old_active_camera)
@@ -200,8 +202,7 @@ glm::mat4 camera::projection_matrix() const
                           10000.0f);
     }
 
-    return glm::perspective(
-        _fov, size.x / size.y, 0.1f, 10000.0f);
+    return glm::perspective(_fov, size.x / size.y, 0.1f, 10000.0f);
 }
 
 transform& camera::get_transform() { return _transformation; }

@@ -21,6 +21,8 @@ public:
     std::shared_ptr<const texture> color_texture() const;
     std::shared_ptr<const texture> depth_texture() const;
 
+    void copy_texture(texture* txt) const;
+
     void resize(glm::uvec2 size);
 
     void bind();
