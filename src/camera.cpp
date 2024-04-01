@@ -152,7 +152,6 @@ void camera::render()
     if (auto urt = _user_render_texture.lock())
     {
         _framebuffer->copy_texture(urt.get());
-        //     urt->clone(_framebuffer->color_texture().get());
     }
 
     if (old_active_camera)

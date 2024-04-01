@@ -15,6 +15,7 @@ struct framebuffer::private_data
 {
     glm::uvec2 _size { 0, 0 };
     unsigned _fbo { 0 };
+    unsigned _copy_fbo { 0 };
     unsigned _sample_count { 1 };
     std::shared_ptr<texture> _color_texture { std::make_shared<texture>() };
     std::shared_ptr<texture> _depth_texture { std::make_shared<texture>() };
@@ -42,12 +43,14 @@ void framebuffer::initialize()
                 _p->_depth_texture->native_id());
     glFramebufferTexture2D(GL_FRAMEBUFFER,
                            GL_COLOR_ATTACHMENT0,
-                           GL_TEXTURE_2D_MULTISAMPLE,
+                           _p->_sample_count > 1 ? GL_TEXTURE_2D_MULTISAMPLE
+                                                 : GL_TEXTURE_2D,
                            _p->_color_texture->native_id(),
                            0);
     glFramebufferTexture2D(GL_FRAMEBUFFER,
                            GL_DEPTH_ATTACHMENT,
-                           GL_TEXTURE_2D_MULTISAMPLE,
+                           _p->_sample_count > 1 ? GL_TEXTURE_2D_MULTISAMPLE
+                                                 : GL_TEXTURE_2D,
                            _p->_depth_texture->native_id(),
                            0);
     auto fbo_status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
@@ -84,10 +87,20 @@ std::shared_ptr<const texture> framebuffer::depth_texture() const
 
 void framebuffer::copy_texture(texture* txt) const
 {
-    unsigned fbo;
+    if (_p->_sample_count == 1)
+    {
+        txt->clone(color_texture().get());
+        return;
+    }
+
     txt->init(_p->_size.x, _p->_size.y);
-    glGenFramebuffers(1, &fbo);
-    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
+
+    if (_p->_copy_fbo == 0)
+    {
+        glGenFramebuffers(1, &_p->_copy_fbo);
+    }
+
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, _p->_copy_fbo);
     glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER,
                            GL_COLOR_ATTACHMENT0,
                            GL_TEXTURE_2D,
@@ -105,7 +118,6 @@ void framebuffer::copy_texture(texture* txt) const
                       GL_COLOR_BUFFER_BIT,
                       GL_NEAREST);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    glDeleteFramebuffers(1, &fbo);
 }
 
 void framebuffer::resize(glm::uvec2 size)

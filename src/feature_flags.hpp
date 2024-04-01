@@ -7,8 +7,7 @@ class feature_flags
 public:
     enum class flag_name
     {
-        load_fbx_as_scene,
-        multisampling
+        load_fbx_as_scene
     };
 
 public:
