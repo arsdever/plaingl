@@ -37,6 +37,7 @@ camera::camera()
     _background_shader->link();
 
     _framebuffer = std::make_unique<framebuffer>();
+    _framebuffer->set_samples(32);
     _framebuffer->resize(_render_size);
     _framebuffer->initialize();
     glGenBuffers(1, &_lights_buffer);

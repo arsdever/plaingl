@@ -18,6 +18,8 @@ public:
     void initialize();
     void destroy();
 
+    void set_samples(unsigned sample_count);
+
     std::shared_ptr<const texture> color_texture() const;
     std::shared_ptr<const texture> depth_texture() const;
 

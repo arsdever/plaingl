@@ -28,6 +28,8 @@ public:
 
     void init(size_t width, size_t height, format texture_format = format::RGB);
 
+    void set_samples(int sample_count);
+
     glm::uvec2 get_size() const;
     size_t get_width() const;
     size_t get_height() const;
@@ -47,18 +49,20 @@ public:
 
     static texture from_image(image* img);
 
-    static void static_bind(size_t id);
-    static void static_unbind();
+    static void static_bind(size_t id, bool ms);
+    static void static_unbind(bool ms);
 
 private:
     static int convert_to_gl_internal_format(format f);
     static int convert_to_gl_format(format f);
+    unsigned target() const;
 
 private:
     size_t _width { 0 };
     size_t _height { 0 };
     unsigned _texture_id { 0 };
     format _format { format::UNSPECIFIED };
+    int _samples { 1 };
 
 public:
     // TODO: may not be the best place for this object
