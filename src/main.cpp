@@ -341,7 +341,7 @@ void setupMouseEvents()
         if (me.get_sender()->get_has_grab())
         {
             main_camera_object->get_transform().set_rotation(
-                glm::quat(glm::radians(glm::vec3(me.get_local_position().y,
+                glm::quat(glm::radians(glm::vec3(-me.get_local_position().y,
                                                  -me.get_local_position().x,
                                                  0) *
                                        .1f)));
@@ -417,13 +417,10 @@ void initScene()
     basic_mat->set_property_value("light_intensity", 1.0f);
 
     game_object* object = new game_object;
-    object->create_component<mesh_component>();
-    object->create_component<mesh_renderer_component>();
-    // object->create_component<jumpy_component>();
-    auto* bc = object->create_component<box_collider_component>();
-    object->get_component<mesh_component>()->set_mesh(
+    object->create_component<mesh_component>()->set_mesh(
         am->get_mesh("Suzanne_mesh"));
-    object->get_component<mesh_renderer_component>()->set_material(basic_mat);
+    object->create_component<mesh_renderer_component>()->set_material(
+        basic_mat);
     object->set_name("susane");
     s.add_object(object);
     // bc->set_position(glm::vec3(0, 0, 0));
@@ -432,16 +429,17 @@ void initScene()
     // bc->set_rotation(glm::quat(glm::radians(glm::vec3 { 0, 30, 0 })));
 
     ttf.load("font.ttf", 16);
-    game_object* collision_text_object = new game_object;
-    auto* ct = collision_text_object->create_component<text_component>();
-    collision_text_object->create_component<text_renderer_component>();
-    collision_text_object->get_component<text_renderer_component>()->set_font(
-        &ttf);
-    collision_text_object->get_component<text_renderer_component>()
-        ->set_material(am->get_material("text"));
-    s.add_object(collision_text_object);
+    // game_object* collision_text_object = new game_object;
+    // auto* ct = collision_text_object->create_component<text_component>();
+    // collision_text_object->create_component<text_renderer_component>();
+    // collision_text_object->get_component<text_renderer_component>()->set_font(
+    //     &ttf);
+    // collision_text_object->get_component<text_renderer_component>()
+    //     ->set_material(am->get_material("text"));
+    // s.add_object(collision_text_object);
     // bc->_text = ct;
-    collision_text_object->get_transform().set_scale({ 0.005f, 0.005f, 1.0f });
+    // collision_text_object->get_transform().set_scale({ 0.005f, 0.005f, 1.0f
+    // });
 
     game_object* ray = new game_object;
     cast_ray = ray->create_component<ray_visualize_component>();
@@ -475,7 +473,7 @@ void initScene()
 
     main_camera->get_transform().set_position({ 0, 0, 3 });
     main_camera->get_transform().set_rotation(
-        glm::quatLookAt(glm::vec3 { 0.0f, 0.0f, 1.0f },
+        glm::quatLookAt(glm::vec3 { 0.0f, 0.0f, -1.0f },
                         glm::vec3 {
                             0.0f,
                             1.0f,
@@ -487,17 +485,17 @@ void initScene()
 
     light* l = new light();
     l->set_color(glm::vec3(1.0f, 1.0f, 1.0f));
-    l->set_intensity(1.0f);
+    l->set_intensity(10.0f);
     object = new game_object;
     object->create_component<light_component>()->set_light(l);
-    object->get_transform().set_position(glm::vec3(0.0f, 1.0f, 0.0f));
+    object->get_transform().set_position(glm::vec3(0.0f, 5.0f, 0.0f));
     s.add_object(object);
 
     l = new light();
     l->set_color(glm::vec3(1.0f, 1.0f, 1.0f));
-    l->set_intensity(1.0f);
+    l->set_intensity(10.0f);
     object = new game_object;
     object->create_component<light_component>()->set_light(l);
-    object->get_transform().set_position(glm::vec3(1.0f, 0.0f, 0.0f));
+    object->get_transform().set_position(glm::vec3(5.0f, 0.0f, 0.0f));
     s.add_object(object);
 }
