@@ -234,7 +234,7 @@ void camera::render_on_private_texture() const
                 renderer)
             {
                 renderer->get_material()->set_property_value(
-                    "model_matrix", obj->get_transform().get_matrix());
+                    "u_model_matrix", obj->get_transform().get_matrix());
                 renderer->render();
             }
         }
@@ -255,7 +255,7 @@ void camera::render_gizmos() const
                 continue;
             }
             gizmo_drawer::instance()->get_shader().set_uniform(
-                "model_matrix",
+                "u_model_matrix",
                 std::make_tuple(obj->get_transform().get_matrix()));
             obj->draw_gizmos();
         }
