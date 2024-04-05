@@ -2,7 +2,7 @@
   "shader": "standard",
   "properties": [
     {
-      "name": "albedo_color",
+      "name": "u_albedo_color",
       "type": "vec4",
       "value": [
         1,
@@ -12,21 +12,21 @@
       ]
     },
     {
-      "name": "albedo_texture_strength",
+      "name": "u_albedo_texture_strength",
       "type": "float",
       "value": 1
     },
     {
-      "name": "albedo_texture",
+      "name": "u_albedo_texture",
       "type": "image"
     },
     {
-      "name": "normal_texture_strength",
+      "name": "u_normal_texture_strength",
       "type": "float",
       "value": 1
     },
     {
-      "name": "normal_texture",
+      "name": "u_normal_texture",
       "type": "image"
     },
     {
@@ -42,11 +42,11 @@
       "type": "float"
     },
     {
-      "name": "model_matrix",
+      "name": "u_model_matrix",
       "type": "mat44"
     },
     {
-      "name": "vp_matrix",
+      "name": "u_vp_matrix",
       "type": "mat44"
     }
   ]

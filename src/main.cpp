@@ -409,9 +409,10 @@ void initScene()
     norm_txt = new texture();
     img = am->get_image("brick");
     *norm_txt = std::move(texture::from_image(img));
-    basic_mat->set_property_value("albedo_texture", txt);
-    basic_mat->set_property_value("albedo_texture_strength", 0.0f);
-    basic_mat->set_property_value("normal_texture", norm_txt);
+    basic_mat->set_property_value("u_albedo_texture", txt);
+    basic_mat->set_property_value("u_albedo_texture_strength", 0.0f);
+    basic_mat->set_property_value("u_normal_texture", norm_txt);
+    basic_mat->set_property_value("u_normal_texture_strength", .5f);
     basic_mat->set_property_value("u_roughness", 0.1f);
     basic_mat->set_property_value("u_metallic", 0.1f);
     basic_mat->set_property_value("u_ao", 0.0f);
@@ -465,7 +466,7 @@ void initScene()
     _fps_text_object->get_component<text_renderer_component>()->set_font(&ttf);
     _fps_text_object->get_component<text_renderer_component>()->set_material(
         am->get_material("text"));
-    am->get_material("text")->set_property_value("textColor", 1.0f, 1.0f, 1.0f);
+    am->get_material("text")->set_property_value("u_text_color", 1.0f, 1.0f, 1.0f);
     _fps_text_object->get_transform().set_position({ 0.5f, 2.0f, 0.0f });
     _fps_text_object->get_transform().set_scale({ 0.01f, 0.01f, 1.0f });
     _fps_text_object->set_name("fps_text");

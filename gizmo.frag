@@ -1,7 +1,7 @@
 #version 460 core
 
-uniform vec4 color;
+uniform vec4 u_color;
 
-out vec4 fragmentColor;
+out vec4 o_fragment_color;
 
-void main() { fragmentColor = color; }
+void main() { o_fragment_color = u_color; }
