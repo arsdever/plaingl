@@ -30,24 +30,24 @@
       "type": "image"
     },
     {
+      "name": "u_metallic",
+      "type": "float"
+    },
+    {
+      "name": "u_roughness",
+      "type": "float"
+    },
+    {
+      "name": "u_ao",
+      "type": "float"
+    },
+    {
       "name": "model_matrix",
       "type": "mat44"
     },
     {
       "name": "vp_matrix",
       "type": "mat44"
-    },
-    {
-      "name": "light_intensity",
-      "type": "float"
-    },
-    {
-      "name": "light_pos",
-      "type": "vec3"
-    },
-    {
-      "name": "light_color",
-      "type": "vec3"
     }
   ]
 }

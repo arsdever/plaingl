@@ -410,11 +410,11 @@ void initScene()
     img = am->get_image("brick");
     *norm_txt = std::move(texture::from_image(img));
     basic_mat->set_property_value("albedo_texture", txt);
-    basic_mat->set_property_value("albedo_texture_strength", 1.0f);
+    basic_mat->set_property_value("albedo_texture_strength", 0.0f);
     basic_mat->set_property_value("normal_texture", norm_txt);
-    basic_mat->set_property_value("light_pos", 0.0f, 1.0f, 0.0f);
-    basic_mat->set_property_value("light_color", 1.0f, 1.0f, 1.0f);
-    basic_mat->set_property_value("light_intensity", 1.0f);
+    basic_mat->set_property_value("u_roughness", 0.1f);
+    basic_mat->set_property_value("u_metallic", 0.1f);
+    basic_mat->set_property_value("u_ao", 0.0f);
 
     game_object* object = new game_object;
     object->create_component<mesh_component>()->set_mesh(
@@ -488,7 +488,7 @@ void initScene()
     l->set_intensity(10.0f);
     object = new game_object;
     object->create_component<light_component>()->set_light(l);
-    object->get_transform().set_position(glm::vec3(0.0f, 5.0f, 0.0f));
+    object->get_transform().set_position(glm::vec3(0.0f, 1.5f, 0.0f));
     s.add_object(object);
 
     l = new light();
@@ -496,6 +496,6 @@ void initScene()
     l->set_intensity(10.0f);
     object = new game_object;
     object->create_component<light_component>()->set_light(l);
-    object->get_transform().set_position(glm::vec3(5.0f, 0.0f, 0.0f));
+    object->get_transform().set_position(glm::vec3(2.0f, 0.0f, 0.0f));
     s.add_object(object);
 }
