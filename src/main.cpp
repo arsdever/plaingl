@@ -395,31 +395,45 @@ void initScene()
     am->load_asset("cube.fbx");
     am->load_asset("sphere.fbx");
     am->load_asset("susane_head.fbx");
+    am->load_asset("shader_ball.fbx");
     am->load_asset("camera.fbx");
     am->load_asset("text.mat");
     am->load_asset("basic.mat");
     am->load_asset("sample.png");
     am->load_asset("brick.png");
     am->load_asset("diffuse.png");
+    am->load_asset("albedo.jpg");
+    am->load_asset("metallic.jpg");
+    am->load_asset("roughness.jpg");
 
     material* basic_mat = am->get_material("basic");
     txt = new texture();
-    image* img = am->get_image("diffuse");
+    image* img = am->get_image("albedo");
     *txt = std::move(texture::from_image(img));
     norm_txt = new texture();
     img = am->get_image("brick");
     *norm_txt = std::move(texture::from_image(img));
+    auto roughness_txt = new texture;
+    img = am->get_image("roughness");
+    *roughness_txt = std::move(texture::from_image(img));
+    auto metallic_txt = new texture;
+    img = am->get_image("metallic");
+    *metallic_txt = std::move(texture::from_image(img));
     basic_mat->set_property_value("u_albedo_texture", txt);
-    basic_mat->set_property_value("u_albedo_texture_strength", 0.0f);
+    basic_mat->set_property_value("u_albedo_texture_strength", 1.0f);
     basic_mat->set_property_value("u_normal_texture", norm_txt);
-    basic_mat->set_property_value("u_normal_texture_strength", .5f);
-    basic_mat->set_property_value("u_roughness", 0.1f);
-    basic_mat->set_property_value("u_metallic", 0.1f);
-    basic_mat->set_property_value("u_ao", 0.0f);
+    basic_mat->set_property_value("u_normal_texture_strength", 1.0f);
+    basic_mat->set_property_value("u_roughness", 1.0f);
+    basic_mat->set_property_value("u_roughness_texture", roughness_txt);
+    basic_mat->set_property_value("u_roughness_texture_strength", 1.0f);
+    basic_mat->set_property_value("u_metallic", 1.0f);
+    basic_mat->set_property_value("u_metallic_texture", metallic_txt);
+    basic_mat->set_property_value("u_metallic_texture_strength", 1.0f);
+    basic_mat->set_property_value("u_ao", 0.1f);
 
     game_object* object = new game_object;
     object->create_component<mesh_component>()->set_mesh(
-        am->get_mesh("Suzanne_mesh"));
+        am->get_mesh("Shader Ball JL 01_mesh"));
     object->create_component<mesh_renderer_component>()->set_material(
         basic_mat);
     object->set_name("susane");
@@ -494,9 +508,9 @@ void initScene()
 
     l = new light();
     l->set_color(glm::vec3(1.0f, 1.0f, 1.0f));
-    l->set_intensity(10.0f);
+    l->set_intensity(100.0f);
     object = new game_object;
     object->create_component<light_component>()->set_light(l);
-    object->get_transform().set_position(glm::vec3(2.0f, 0.0f, 0.0f));
+    object->get_transform().set_position(glm::vec3(5.0f, 0.0f, 0.0f));
     s.add_object(object);
 }

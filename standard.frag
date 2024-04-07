@@ -12,6 +12,10 @@ uniform vec4 u_albedo_color;
 uniform sampler2D u_normal_texture;
 uniform float u_normal_texture_strength;
 uniform float u_metallic;
+uniform sampler2D u_metallic_texture;
+uniform float u_metallic_texture_strength;
+uniform sampler2D u_roughness_texture;
+uniform float u_roughness_texture_strength;
 uniform float u_roughness;
 uniform float u_ambient_occlusion;
 
@@ -116,7 +120,9 @@ vec3 direct_light_contribution(light_t light,
                                vec3 surface_albedo,
                                vec3 surface_normal,
                                vec3 view_direction,
-                               vec3 direct_fresnel)
+                               vec3 direct_fresnel,
+                               float roughness,
+                               float metallic)
 {
     // calculate per-light radiance
     vec3 light_to_fragment_direction =
@@ -124,24 +130,21 @@ vec3 direct_light_contribution(light_t light,
     vec3 half_vector = normalize(view_direction + light_to_fragment_direction);
     float light_to_fragment_distance =
         length(light.position - fragment_position);
-    float attenuation =
-        1.0 / (light_to_fragment_distance * light_to_fragment_distance);
+    float attenuation = light.intensity / (light_to_fragment_distance *
+                                           light_to_fragment_distance);
     vec3 radiance = light.color * attenuation;
 
     // cook-torrance brdf
     float normal_distribution =
-        ggx_distribution(surface_normal, half_vector, u_roughness);
-    float geometry_function =
-        smiths_geometry_function(surface_normal,
-                                 view_direction,
-                                 light_to_fragment_direction,
-                                 u_roughness);
+        ggx_distribution(surface_normal, half_vector, roughness);
+    float geometry_function = smiths_geometry_function(
+        surface_normal, view_direction, light_to_fragment_direction, roughness);
     vec3 fresnel = fresnel_schlick(max(dot(half_vector, view_direction), 0.0),
                                    direct_fresnel);
 
     vec3 specular_light_coefficient = fresnel;
     vec3 direct_light_coefficient = vec3(1.0) - specular_light_coefficient;
-    direct_light_coefficient *= 1.0 - u_metallic;
+    direct_light_coefficient *= 1.0 - metallic;
 
     vec3 numerator = normal_distribution * geometry_function * fresnel;
     float denominator =
@@ -164,7 +167,13 @@ void main()
 
     vec3 direct_fresnel = vec3(0.04);
     vec3 albedo = albedo_mixed_color(fragment_uv).xyz;
-    direct_fresnel = mix(direct_fresnel, albedo.rgb, u_metallic);
+    float roughness = mix(u_roughness,
+                          texture(u_roughness_texture, fragment_uv).r,
+                          u_albedo_texture_strength);
+    float metallic = mix(u_metallic,
+                         texture(u_metallic_texture, fragment_uv).r,
+                         u_albedo_texture_strength);
+    direct_fresnel = mix(direct_fresnel, albedo.rgb, metallic);
 
     // reflectance equation
     vec3 direct_light = vec3(0.0);
@@ -174,7 +183,9 @@ void main()
                                                   albedo,
                                                   surface_normal,
                                                   view_direction,
-                                                  direct_fresnel);
+                                                  direct_fresnel,
+                                                  roughness,
+                                                  metallic);
     }
 
     vec3 ambient = vec3(0.03) * albedo * u_ambient_occlusion;

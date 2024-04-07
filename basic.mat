@@ -34,6 +34,24 @@
       "type": "float"
     },
     {
+      "name": "u_metallic_texture_strength",
+      "type": "float",
+      "value": 1
+    },
+    {
+      "name": "u_metallic_texture",
+      "type": "image"
+    },
+    {
+      "name": "u_roughness_texture_strength",
+      "type": "float",
+      "value": 1
+    },
+    {
+      "name": "u_roughness_texture",
+      "type": "image"
+    },
+    {
       "name": "u_roughness",
       "type": "float"
     },
