@@ -1,9 +1,9 @@
 #version 460 core
 
-in vec2 _vertex_uv;
+in vec2 fragment_uv;
 
-uniform sampler2D _i_input_image;
+uniform sampler2D i_input_image;
 
-out vec4 _o_fragment_color;
+out vec4 o_fragment_color;
 
-void main() { _o_fragment_color = texture(_i_input_image, _vertex_uv); }
+void main() { o_fragment_color = texture(i_input_image, fragment_uv); }

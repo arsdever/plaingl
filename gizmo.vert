@@ -1,11 +1,11 @@
 #version 460 core
 
-layout(location = 0) in vec3 vertexPosition;
+layout(location = 0) in vec3 i_vertex_position;
 
-uniform mat4 vp_matrix;
-uniform mat4 model_matrix;
+uniform mat4 u_vp_matrix;
+uniform mat4 u_model_matrix;
 
 void main()
 {
-    gl_Position = vp_matrix * model_matrix * vec4(vertexPosition, 1.0);
+    gl_Position = u_vp_matrix * u_model_matrix * vec4(i_vertex_position, 1.0);
 }

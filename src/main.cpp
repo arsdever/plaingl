@@ -17,6 +17,7 @@
 #include "experimental/viewport.hpp"
 #include "experimental/window.hpp"
 #include "experimental/window_events.hpp"
+#include "feature_flags.hpp"
 #include "font.hpp"
 #include "game_clock.hpp"
 #include "game_object.hpp"
@@ -306,15 +307,15 @@ void initViewports()
     };
     _view_cameras[ 0 ]->get_transform().set_position({ 100, 0, 0 });
     _view_cameras[ 0 ]->get_transform().set_rotation(glm::quatLookAt(
-        glm::vec3 { 1.0f, 0.0f, 0.0f }, glm::vec3 { 0.0f, 1.0f, 0.0f }));
+        glm::vec3 { -1.0f, 0.0f, 0.0f }, glm::vec3 { 0.0f, 1.0f, 0.0f }));
 
     _view_cameras[ 1 ]->get_transform().set_position({ 0, 100, 0 });
     _view_cameras[ 1 ]->get_transform().set_rotation(glm::quatLookAt(
-        glm::vec3 { 0.0f, 1.0f, 0.0f }, glm::vec3 { 0.0f, 0.0f, 1.0f }));
+        glm::vec3 { 0.0f, -1.0f, 0.0f }, glm::vec3 { 0.0f, 0.0f, 1.0f }));
 
     _view_cameras[ 2 ]->get_transform().set_position({ 0, 0, 100 });
     _view_cameras[ 2 ]->get_transform().set_rotation(glm::quatLookAt(
-        glm::vec3 { 0.0f, 0.0f, 1.0f }, glm::vec3 { 0.0f, 1.0f, 0.0f }));
+        glm::vec3 { 0.0f, 0.0f, -1.0f }, glm::vec3 { 0.0f, 1.0f, 0.0f }));
 }
 
 void setupMouseEvents()
@@ -325,7 +326,7 @@ void setupMouseEvents()
         if (me.get_sender()->get_has_grab())
         {
             main_camera_object->get_transform().set_rotation(
-                glm::quat(glm::radians(glm::vec3(me.get_local_position().y,
+                glm::quat(glm::radians(glm::vec3(-me.get_local_position().y,
                                                  -me.get_local_position().x,
                                                  0) *
                                        .1f)));
@@ -374,45 +375,52 @@ void setupMouseEvents()
 
 void initScene()
 {
-    shader_program* prog = new shader_program;
-    prog->init();
-    prog->add_shader("shader.vert");
-    prog->add_shader("shader.frag");
-    prog->link();
-
+    feature_flags::set_flag(feature_flags::flag_name::load_fbx_as_scene, false);
     auto* am = asset_manager::default_asset_manager();
     am->load_asset("cube.fbx");
     am->load_asset("sphere.fbx");
     am->load_asset("susane_head.fbx");
+    am->load_asset("shader_ball.fbx");
     am->load_asset("camera.fbx");
     am->load_asset("text.mat");
     am->load_asset("basic.mat");
     am->load_asset("sample.png");
     am->load_asset("brick.png");
     am->load_asset("diffuse.png");
+    am->load_asset("albedo.jpg");
+    am->load_asset("metallic.jpg");
+    am->load_asset("roughness.jpg");
 
     material* basic_mat = am->get_material("basic");
     txt = new texture();
-    image* img = am->get_image("diffuse");
+    image* img = am->get_image("albedo");
     *txt = std::move(texture::from_image(img));
     norm_txt = new texture();
     img = am->get_image("brick");
     *norm_txt = std::move(texture::from_image(img));
-    basic_mat->set_property_value("albedo_texture", txt);
-    basic_mat->set_property_value("albedo_texture_strength", 1.0f);
-    basic_mat->set_property_value("normal_texture", norm_txt);
-    basic_mat->set_property_value("light_pos", 0.0f, 1.0f, 0.0f);
-    basic_mat->set_property_value("light_color", 1.0f, 1.0f, 1.0f);
-    basic_mat->set_property_value("light_intensity", 1.0f);
+    auto roughness_txt = new texture;
+    img = am->get_image("roughness");
+    *roughness_txt = std::move(texture::from_image(img));
+    auto metallic_txt = new texture;
+    img = am->get_image("metallic");
+    *metallic_txt = std::move(texture::from_image(img));
+    basic_mat->set_property_value("u_albedo_texture", txt);
+    basic_mat->set_property_value("u_albedo_texture_strength", 1.0f);
+    basic_mat->set_property_value("u_normal_texture", norm_txt);
+    basic_mat->set_property_value("u_normal_texture_strength", 1.0f);
+    basic_mat->set_property_value("u_roughness", 1.0f);
+    basic_mat->set_property_value("u_roughness_texture", roughness_txt);
+    basic_mat->set_property_value("u_roughness_texture_strength", 1.0f);
+    basic_mat->set_property_value("u_metallic", 1.0f);
+    basic_mat->set_property_value("u_metallic_texture", metallic_txt);
+    basic_mat->set_property_value("u_metallic_texture_strength", 1.0f);
+    basic_mat->set_property_value("u_ao", 0.1f);
 
     game_object* object = new game_object;
-    object->create_component<mesh_component>();
-    object->create_component<mesh_renderer_component>();
-    // object->create_component<jumpy_component>();
-    auto* bc = object->create_component<box_collider_component>();
-    object->get_component<mesh_component>()->set_mesh(
-        am->get_mesh("susane_head"));
-    object->get_component<mesh_renderer_component>()->set_material(basic_mat);
+    object->create_component<mesh_component>()->set_mesh(
+        am->get_mesh("Shader Ball JL 01_mesh"));
+    object->create_component<mesh_renderer_component>()->set_material(
+        basic_mat);
     object->set_name("susane");
     s.add_object(object);
     // bc->set_position(glm::vec3(0, 0, 0));
@@ -421,16 +429,17 @@ void initScene()
     // bc->set_rotation(glm::quat(glm::radians(glm::vec3 { 0, 30, 0 })));
 
     ttf.load("font.ttf", 16);
-    game_object* collision_text_object = new game_object;
-    auto* ct = collision_text_object->create_component<text_component>();
-    collision_text_object->create_component<text_renderer_component>();
-    collision_text_object->get_component<text_renderer_component>()->set_font(
-        &ttf);
-    collision_text_object->get_component<text_renderer_component>()
-        ->set_material(am->get_material("text"));
-    s.add_object(collision_text_object);
+    // game_object* collision_text_object = new game_object;
+    // auto* ct = collision_text_object->create_component<text_component>();
+    // collision_text_object->create_component<text_renderer_component>();
+    // collision_text_object->get_component<text_renderer_component>()->set_font(
+    //     &ttf);
+    // collision_text_object->get_component<text_renderer_component>()
+    //     ->set_material(am->get_material("text"));
+    // s.add_object(collision_text_object);
     // bc->_text = ct;
-    collision_text_object->get_transform().set_scale({ 0.005f, 0.005f, 1.0f });
+    // collision_text_object->get_transform().set_scale({ 0.005f, 0.005f, 1.0f
+    // });
 
     game_object* ray = new game_object;
     cast_ray = ray->create_component<ray_visualize_component>();
@@ -456,7 +465,7 @@ void initScene()
     _fps_text_object->get_component<text_renderer_component>()->set_font(&ttf);
     _fps_text_object->get_component<text_renderer_component>()->set_material(
         am->get_material("text"));
-    am->get_material("text")->set_property_value("textColor", 1.0f, 1.0f, 1.0f);
+    am->get_material("text")->set_property_value("u_text_color", 1.0f, 1.0f, 1.0f);
     _fps_text_object->get_transform().set_position({ 0.5f, 2.0f, 0.0f });
     _fps_text_object->get_transform().set_scale({ 0.01f, 0.01f, 1.0f });
     _fps_text_object->set_name("fps_text");
@@ -464,7 +473,7 @@ void initScene()
 
     main_camera->get_transform().set_position({ 0, 0, 3 });
     main_camera->get_transform().set_rotation(
-        glm::quatLookAt(glm::vec3 { 0.0f, 0.0f, 1.0f },
+        glm::quatLookAt(glm::vec3 { 0.0f, 0.0f, -1.0f },
                         glm::vec3 {
                             0.0f,
                             1.0f,
@@ -476,17 +485,17 @@ void initScene()
 
     light* l = new light();
     l->set_color(glm::vec3(1.0f, 1.0f, 1.0f));
-    l->set_intensity(1.0f);
+    l->set_intensity(10.0f);
     object = new game_object;
     object->create_component<light_component>()->set_light(l);
-    object->get_transform().set_position(glm::vec3(0.0f, 1.0f, 0.0f));
+    object->get_transform().set_position(glm::vec3(0.0f, 1.5f, 0.0f));
     s.add_object(object);
 
     l = new light();
     l->set_color(glm::vec3(1.0f, 1.0f, 1.0f));
-    l->set_intensity(1.0f);
+    l->set_intensity(100.0f);
     object = new game_object;
     object->create_component<light_component>()->set_light(l);
-    object->get_transform().set_position(glm::vec3(1.0f, 0.0f, 0.0f));
+    object->get_transform().set_position(glm::vec3(5.0f, 0.0f, 0.0f));
     s.add_object(object);
 }

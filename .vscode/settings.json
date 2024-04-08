@@ -110,7 +110,8 @@
 		"valarray": "cpp",
 		"*.ipp": "cpp",
 		"numbers": "cpp",
-		"expected": "cpp"
+		"expected": "cpp",
+		"*.mat": "json"
 	},
 	"dotnet.defaultSolution": "disable"
 }

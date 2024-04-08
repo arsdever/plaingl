@@ -48,6 +48,11 @@ public:
                                              : static_cast<T*>(*iterator);
     }
 
+    void add_child(game_object* child);
+    std::vector<game_object*>& get_children();
+    void set_parent(game_object* parent);
+    game_object* get_parent();
+
 private:
     transform _transformation;
     bool _selected = false;
@@ -55,4 +60,6 @@ private:
     std::string _name;
 
     std::vector<component*> _components;
+    game_object* _parent;
+    std::vector<game_object*> _children;
 };

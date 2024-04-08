@@ -57,27 +57,50 @@ void texture::init(size_t width, size_t height, format texture_format)
 {
     _width = width;
     _height = height;
+    if (_width == 0 || _height == 0)
+    {
+        return;
+    }
     _format = texture_format;
-    glBindTexture(GL_TEXTURE_2D, _texture_id);
-    glTexImage2D(GL_TEXTURE_2D,
-                 0,
-                 convert_to_gl_internal_format(texture_format),
-                 _width,
-                 _height,
-                 0,
-                 convert_to_gl_format(texture_format),
-                 GL_UNSIGNED_BYTE,
-                 nullptr);
+    glBindTexture(target(), _texture_id);
+    if (_samples > 1)
+    {
+        glTexImage2DMultisample(target(),
+                                _samples,
+                                convert_to_gl_internal_format(texture_format),
+                                _width,
+                                _height,
+                                GL_TRUE);
+    }
+    else
+    {
+        glTexImage2D(target(),
+                     0,
+                     convert_to_gl_internal_format(texture_format),
+                     _width,
+                     _height,
+                     0,
+                     convert_to_gl_format(texture_format),
+                     GL_UNSIGNED_BYTE,
+                     nullptr);
+    }
+
     auto error = glGetError();
     if (error != GL_NO_ERROR)
     {
-        return;
+        log()->error("Error ocurred {}", error);
     }
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     return;
+}
+
+void texture::set_samples(int sample_count)
+{
+    _samples = sample_count;
+    init(_width, _height, _format);
 }
 
 glm::uvec2 texture::get_size() const { return { _width, _height }; }
@@ -100,9 +123,9 @@ size_t texture::get_channel_count() const
 
 void texture::get_data(char* data_ptr)
 {
-    glBindTexture(GL_TEXTURE_2D, _texture_id);
-    glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, data_ptr);
-    glBindTexture(GL_TEXTURE_2D, 0);
+    glBindTexture(target(), _texture_id);
+    glGetTexImage(target(), 0, GL_RGBA, GL_UNSIGNED_BYTE, data_ptr);
+    glBindTexture(target(), 0);
 }
 
 void texture::set_data(const char* data_ptr)
@@ -114,8 +137,8 @@ void texture::set_rect_data(glm::vec<2, size_t> pos,
                             glm::vec<2, size_t> size,
                             const char* data_ptr)
 {
-    glBindTexture(GL_TEXTURE_2D, _texture_id);
-    glTexSubImage2D(GL_TEXTURE_2D,
+    glBindTexture(target(), _texture_id);
+    glTexSubImage2D(target(),
                     0,
                     pos.x,
                     pos.y,
@@ -126,9 +149,9 @@ void texture::set_rect_data(glm::vec<2, size_t> pos,
                     data_ptr);
 }
 
-void texture::bind() const { static_bind(_texture_id); }
+void texture::bind() const { static_bind(_texture_id, _samples > 1); }
 
-void texture::unbind() const { static_unbind(); }
+void texture::unbind() const { static_unbind(_samples > 1); }
 
 void texture::set_active_texture(size_t index) const
 {
@@ -198,9 +221,15 @@ texture texture::from_image(image* img)
     return result;
 }
 
-void texture::static_bind(size_t id) { glBindTexture(GL_TEXTURE_2D, id); }
+void texture::static_bind(size_t id, bool ms)
+{
+    glBindTexture(ms ? GL_TEXTURE_2D_MULTISAMPLE : GL_TEXTURE_2D, id);
+}
 
-void texture::static_unbind() { glBindTexture(GL_TEXTURE_2D, 0); }
+void texture::static_unbind(bool ms)
+{
+    glBindTexture(ms ? GL_TEXTURE_2D_MULTISAMPLE : GL_TEXTURE_2D, 0);
+}
 
 int texture::convert_to_gl_internal_format(format f)
 {
@@ -224,6 +253,11 @@ int texture::convert_to_gl_format(format f)
     case format::RGBA: return GL_RGBA;
     default: return GL_NONE;
     }
+}
+
+unsigned texture::target() const
+{
+    return _samples > 1 ? GL_TEXTURE_2D_MULTISAMPLE : GL_TEXTURE_2D;
 }
 
 std::vector<texture*> texture::_textures;

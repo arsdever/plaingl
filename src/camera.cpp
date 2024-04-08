@@ -29,6 +29,7 @@ camera::camera()
     _background_shader->link();
 
     _framebuffer = std::make_unique<framebuffer>();
+    _framebuffer->set_samples(32);
     _framebuffer->resize(_render_size);
     _framebuffer->initialize();
     glGenBuffers(1, &_lights_buffer);
@@ -128,7 +129,8 @@ void camera::render()
     }
 
     _background_shader->use();
-    mesh* quad_mesh = asset_manager::default_asset_manager()->get_mesh("quad");
+    mesh* quad_mesh =
+    asset_manager::default_asset_manager()->get_mesh("quad");
     quad_mesh->render();
     shader_program::unuse();
 
@@ -141,7 +143,7 @@ void camera::render()
 
     if (auto urt = _user_render_texture.lock())
     {
-        urt->clone(_framebuffer->color_texture().get());
+        _framebuffer->copy_texture(urt.get());
     }
 
     if (old_active_camera)
@@ -159,9 +161,9 @@ glm::mat4 camera::view_matrix() const
 {
     // TODO: optimize with caching
     glm::quat rotation = get_transform().get_rotation();
-    glm::vec3 cam_right = rotation * glm::vec3 { -1, 0, 0 };
+    glm::vec3 cam_right = rotation * glm::vec3 { 1, 0, 0 };
     glm::vec3 cam_up = rotation * glm::vec3 { 0, 1, 0 };
-    glm::vec3 cam_forward = rotation * glm::vec3 { 0, 0, -1 };
+    glm::vec3 cam_forward = rotation * glm::vec3 { 0, 0, 1 };
 
     glm::mat3 view3(cam_right, cam_up, cam_forward);
     glm::mat4 view = view3;
@@ -192,8 +194,7 @@ glm::mat4 camera::projection_matrix() const
                           10000.0f);
     }
 
-    return glm::perspective(
-        glm::radians(_fov), size.x / size.y, 0.1f, 10000.0f);
+    return glm::perspective(_fov, size.x / size.y, 0.1f, 10000.0f);
 }
 
 transform& camera::get_transform() { return _transformation; }
@@ -225,7 +226,7 @@ void camera::render_on_private_texture() const
                 renderer)
             {
                 renderer->get_material()->set_property_value(
-                    "model_matrix", obj->get_transform().get_matrix());
+                    "u_model_matrix", obj->get_transform().get_matrix());
                 renderer->render();
             }
         }
@@ -246,7 +247,7 @@ void camera::render_gizmos() const
                 continue;
             }
             gizmo_drawer::instance()->get_shader().set_uniform(
-                "model_matrix",
+                "u_model_matrix",
                 std::make_tuple(obj->get_transform().get_matrix()));
             obj->draw_gizmos();
         }

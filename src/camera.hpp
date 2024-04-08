@@ -14,7 +14,18 @@ public:
     camera();
     ~camera();
 
+    /**
+     * @brief Set the field of view (horizontal) of the camera in radians
+     *
+     * @param fov horizontal field of view in radians
+     */
     void set_fov(float fov);
+
+    /**
+     * @brief Get the field of view angle value
+     *
+     * @return float the value of field of view in radians
+     */
     float get_fov() const;
     void set_ortho(bool ortho_flag = true);
     float get_aspect_ratio() const;
@@ -49,7 +60,7 @@ private:
 private:
     transform _transformation;
     glm::uvec2 _render_size { 1, 1 };
-    float _fov = 60.0f;
+    float _fov = .6f;
     bool _ortho_flag = false;
     std::weak_ptr<texture> _user_render_texture {};
     glm::vec3 _background_color { 0.0f, 0.0f, 0.0f };

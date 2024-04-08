@@ -69,7 +69,7 @@ void gizmo_drawer::draw_grid(glm::vec3 position,
     }
 
     _gizmo_shader.set_uniform(
-        "color", std::make_tuple(color.r, color.g, color.b, color.a));
+        "u_color", std::make_tuple(color.r, color.g, color.b, color.a));
     _gizmo_shader.use();
     draw_vertices(
         _grid_vertices_cache, _grid_indices_cache, _grid_vbo, _grid_ebo);
@@ -100,7 +100,7 @@ void gizmo_drawer::draw_plane(glm::vec3 position,
     }
 
     _gizmo_shader.set_uniform(
-        "color", std::make_tuple(color.r, color.g, color.b, color.a));
+        "u_color", std::make_tuple(color.r, color.g, color.b, color.a));
     _gizmo_shader.use();
     draw_vertices(std::move(vertices), std::move(indices), _vbo, _ebo);
     shader_program::unuse();
@@ -129,7 +129,7 @@ void gizmo_drawer::draw_box(glm::vec3 position,
     }
 
     _gizmo_shader.set_uniform(
-        "color", std::make_tuple(color.r, color.g, color.b, color.a));
+        "u_color", std::make_tuple(color.r, color.g, color.b, color.a));
     _gizmo_shader.use();
     draw_vertices(std::move(vertices), std::move(indices), _vbo, _ebo);
     shader_program::unuse();
@@ -160,7 +160,7 @@ void gizmo_drawer::draw_sphere(glm::vec3 center, float radius, glm::vec4 color)
     }
 
     _gizmo_shader.set_uniform(
-        "color", std::make_tuple(color.r, color.g, color.b, color.a));
+        "u_color", std::make_tuple(color.r, color.g, color.b, color.a));
     _gizmo_shader.use();
     draw_vertices(std::move(vertices), std::move(indices), _vbo, _ebo);
     shader_program::unuse();
@@ -195,7 +195,7 @@ void gizmo_drawer::draw_ray(glm::vec3 pos,
 void gizmo_drawer::draw_line(glm::vec3 p1, glm::vec3 p2, glm::vec4 color)
 {
     _gizmo_shader.set_uniform(
-        "color", std::make_tuple(color.r, color.g, color.b, color.a));
+        "u_color", std::make_tuple(color.r, color.g, color.b, color.a));
     _gizmo_shader.use();
     draw_vertices({ { p1 }, { p2 } });
     shader_program::unuse();
@@ -204,7 +204,7 @@ void gizmo_drawer::draw_line(glm::vec3 p1, glm::vec3 p2, glm::vec4 color)
 void gizmo_drawer::draw_line_2d(glm::vec2 p1, glm::vec2 p2, glm::vec4 color)
 {
     _gizmo_shader.set_uniform(
-        "color", std::make_tuple(color.r, color.g, color.b, color.a));
+        "u_color", std::make_tuple(color.r, color.g, color.b, color.a));
     _gizmo_shader.use();
     draw_vertices({ { p1, 0 }, { p2, 0 } });
     shader_program::unuse();
