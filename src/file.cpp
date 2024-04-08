@@ -103,7 +103,7 @@ std::string file::read_all(std::string_view path)
     return f.read_all();
 }
 
-bool file_exists(std::string_view path)
+bool file::exists(std::string_view path)
 {
     return std::filesystem::is_regular_file(path);
 }

@@ -24,13 +24,12 @@ public:
     std::string read_all();
 
     static std::string read_all(std::string_view path);
+    static bool exists(std::string_view path);
 
 private:
     std::FILE* _file_descriptor = nullptr;
     state _state = state::invalid;
 };
-
-bool file_exists(std::string_view path);
 
 std::tuple<std::string, std::string, std::string>
 parse_path(std::string_view path);
