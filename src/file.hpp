@@ -4,12 +4,17 @@ class file
 {
     enum class state
     {
+        invalid,
         closed,
         open,
     };
 
 public:
     file();
+    file(const file&) = delete;
+    file& operator=(const file&) = delete;
+    file(file&& o);
+    file& operator=(file&& o);
     ~file();
 
     void open(std::string_view path, std::string_view privileges);
@@ -18,12 +23,12 @@ public:
     size_t read(char* buffer, size_t length);
     std::string read_all();
 
+    static std::string read_all(std::string_view path);
+
 private:
     std::FILE* _file_descriptor = nullptr;
-    state _state = state::closed;
+    state _state = state::invalid;
 };
-
-std::string get_file_contents(std::string_view path);
 
 bool file_exists(std::string_view path);
 

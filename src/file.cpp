@@ -10,6 +10,23 @@ static inline logger log() { return get_logger("fs"); }
 
 file::file() = default;
 
+file::file(file&& o)
+{
+    _file_descriptor = o._file_descriptor;
+    _state = o._state;
+    o._file_descriptor = 0;
+    o._state = state::invalid;
+}
+
+file& file::operator=(file&& o)
+{
+    _file_descriptor = o._file_descriptor;
+    _state = o._state;
+    o._file_descriptor = 0;
+    o._state = state::invalid;
+    return *this;
+}
+
 file::~file() { close(); }
 
 void file::open(std::string_view path, std::string_view privileges)
@@ -79,6 +96,13 @@ std::string file::read_all()
     return result;
 }
 
+std::string file::read_all(std::string_view path)
+{
+    file f;
+    f.open(path, "r");
+    return f.read_all();
+}
+
 bool file_exists(std::string_view path)
 {
     return std::filesystem::is_regular_file(path);
@@ -91,11 +115,4 @@ parse_path(std::string_view path)
     return { p.root_directory().generic_string(),
              p.stem().generic_string(),
              p.extension().generic_string() };
-}
-
-std::string get_file_contents(std::string_view path)
-{
-    file f;
-    f.open(path, "r");
-    return f.read_all();
 }

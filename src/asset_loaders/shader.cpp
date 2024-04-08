@@ -5,7 +5,7 @@
 
 void asset_loader_SHADER::load(std::string_view path)
 {
-    std::string content = get_file_contents(path);
+    std::string content = file::read_all(path);
     std::stringstream ss(content);
     std::string shader_line;
     shader_program* prog = new shader_program();
