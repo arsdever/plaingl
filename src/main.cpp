@@ -93,6 +93,11 @@ int main(int argc, char** argv)
         }
     }
 
+    file mat_file("basic.mat");
+    mat_file.changed_externally +=
+        [](file::event_type et) { log()->info("material file changed"); };
+    mat_file.watch();
+
     // start a physics thread
     // TODO: these should move into physics engine class
     std::atomic_bool program_exits = false;
@@ -120,9 +125,6 @@ int main(int argc, char** argv)
         asset_manager::default_asset_manager()->get_image("env"));
     // texture* txt = new texture;
     // main_camera->set_render_texture(txt);
-    file::watch("basic.mat");
-    file::changed_externally += [](std::string_view path)
-    { log()->info("File at {} was changed", path); };
 
     int trigger_show = -1;
 
