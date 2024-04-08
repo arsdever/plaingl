@@ -1,6 +1,3 @@
-#include <glad/gl.h>
-#include <glm/ext.hpp>
-
 #include "material.hpp"
 
 #include "logging.hpp"
@@ -94,7 +91,7 @@ void material::activate() const
         {
             const auto& [ t ] =
                 std::any_cast<std::tuple<texture*>>(property._value);
-            t->bind(property._special);
+            t->set_active_texture(property._special);
             _shader_program->set_uniform(name,
                                          std::tuple<int>(property._special));
         }

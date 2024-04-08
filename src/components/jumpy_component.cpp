@@ -11,6 +11,6 @@ jumpy_component::jumpy_component(game_object* parent)
 void jumpy_component::update()
 {
     glm::vec3 pos = get_game_object()->get_transform().get_position();
-    pos.y = std::sin(game_clock::absolute().count() * 10);
+    pos.y = std::sin(game_clock::absolute().count());
     get_game_object()->get_transform().set_position(pos);
 }

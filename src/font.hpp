@@ -1,10 +1,5 @@
 #pragma once
 
-#include <map>
-#include <string>
-
-#include <glm/glm.hpp>
-
 class font
 {
 public:

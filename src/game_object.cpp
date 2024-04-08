@@ -1,10 +1,9 @@
 #include "game_object.hpp"
 
 #include "component.hpp"
-#include "gizmo_drawer.hpp"
-#include "shader.hpp"
+#include "components/transform_component.hpp"
 
-game_object::game_object() = default;
+game_object::game_object() { create_component<transform_component>(); }
 
 void game_object::set_selected(bool selected) { _selected = selected; }
 
@@ -20,9 +19,27 @@ void game_object::init()
 
 void game_object::update()
 {
+    if (!is_active())
+    {
+        return;
+    }
+
     for (auto& c : _components)
     {
         c->update();
+    }
+}
+
+void game_object::draw_gizmos()
+{
+    if (!is_active())
+    {
+        return;
+    }
+
+    for (auto& c : _components)
+    {
+        c->draw_gizmos();
     }
 }
 
@@ -34,31 +51,29 @@ void game_object::deinit()
     }
 }
 
-void game_object::draw_gizmos()
+void game_object::set_active(bool active_flag) { _is_active = active_flag; }
+
+bool game_object::is_active() const { return _is_active; }
+
+void game_object::set_name(std::string_view name)
 {
-    gizmo_drawer::instance()->get_shader().set_uniform(
-        "model_matrix", std::make_tuple(_transformation.get_matrix()));
-    gizmo_drawer::instance()->draw_line(
-        { 0, 0, 0 }, { 0, 0, 1 }, { 0, 0, 1, 1 });
-    gizmo_drawer::instance()->draw_line(
-        { 0, 0, 0 }, { 0, 1, 0 }, { 0, 1, 0, 1 });
-    gizmo_drawer::instance()->draw_line(
-        { 0, 0, 0 }, { 1, 0, 0 }, { 1, 0, 0, 1 });
+    _name = std::string { name };
 }
+
+std::string_view game_object::get_name() const { return _name; }
 
 transform& game_object::get_transform() { return _transformation; }
 
 const transform& game_object::get_transform() const { return _transformation; }
 
-component* game_object::get_component(std::string_view type_id)
+void game_object::add_child(game_object* child)
 {
-    for (auto& c : _components)
-    {
-        if (c->type_id() == type_id)
-        {
-            return c;
-        }
-    }
-
-    return nullptr;
+    child->set_parent(this);
+    _children.push_back(child);
 }
+
+std::vector<game_object*>& game_object::get_children() { return _children; }
+
+void game_object::set_parent(game_object* parent) { _parent = parent; }
+
+game_object* game_object::get_parent() { return _parent; }

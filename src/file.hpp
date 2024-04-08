@@ -1,8 +1,5 @@
 #pragma once
 
-#include <string>
-#include <tuple>
-
 class file
 {
     enum class state

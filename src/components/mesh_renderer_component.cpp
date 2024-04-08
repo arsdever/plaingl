@@ -5,16 +5,8 @@
 #include "material.hpp"
 #include "mesh.hpp"
 
-namespace
-{
-static inline logger log()
-{
-    return get_logger(mesh_renderer_component::class_type_id);
-}
-} // namespace
-
 mesh_renderer_component::mesh_renderer_component(game_object* parent)
-    : component(parent, class_type_id)
+    : renderer_component(parent, class_type_id)
 {
     if (get_component<mesh_component>() == nullptr)
     {
@@ -22,21 +14,18 @@ mesh_renderer_component::mesh_renderer_component(game_object* parent)
     }
 }
 
-void mesh_renderer_component::set_material(material* mat) { _material = mat; }
-
-material* mesh_renderer_component::get_material() { return _material; }
-
-void mesh_renderer_component::update()
+void mesh_renderer_component::render()
 {
     if (_material)
     {
-        _material->set_property_value(
-            "model_matrix", get_game_object()->get_transform().get_matrix());
         _material->activate();
 
         if (get_component<mesh_component>())
         {
-            get_component<mesh_component>()->get_mesh()->render();
+            if (auto* mesh = get_component<mesh_component>()->get_mesh())
+            {
+                mesh->render();
+            }
         }
         _material->deactivate();
     }

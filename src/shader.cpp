@@ -1,6 +1,3 @@
-#include <glad/gl.h>
-#include <glm/ext.hpp>
-
 #include "shader.hpp"
 
 #include "camera.hpp"
@@ -401,13 +398,20 @@ void shader_program::setup_property_values() const
         }
     }
 
-    if (camera::active_camera() && _name_property_map.contains("vp_matrix"))
+    if (camera::active_camera())
     {
-        glUniformMatrix4fv(
-            _name_property_map.find("vp_matrix")->second._index,
-            1,
-            GL_FALSE,
-            glm::value_ptr(camera::active_camera()->vp_matrix()));
+        if (_name_property_map.contains("u_vp_matrix"))
+            glUniformMatrix4fv(
+                _name_property_map.find("u_vp_matrix")->second._index,
+                1,
+                GL_FALSE,
+                glm::value_ptr(camera::active_camera()->vp_matrix()));
+        if (_name_property_map.contains("u_camera_position"))
+            glUniform3fv(
+                _name_property_map.find("u_camera_position")->second._index,
+                1,
+                glm::value_ptr(
+                    camera::active_camera()->get_transform().get_position()));
     }
 }
 

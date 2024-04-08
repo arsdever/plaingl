@@ -1,6 +1,3 @@
-#include <GLFW/glfw3.h>
-#include <glm/gtx/quaternion.hpp>
-
 #include "transform.hpp"
 
 transform::transform()
@@ -26,7 +23,7 @@ glm::mat4 transform::get_matrix() const
 {
     glm::mat4 matrix = glm::identity<glm::mat4>();
     matrix = glm::translate(matrix, _position);
-    matrix = glm::toMat4(_rotation) * matrix;
+    matrix = matrix * glm::toMat4(_rotation);
     matrix = glm::scale(matrix, _scale);
     return matrix;
 }

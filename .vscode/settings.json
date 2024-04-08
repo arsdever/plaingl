@@ -1,6 +1,11 @@
 {
-	"cmake.debugConfig": {"args": ["SPDLOG_LEVEL=trace"]},
+	"cmake.debugConfig": {
+		"args": [
+			"SPDLOG_LEVEL=trace"
+		]
+	},
 	"sonarlint.pathToCompileCommands": "${workspaceFolder}\\build\\compile_commands.json",
+	"C_Cpp.default.compileCommands": "${workspaceFolder}\\build\\compile_commands.json",
 	"files.associations": {
 		"array": "cpp",
 		"iterator": "cpp",
@@ -102,6 +107,11 @@
 		"stdfloat": "cpp",
 		"strstream": "cpp",
 		"typeindex": "cpp",
-		"valarray": "cpp"
-	}
+		"valarray": "cpp",
+		"*.ipp": "cpp",
+		"numbers": "cpp",
+		"expected": "cpp",
+		"*.mat": "json"
+	},
+	"dotnet.defaultSolution": "disable"
 }

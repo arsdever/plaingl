@@ -1,15 +1,9 @@
-/* clang-format off */
-#include <glad/gl.h>
-#include <GLFW/glfw3.h>
-/* clang-format on */
-
-#include <array>
-
 #include "texture_viewer.hpp"
 
 #include "image.hpp"
 #include "logging.hpp"
 #include "shader.hpp"
+#include "texture.hpp"
 
 namespace
 {
@@ -77,15 +71,13 @@ static inline void gl_debug_output(GLenum source,
 }
 } // namespace
 
-void texture_viewer::show_preview(image* img)
+void texture_viewer::show_preview(texture* t)
 {
-    glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
-    glfwWindowHint(GLFW_SAMPLES, 8);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    auto* window =
-        glfwCreateWindow(200, 200, "texture preview", nullptr, nullptr);
+    auto* window = glfwCreateWindow(t->get_width(),
+                                    t->get_height(),
+                                    "texture preview",
+                                    nullptr,
+                                    glfwGetCurrentContext());
     if (window == nullptr)
     {
         log()->error("Failed to create GLFW window");
@@ -109,8 +101,7 @@ void texture_viewer::show_preview(image* img)
             GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
     }
 
-    // glViewport(0, 0, img->width(), img->height());
-    glViewport(0, 0, 200, 200);
+    glViewport(0, 0, t->get_width(), t->get_height());
 
     glfwSetWindowSizeCallback(window,
                               [](GLFWwindow*, int width, int height)
@@ -128,6 +119,7 @@ void texture_viewer::show_preview(image* img)
     };
     unsigned vao = 0;
     unsigned vbo = 0;
+
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
     glGenBuffers(1, &vbo);
@@ -138,35 +130,15 @@ void texture_viewer::show_preview(image* img)
                  GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), nullptr);
-
-    glActiveTexture(GL_TEXTURE0);
-    unsigned texture = 0;
-    glGenTextures(1, &texture);
-    glBindTexture(GL_TEXTURE_2D, texture);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexImage2D(GL_TEXTURE_2D,
-                 0,
-                 GL_RGBA,
-                 img->get_width(),
-                 img->get_height(),
-                 0,
-                 GL_RGB,
-                 GL_UNSIGNED_BYTE,
-                 img->get_data());
-    auto error = glGetError();
-    if (error != GL_NO_ERROR)
-    {
-        log()->error("Error while creating a texture {}", error);
-    }
+    t->set_active_texture(0);
 
     while (!glfwWindowShouldClose(window))
     {
         glBindVertexArray(vao);
         prog.use();
         glUniform1i(glGetUniformLocation(prog.id(), "texture_sampler"), 0);
+        glUniform1ui(glGetUniformLocation(prog.id(), "texture_type"),
+                     t->get_channel_count());
         glDrawArrays(GL_TRIANGLES, 0, points.size());
         glfwSwapBuffers(window);
         glfwPollEvents();
@@ -176,7 +148,12 @@ void texture_viewer::show_preview(image* img)
     shader_program::unuse();
     glDeleteVertexArrays(1, &vao);
     glDeleteBuffers(1, &vbo);
-    glDeleteTextures(1, &texture);
 
     glfwDestroyWindow(window);
+}
+
+void texture_viewer::show_preview(image* img)
+{
+    texture t = texture::from_image(img);
+    show_preview(&t);
 }
