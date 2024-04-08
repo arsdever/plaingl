@@ -1,5 +1,7 @@
 #pragma once
 
+#include "event.hpp"
+
 class file
 {
     enum class state
@@ -22,6 +24,9 @@ public:
     size_t size() const;
     size_t read(char* buffer, size_t length);
     std::string read_all();
+
+    static void watch(std::string_view path);
+    static event<void(std::string_view)> changed_externally;
 
     static std::string read_all(std::string_view path);
     static bool exists(std::string_view path);

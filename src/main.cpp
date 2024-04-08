@@ -18,6 +18,7 @@
 #include "experimental/window.hpp"
 #include "experimental/window_events.hpp"
 #include "feature_flags.hpp"
+#include "file.hpp"
 #include "font.hpp"
 #include "game_clock.hpp"
 #include "game_object.hpp"
@@ -119,6 +120,9 @@ int main(int argc, char** argv)
         asset_manager::default_asset_manager()->get_image("env"));
     // texture* txt = new texture;
     // main_camera->set_render_texture(txt);
+    file::watch("basic.mat");
+    file::changed_externally += [](std::string_view path)
+    { log()->info("File at {} was changed", path); };
 
     int trigger_show = -1;
 
@@ -465,7 +469,8 @@ void initScene()
     _fps_text_object->get_component<text_renderer_component>()->set_font(&ttf);
     _fps_text_object->get_component<text_renderer_component>()->set_material(
         am->get_material("text"));
-    am->get_material("text")->set_property_value("u_text_color", 1.0f, 1.0f, 1.0f);
+    am->get_material("text")->set_property_value(
+        "u_text_color", 1.0f, 1.0f, 1.0f);
     _fps_text_object->get_transform().set_position({ 0.5f, 2.0f, 0.0f });
     _fps_text_object->get_transform().set_scale({ 0.01f, 0.01f, 1.0f });
     _fps_text_object->set_name("fps_text");

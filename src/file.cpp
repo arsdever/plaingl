@@ -1,11 +1,13 @@
 
 #include "file.hpp"
 
+#include "FileWatch.hpp"
 #include "logging.hpp"
 
 namespace
 {
 static inline logger log() { return get_logger("fs"); }
+std::vector<std::shared_ptr<filewatch::FileWatch<std::string>>> watches;
 } // namespace
 
 file::file() = default;
@@ -31,7 +33,7 @@ file::~file() { close(); }
 
 void file::open(std::string_view path, std::string_view privileges)
 {
-    if (_state != state::closed)
+    if (_state == state::open)
     {
         log()->warn("Another file is already open. Closing");
         close();
@@ -58,6 +60,17 @@ void file::open(std::string_view path, std::string_view privileges)
 #pragma clang diagnostic pop
     }
     _state = state::open;
+}
+
+void file::watch(std::string_view path)
+{
+    watches.push_back(std::make_shared<filewatch::FileWatch<std::string>>(
+        std::string("E:/plaingl/basic.mat"),
+        [](const std::string& path, const filewatch::Event change_type)
+    {
+        std::string spath(path.begin(), path.end());
+        file::changed_externally(spath);
+    }));
 }
 
 void file::close()
@@ -116,3 +129,5 @@ parse_path(std::string_view path)
              p.stem().generic_string(),
              p.extension().generic_string() };
 }
+
+event<void(std::string_view)> file::changed_externally;
