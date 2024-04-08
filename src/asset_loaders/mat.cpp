@@ -31,7 +31,7 @@ std::tuple<Args...> from_json(const nlohmann::json& args,
 
 void asset_loader_MAT::load(std::string_view path)
 {
-    std::string content = get_file_contents(path);
+    std::string content = file::read_all(path);
     json mat_struct = json::parse(content);
 
     std::string shader_name = mat_struct[ "shader" ].get<std::string>();

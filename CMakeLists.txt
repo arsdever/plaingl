@@ -38,6 +38,11 @@ add_subdirectory(thirdparty/assimp)
 add_subdirectory(thirdparty/spdlog)
 add_subdirectory(thirdparty/freetype)
 add_subdirectory(thirdparty/prof)
+
+add_library(filewatch INTERFACE IMPORTED)
+target_include_directories(
+    filewatch INTERFACE "thirdparty/filewatch")
+
 remove_definitions(-w)
 
 add_subdirectory(src)

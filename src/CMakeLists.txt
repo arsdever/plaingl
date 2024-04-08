@@ -108,7 +108,9 @@ target_link_libraries(
   glm
   profiler::lib
   freetype
-  Winmm)
+  Winmm
+  filewatch
+)
 
 target_precompile_headers(${PROJECT}_lib PUBLIC "$<$<COMPILE_LANGUAGE:CXX>:precompile.hpp>")
 
