@@ -1,10 +1,5 @@
 #pragma once
 
-#include <memory>
-#include <string>
-
-#include <glm/vec2.hpp>
-
 class camera;
 class window;
 

@@ -5,7 +5,7 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
 set(PROJECT gamify)
 
-project(${PROJECT})
+project(${PROJECT} LANGUAGES C CXX)
 
 include($ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake)
 find_package(ZLIB REQUIRED)

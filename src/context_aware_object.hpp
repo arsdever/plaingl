@@ -1,7 +1,5 @@
 #pragma once
 
-#include <unordered_map>
-
 template <typename T, typename K>
 class context_aware_object
 {

@@ -1,5 +1,3 @@
-#include <sstream>
-
 #include "asset_loaders/shader.hpp"
 
 #include "../shader.hpp"

@@ -1,10 +1,5 @@
 #pragma once
 
-#include <memory>
-#include <optional>
-
-#include <glm/vec2.hpp>
-
 #include "event.hpp"
 
 struct GLFWwindow;

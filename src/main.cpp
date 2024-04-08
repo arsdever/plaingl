@@ -1,19 +1,4 @@
-/* clang-format off */
-#include <glad/gl.h>
-#include <GLFW/glfw3.h>
-/* clang-format on */
-
-#include <array>
-#include <atomic>
-#include <chrono>
-#include <iostream>
-#include <sstream>
-#include <thread>
-#include <unordered_set>
-
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
+#include <precompile.hpp>
 #include <prof/profiler.hpp>
 
 #include "asset_manager.hpp"

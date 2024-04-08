@@ -1,9 +1,5 @@
 #pragma once
 
-#include <memory>
-
-#include <glm/fwd.hpp>
-
 class texture;
 
 class framebuffer

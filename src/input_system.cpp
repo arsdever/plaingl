@@ -1,5 +1,3 @@
-#include <GLFW/glfw3.h>
-
 #include "input_system.hpp"
 
 #include "logging.hpp"

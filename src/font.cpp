@@ -1,7 +1,4 @@
-#include <string>
-
 #include <freetype/freetype.h>
-#include <glm/glm.hpp>
 
 #include "font.hpp"
 

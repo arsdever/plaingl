@@ -1,10 +1,6 @@
 // TODO: investigate PBO and integrate
 // https://www.songho.ca/opengl/gl_pbo.html
 
-#include <string>
-
-#include <glad/gl.h>
-
 #include "texture.hpp"
 
 #include "image.hpp"

@@ -1,6 +1,3 @@
-#include <GLFW/glfw3.h>
-#include <glm/ext.hpp>
-
 #include "mouse_events_refiner.hpp"
 
 #include "logging.hpp"

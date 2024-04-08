@@ -1,6 +1,3 @@
-#include <GLFW/glfw3.h>
-#include <glm/gtx/quaternion.hpp>
-
 #include "transform.hpp"
 
 transform::transform()

@@ -1,10 +1,5 @@
 #pragma once
 
-#include <string>
-#include <string_view>
-
-#include <glm/fwd.hpp>
-
 struct string_hash
 {
     using is_transparent = void; // enables heterogenous lookup

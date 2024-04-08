@@ -1,7 +1,5 @@
 #pragma once
 
-#include <unordered_set>
-
 #include "event.hpp"
 
 class input_system

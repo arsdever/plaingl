@@ -1,6 +1,3 @@
-#include <glad/gl.h>
-#include <glm/vec2.hpp>
-
 #include "framebuffer.hpp"
 
 #include "logging.hpp"

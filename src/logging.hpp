@@ -1,13 +1,10 @@
 #pragma once
 
-#include <memory>
-#include <string>
-
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
-#include "spdlog/cfg/argv.h"
-#include "spdlog/sinks/stdout_color_sinks.h"
-#include "spdlog/spdlog.h"
+#include <spdlog/cfg/argv.h>
+#include <spdlog/sinks/stdout_color_sinks.h>
+#include <spdlog/spdlog.h>
 #pragma clang diagnostic pop
 
 namespace spdlog

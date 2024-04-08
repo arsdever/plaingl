@@ -1,7 +1,3 @@
-#include <string_view>
-
-#include <glad/gl.h>
-
 #include "logging.hpp"
 
 namespace

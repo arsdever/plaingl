@@ -1,12 +1,3 @@
-/* clang-format off */
-#include <glad/gl.h>
-#include <GLFW/glfw3.h>
-/* clang-format on */
-
-#include <glm/ext.hpp>
-#include <glm/gtx/hash.hpp>
-#include <glm/gtx/quaternion.hpp>
-
 #include "gizmo_drawer.hpp"
 
 #include "vertex.hpp"
