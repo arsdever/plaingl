@@ -46,3 +46,11 @@ target_include_directories(
 remove_definitions(-w)
 
 add_subdirectory(src)
+
+if (ENABLE_TESTING)
+    set(${PROJECT}_TESTING_ENABLED ON)
+endif ()
+
+if (${PROJECT}_TESTING_ENABLED)
+    add_subdirectory(unittest)
+endif ()

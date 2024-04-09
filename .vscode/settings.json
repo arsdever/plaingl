@@ -1,9 +1,12 @@
 {
 	"cmake.debugConfig": {
 		"args": [
-			"SPDLOG_LEVEL=trace"
-		]
+			"SPDLOG_LEVEL=trace",
+		],
 	},
+	"cmake.configureArgs": [
+		"-DENABLE_TESTING=ON"
+	],
 	"sonarlint.pathToCompileCommands": "${workspaceFolder}\\build\\compile_commands.json",
 	"C_Cpp.default.compileCommands": "${workspaceFolder}\\build\\compile_commands.json",
 	"files.associations": {
