@@ -7,7 +7,7 @@
 namespace
 {
 static inline logger log() { return get_logger("fs"); }
-auto convert_to_local_event_type = [](filewatch::Event e)
+file::event_type convert_to_local_event_type(filewatch::Event e)
 {
     switch (e)
     {
@@ -99,11 +99,9 @@ file::file_watch_hook file::watch(
     std::string_view path,
     std::function<void(std::string_view path, file::event_type event)> functor)
 {
-    return file::file_watch_hook(
-        { filewatch::FileWatch<std::string>(
-            std::string(path),
-            [ functor ](const std::string& path,
-                        const filewatch::Event change_type)
+    return file::file_watch_hook({ filewatch::FileWatch<std::string>(
+        std::string(path),
+        [ functor ](const std::string& path, const filewatch::Event change_type)
     { functor(path, convert_to_local_event_type(change_type)); }) });
 }
 
