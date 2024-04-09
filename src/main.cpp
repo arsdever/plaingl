@@ -128,6 +128,10 @@ int main(int argc, char** argv)
 
     int trigger_show = -1;
 
+    auto wh = file::watch("./",
+                [](auto path, auto change)
+    { log()->info("Path {} changed: {}", path, static_cast<int>(change)); });
+
     input_system::on_keypress += [ &trigger_show ](int keycode)
     {
         if (keycode == GLFW_KEY_ENTER)

@@ -7,7 +7,19 @@
 namespace
 {
 static inline logger log() { return get_logger("fs"); }
-std::vector<std::shared_ptr<filewatch::FileWatch<std::string>>> watches;
+auto convert_to_local_event_type = [](filewatch::Event e)
+{
+    switch (e)
+    {
+    case filewatch::Event::added: return file::event_type::added;
+    case filewatch::Event::modified: return file::event_type::modified;
+    case filewatch::Event::removed: return file::event_type::removed;
+    case filewatch::Event::renamed_new:
+    case filewatch::Event::renamed_old: return file::event_type::renamed;
+    default: return file::event_type::unknown;
+    }
+    return file::event_type::unknown;
+};
 } // namespace
 
 struct file::private_data
@@ -17,6 +29,23 @@ struct file::private_data
     std::unique_ptr<filewatch::FileWatch<std::string>> _watch;
     mutable state _state { state::invalid };
 };
+
+struct file::file_watch_hook::pdata
+{
+    filewatch::FileWatch<std::string> _watch;
+};
+
+file::file_watch_hook::file_watch_hook(pdata&& p)
+    : _p(std::make_unique<pdata>(std::move(p)))
+{
+}
+
+file::file_watch_hook&
+file::file_watch_hook::operator=(file_watch_hook&&) = default;
+
+file::file_watch_hook::file_watch_hook(file_watch_hook&&) = default;
+
+file::file_watch_hook::~file_watch_hook() = default;
 
 file::file(std::string path)
     : _pdata(std::make_unique<private_data>(
@@ -66,15 +95,16 @@ void file::open(std::string_view mode) const
     _pdata->_state = mode_read ? state::open_read : state::open_write;
 }
 
-void file::watch(std::string_view path)
+file::file_watch_hook file::watch(
+    std::string_view path,
+    std::function<void(std::string_view path, file::event_type event)> functor)
 {
-    watches.push_back(std::make_shared<filewatch::FileWatch<std::string>>(
-        std::string("E:/plaingl/basic.mat"),
-        [](const std::string& path, const filewatch::Event change_type)
-    {
-        std::string spath(path.begin(), path.end());
-        file::generic_file_change(spath);
-    }));
+    return file::file_watch_hook(
+        { filewatch::FileWatch<std::string>(
+            std::string(path),
+            [ functor ](const std::string& path,
+                        const filewatch::Event change_type)
+    { functor(path, convert_to_local_event_type(change_type)); }) });
 }
 
 void file::close() const
@@ -135,17 +165,6 @@ void file::watch()
         _pdata->_path,
         [ this ](const std::string& path, filewatch::Event event_type)
     {
-        auto convert_to_local_event_type = [](filewatch::Event e)
-        {
-            switch (e)
-            {
-            case filewatch::Event::added: return event_type::added;
-            case filewatch::Event::modified: return event_type::modified;
-            case filewatch::Event::removed: return event_type::removed;
-            case filewatch::Event::renamed_new:
-            case filewatch::Event::renamed_old: return event_type::renamed;
-            }
-        };
         if (event_type == filewatch::Event::renamed_new)
         {
             _pdata->_path = path;
