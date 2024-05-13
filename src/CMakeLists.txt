@@ -60,7 +60,6 @@ add_library(
   viewport.cpp
   window.hpp
   window.cpp
-  glad/src/gl.c
   experimental/input_system.hpp
   experimental/input_system.cpp
   experimental/viewport.hpp
@@ -101,9 +100,12 @@ add_library(
   components/walking_component.hpp
   components/walking_component.cpp)
 
+add_subdirectory(glad)
+
 target_link_libraries(
   ${PROJECT}_lib
   PUBLIC ${PROJECT}_includes
+  ${PROJECT}::glad
   glfw
   glm
   profiler::lib
