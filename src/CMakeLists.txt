@@ -25,6 +25,8 @@ add_library(
   gizmo_drawer.cpp
   gl_error_handler.hpp
   gl_error_handler.cpp
+  graphics_buffer.hpp
+  graphics_buffer.cpp
   image.hpp
   image.cpp
   input_system.hpp
@@ -105,20 +107,20 @@ add_subdirectory(glad)
 target_link_libraries(
   ${PROJECT}_lib
   PUBLIC ${PROJECT}_includes
-  ${PROJECT}::glad
-  glfw
-  glm
-  profiler::lib
-  freetype
-  Winmm
-  filewatch
-)
+         ${PROJECT}::glad
+         glfw
+         glm
+         profiler::lib
+         freetype
+         Winmm
+         filewatch)
 
-target_precompile_headers(${PROJECT}_lib PUBLIC "$<$<COMPILE_LANGUAGE:CXX>:precompile.hpp>")
+target_precompile_headers(${PROJECT}_lib PUBLIC
+                          "$<$<COMPILE_LANGUAGE:CXX>:precompile.hpp>")
 
 add_library(${PROJECT}_includes INTERFACE)
 target_include_directories(${PROJECT}_includes
-  INTERFACE ${CMAKE_CURRENT_SOURCE_DIR} glad/include)
+                           INTERFACE ${CMAKE_CURRENT_SOURCE_DIR} glad/include)
 
 link_libraries(spdlog::spdlog)
 
@@ -133,9 +135,9 @@ macro(enable_asset_type)
     message(STATUS "Enabling ${asset_type_upper} support")
     set(${PROJECT}_SUPPORT_${asset_type_upper} ON)
     target_link_libraries(${PROJECT}_lib
-      PRIVATE ${PROJECT}::asset::${asset_type_lower})
+                          PRIVATE ${PROJECT}::asset::${asset_type_lower})
     add_dependencies(${PROJECT}_asset_loaders
-      ${PROJECT}::asset::${asset_type_lower})
+                     ${PROJECT}::asset::${asset_type_lower})
   endforeach()
 endmacro()
 
