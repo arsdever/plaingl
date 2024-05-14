@@ -131,4 +131,8 @@ graphics_buffer::usage_type graphics_buffer::get_usage_type() const
 
 unsigned graphics_buffer::get_handle() const { return _handle; }
 
-void graphics_buffer::release() { glDeleteBuffers(1, &_handle); }
+void graphics_buffer::release()
+{
+    glDeleteBuffers(1, &_handle);
+    _handle = 0;
+}
