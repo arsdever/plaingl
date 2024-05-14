@@ -32,7 +32,6 @@ camera::camera()
     _framebuffer->set_samples(32);
     _framebuffer->resize(_render_size);
     _framebuffer->initialize();
-    glGenBuffers(1, &_lights_buffer);
     set_background(glm::vec3 { 0.0f, 0.0f, 0.0f });
 }
 
@@ -129,8 +128,7 @@ void camera::render()
     }
 
     _background_shader->use();
-    mesh* quad_mesh =
-    asset_manager::default_asset_manager()->get_mesh("quad");
+    mesh* quad_mesh = asset_manager::default_asset_manager()->get_mesh("quad");
     quad_mesh->render();
     shader_program::unuse();
 
@@ -288,12 +286,12 @@ void camera::setup_lights()
         ++i;
     }
 
-    glBindBuffer(GL_SHADER_STORAGE_BUFFER, _lights_buffer);
-    glBufferData(GL_SHADER_STORAGE_BUFFER,
-                 (4 * 3 * sizeof(float)) * glsl_lights.size(),
-                 glsl_lights.data(),
-                 GL_DYNAMIC_COPY);
-    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, _lights_buffer);
+    _lights_buffer.set_element_stride(4 * 3 * sizeof(float));
+    _lights_buffer.set_element_count(glsl_lights.size());
+    _lights_buffer.set_usage_type(graphics_buffer::usage_type::dynamic_copy);
+    _lights_buffer.set_data(glsl_lights.data());
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, _lights_buffer.get_handle());
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, _lights_buffer.get_handle());
 }
 
 camera* camera::_active_camera = nullptr;

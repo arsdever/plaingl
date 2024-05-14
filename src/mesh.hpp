@@ -33,6 +33,6 @@ private:
     std::vector<submesh_info> _submeshes;
 
     vao_map _vao;
-    graphics_buffer _vbo { graphics_buffer_type::vertex };
-    graphics_buffer _ebo { graphics_buffer_type::index };
+    graphics_buffer _vbo { graphics_buffer::type::vertex };
+    graphics_buffer _ebo { graphics_buffer::type::index };
 };
