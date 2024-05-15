@@ -24,8 +24,8 @@ camera::camera()
 
     _background_shader = std::make_unique<shader_program>();
     _background_shader->init();
-    _background_shader->add_shader("camera_background_shader.vert");
-    _background_shader->add_shader("camera_background_shader.frag");
+    _background_shader->add_shader("resources/camera_background_shader.vert");
+    _background_shader->add_shader("resources/camera_background_shader.frag");
     _background_shader->link();
 
     _framebuffer = std::make_unique<framebuffer>();
