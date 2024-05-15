@@ -1,0 +1,21 @@
+{
+  "shader": "text",
+  "properties": [
+    {
+      "name": "u_text",
+      "type": "image"
+    },
+    {
+      "name": "u_model_matrix",
+      "type": "mat44"
+    },
+    {
+      "name": "u_vp_matrix",
+      "type": "mat44"
+    },
+    {
+      "name": "u_text_color",
+      "type": "vec3"
+    }
+  ]
+}

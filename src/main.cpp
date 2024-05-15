@@ -93,7 +93,7 @@ int main(int argc, char** argv)
         }
     }
 
-    file mat_file("basic.mat");
+    file mat_file("resources/standard/basic.mat");
     mat_file.changed_externally +=
         [](file::event_type et) { log()->info("material file changed"); };
     mat_file.watch();
@@ -129,7 +129,7 @@ int main(int argc, char** argv)
     int trigger_show = -1;
 
     auto wh = file::watch("./",
-                [](auto path, auto change)
+                          [](auto path, auto change)
     { log()->info("Path {} changed: {}", path, static_cast<int>(change)); });
 
     input_system::on_keypress += [ &trigger_show ](int keycode)
@@ -387,19 +387,19 @@ void initScene()
 {
     feature_flags::set_flag(feature_flags::flag_name::load_fbx_as_scene, false);
     auto* am = asset_manager::default_asset_manager();
-    am->load_asset("cube.fbx");
-    am->load_asset("sphere.fbx");
-    am->load_asset("susane_head.fbx");
-    am->load_asset("shader_ball.fbx");
-    am->load_asset("camera.fbx");
-    am->load_asset("text.mat");
-    am->load_asset("basic.mat");
-    am->load_asset("sample.png");
-    am->load_asset("brick.png");
-    am->load_asset("diffuse.png");
-    am->load_asset("albedo.jpg");
-    am->load_asset("metallic.jpg");
-    am->load_asset("roughness.jpg");
+    am->load_asset("resources/meshes/cube.fbx");
+    am->load_asset("resources/meshes/sphere.fbx");
+    am->load_asset("resources/meshes/susane_head.fbx");
+    am->load_asset("resources/meshes/shader_ball.fbx");
+    am->load_asset("resources/meshes/camera.fbx");
+    am->load_asset("resources/standard/text.mat");
+    am->load_asset("resources/standard/basic.mat");
+    am->load_asset("resources/images/sample.png");
+    am->load_asset("resources/images/brick.png");
+    am->load_asset("resources/images/diffuse.png");
+    am->load_asset("resources/images/albedo.jpg");
+    am->load_asset("resources/images/metallic.jpg");
+    am->load_asset("resources/images/roughness.jpg");
 
     material* basic_mat = am->get_material("basic");
     txt = new texture();
