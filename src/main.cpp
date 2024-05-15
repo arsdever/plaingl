@@ -120,7 +120,7 @@ int main(int argc, char** argv)
     set_thread_name(thd, "physics_thread");
     set_thread_priority(thd, 15);
     // main_camera->set_background(glm::vec3 { 1, 0, 0 });
-    asset_manager::default_asset_manager()->load_asset("env.jpg");
+    asset_manager::default_asset_manager()->load_asset("resources/images/env.jpg");
     main_camera->set_background(
         asset_manager::default_asset_manager()->get_image("env"));
     // texture* txt = new texture;
