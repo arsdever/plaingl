@@ -10,9 +10,14 @@ void asset_loader_SHADER::load(std::string_view path)
     std::string shader_line;
     shader_program* prog = new shader_program();
     prog->init();
-    while (std::getline(ss, shader_line, '\n') && file::exists(shader_line))
+    while (std::getline(ss, shader_line, '\n'))
     {
-        prog->add_shader(shader_line);
+        std::filesystem::path dir = std::filesystem::path(path).parent_path();
+        std::string shader_name = (dir / shader_line).string();
+        if (file::exists(shader_name))
+        {
+            prog->add_shader(shader_name);
+        }
     }
 
     prog->link();

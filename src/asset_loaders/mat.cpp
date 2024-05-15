@@ -34,20 +34,24 @@ void asset_loader_MAT::load(std::string_view path)
     std::string content = file::read_all(path);
     json mat_struct = json::parse(content);
 
-    std::string shader_name = mat_struct[ "shader" ].get<std::string>();
+    std::string shader_exclusive_name =
+        mat_struct[ "shader" ].get<std::string>();
     auto* am = asset_manager::default_asset_manager();
     shader_program* sh;
+    std::filesystem::path dir = std::filesystem::path(path).parent_path();
+    std::string shader_name = (dir / shader_exclusive_name).string();
+    std::string shader_path = shader_name + ".shader";
 
     if (sh = am->get_shader(shader_name); !sh)
     {
-        am->load_asset(shader_name + ".shader");
+        am->load_asset(shader_path);
     }
 
-    if (sh = am->get_shader(shader_name); !sh)
+    if (sh = am->get_shader(shader_exclusive_name); !sh)
     {
         log()->error(
-            R"(Shader file " {} " required by material " {} " could not be found)",
-            shader_name + ".shader",
+            "(Shader file '{}' required by material '{}' could not be found) ",
+            shader_path,
             path);
         return;
     }

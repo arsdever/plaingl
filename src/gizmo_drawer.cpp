@@ -5,8 +5,8 @@
 void gizmo_drawer::init()
 {
     _gizmo_shader.init();
-    _gizmo_shader.add_shader("gizmo.vert");
-    _gizmo_shader.add_shader("gizmo.frag");
+    _gizmo_shader.add_shader("resources/gizmo.vert");
+    _gizmo_shader.add_shader("resources/gizmo.frag");
     _gizmo_shader.link();
     _gizmo_shader.use();
     shader_program::unuse();
