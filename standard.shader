@@ -1,2 +1,0 @@
-./standard.frag
-./standard.vert
