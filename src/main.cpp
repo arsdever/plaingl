@@ -14,6 +14,7 @@
 #include "components/text_component.hpp"
 #include "components/text_renderer_component.hpp"
 #include "components/walking_component.hpp"
+#include "experimental/input_system.hpp"
 #include "experimental/viewport.hpp"
 #include "experimental/window.hpp"
 #include "experimental/window_events.hpp"
@@ -28,6 +29,7 @@
 #include "logging.hpp"
 #include "material.hpp"
 #include "physics_engine.hpp"
+#include "renderer/material_preview_renderer.hpp"
 #include "scene.hpp"
 #include "shader.hpp"
 #include "texture.hpp"
@@ -52,6 +54,9 @@ ray_visualize_component* cast_ray;
 std::vector<std::shared_ptr<experimental::window>> windows;
 std::array<std::shared_ptr<camera>, 3> _view_cameras { nullptr };
 std::string console_string;
+std::unique_ptr<material_preview_renderer> mr;
+texture* mesh_preview_texture { nullptr };
+int mesh_preview_texture_index { 0 };
 
 physics_engine p;
 } // namespace
@@ -82,6 +87,15 @@ int main(int argc, char** argv)
     initViewports();
     setupMouseEvents();
     initScene();
+
+    mr = std::make_unique<material_preview_renderer>();
+    mr->initialize();
+    mesh_preview_texture = new texture;
+    mesh_preview_texture_index = texture::_textures.size() - 1;
+    mesh_preview_texture->init(512, 512);
+
+    asset_manager::default_asset_manager()->load_asset(
+        "resources/standard/2d_rendering.shader");
 
     // TODO: may not be the best place for object initialization
     // Probably should be done in some sort of scene loading procedure
@@ -120,7 +134,8 @@ int main(int argc, char** argv)
     set_thread_name(thd, "physics_thread");
     set_thread_priority(thd, 15);
     // main_camera->set_background(glm::vec3 { 1, 0, 0 });
-    asset_manager::default_asset_manager()->load_asset("resources/images/env.jpg");
+    asset_manager::default_asset_manager()->load_asset(
+        "resources/images/env.jpg");
     main_camera->set_background(
         asset_manager::default_asset_manager()->get_image("env"));
     // texture* txt = new texture;
@@ -132,7 +147,7 @@ int main(int argc, char** argv)
                           [](auto path, auto change)
     { log()->info("Path {} changed: {}", path, static_cast<int>(change)); });
 
-    input_system::on_keypress += [ &trigger_show ](int keycode)
+    experimental::input_system::on_keypress += [ &trigger_show ](int keycode)
     {
         if (keycode == GLFW_KEY_ENTER)
         {
@@ -180,6 +195,14 @@ int main(int argc, char** argv)
                             i,
                             texture::_textures[ i ]->native_id());
             }
+        }
+
+        if (keycode == 'M')
+        {
+            mr->render(
+                *asset_manager::default_asset_manager()->get_material("basic"));
+            mr->get_result(*mesh_preview_texture);
+            trigger_show = mesh_preview_texture_index;
         }
     };
 

@@ -41,8 +41,11 @@ public:
     void render();
     void take_screenshot(std::string_view path);
 
+    static viewport* current_viewport();
+
 private:
     std::unique_ptr<viewport_private> _p;
+    static viewport* _current_viewport;
 };
 
 } // namespace experimental

@@ -1,6 +1,7 @@
 #include "renderer_2d.hpp"
 
 #include "asset_manager.hpp"
+#include "experimental/viewport.hpp"
 #include "glad/gl.h"
 #include "graphics_buffer.hpp"
 #include "mesh.hpp"
@@ -65,6 +66,14 @@ void renderer_2d::draw_rect(glm::vec2 top_left,
 
     auto shader_2d =
         asset_manager::default_asset_manager()->get_shader("2d_rendering");
+
+    shader_2d->set_uniform(
+        "u_view_dimensions",
+        std::make_tuple(
+            static_cast<unsigned int>(
+                experimental::viewport::current_viewport()->get_size().x),
+            static_cast<unsigned int>(
+                experimental::viewport::current_viewport()->get_size().y)));
 
     colored_vertex_2d::activate_attributes();
 
