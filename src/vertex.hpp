@@ -135,3 +135,13 @@ struct simple_vertex3d : vertex<position_3d_attribute>
         return get<0>();
     }
 };
+
+struct colored_vertex2d : vertex<position_2d_attribute, color_attribute>
+{
+    position_2d_attribute::attribute_data_storage_type& position()
+    {
+        return get<1>();
+    }
+
+    color_attribute::attribute_data_storage_type& color() { return get<0>(); }
+};
