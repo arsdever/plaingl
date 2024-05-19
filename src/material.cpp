@@ -89,11 +89,9 @@ void material::activate() const
 
         if (property._type == material_property::data_type::type_image)
         {
-            const auto& [ t ] =
-                std::any_cast<std::tuple<texture*>>(property._value);
+            auto* t = std::any_cast<texture*>(property._value);
             t->set_active_texture(property._special);
-            _shader_program->set_uniform(name,
-                                         std::tuple<int>(property._special));
+            _shader_program->set_uniform(name, property._special);
         }
         else
         {

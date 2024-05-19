@@ -346,10 +346,8 @@ game_object* window::find_game_object_at_position(double x, double y)
     {
         glm::mat4 model = object->get_transform().get_matrix();
         glm::mat4 mvp = _view_camera->vp_matrix() * model;
-        _object_index_map_shader->set_uniform("mvp_matrix",
-                                              std::make_tuple(mvp));
-        _object_index_map_shader->set_uniform("object_id",
-                                              std::make_tuple(++id));
+        _object_index_map_shader->set_uniform("mvp_matrix", mvp);
+        _object_index_map_shader->set_uniform("object_id", ++id);
         _object_index_map_shader->use();
         if (object->get_component<mesh_component>())
         {

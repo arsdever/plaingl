@@ -78,24 +78,13 @@ void renderer_2d::draw_rect(glm::vec2 top_left,
     auto shader_2d =
         asset_manager::default_asset_manager()->get_shader("canvas");
 
-    shader_2d->set_uniform(
-        "u_view_dimensions",
-        std::make_tuple(
-            static_cast<unsigned>(
-                experimental::viewport::current_viewport()->get_size().x),
-            static_cast<unsigned>(
-                experimental::viewport::current_viewport()->get_size().y)));
-    shader_2d->set_uniform(
-        "u_color",
-        std::make_tuple(
-            fill_color.r, fill_color.g, fill_color.b, fill_color.a));
+    glm::uvec2 usize = experimental::viewport::current_viewport()->get_size();
+    shader_2d->set_uniform("u_view_dimensions", usize);
+    shader_2d->set_uniform("u_color", fill_color);
     shader_2d->use();
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 
-    shader_2d->set_uniform(
-        "u_color",
-        std::make_tuple(
-            border_color.r, border_color.g, border_color.b, border_color.a));
+    shader_2d->set_uniform("u_color", border_color);
     shader_2d->use();
     glDrawElements(GL_TRIANGLES,
                    indices.size() - 6,
