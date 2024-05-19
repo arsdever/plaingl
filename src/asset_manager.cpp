@@ -32,6 +32,7 @@ void asset_manager::load_asset(std::string_view path)
     {
         asset_loader_SHADER shader_loader;
         shader_loader.load(path);
+        shader_loader.get_shader_program()->set_name(filename);
         auto [ it, success ] = _shader_programs.try_emplace(
             filename, shader_loader.get_shader_program());
         return;
@@ -87,8 +88,7 @@ void asset_manager::save_asset<image>(std::string_view path, const image* img)
 }
 
 template <>
-void asset_manager::register_asset<mesh>(std::string_view name,
-                                         mesh* asset)
+void asset_manager::register_asset<mesh>(std::string_view name, mesh* asset)
 {
     _meshs.emplace(std::string(name), asset);
 }

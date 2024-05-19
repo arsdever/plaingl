@@ -9,8 +9,6 @@
 #include "graphics_buffer.hpp"
 #include "material.hpp"
 #include "mesh.hpp"
-#include "renderer/algorithms/polygon_to_mesh.hpp"
-#include "shader.hpp"
 #include "vaomap.hpp"
 #include "vertex.hpp"
 

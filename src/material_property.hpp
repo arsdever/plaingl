@@ -49,5 +49,5 @@ struct material_property
      *
      * For textures, this is the OpenGL texture id used in the material.
      */
-    unsigned _special;
+    int _special;
 };

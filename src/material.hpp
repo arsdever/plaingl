@@ -35,13 +35,6 @@ public:
         set_property_value(name, std::any { std::make_tuple(args...) });
     }
 
-    template <typename C, typename... T>
-    void set_property_value(std::string_view name, T... args)
-    {
-        set_property_value(
-            name, std::any { std::make_tuple(static_cast<C>(args)...) });
-    }
-
     template <typename T>
     void set_property_value(std::string_view name, T element)
     {

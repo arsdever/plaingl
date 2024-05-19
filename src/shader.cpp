@@ -232,6 +232,10 @@ int shader_program::id() const { return _id; }
 
 bool shader_program::linked() const { return _status == status::linked; }
 
+void shader_program::set_name(std::string name) { _name = std::move(name); }
+
+std::string shader_program::get_name() const { return _name; }
+
 void shader_program::unuse() { glUseProgram(0); }
 
 void shader_program::set_uniform(std::string_view name, std::any value)
@@ -268,7 +272,6 @@ void shader_program::resolve_uniforms()
         _properties[ i ]._name.resize(length);
         _properties[ i ]._index = i;
         _properties[ i ]._size = size;
-        _properties[ i ]._type = uniform_info::type(type);
         // TODO: verify emplace did add element
         _name_property_map.try_emplace(_properties[ i ]._name,
                                        _properties[ i ]);
@@ -313,6 +316,10 @@ void shader_program::setup_property_values() const
                 std::any_cast<std::tuple<float, float, float, float>>(v);
             glUniform4f(id, v0, v1, v2, v3);
         }
+        else if (v.type() == typeid(int))
+        {
+            glUniform1i(id, std::any_cast<int>(v));
+        }
         else if (v.type() == typeid(std::tuple<int>))
         {
             auto [ v0 ] = std::any_cast<std::tuple<int>>(v);
@@ -334,34 +341,31 @@ void shader_program::setup_property_values() const
                 std::any_cast<std::tuple<int, int, int, int>>(v);
             glUniform4i(id, v0, v1, v2, v3);
         }
-        else if (v.type() == typeid(std::tuple<unsigned int>))
+        else if (v.type() == typeid(unsigned))
         {
-            auto [ v0 ] = std::any_cast<std::tuple<unsigned int>>(v);
+            glUniform1ui(id, std::any_cast<unsigned>(v));
+        }
+        else if (v.type() == typeid(std::tuple<unsigned>))
+        {
+            auto [ v0 ] = std::any_cast<std::tuple<unsigned>>(v);
             glUniform1ui(id, v0);
         }
-        else if (v.type() == typeid(std::tuple<unsigned int, unsigned int>))
+        else if (v.type() == typeid(std::tuple<unsigned, unsigned>))
         {
-            auto [ v0, v1 ] =
-                std::any_cast<std::tuple<unsigned int, unsigned int>>(v);
+            auto [ v0, v1 ] = std::any_cast<std::tuple<unsigned, unsigned>>(v);
             glUniform2ui(id, v0, v1);
         }
-        else if (v.type() ==
-                 typeid(std::tuple<unsigned int, unsigned int, unsigned int>))
+        else if (v.type() == typeid(std::tuple<unsigned, unsigned, unsigned>))
         {
-            auto [ v0, v1, v2 ] = std::any_cast<
-                std::tuple<unsigned int, unsigned int, unsigned int>>(v);
+            auto [ v0, v1, v2 ] =
+                std::any_cast<std::tuple<unsigned, unsigned, unsigned>>(v);
             glUniform3ui(id, v0, v1, v2);
         }
-        else if (v.type() == typeid(std::tuple<unsigned int,
-                                               unsigned int,
-                                               unsigned int,
-                                               unsigned int>))
+        else if (v.type() ==
+                 typeid(std::tuple<unsigned, unsigned, unsigned, unsigned>))
         {
-            auto [ v0, v1, v2, v3 ] =
-                std::any_cast<std::tuple<unsigned int,
-                                         unsigned int,
-                                         unsigned int,
-                                         unsigned int>>(v);
+            auto [ v0, v1, v2, v3 ] = std::any_cast<
+                std::tuple<unsigned, unsigned, unsigned, unsigned>>(v);
             glUniform4ui(id, v0, v1, v2, v3);
         }
         else if (v.type() == typeid(glm::vec1))
