@@ -126,7 +126,7 @@ void gizmo_drawer::draw_box(glm::vec3 position,
         v = transform * glm::vec4 { v, 1 };
     }
 
-    _gizmo_shader.set_uniform("u_color", color.a);
+    _gizmo_shader.set_uniform("u_color", color);
     _gizmo_shader.use();
     draw_vertices(std::move(vertices), std::move(indices), _vbo, _ebo);
     shader_program::unuse();
@@ -190,7 +190,7 @@ void gizmo_drawer::draw_ray(glm::vec3 pos,
 }
 void gizmo_drawer::draw_line(glm::vec3 p1, glm::vec3 p2, glm::vec4 color)
 {
-    _gizmo_shader.set_uniform("u_color", color.r);
+    _gizmo_shader.set_uniform("u_color", color);
     _gizmo_shader.use();
     draw_vertices({ { p1 }, { p2 } });
     shader_program::unuse();
@@ -198,7 +198,7 @@ void gizmo_drawer::draw_line(glm::vec3 p1, glm::vec3 p2, glm::vec4 color)
 
 void gizmo_drawer::draw_line_2d(glm::vec2 p1, glm::vec2 p2, glm::vec4 color)
 {
-    _gizmo_shader.set_uniform("u_color", color.a);
+    _gizmo_shader.set_uniform("u_color", color);
     _gizmo_shader.use();
     draw_vertices({ { p1, 0 }, { p2, 0 } });
     shader_program::unuse();
