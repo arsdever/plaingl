@@ -286,115 +286,116 @@ void shader_program::setup_property_values() const
         }
 
         int id = property._index;
-        switch (property._type)
+        const auto& v = property._value;
+        if (v.type() == typeid(float))
         {
-        case uniform_info::type::property_type_1f:
-        {
-            auto [ f1 ] = std::any_cast<std::tuple<float>>(property._value);
-            glUniform1f(id, f1);
-            break;
+            glUniform1f(id, std::any_cast<float>(v));
         }
-        case uniform_info::type::property_type_2f:
+        else if (v.type() == typeid(std::tuple<float>))
         {
-            auto [ f1, f2 ] =
-                std::any_cast<std::tuple<float, float>>(property._value);
-            glUniform2f(id, f1, f2);
-            break;
+            auto [ v0 ] = std::any_cast<std::tuple<float>>(v);
+            glUniform1f(id, v0);
         }
-        case uniform_info::type::property_type_3f:
+        else if (v.type() == typeid(std::tuple<float, float>))
         {
-            auto [ f1, f2, f3 ] =
-                std::any_cast<std::tuple<float, float, float>>(property._value);
-            glUniform3f(id, f1, f2, f3);
-            break;
+            auto [ v0, v1 ] = std::any_cast<std::tuple<float, float>>(v);
+            glUniform2f(id, v0, v1);
         }
-        case uniform_info::type::property_type_4f:
+        else if (v.type() == typeid(std::tuple<float, float, float>))
         {
-            auto [ f1, f2, f3, f4 ] =
-                std::any_cast<std::tuple<float, float, float, float>>(
-                    property._value);
-            glUniform4f(id, f1, f2, f3, f4);
-            break;
+            auto [ v0, v1, v2 ] =
+                std::any_cast<std::tuple<float, float, float>>(v);
+            glUniform3f(id, v0, v1, v2);
         }
-        case uniform_info::type::property_type_sampler2D:
-        case uniform_info::type::property_type_1i:
+        else if (v.type() == typeid(std::tuple<float, float, float, float>))
         {
-            auto [ i1 ] = std::any_cast<std::tuple<int>>(property._value);
-            glUniform1i(id, i1);
-            break;
+            auto [ v0, v1, v2, v3 ] =
+                std::any_cast<std::tuple<float, float, float, float>>(v);
+            glUniform4f(id, v0, v1, v2, v3);
         }
-        case uniform_info::type::property_type_2i:
+        else if (v.type() == typeid(std::tuple<int>))
         {
-            auto [ i1, i2 ] =
-                std::any_cast<std::tuple<int, int>>(property._value);
-            glUniform2i(id, i1, i2);
-            break;
+            auto [ v0 ] = std::any_cast<std::tuple<int>>(v);
+            glUniform1i(id, v0);
         }
-        case uniform_info::type::property_type_3i:
+        else if (v.type() == typeid(std::tuple<int, int>))
         {
-            auto [ i1, i2, i3 ] =
-                std::any_cast<std::tuple<int, int, int>>(property._value);
-            glUniform3i(id, i1, i2, i3);
-            break;
+            auto [ v0, v1 ] = std::any_cast<std::tuple<int, int>>(v);
+            glUniform2i(id, v0, v1);
         }
-        case uniform_info::type::property_type_4i:
+        else if (v.type() == typeid(std::tuple<int, int, int>))
         {
-            auto [ i1, i2, i3, i4 ] =
-                std::any_cast<std::tuple<int, int, int, int>>(property._value);
-            glUniform4i(id, i1, i2, i3, i4);
-            break;
+            auto [ v0, v1, v2 ] = std::any_cast<std::tuple<int, int, int>>(v);
+            glUniform3i(id, v0, v1, v2);
         }
-        case uniform_info::type::property_type_1ui:
+        else if (v.type() == typeid(std::tuple<int, int, int, int>))
         {
-            auto [ ui1 ] = std::any_cast<std::tuple<unsigned>>(property._value);
-            glUniform1ui(id, ui1);
-            break;
+            auto [ v0, v1, v2, v3 ] =
+                std::any_cast<std::tuple<int, int, int, int>>(v);
+            glUniform4i(id, v0, v1, v2, v3);
         }
-        case uniform_info::type::property_type_2ui:
+        else if (v.type() == typeid(std::tuple<unsigned>))
         {
-            auto [ ui1, ui2 ] =
-                std::any_cast<std::tuple<unsigned, unsigned>>(property._value);
-            glUniform2ui(id, ui1, ui2);
-            break;
+            auto [ v0 ] = std::any_cast<std::tuple<unsigned>>(v);
+            glUniform1ui(id, v0);
         }
-        case uniform_info::type::property_type_3ui:
+        else if (v.type() == typeid(std::tuple<unsigned, unsigned>))
         {
-            auto [ ui1, ui2, ui3 ] =
-                std::any_cast<std::tuple<unsigned, unsigned, unsigned>>(
-                    property._value);
-            glUniform3ui(id, ui1, ui2, ui3);
-            break;
+            auto [ v0, v1 ] = std::any_cast<std::tuple<unsigned, unsigned>>(v);
+            glUniform2ui(id, v0, v1);
         }
-        case uniform_info::type::property_type_4ui:
+        else if (v.type() == typeid(std::tuple<unsigned, unsigned, unsigned>))
         {
-            auto [ ui1, ui2, ui3, ui4 ] = std::any_cast<
-                std::tuple<unsigned, unsigned, unsigned, unsigned>>(
-                property._value);
-            glUniform4ui(id, ui1, ui2, ui3, ui4);
-            break;
+            auto [ v0, v1, v2 ] =
+                std::any_cast<std::tuple<unsigned, unsigned, unsigned>>(v);
+            glUniform3ui(id, v0, v1, v2);
         }
-        case uniform_info::type::property_type_mat2:
+        else if (v.type() ==
+                 typeid(std::tuple<unsigned, unsigned, unsigned, unsigned>))
         {
-            auto [ matrix ] =
-                std::any_cast<std::tuple<glm::mat2>>(property._value);
-            glUniformMatrix2fv(id, 1, GL_FALSE, glm::value_ptr(matrix));
-            break;
+            auto [ v0, v1, v2, v3 ] = std::any_cast<
+                std::tuple<unsigned, unsigned, unsigned, unsigned>>(v);
+            glUniform4ui(id, v0, v1, v2, v3);
         }
-        case uniform_info::type::property_type_mat3:
+        else if (v.type() == typeid(glm::vec1))
         {
-            auto [ matrix ] =
-                std::any_cast<std::tuple<glm::mat3>>(property._value);
-            glUniformMatrix3fv(id, 1, GL_FALSE, glm::value_ptr(matrix));
-            break;
+            glUniform1f(id, std::any_cast<glm::vec1>(v).x);
         }
-        case uniform_info::type::property_type_mat4:
+        else if (v.type() == typeid(glm::vec2))
         {
-            auto [ matrix ] =
-                std::any_cast<std::tuple<glm::mat4>>(property._value);
-            glUniformMatrix4fv(id, 1, GL_FALSE, glm::value_ptr(matrix));
-            break;
+            glUniform2f(id,
+                        std::any_cast<glm::vec2>(v).x,
+                        std::any_cast<glm::vec2>(v).y);
         }
-        default: break;
+        else if (v.type() == typeid(glm::vec3))
+        {
+            glUniform3f(id,
+                        std::any_cast<glm::vec3>(v).x,
+                        std::any_cast<glm::vec3>(v).y,
+                        std::any_cast<glm::vec3>(v).z);
+        }
+        else if (v.type() == typeid(glm::vec4))
+        {
+            glUniform4f(id,
+                        std::any_cast<glm::vec4>(v).x,
+                        std::any_cast<glm::vec4>(v).y,
+                        std::any_cast<glm::vec4>(v).z,
+                        std::any_cast<glm::vec4>(v).w);
+        }
+        else if (v.type() == typeid(glm::mat2))
+        {
+            glUniformMatrix2fv(
+                id, 1, GL_FALSE, glm::value_ptr(std::any_cast<glm::mat2>(v)));
+        }
+        else if (v.type() == typeid(glm::mat3))
+        {
+            glUniformMatrix3fv(
+                id, 1, GL_FALSE, glm::value_ptr(std::any_cast<glm::mat3>(v)));
+        }
+        else if (v.type() == typeid(glm::mat4))
+        {
+            glUniformMatrix4fv(
+                id, 1, GL_FALSE, glm::value_ptr(std::any_cast<glm::mat4>(v)));
         }
     }
 

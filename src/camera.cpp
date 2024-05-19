@@ -90,9 +90,8 @@ bool camera::get_gizmos_enabled() const { return _gizmos_enabled; }
 void camera::set_background(glm::vec3 color)
 {
     _background_color = color;
-    _background_shader->set_uniform("background_color",
-                                    std::make_tuple(color.r, color.g, color.b));
-    _background_shader->set_uniform("use_color", std::make_tuple(1.0f));
+    _background_shader->set_uniform("background_color", color);
+    _background_shader->set_uniform("use_color", 1.0f);
 }
 
 void camera::set_background(image* img)
@@ -105,9 +104,8 @@ void camera::set_background(image* img)
     {
         _background_texture =
             std::make_unique<texture>(std::move(texture::from_image(img)));
-        _background_shader->set_uniform(
-            "cubemap", std::make_tuple(_background_texture.get()));
-        _background_shader->set_uniform("use_color", std::make_tuple(0.0f));
+        _background_shader->set_uniform("cubemap", _background_texture.get());
+        _background_shader->set_uniform("use_color", 0.0f);
     }
 }
 
@@ -120,8 +118,8 @@ void camera::render()
 
     _background_shader->set_uniform(
         "camera_matrix",
-        std::make_tuple(glm::toMat4(get_transform().get_rotation()) *
-                        glm::inverse(projection_matrix())));
+        glm::toMat4(get_transform().get_rotation()) *
+            glm::inverse(projection_matrix()));
     if (_background_texture)
     {
         _background_texture->set_active_texture(0);
@@ -245,8 +243,7 @@ void camera::render_gizmos() const
                 continue;
             }
             gizmo_drawer::instance()->get_shader().set_uniform(
-                "u_model_matrix",
-                std::make_tuple(obj->get_transform().get_matrix()));
+                "u_model_matrix", obj->get_transform().get_matrix());
             obj->draw_gizmos();
         }
     }
