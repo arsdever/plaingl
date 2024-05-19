@@ -112,8 +112,7 @@ void viewport::draw() const
                 continue;
             }
             gizmo_drawer::instance()->get_shader().set_uniform(
-                "model_matrix",
-                std::make_tuple(obj->get_transform().get_matrix()));
+                "model_matrix", obj->get_transform().get_matrix());
             obj->draw_gizmos();
         }
     }

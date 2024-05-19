@@ -106,8 +106,7 @@ void text_renderer_component::render()
 void text_renderer_component::draw_gizmos()
 {
     gizmo_drawer::instance()->get_shader().set_uniform(
-        "model_matrix",
-        std::make_tuple(get_game_object()->get_transform().get_matrix()));
+        "model_matrix", get_game_object()->get_transform().get_matrix());
 
     // while rendering local to world conversion is already considered
     glm::vec2 scale = glm::vec2(1);
