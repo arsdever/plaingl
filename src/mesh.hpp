@@ -27,6 +27,9 @@ public:
     // manage the vao creation per context
     void render();
 
+    const graphics_buffer& get_vertex_buffer() const;
+    const graphics_buffer& get_index_buffer() const;
+
 private:
     std::vector<vertex3d> _vertices;
     std::vector<int> _indices;

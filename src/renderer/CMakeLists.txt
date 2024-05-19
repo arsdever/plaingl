@@ -2,6 +2,8 @@ add_library(
   ${PROJECT}_renderer STATIC
   renderer_2d.hpp
   renderer_2d.cpp
+  renderer_3d.hpp
+  renderer_3d.cpp
   renderer.hpp
   renderer.cpp
   algorithms/polygon_to_mesh.hpp

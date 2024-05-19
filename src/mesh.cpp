@@ -39,3 +39,7 @@ void mesh::render()
     glDrawElements(GL_TRIANGLES, _indices.size(), GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
 }
+
+const graphics_buffer& mesh::get_vertex_buffer() const { return _vbo; }
+
+const graphics_buffer& mesh::get_index_buffer() const { return _ebo; }

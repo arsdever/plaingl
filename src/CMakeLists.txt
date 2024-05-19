@@ -103,7 +103,7 @@ add_library(
   components/walking_component.cpp)
 
 set(PROJECT_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR})
-link_libraries(spdlog::spdlog)
+link_libraries(spdlog::spdlog profiler::lib)
 
 add_subdirectory(glad)
 add_subdirectory(renderer)
@@ -115,7 +115,6 @@ target_link_libraries(
          ${PROJECT}::renderer
          glfw
          glm
-         profiler::lib
          freetype
          Winmm
          filewatch)
