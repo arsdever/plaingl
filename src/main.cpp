@@ -29,7 +29,6 @@
 #include "logging.hpp"
 #include "material.hpp"
 #include "physics_engine.hpp"
-#include "renderer/material_preview_renderer.hpp"
 #include "scene.hpp"
 #include "shader.hpp"
 #include "texture.hpp"
@@ -54,8 +53,6 @@ ray_visualize_component* cast_ray;
 std::vector<std::shared_ptr<experimental::window>> windows;
 std::array<std::shared_ptr<camera>, 3> _view_cameras { nullptr };
 std::string console_string;
-std::unique_ptr<material_preview_renderer> mr;
-texture* mesh_preview_texture { nullptr };
 int mesh_preview_texture_index { 0 };
 
 physics_engine p;
@@ -87,12 +84,6 @@ int main(int argc, char** argv)
     initViewports();
     setupMouseEvents();
     initScene();
-
-    mr = std::make_unique<material_preview_renderer>();
-    mr->initialize();
-    mesh_preview_texture = new texture;
-    mesh_preview_texture_index = texture::_textures.size() - 1;
-    mesh_preview_texture->init(512, 512);
 
     asset_manager::default_asset_manager()->load_asset(
         "resources/standard/2d_rendering.shader");
@@ -195,14 +186,6 @@ int main(int argc, char** argv)
                             i,
                             texture::_textures[ i ]->native_id());
             }
-        }
-
-        if (keycode == 'M')
-        {
-            mr->render(
-                *asset_manager::default_asset_manager()->get_material("basic"));
-            mr->get_result(*mesh_preview_texture);
-            trigger_show = mesh_preview_texture_index;
         }
     };
 

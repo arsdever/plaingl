@@ -7,9 +7,7 @@ add_library(
   renderer.hpp
   renderer.cpp
   algorithms/polygon_to_mesh.hpp
-  algorithms/polygon_to_mesh.cpp
-  material_preview_renderer.hpp
-  material_preview_renderer.cpp)
+  algorithms/polygon_to_mesh.cpp)
 add_library(${PROJECT}::renderer ALIAS ${PROJECT}_renderer)
 
 target_precompile_headers(${PROJECT}_renderer PUBLIC precompile.hpp)
