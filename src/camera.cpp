@@ -228,8 +228,6 @@ void camera::render_on_private_texture() const
             }
         }
     }
-    renderer_2d().draw_rect(
-        { 100, 100 }, { 200, 200 }, 5, { 1, 0, 0, 1 }, { 0, 1, 0, 1 });
 
     _framebuffer->unbind();
 }
