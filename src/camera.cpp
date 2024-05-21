@@ -9,7 +9,6 @@
 #include "logging.hpp"
 #include "material.hpp"
 #include "mesh.hpp"
-#include "renderer/renderer_2d.hpp"
 #include "scene.hpp"
 #include "shader.hpp"
 #include "texture.hpp"
@@ -228,7 +227,6 @@ void camera::render_on_private_texture() const
             }
         }
     }
-
     _framebuffer->unbind();
 }
 
