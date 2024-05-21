@@ -85,9 +85,6 @@ int main(int argc, char** argv)
     setupMouseEvents();
     initScene();
 
-    asset_manager::default_asset_manager()->load_asset(
-        "resources/standard/2d_rendering.shader");
-
     // TODO: may not be the best place for object initialization
     // Probably should be done in some sort of scene loading procedure
     if (scene::get_active_scene())
