@@ -3,10 +3,10 @@
 namespace
 {
 
-template <typename T, size_t C>
+template <typename T, size_t C, typename S = std::array<T, C>>
 struct vertex_attribute
 {
-    using attribute_data_storage_type = std::array<T, C>;
+    using attribute_data_storage_type = S;
     using attribute_component_type = T;
 
     static constexpr size_t component_count = C;
@@ -55,10 +55,11 @@ using reverse_order_tuple = reverse_order_tuple_helper<T...>::type;
 
 } // namespace
 
-using position_3d_attribute = vertex_attribute<float, 3>;
-using position_2d_attribute = vertex_attribute<float, 2>;
-using normal_3d_attribute = vertex_attribute<float, 3>;
-using uv_attribute = vertex_attribute<float, 2>;
+using position_3d_attribute = vertex_attribute<float, 3, glm::vec3>;
+using position_2d_attribute = vertex_attribute<float, 2, glm::vec2>;
+using normal_3d_attribute = vertex_attribute<float, 3, glm::vec3>;
+using color_attribute = vertex_attribute<float, 4, glm::vec4>;
+using uv_attribute = vertex_attribute<float, 2, glm::vec2>;
 
 template <typename... ATTRIBUTES>
 struct vertex
@@ -133,4 +134,14 @@ struct simple_vertex3d : vertex<position_3d_attribute>
     {
         return get<0>();
     }
+};
+
+struct colored_vertex2d : vertex<position_2d_attribute, color_attribute>
+{
+    position_2d_attribute::attribute_data_storage_type& position()
+    {
+        return get<1>();
+    }
+
+    color_attribute::attribute_data_storage_type& color() { return get<0>(); }
 };

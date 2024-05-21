@@ -14,6 +14,7 @@
 #include "components/text_component.hpp"
 #include "components/text_renderer_component.hpp"
 #include "components/walking_component.hpp"
+#include "experimental/input_system.hpp"
 #include "experimental/viewport.hpp"
 #include "experimental/window.hpp"
 #include "experimental/window_events.hpp"
@@ -52,6 +53,7 @@ ray_visualize_component* cast_ray;
 std::vector<std::shared_ptr<experimental::window>> windows;
 std::array<std::shared_ptr<camera>, 3> _view_cameras { nullptr };
 std::string console_string;
+int mesh_preview_texture_index { 0 };
 
 physics_engine p;
 } // namespace
@@ -120,7 +122,8 @@ int main(int argc, char** argv)
     set_thread_name(thd, "physics_thread");
     set_thread_priority(thd, 15);
     // main_camera->set_background(glm::vec3 { 1, 0, 0 });
-    asset_manager::default_asset_manager()->load_asset("resources/images/env.jpg");
+    asset_manager::default_asset_manager()->load_asset(
+        "resources/images/env.jpg");
     main_camera->set_background(
         asset_manager::default_asset_manager()->get_image("env"));
     // texture* txt = new texture;
@@ -132,7 +135,7 @@ int main(int argc, char** argv)
                           [](auto path, auto change)
     { log()->info("Path {} changed: {}", path, static_cast<int>(change)); });
 
-    input_system::on_keypress += [ &trigger_show ](int keycode)
+    experimental::input_system::on_keypress += [ &trigger_show ](int keycode)
     {
         if (keycode == GLFW_KEY_ENTER)
         {

@@ -232,6 +232,10 @@ int shader_program::id() const { return _id; }
 
 bool shader_program::linked() const { return _status == status::linked; }
 
+void shader_program::set_name(std::string name) { _name = std::move(name); }
+
+std::string shader_program::get_name() const { return _name; }
+
 void shader_program::unuse() { glUseProgram(0); }
 
 void shader_program::set_uniform(std::string_view name, std::any value)
@@ -268,7 +272,6 @@ void shader_program::resolve_uniforms()
         _properties[ i ]._name.resize(length);
         _properties[ i ]._index = i;
         _properties[ i ]._size = size;
-        _properties[ i ]._type = uniform_info::type(type);
         // TODO: verify emplace did add element
         _name_property_map.try_emplace(_properties[ i ]._name,
                                        _properties[ i ]);
@@ -313,6 +316,10 @@ void shader_program::setup_property_values() const
                 std::any_cast<std::tuple<float, float, float, float>>(v);
             glUniform4f(id, v0, v1, v2, v3);
         }
+        else if (v.type() == typeid(int))
+        {
+            glUniform1i(id, std::any_cast<int>(v));
+        }
         else if (v.type() == typeid(std::tuple<int>))
         {
             auto [ v0 ] = std::any_cast<std::tuple<int>>(v);
@@ -333,6 +340,10 @@ void shader_program::setup_property_values() const
             auto [ v0, v1, v2, v3 ] =
                 std::any_cast<std::tuple<int, int, int, int>>(v);
             glUniform4i(id, v0, v1, v2, v3);
+        }
+        else if (v.type() == typeid(unsigned))
+        {
+            glUniform1ui(id, std::any_cast<unsigned>(v));
         }
         else if (v.type() == typeid(std::tuple<unsigned>))
         {
@@ -382,6 +393,71 @@ void shader_program::setup_property_values() const
                         std::any_cast<glm::vec4>(v).z,
                         std::any_cast<glm::vec4>(v).w);
         }
+        else if (v.type() == typeid(glm::uvec1))
+        {
+            glUniform1ui(id, std::any_cast<glm::uvec1>(v).x);
+        }
+        else if (v.type() == typeid(glm::uvec2))
+        {
+            glUniform2ui(id,
+                         std::any_cast<glm::uvec2>(v).x,
+                         std::any_cast<glm::uvec2>(v).y);
+        }
+        else if (v.type() == typeid(glm::uvec3))
+        {
+            glUniform3ui(id,
+                         std::any_cast<glm::uvec3>(v).x,
+                         std::any_cast<glm::uvec3>(v).y,
+                         std::any_cast<glm::uvec3>(v).z);
+        }
+        else if (v.type() == typeid(glm::uvec4))
+        {
+            glUniform4ui(id,
+                         std::any_cast<glm::uvec4>(v).x,
+                         std::any_cast<glm::uvec4>(v).y,
+                         std::any_cast<glm::uvec4>(v).z,
+                         std::any_cast<glm::uvec4>(v).w);
+        }
+        else if (v.type() == typeid(glm::ivec1))
+        {
+            glUniform1i(id, std::any_cast<glm::ivec1>(v).x);
+        }
+        else if (v.type() == typeid(glm::ivec2))
+        {
+            glUniform2i(id,
+                        std::any_cast<glm::ivec2>(v).x,
+                        std::any_cast<glm::ivec2>(v).y);
+        }
+        else if (v.type() == typeid(glm::ivec3))
+        {
+            glUniform3i(id,
+                        std::any_cast<glm::ivec3>(v).x,
+                        std::any_cast<glm::ivec3>(v).y,
+                        std::any_cast<glm::ivec3>(v).z);
+        }
+        else if (v.type() == typeid(glm::ivec4))
+        {
+            glUniform4i(id,
+                        std::any_cast<glm::ivec4>(v).x,
+                        std::any_cast<glm::ivec4>(v).y,
+                        std::any_cast<glm::ivec4>(v).z,
+                        std::any_cast<glm::ivec4>(v).w);
+        }
+        else if (v.type() == typeid(std::tuple<glm::mat2>))
+        {
+            auto [ value ] = std::any_cast<std::tuple<glm::mat2>>(v);
+            glUniformMatrix2fv(id, 1, GL_FALSE, glm::value_ptr(value));
+        }
+        else if (v.type() == typeid(std::tuple<glm::mat3>))
+        {
+            auto [ value ] = std::any_cast<std::tuple<glm::mat3>>(v);
+            glUniformMatrix3fv(id, 1, GL_FALSE, glm::value_ptr(value));
+        }
+        else if (v.type() == typeid(std::tuple<glm::mat4>))
+        {
+            auto [ value ] = std::any_cast<std::tuple<glm::mat4>>(v);
+            glUniformMatrix4fv(id, 1, GL_FALSE, glm::value_ptr(value));
+        }
         else if (v.type() == typeid(glm::mat2))
         {
             glUniformMatrix2fv(
@@ -397,22 +473,12 @@ void shader_program::setup_property_values() const
             glUniformMatrix4fv(
                 id, 1, GL_FALSE, glm::value_ptr(std::any_cast<glm::mat4>(v)));
         }
-    }
-
-    if (camera::active_camera())
-    {
-        if (_name_property_map.contains("u_vp_matrix"))
-            glUniformMatrix4fv(
-                _name_property_map.find("u_vp_matrix")->second._index,
-                1,
-                GL_FALSE,
-                glm::value_ptr(camera::active_camera()->vp_matrix()));
-        if (_name_property_map.contains("u_camera_position"))
-            glUniform3fv(
-                _name_property_map.find("u_camera_position")->second._index,
-                1,
-                glm::value_ptr(
-                    camera::active_camera()->get_transform().get_position()));
+        else
+        {
+            log()->warn("Unknown uniform type '{}' specified for property {}",
+                        v.type().name(),
+                        property._name);
+        }
     }
 }
 

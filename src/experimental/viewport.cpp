@@ -64,6 +64,7 @@ std::shared_ptr<camera> viewport::get_camera() const
 
 void viewport::render()
 {
+    _current_viewport = this;
     auto cam = get_camera();
     if (cam == nullptr)
     {
@@ -87,5 +88,9 @@ void viewport::take_screenshot(std::string_view path)
     asset_manager::default_asset_manager()->save_asset(path, screenshot);
     delete screenshot;
 }
+
+viewport* viewport::current_viewport() { return _current_viewport; }
+
+viewport* viewport::_current_viewport { nullptr };
 
 } // namespace experimental

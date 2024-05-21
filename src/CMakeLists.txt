@@ -102,15 +102,19 @@ add_library(
   components/walking_component.hpp
   components/walking_component.cpp)
 
+set(PROJECT_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+link_libraries(spdlog::spdlog profiler::lib)
+
 add_subdirectory(glad)
+add_subdirectory(renderer)
 
 target_link_libraries(
   ${PROJECT}_lib
   PUBLIC ${PROJECT}_includes
          ${PROJECT}::glad
+         ${PROJECT}::renderer
          glfw
          glm
-         profiler::lib
          freetype
          Winmm
          filewatch)
@@ -121,8 +125,6 @@ target_precompile_headers(${PROJECT}_lib PUBLIC
 add_library(${PROJECT}_includes INTERFACE)
 target_include_directories(${PROJECT}_includes
                            INTERFACE ${CMAKE_CURRENT_SOURCE_DIR} glad/include)
-
-link_libraries(spdlog::spdlog)
 
 macro(enable_asset_type)
   if(NOT ${PROJECT}_asset_loaders)
