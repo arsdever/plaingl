@@ -49,11 +49,7 @@ template <typename T>
 class singleton
 {
 public:
-    static std::shared_ptr<T> get()
-    {
-        static std::shared_ptr<T> instance = std::shared_ptr<T>(new T());
-        return instance;
-    }
+    static std::shared_ptr<T> get() { return _instance; }
 
 private:
     using singleton_t = singleton<T>;
@@ -66,4 +62,9 @@ private:
     ~singleton() = default;
 
     friend T;
+
+    static std::shared_ptr<T> _instance;
 };
+
+template <typename T>
+std::shared_ptr<T> singleton<T>::_instance = std::shared_ptr<T>(new T());
