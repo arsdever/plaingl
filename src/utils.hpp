@@ -44,3 +44,26 @@ bool rect_contains(glm::vec<2, T, glm::defaultp> top_left,
 
     return is_in_range(tl.x, br.x, pos.x) && is_in_range(tl.y, br.y, pos.y);
 }
+
+template <typename T>
+class singleton
+{
+public:
+    static std::shared_ptr<T> get()
+    {
+        static std::shared_ptr<T> instance = std::shared_ptr<T>(new T());
+        return instance;
+    }
+
+private:
+    using singleton_t = singleton<T>;
+
+    singleton() = default;
+    singleton(const singleton&) = delete;
+    singleton& operator=(const singleton&) = delete;
+    singleton(singleton&&) = delete;
+    singleton& operator=(singleton&&) = delete;
+    ~singleton() = default;
+
+    friend T;
+};
