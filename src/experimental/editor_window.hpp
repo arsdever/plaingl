@@ -16,7 +16,14 @@ public:
 private:
     editor_window();
 
+    void initialize();
+    void render_grid();
+
     friend singleton_t;
+
+private:
+    glm::vec3 _camera_position;
+    glm::vec3 _camera_direction;
 };
 
 } // namespace experimental
