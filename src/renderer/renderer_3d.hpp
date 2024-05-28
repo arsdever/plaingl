@@ -15,6 +15,12 @@ public:
                           const glm::mat4& model,
                           const glm::mat4& view,
                           const glm::mat4& proj);
+    static void draw_ray(const glm::vec3& origin,
+                         const glm::vec3& direction,
+                         float length,
+                         const glm::vec4& color,
+                         const glm::mat4& view,
+                         const glm::mat4& proj);
 
     static renderer_3d& instance();
 

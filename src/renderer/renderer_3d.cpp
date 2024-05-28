@@ -88,6 +88,52 @@ void renderer_3d::draw_grid(float grid_size,
     glDrawElementsInstanced(GL_LINES, 2, GL_UNSIGNED_INT, nullptr, grid_count);
 }
 
+void renderer_3d::draw_ray(const glm::vec3& origin,
+                           const glm::vec3& direction,
+                           float length,
+                           const glm::vec4& color,
+                           const glm::mat4& view,
+                           const glm::mat4& proj)
+{
+    auto sp = prof::profile(__FUNCTION__);
+    std::array<simple_vertex3d, 2> line;
+    line[ 0 ].position() = origin;
+    line[ 1 ].position() = origin + glm::normalize(direction) * length;
+    std::array<unsigned, 2> indices = { 0, 1 };
+
+    graphics_buffer vbo(graphics_buffer::type::vertex);
+    graphics_buffer ebo(graphics_buffer::type::index);
+
+    vbo.set_element_count(2);
+    vbo.set_element_stride(simple_vertex3d::size);
+    vbo.set_data(line.data());
+
+    ebo.set_element_count(2);
+    ebo.set_element_stride(sizeof(unsigned));
+    ebo.set_data(indices.data());
+
+    // TODO: crashes when changing to instance()._vao.activate()
+    vao_map vao;
+    if (vao.activate())
+    {
+        glBindBuffer(GL_ARRAY_BUFFER, vbo.get_handle());
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo.get_handle());
+
+        simple_vertex3d::initialize_attributes();
+    }
+
+    simple_vertex3d::activate_attributes();
+
+    auto line_shader =
+        asset_manager::default_asset_manager()->get_shader("line");
+    line_shader->set_uniform("u_color", color);
+    line_shader->set_uniform("u_model_matrix", glm::identity<glm::mat4>());
+    line_shader->set_uniform("u_vp_matrix", proj * view);
+
+    line_shader->use();
+    glDrawElements(GL_LINES, 2, GL_UNSIGNED_INT, nullptr);
+}
+
 renderer_3d& renderer_3d::instance()
 {
     if (!_instance)
