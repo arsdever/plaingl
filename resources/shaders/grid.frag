@@ -23,5 +23,5 @@ void main()
     float falloff = 1 - distance(fragment_position, vec2(0)) / max_distance;
     falloff = clamp(falloff, 0, 1);
 
-    o_color = vec4(color * falloff, 1);
+    o_color = vec4(color, falloff);
 }

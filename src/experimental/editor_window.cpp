@@ -34,8 +34,10 @@ void editor_window::render_grid()
 
     glViewport(0, 0, get_width(), get_height());
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    glClearColor(0, 0, 0, 0);
+    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     renderer_3d::draw_grid(0.3f, glm::identity<glm::mat4>(), view, projection);
 }
 
