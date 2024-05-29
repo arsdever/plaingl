@@ -63,7 +63,11 @@ void editor_window::initialize()
         }
         }
     };
-    get_events().render += [ this ](auto re) { render_grid(); };
+    get_events().render += [ this ](auto re)
+    {
+        render_grid();
+        render_axis();
+    };
     get_events().mouse_move += [ this ](auto me)
     {
         if (!get_has_grab())
@@ -113,6 +117,21 @@ void editor_window::render_grid()
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     renderer_3d::draw_grid(0.3f, glm::identity<glm::mat4>(), view, projection);
+}
+
+void editor_window::render_axis()
+{
+    auto camera_right =
+        glm::normalize(glm::cross(_camera_direction, { 0, 1, 0 }));
+    auto camera_up =
+        glm::normalize(glm::cross(camera_right, _camera_direction));
+    auto inverse_view_from_origin =
+        glm::mat4(glm::mat3(camera_right, camera_up, _camera_direction));
+    auto inverse_view =
+        glm::translate(glm::identity<glm::mat4>(), _camera_position) *
+        inverse_view_from_origin;
+    auto view = glm::inverse(inverse_view);
+    auto projection = glm::perspective(glm::radians(45.0f), 1.0f, 0.1f, 100.0f);
 
     unsigned axis_viewport_size = 80;
     glViewport(get_width() - axis_viewport_size - 20,

@@ -18,6 +18,7 @@ private:
 
     void initialize();
     void render_grid();
+    void render_axis();
 
     friend singleton_t;
 
