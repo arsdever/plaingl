@@ -10,6 +10,7 @@
 #include "material.hpp"
 #include "mesh.hpp"
 #include "shader.hpp"
+#include "transform.hpp"
 #include "vaomap.hpp"
 #include "vertex.hpp"
 
@@ -86,6 +87,59 @@ void renderer_3d::draw_grid(float grid_size,
 
     grid_shader->use();
     glDrawElementsInstanced(GL_LINES, 2, GL_UNSIGNED_INT, nullptr, grid_count);
+}
+
+void renderer_3d::render_transform_controls(transform& t,
+                                            const glm::mat4& view,
+                                            const glm::mat4& proj)
+{
+    auto sp = prof::profile(__FUNCTION__);
+
+    auto arrow_mesh = asset_manager::default_asset_manager()->get_mesh(
+        "translation_arrow_mesh");
+    auto shader =
+        asset_manager::default_asset_manager()->get_shader("basic_lit");
+
+    vao_map vao;
+    if (vao.activate())
+    {
+        glBindBuffer(GL_ARRAY_BUFFER,
+                     arrow_mesh->get_vertex_buffer().get_handle());
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,
+                     arrow_mesh->get_index_buffer().get_handle());
+
+        vertex3d::initialize_attributes();
+    }
+    vertex3d::activate_attributes();
+
+    shader->set_uniform("u_vp_matrix", proj * view);
+    shader->set_uniform("u_model_matrix", glm::identity<glm::mat4>());
+    shader->set_uniform("u_color", glm::vec4 { 0.82, 0.33, 0.35, 1.0 });
+    shader->use();
+    glDrawElements(GL_TRIANGLES,
+                   arrow_mesh->get_index_buffer().get_element_count(),
+                   GL_UNSIGNED_INT,
+                   nullptr);
+    shader->set_uniform("u_color", glm::vec4 { 0.46, 0.61, 0.11, 1.0 });
+    shader->set_uniform("u_model_matrix",
+                        glm::rotate(glm::identity<glm::mat4>(),
+                                    glm::radians(90.0f),
+                                    glm::vec3 { 0, 0, 1 }));
+    shader->use();
+    glDrawElements(GL_TRIANGLES,
+                   arrow_mesh->get_index_buffer().get_element_count(),
+                   GL_UNSIGNED_INT,
+                   nullptr);
+    shader->set_uniform("u_color", glm::vec4 { 0.2, 0.42, 0.64, 1.0 });
+    shader->set_uniform("u_model_matrix",
+                        glm::rotate(glm::identity<glm::mat4>(),
+                                    glm::radians(-90.0f),
+                                    glm::vec3 { 0, 1, 0 }));
+    shader->use();
+    glDrawElements(GL_TRIANGLES,
+                   arrow_mesh->get_index_buffer().get_element_count(),
+                   GL_UNSIGNED_INT,
+                   nullptr);
 }
 
 void renderer_3d::draw_ray(const glm::vec3& origin,
