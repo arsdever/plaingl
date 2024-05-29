@@ -24,6 +24,7 @@ private:
 private:
     glm::vec3 _camera_position;
     glm::vec3 _camera_direction;
+    std::optional<glm::vec2> _mouse_position;
 };
 
 } // namespace experimental
