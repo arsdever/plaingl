@@ -22,12 +22,6 @@ camera::camera()
 {
     _cameras.push_back(this);
 
-    _background_shader = std::make_unique<shader_program>();
-    _background_shader->init();
-    _background_shader->add_shader("resources/camera_background_shader.vert");
-    _background_shader->add_shader("resources/camera_background_shader.frag");
-    _background_shader->link();
-
     _framebuffer = std::make_unique<framebuffer>();
     _framebuffer->set_samples(32);
     _framebuffer->resize(_render_size);
@@ -87,12 +81,7 @@ void camera::set_gizmos_enabled(bool flag) { _gizmos_enabled = flag; }
 
 bool camera::get_gizmos_enabled() const { return _gizmos_enabled; }
 
-void camera::set_background(glm::vec3 color)
-{
-    _background_color = color;
-    _background_shader->set_uniform("background_color", color);
-    _background_shader->set_uniform("use_color", 1.0f);
-}
+void camera::set_background(glm::vec3 color) { _background_color = color; }
 
 void camera::set_background(image* img)
 {
@@ -104,8 +93,6 @@ void camera::set_background(image* img)
     {
         _background_texture =
             std::make_unique<texture>(std::move(texture::from_image(img)));
-        _background_shader->set_uniform("cubemap", _background_texture.get());
-        _background_shader->set_uniform("use_color", 0.0f);
     }
 }
 
@@ -116,26 +103,18 @@ void camera::render()
     setup_lights();
     render_on_private_texture();
 
-    _background_shader->set_uniform(
-        "camera_matrix",
-        glm::toMat4(get_transform().get_rotation()) *
-            glm::inverse(projection_matrix()));
+    _framebuffer->bind();
     if (_background_texture)
     {
-        _background_texture->set_active_texture(0);
+        render_texture_background();
     }
-
-    _background_shader->use();
-    mesh* quad_mesh = asset_manager::default_asset_manager()->get_mesh("quad");
-    quad_mesh->render();
-    shader_program::unuse();
 
     if (get_gizmos_enabled())
     {
         render_gizmos();
     }
 
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    _framebuffer->unbind();
 
     if (auto urt = _user_render_texture.lock())
     {
@@ -206,7 +185,8 @@ void camera::render_on_private_texture() const
     _framebuffer->bind();
     // TODO?: maybe better to clear with the specified background color instead
     // of drawing background quad with that color
-    glClearColor(0, 0, 0, 0);
+    glClearColor(
+        _background_color.x, _background_color.y, _background_color.z, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
 
@@ -249,6 +229,27 @@ void camera::render_gizmos() const
     }
     glDisable(GL_BLEND);
     _framebuffer->unbind();
+}
+
+void camera::render_texture_background()
+{
+    auto background_shader =
+        asset_manager::default_asset_manager()->get_shader("camera_background");
+    background_shader->set_uniform("u_environment_map",
+                                   _background_texture.get());
+
+    background_shader->set_uniform("u_camera_matrix",
+                                   glm::toMat4(get_transform().get_rotation()) *
+                                       glm::inverse(projection_matrix()));
+    if (_background_texture)
+    {
+        _background_texture->set_active_texture(0);
+    }
+
+    background_shader->use();
+    mesh* quad_mesh = asset_manager::default_asset_manager()->get_mesh("quad");
+    quad_mesh->render();
+    shader_program::unuse();
 }
 
 void camera::setup_lights()
