@@ -224,6 +224,8 @@ void camera::render_gizmos() const
             }
             gizmo_drawer::instance()->get_shader().set_uniform(
                 "u_model_matrix", obj->get_transform().get_matrix());
+            gizmo_drawer::instance()->get_shader().set_uniform("u_vp_matrix",
+                                                               vp_matrix());
             obj->draw_gizmos();
         }
     }
