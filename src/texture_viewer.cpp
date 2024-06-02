@@ -109,8 +109,8 @@ void texture_viewer::show_preview(texture* t)
 
     shader_program prog;
     prog.init();
-    prog.add_shader("texture.vert");
-    prog.add_shader("texture.frag");
+    prog.add_shader("resources/texture.vert");
+    prog.add_shader("resources/texture.frag");
     prog.link();
     prog.use();
 

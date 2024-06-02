@@ -237,9 +237,8 @@ void camera::render_texture_background()
 {
     auto background_shader =
         asset_manager::default_asset_manager()->get_shader("camera_background");
-    background_shader->set_uniform("u_environment_map",
-                                   _background_texture.get());
-
+        _background_texture->set_active_texture(0);
+    background_shader->set_uniform("u_environment_map", 0);
     background_shader->set_uniform("u_camera_matrix",
                                    glm::toMat4(get_transform().get_rotation()) *
                                        glm::inverse(projection_matrix()));

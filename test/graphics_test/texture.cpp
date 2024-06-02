@@ -8,6 +8,34 @@
 #include "vaomap.hpp"
 #include "vertex.hpp"
 
+std::array<graphics_buffer, 2> init_quad_mesh()
+{
+    std::array<vertex3d, 4> quad_vertices;
+    quad_vertices[ 0 ].position() = { -1, -1, 0 };
+    quad_vertices[ 1 ].position() = { 1, -1, 0 };
+    quad_vertices[ 2 ].position() = { 1, 1, 0 };
+    quad_vertices[ 3 ].position() = { -1, 1, 0 };
+
+    quad_vertices[ 0 ].uv() = { -1, -1 };
+    quad_vertices[ 1 ].uv() = { 2, -1 };
+    quad_vertices[ 2 ].uv() = { 2, 2 };
+    quad_vertices[ 3 ].uv() = { -1, 2 };
+
+    std::array<unsigned, 6> quad_indices = { 0, 1, 2, 0, 2, 3 };
+
+    graphics_buffer vbo(graphics_buffer::type::vertex);
+    graphics_buffer ebo(graphics_buffer::type::index);
+
+    vbo.set_element_count(4);
+    vbo.set_element_stride(vertex3d::size);
+    vbo.set_data(quad_vertices.data());
+
+    ebo.set_element_count(6);
+    ebo.set_element_stride(sizeof(unsigned));
+    ebo.set_data(quad_indices.data());
+    return { std::move(vbo), std::move(ebo) };
+}
+
 int main(int argc, char** argv)
 {
     glfwInit();
@@ -32,41 +60,19 @@ int main(int argc, char** argv)
     auto txt = texture::from_image(
         asset_manager::default_asset_manager()->get_image("parrot_pixel"));
 
-    wnd_repeat->get_events()->render += [ &txt ](const auto& e)
+    auto [ vbo, ebo ] = init_quad_mesh();
+
+    wnd_repeat->get_events()->render += [ &vbo, &ebo, &txt ](const auto& e)
     {
-        std::array<vertex2d, 4> quad_vertices;
-        quad_vertices[ 0 ].position() = { -1, -1 };
-        quad_vertices[ 1 ].position() = { 1, -1 };
-        quad_vertices[ 2 ].position() = { 1, 1 };
-        quad_vertices[ 3 ].position() = { -1, 1 };
-
-        quad_vertices[ 0 ].uv() = { -1, -1 };
-        quad_vertices[ 1 ].uv() = { 2, -1 };
-        quad_vertices[ 2 ].uv() = { 2, 2 };
-        quad_vertices[ 3 ].uv() = { -1, 2 };
-
-        std::array<unsigned, 6> quad_indices = { 0, 1, 2, 0, 2, 3 };
-
-        graphics_buffer vbo(graphics_buffer::type::vertex);
-        graphics_buffer ebo(graphics_buffer::type::index);
-
-        vbo.set_element_count(4);
-        vbo.set_element_stride(vertex2d::size);
-        vbo.set_data(quad_vertices.data());
-
-        ebo.set_element_count(6);
-        ebo.set_element_stride(sizeof(unsigned));
-        ebo.set_data(quad_indices.data());
-
         vao_map vao;
         if (vao.activate())
         {
             glBindBuffer(GL_ARRAY_BUFFER, vbo.get_handle());
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo.get_handle());
-            vertex2d::initialize_attributes();
+            vertex3d::initialize_attributes();
         }
 
-        vertex2d::activate_attributes();
+        vertex3d::activate_attributes();
 
         auto* surface_shader =
             asset_manager::default_asset_manager()->get_shader("surface");
@@ -111,41 +117,17 @@ int main(int argc, char** argv)
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
     };
 
-    wnd_interpolation->get_events()->render += [ &txt ](const auto&)
+    wnd_interpolation->get_events()->render += [ &vbo, &ebo, &txt ](const auto&)
     {
-        std::array<vertex2d, 4> quad_vertices;
-        quad_vertices[ 0 ].position() = { -1, -1 };
-        quad_vertices[ 1 ].position() = { 1, -1 };
-        quad_vertices[ 2 ].position() = { 1, 1 };
-        quad_vertices[ 3 ].position() = { -1, 1 };
-
-        quad_vertices[ 0 ].uv() = { 0, 0 };
-        quad_vertices[ 1 ].uv() = { 1, 0 };
-        quad_vertices[ 2 ].uv() = { 1, 1 };
-        quad_vertices[ 3 ].uv() = { 0, 1 };
-
-        std::array<unsigned, 6> quad_indices = { 0, 1, 2, 0, 2, 3 };
-
-        graphics_buffer vbo(graphics_buffer::type::vertex);
-        graphics_buffer ebo(graphics_buffer::type::index);
-
-        vbo.set_element_count(4);
-        vbo.set_element_stride(vertex2d::size);
-        vbo.set_data(quad_vertices.data());
-
-        ebo.set_element_count(6);
-        ebo.set_element_stride(sizeof(unsigned));
-        ebo.set_data(quad_indices.data());
-
         vao_map vao;
         if (vao.activate())
         {
             glBindBuffer(GL_ARRAY_BUFFER, vbo.get_handle());
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo.get_handle());
-            vertex2d::initialize_attributes();
+            vertex3d::initialize_attributes();
         }
 
-        vertex2d::activate_attributes();
+        vertex3d::activate_attributes();
 
         auto* surface_shader =
             asset_manager::default_asset_manager()->get_shader("surface");
@@ -157,7 +139,7 @@ int main(int argc, char** argv)
         surface_shader->use();
 
         txt.set_wrapping_mode(
-            true, true, texture::wrapping_mode::clamp_to_edge);
+            true, true, texture::wrapping_mode::repeat);
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
         txt.set_sampling_mode_mag(texture::sampling_mode::nearest);
