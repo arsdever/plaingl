@@ -159,6 +159,38 @@ void texture::set_active_texture(size_t index) const
     glBindTexture(GL_TEXTURE_2D, _texture_id);
 }
 
+void texture::set_wrapping_mode(bool x, bool y, wrapping_mode mode)
+{
+    int wmode = GL_REPEAT;
+    switch (mode)
+    {
+    case wrapping_mode::repeat: break;
+    case wrapping_mode::clamp_to_border: wmode = GL_CLAMP_TO_BORDER; break;
+    case wrapping_mode::clamp_to_edge: wmode = GL_CLAMP_TO_EDGE; break;
+    case wrapping_mode::mirrored_repeat: wmode = GL_MIRRORED_REPEAT; break;
+    }
+
+    if (x)
+        glTextureParameteri(_texture_id, GL_TEXTURE_WRAP_S, wmode);
+    if (y)
+        glTextureParameteri(_texture_id, GL_TEXTURE_WRAP_T, wmode);
+}
+
+void texture::set_sampling_mode(sampling_mode mode)
+{
+    switch (mode)
+    {
+    case sampling_mode::nearest:
+        glTextureParameteri(_texture_id, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTextureParameteri(_texture_id, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        break;
+    case sampling_mode::linear:
+        glTextureParameteri(_texture_id, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTextureParameteri(_texture_id, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        break;
+    }
+}
+
 void texture::clone(const texture* other_texture)
 {
     if (get_width() != other_texture->get_width() ||

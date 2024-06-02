@@ -14,6 +14,20 @@ public:
         RGBA,
     };
 
+    enum class sampling_mode
+    {
+        nearest,
+        linear,
+    };
+
+    enum class wrapping_mode
+    {
+        repeat,
+        mirrored_repeat,
+        clamp_to_edge,
+        clamp_to_border,
+    };
+
 public:
     texture();
     texture(const texture& other) = delete;
@@ -38,6 +52,8 @@ public:
     void bind() const;
     void unbind() const;
     void set_active_texture(size_t index) const;
+    void set_sampling_mode(sampling_mode mode);
+    void set_wrapping_mode(bool x, bool y, wrapping_mode mode);
 
     void clone(const texture* other_texture);
 

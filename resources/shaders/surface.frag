@@ -2,8 +2,8 @@
 
 in vec2 fragment_uv;
 
-uniform sampler2D u_input_image;
+uniform sampler2D u_image;
 
 out vec4 o_fragment_color;
 
-void main() { o_fragment_color = texture(u_input_image, fragment_uv); }
+void main() { o_fragment_color = texture(u_image, fragment_uv); }

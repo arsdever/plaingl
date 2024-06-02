@@ -18,7 +18,7 @@ void render_quad(texture* _p)
     shader_program* quad_shader =
         asset_manager::default_asset_manager()->get_shader("surface");
     mesh* quad_mesh = asset_manager::default_asset_manager()->get_mesh("quad");
-    quad_shader->set_uniform("_i_input_image", 0);
+    quad_shader->set_uniform("u_image", 0);
     _p->set_active_texture(0);
     quad_shader->use();
     quad_mesh->render();
