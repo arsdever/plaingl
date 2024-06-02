@@ -18,6 +18,10 @@ public:
     {
         nearest,
         linear,
+        nearest_nearest,
+        nearest_linear,
+        linear_nearest,
+        linear_linear,
     };
 
     enum class wrapping_mode
@@ -52,8 +56,13 @@ public:
     void bind() const;
     void unbind() const;
     void set_active_texture(size_t index) const;
-    void set_sampling_mode(sampling_mode mode);
+    void set_sampling_mode_min(sampling_mode mode);
+    sampling_mode get_sampling_mode_min() const;
+    void set_sampling_mode_mag(sampling_mode mode);
+    sampling_mode get_sampling_mode_mag() const;
     void set_wrapping_mode(bool x, bool y, wrapping_mode mode);
+    wrapping_mode get_wrapping_mode_x() const;
+    wrapping_mode get_wrapping_mode_y() const;
 
     void clone(const texture* other_texture);
 

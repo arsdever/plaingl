@@ -5,11 +5,44 @@
 
 #include "image.hpp"
 #include "logging.hpp"
+#include "utils.hpp"
 
 namespace
 {
 logger log() { return get_logger("texture"); }
 } // namespace
+
+template <>
+texture::sampling_mode
+gl_convert<texture::sampling_mode, int>(int&& gl_sampling_mode)
+{
+    using sampling_mode = texture::sampling_mode;
+    switch (gl_sampling_mode)
+    {
+    case GL_NEAREST: return sampling_mode::nearest;
+    case GL_LINEAR: return sampling_mode::linear;
+    case GL_NEAREST_MIPMAP_NEAREST: return sampling_mode::nearest_nearest;
+    case GL_NEAREST_MIPMAP_LINEAR: return sampling_mode::nearest_linear;
+    case GL_LINEAR_MIPMAP_NEAREST: return sampling_mode::linear_nearest;
+    case GL_LINEAR_MIPMAP_LINEAR: return sampling_mode::linear_linear;
+    default: return sampling_mode::nearest;
+    }
+}
+
+template <>
+texture::wrapping_mode
+gl_convert<texture::wrapping_mode, int>(int&& gl_wrapping_mode)
+{
+    using wrapping_mode = texture::wrapping_mode;
+    switch (gl_wrapping_mode)
+    {
+    case GL_REPEAT: return wrapping_mode::repeat;
+    case GL_MIRRORED_REPEAT: return wrapping_mode::mirrored_repeat;
+    case GL_CLAMP_TO_EDGE: return wrapping_mode::clamp_to_edge;
+    case GL_CLAMP_TO_BORDER: return wrapping_mode::clamp_to_border;
+    default: return wrapping_mode::repeat;
+    }
+}
 
 texture::texture()
 {
@@ -90,8 +123,8 @@ void texture::init(size_t width, size_t height, format texture_format)
     {
         log()->error("Error ocurred {}", error);
     }
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     return;
@@ -176,19 +209,78 @@ void texture::set_wrapping_mode(bool x, bool y, wrapping_mode mode)
         glTextureParameteri(_texture_id, GL_TEXTURE_WRAP_T, wmode);
 }
 
-void texture::set_sampling_mode(sampling_mode mode)
+texture::wrapping_mode texture::get_wrapping_mode_x() const
+{
+    int mode = 0;
+    glGetTextureParameteriv(_texture_id, GL_TEXTURE_WRAP_S, &mode);
+    return gl_convert<texture::wrapping_mode, int>(std::move(mode));
+}
+
+texture::wrapping_mode texture::get_wrapping_mode_y() const
+{
+    int mode = 0;
+    glGetTextureParameteriv(_texture_id, GL_TEXTURE_WRAP_T, &mode);
+    return gl_convert<texture::wrapping_mode, int>(std::move(mode));
+}
+
+void texture::set_sampling_mode_min(sampling_mode mode)
 {
     switch (mode)
     {
     case sampling_mode::nearest:
         glTextureParameteri(_texture_id, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTextureParameteri(_texture_id, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         break;
     case sampling_mode::linear:
         glTextureParameteri(_texture_id, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        break;
+    case sampling_mode::nearest_nearest:
+        glTextureParameteri(
+            _texture_id, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
+        break;
+    case sampling_mode::nearest_linear:
+        glTextureParameteri(
+            _texture_id, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR);
+        break;
+    case sampling_mode::linear_nearest:
+        glTextureParameteri(
+            _texture_id, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+        break;
+    case sampling_mode::linear_linear:
+        glTextureParameteri(
+            _texture_id, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        break;
+    }
+}
+
+texture::sampling_mode texture::get_sampling_mode_min() const
+{
+    int mode = 0;
+    glGetTextureParameteriv(_texture_id, GL_TEXTURE_MIN_FILTER, &mode);
+    return gl_convert<texture::sampling_mode, int>(std::move(mode));
+}
+
+void texture::set_sampling_mode_mag(sampling_mode mode)
+{
+    switch (mode)
+    {
+    case sampling_mode::nearest:
+    case sampling_mode::nearest_nearest:
+    case sampling_mode::nearest_linear:
+        glTextureParameteri(_texture_id, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        break;
+    case sampling_mode::linear:
+    case sampling_mode::linear_nearest:
+    case sampling_mode::linear_linear:
         glTextureParameteri(_texture_id, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         break;
     }
+}
+
+texture::sampling_mode texture::get_sampling_mode_mag() const
+{
+    int mode = 0;
+    glGetTextureParameteriv(_texture_id, GL_TEXTURE_MAG_FILTER, &mode);
+    return gl_convert<texture::sampling_mode, int>(std::move(mode));
 }
 
 void texture::clone(const texture* other_texture)
