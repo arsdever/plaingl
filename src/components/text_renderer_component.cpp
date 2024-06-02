@@ -5,6 +5,7 @@
 
 #include "components/text_renderer_component.hpp"
 
+#include "camera.hpp"
 #include "components/text_component.hpp"
 #include "font.hpp"
 #include "gizmo_drawer.hpp"
@@ -36,6 +37,8 @@ void text_renderer_component::render()
 {
     if (_material && get_component<text_component>())
     {
+        _material->set_property_value("u_vp_matrix",
+                                      camera::active_camera()->vp_matrix());
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         _material->activate();

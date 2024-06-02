@@ -120,6 +120,16 @@ struct vertex3d
     uv_attribute::attribute_data_storage_type& uv() { return get<0>(); }
 };
 
+struct vertex2d
+    : vertex<position_2d_attribute, uv_attribute>
+{
+    position_2d_attribute::attribute_data_storage_type& position()
+    {
+        return get<1>();
+    }
+    uv_attribute::attribute_data_storage_type& uv() { return get<0>(); }
+};
+
 struct simple_vertex2d : vertex<position_2d_attribute>
 {
     position_2d_attribute::attribute_data_storage_type& position()

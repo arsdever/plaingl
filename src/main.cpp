@@ -59,6 +59,7 @@ int mesh_preview_texture_index { 0 };
 physics_engine p;
 } // namespace
 
+void load_internal_resources();
 void initScene();
 void initMainWindow();
 void initViewports();
@@ -123,8 +124,6 @@ int main(int argc, char** argv)
     set_thread_name(thd, "physics_thread");
     set_thread_priority(thd, 15);
     // main_camera->set_background(glm::vec3 { 1, 0, 0 });
-    asset_manager::default_asset_manager()->load_asset(
-        "resources/images/env.jpg");
     main_camera->set_background(
         asset_manager::default_asset_manager()->get_image("env"));
     // texture* txt = new texture;
@@ -238,6 +237,7 @@ void initMainWindow()
 {
     auto wnd = experimental::editor_window::get();
     windows.push_back(wnd);
+    wnd->on_user_initialize += [](auto) { load_internal_resources(); };
     wnd->init();
     wnd->resize(800, 800);
     wnd->get_events().close += [](auto ce)
@@ -322,14 +322,17 @@ void initViewports()
     _view_cameras[ 0 ]->get_transform().set_position({ 100, 0, 0 });
     _view_cameras[ 0 ]->get_transform().set_rotation(glm::quatLookAt(
         glm::vec3 { -1.0f, 0.0f, 0.0f }, glm::vec3 { 0.0f, 1.0f, 0.0f }));
+    _view_cameras[ 0 ]->set_background(glm::vec3 { 0.1f, 0.0f, 0.0f });
 
     _view_cameras[ 1 ]->get_transform().set_position({ 0, 100, 0 });
     _view_cameras[ 1 ]->get_transform().set_rotation(glm::quatLookAt(
         glm::vec3 { 0.0f, -1.0f, 0.0f }, glm::vec3 { 0.0f, 0.0f, 1.0f }));
+    _view_cameras[ 1 ]->set_background(glm::vec3 { 0.0f, 0.1f, 0.0f });
 
     _view_cameras[ 2 ]->get_transform().set_position({ 0, 0, 100 });
     _view_cameras[ 2 ]->get_transform().set_rotation(glm::quatLookAt(
         glm::vec3 { 0.0f, 0.0f, -1.0f }, glm::vec3 { 0.0f, 1.0f, 0.0f }));
+    _view_cameras[ 2 ]->set_background(glm::vec3 { 0.0f, 0.0f, 0.1f });
 }
 
 void setupMouseEvents()
@@ -390,20 +393,6 @@ void initScene()
 {
     feature_flags::set_flag(feature_flags::flag_name::load_fbx_as_scene, false);
     auto* am = asset_manager::default_asset_manager();
-    am->load_asset("resources/meshes/cube.fbx");
-    am->load_asset("resources/meshes/sphere.fbx");
-    am->load_asset("resources/meshes/susane_head.fbx");
-    am->load_asset("resources/meshes/shader_ball.fbx");
-    am->load_asset("resources/meshes/camera.fbx");
-    am->load_asset("resources/standard/text.mat");
-    am->load_asset("resources/standard/basic.mat");
-    am->load_asset("resources/images/sample.png");
-    am->load_asset("resources/images/brick.png");
-    am->load_asset("resources/images/diffuse.png");
-    am->load_asset("resources/images/albedo.jpg");
-    am->load_asset("resources/images/metallic.jpg");
-    am->load_asset("resources/images/roughness.jpg");
-
     material* basic_mat = am->get_material("basic");
     txt = new texture();
     image* img = am->get_image("albedo");
@@ -512,4 +501,25 @@ void initScene()
     object->create_component<light_component>()->set_light(l);
     object->get_transform().set_position(glm::vec3(5.0f, 0.0f, 0.0f));
     s.add_object(object);
+}
+
+void load_internal_resources()
+{
+    auto* am = asset_manager::default_asset_manager();
+    am->load_asset("resources/internal/camera_background.shader");
+
+    am->load_asset("resources/meshes/cube.fbx");
+    am->load_asset("resources/meshes/sphere.fbx");
+    am->load_asset("resources/meshes/susane_head.fbx");
+    am->load_asset("resources/meshes/shader_ball.fbx");
+    am->load_asset("resources/meshes/camera.fbx");
+    am->load_asset("resources/standard/text.mat");
+    am->load_asset("resources/standard/basic.mat");
+    am->load_asset("resources/images/sample.png");
+    am->load_asset("resources/images/brick.png");
+    am->load_asset("resources/images/diffuse.png");
+    am->load_asset("resources/images/albedo.jpg");
+    am->load_asset("resources/images/metallic.jpg");
+    am->load_asset("resources/images/roughness.jpg");
+    am->load_asset("resources/images/env.jpg");
 }

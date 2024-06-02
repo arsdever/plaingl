@@ -68,3 +68,6 @@ private:
 
 template <typename T>
 std::shared_ptr<T> singleton<T>::_instance = std::shared_ptr<T>(new T());
+
+template <typename R, typename... ARGS>
+R gl_convert(ARGS&&... args);

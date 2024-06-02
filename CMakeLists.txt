@@ -52,5 +52,5 @@ if (ENABLE_TESTING)
 endif ()
 
 if (${PROJECT}_TESTING_ENABLED)
-    add_subdirectory(unittest)
+    add_subdirectory(test)
 endif ()
