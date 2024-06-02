@@ -16,9 +16,11 @@ int main(int argc, char** argv)
     std::shared_ptr<experimental::window> wnd_repeat =
         std::make_shared<experimental::window>();
 
+    wnd_interpolation->set_title("Sampling mode visualization");
     wnd_interpolation->resize(400, 200);
     wnd_interpolation->init();
 
+    wnd_repeat->set_title("Repeat mode visualization");
     wnd_repeat->resize(400, 400);
     wnd_repeat->init();
 
@@ -75,7 +77,7 @@ int main(int argc, char** argv)
         surface_shader->set_uniform("u_image", 0);
         surface_shader->use();
 
-        txt.set_sampling_mode(texture::sampling_mode::nearest);
+        txt.set_sampling_mode_mag(texture::sampling_mode::nearest);
 
         static const std::array<std::function<void()>, 4> modes {
             [ &txt ]()
@@ -154,12 +156,14 @@ int main(int argc, char** argv)
         surface_shader->set_uniform("u_image", 0);
         surface_shader->use();
 
+        txt.set_wrapping_mode(
+            true, true, texture::wrapping_mode::clamp_to_edge);
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
-        txt.set_sampling_mode(texture::sampling_mode::nearest);
+        txt.set_sampling_mode_mag(texture::sampling_mode::nearest);
         glViewport(0, 0, 200, 200);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-        txt.set_sampling_mode(texture::sampling_mode::linear);
+        txt.set_sampling_mode_mag(texture::sampling_mode::linear);
         glViewport(200, 0, 200, 200);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
     };
