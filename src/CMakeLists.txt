@@ -106,23 +106,17 @@ set(PROJECT_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 link_libraries(spdlog::spdlog profiler::lib)
 
 add_subdirectory(glad)
+add_subdirectory(common)
 add_subdirectory(renderer)
 
-target_link_libraries(
-  ${PROJECT}_lib
-  PUBLIC ${PROJECT}_includes
-         ${PROJECT}::glad
-         ${PROJECT}::renderer
-         glfw
-         glm
-         freetype
-         Winmm
-         filewatch)
+target_precompile_headers(${PROJECT}_lib REUSE_FROM ${PROJECT}::common)
 
-target_precompile_headers(${PROJECT}_lib PUBLIC
-                          "$<$<COMPILE_LANGUAGE:CXX>:precompile.hpp>")
+target_link_libraries(
+  ${PROJECT}_lib PUBLIC ${PROJECT}::common ${PROJECT}::includes
+                        ${PROJECT}::renderer freetype Winmm filewatch)
 
 add_library(${PROJECT}_includes INTERFACE)
+add_library(${PROJECT}::includes ALIAS ${PROJECT}_includes)
 target_include_directories(${PROJECT}_includes
                            INTERFACE ${CMAKE_CURRENT_SOURCE_DIR} glad/include)
 

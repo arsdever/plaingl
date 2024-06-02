@@ -40,17 +40,16 @@ add_subdirectory(thirdparty/freetype)
 add_subdirectory(thirdparty/prof)
 
 add_library(filewatch INTERFACE IMPORTED)
-target_include_directories(
-    filewatch INTERFACE "thirdparty/filewatch")
+target_include_directories(filewatch INTERFACE "thirdparty/filewatch")
 
 remove_definitions(-w)
 
 add_subdirectory(src)
 
-if (ENABLE_TESTING)
-    set(${PROJECT}_TESTING_ENABLED ON)
-endif ()
+if(ENABLE_TESTING)
+  set(${PROJECT}_TESTING_ENABLED ON)
+endif()
 
-if (${PROJECT}_TESTING_ENABLED)
-    add_subdirectory(test)
-endif ()
+if(${PROJECT}_TESTING_ENABLED)
+  add_subdirectory(test)
+endif()
