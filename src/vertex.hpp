@@ -77,9 +77,11 @@ struct vertex
     tuple_type _attributes;
 
     template <size_t I>
-    std::tuple_element<I, tuple_type>::type::attribute_data_storage_type& get()
+    std::tuple_element<attribute_count - I - 1,
+                       tuple_type>::type::attribute_data_storage_type&
+    get()
     {
-        return std::get<I>(_attributes).data;
+        return std::get<attribute_count - I - 1>(_attributes).data;
     }
 
     static void activate_attributes()
@@ -107,27 +109,30 @@ struct vertex
 };
 
 struct vertex3d
-    : vertex<position_3d_attribute, normal_3d_attribute, uv_attribute>
+    : vertex<position_3d_attribute,
+             normal_3d_attribute,
+             uv_attribute,
+             color_attribute>
 {
     position_3d_attribute::attribute_data_storage_type& position()
     {
-        return get<2>();
+        return get<0>();
     }
     normal_3d_attribute::attribute_data_storage_type& normal()
     {
         return get<1>();
     }
-    uv_attribute::attribute_data_storage_type& uv() { return get<0>(); }
+    uv_attribute::attribute_data_storage_type& uv() { return get<2>(); }
+    color_attribute::attribute_data_storage_type& color() { return get<3>(); }
 };
 
-struct vertex2d
-    : vertex<position_2d_attribute, uv_attribute>
+struct vertex2d : vertex<position_2d_attribute, uv_attribute>
 {
     position_2d_attribute::attribute_data_storage_type& position()
     {
-        return get<1>();
+        return get<0>();
     }
-    uv_attribute::attribute_data_storage_type& uv() { return get<0>(); }
+    uv_attribute::attribute_data_storage_type& uv() { return get<1>(); }
 };
 
 struct simple_vertex2d : vertex<position_2d_attribute>
@@ -150,8 +155,8 @@ struct colored_vertex2d : vertex<position_2d_attribute, color_attribute>
 {
     position_2d_attribute::attribute_data_storage_type& position()
     {
-        return get<1>();
+        return get<0>();
     }
 
-    color_attribute::attribute_data_storage_type& color() { return get<0>(); }
+    color_attribute::attribute_data_storage_type& color() { return get<1>(); }
 };
