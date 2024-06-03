@@ -1,4 +1,3 @@
-#include <precompile.hpp>
 #include <prof/profiler.hpp>
 
 #include "asset_manager.hpp"
@@ -61,6 +60,7 @@ physics_engine p;
 void load_internal_resources();
 void initScene();
 void initMainWindow();
+void initProfilerView();
 void initViewports();
 void setupMouseEvents();
 
@@ -82,6 +82,7 @@ int main(int argc, char** argv)
     game_object* selected_object = nullptr;
 
     initMainWindow();
+    initProfilerView();
     initViewports();
     setupMouseEvents();
     initScene();
@@ -213,8 +214,8 @@ int main(int argc, char** argv)
 
     std::stringstream ss;
     ss << std::this_thread::get_id();
-    prof::apply_for_data(ss.str(),
-                         [](const prof::data_sample& data) -> bool
+    prof::apply_data(ss.str(),
+                     [](const prof::data_sample& data) -> bool
     {
         log()->info("Profiling frame:\n\tfunction name: {}\n\tdepth: "
                     "{}\n\tduration: {}",
@@ -522,4 +523,26 @@ void load_internal_resources()
     am->load_asset("resources/images/metallic.jpg");
     am->load_asset("resources/images/roughness.jpg");
     am->load_asset("resources/images/env.jpg");
+}
+
+void initProfilerView()
+{
+    windows.push_back(std::make_shared<experimental::window>());
+    auto& wnd = windows.back();
+    wnd->init();
+    wnd->resize(800, 200);
+    wnd->get_events()->close += [](auto ce)
+    { std::erase(windows, ce.get_sender()->shared_from_this()); };
+    wnd->get_events()->render += [](auto re)
+    {
+        prof::draw_data dd;
+        dd.height = re.get_sender()->get_height();
+        dd.width = re.get_sender()->get_width();
+        dd.zoom_x = .01f;
+        dd.zoom_y = 1.0f;
+        std::stringstream ss;
+        ss << std::this_thread::get_id();
+        prof::draw_overall_data(ss.str(), dd);
+    };
+    wnd->set_can_grab(false);
 }

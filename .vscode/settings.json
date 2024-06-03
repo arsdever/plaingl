@@ -3,6 +3,7 @@
 		"args": [
 			"SPDLOG_LEVEL=trace",
 		],
+		"console": "integratedTerminal"
 	},
 	"cmake.configureArgs": [
 		"-DENABLE_TESTING=ON"

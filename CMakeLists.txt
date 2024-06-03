@@ -37,6 +37,8 @@ set(ASSIMP_BUILD_TESTS
 add_subdirectory(thirdparty/assimp)
 add_subdirectory(thirdparty/spdlog)
 add_subdirectory(thirdparty/freetype)
+
+set(PROF_OPENGL TRUE)
 add_subdirectory(thirdparty/prof)
 
 add_library(filewatch INTERFACE IMPORTED)
@@ -45,6 +47,8 @@ target_include_directories(filewatch INTERFACE "thirdparty/filewatch")
 remove_definitions(-w)
 
 add_subdirectory(src)
+
+target_link_libraries(profiler_lib PUBLIC ${PROJECT}::glad)
 
 if(ENABLE_TESTING)
   set(${PROJECT}_TESTING_ENABLED ON)
