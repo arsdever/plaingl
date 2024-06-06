@@ -12,39 +12,17 @@ find_package(ZLIB REQUIRED)
 find_package(PNG REQUIRED)
 find_package(JPEG REQUIRED)
 find_package(nlohmann_json REQUIRED)
-
-add_definitions(-w)
-add_subdirectory(thirdparty/glm)
-add_subdirectory(thirdparty/glfw)
-set(ASSIMP_WARNINGS_AS_ERRORS
-    OFF
-    CACHE BOOL "" FORCE)
-set(ASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT
-    OFF
-    CACHE BOOL "" FORCE)
-set(ASSIMP_BUILD_ALL_EXPORTERS_BY_DEFAULT
-    OFF
-    CACHE BOOL "" FORCE)
-set(ASSIMP_BUILD_FBX_IMPORTER
-    ON
-    CACHE BOOL "" FORCE)
-set(ASSIMP_BUILD_ZLIB
-    OFF
-    CACHE BOOL "" FORCE)
-set(ASSIMP_BUILD_TESTS
-    OFF
-    CACHE BOOL "" FORCE)
-add_subdirectory(thirdparty/assimp)
-add_subdirectory(thirdparty/spdlog)
-add_subdirectory(thirdparty/freetype)
+find_package(glm CONFIG REQUIRED)
+find_package(glfw3 CONFIG REQUIRED)
+find_package(assimp CONFIG REQUIRED)
+find_package(freetype CONFIG REQUIRED)
+find_package(spdlog CONFIG REQUIRED)
 
 set(PROF_OPENGL TRUE)
 add_subdirectory(thirdparty/prof)
 
 add_library(filewatch INTERFACE IMPORTED)
 target_include_directories(filewatch INTERFACE "thirdparty/filewatch")
-
-remove_definitions(-w)
 
 add_subdirectory(src)
 
