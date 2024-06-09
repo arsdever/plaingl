@@ -17,6 +17,7 @@ find_package(glfw3 REQUIRED)
 find_package(assimp REQUIRED)
 find_package(spdlog REQUIRED)
 find_package(freetype REQUIRED)
+find_package(EnTT REQUIRED)
 
 add_subdirectory(thirdparty/prof)
 
