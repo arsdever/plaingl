@@ -15,6 +15,8 @@ static inline logger log() { return get_logger("asset_loader_mat"); }
 
 using json = nlohmann::json;
 
+namespace details
+{
 template <typename... Args, std::size_t... Is>
 std::tuple<Args...> from_json(const nlohmann::json& args,
                               std::index_sequence<Is...>)
@@ -28,6 +30,7 @@ std::tuple<Args...> from_json(const nlohmann::json& args,
         return { args[ Is ].get<Args>()... };
     }
 }
+} // namespace details
 
 void asset_loader_MAT::load(std::string_view path)
 {
@@ -89,15 +92,15 @@ void asset_loader_MAT::load(std::string_view path)
             {
                 _material->set_property_value(
                     prop_name,
-                    from_json<float>(prop[ "value" ],
-                                     std::make_index_sequence<1>()));
+                    details::from_json<float>(prop[ "value" ],
+                                              std::make_index_sequence<1>()));
                 break;
             }
             case material_property::data_type::type_float_vector_4:
             {
                 _material->set_property_value(
                     prop_name,
-                    from_json<float, float, float, float>(
+                    details::from_json<float, float, float, float>(
                         prop[ "value" ], std::make_index_sequence<4>()));
                 break;
             }
