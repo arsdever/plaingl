@@ -102,6 +102,19 @@ add_library(
   components/walking_component.hpp
   components/walking_component.cpp)
 
+add_library(
+  ${PROJECT}_project STATIC
+  experimental/project/game_object.cpp
+  experimental/project/game_object.hpp
+  experimental/project/memory_manager.cpp
+  experimental/project/memory_manager.hpp
+  experimental/project/object.cpp
+  experimental/project/object.hpp)
+add_library(${PROJECT}::project ALIAS ${PROJECT}_project)
+target_link_libraries(${PROJECT}_project PUBLIC EnTT::EnTT ${PROJECT}::common)
+target_include_directories(${PROJECT}_project
+                           PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+
 set(PROJECT_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 link_libraries(spdlog::spdlog profiler::lib)
 
