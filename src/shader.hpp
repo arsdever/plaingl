@@ -67,6 +67,8 @@ public:
     void release_shaders();
     int id() const;
     bool linked() const;
+    void set_name(std::string name);
+    std::string get_name() const;
 
     static void unuse();
 
@@ -80,6 +82,7 @@ private:
     status _status = status::uninitialized;
     int _id = 0;
     std::vector<shader> _shaders;
+    std::string _name;
     static glm::mat4 _view_matrix;
     static glm::mat4 _projection_matrix;
     std::vector<uniform_info> _properties;

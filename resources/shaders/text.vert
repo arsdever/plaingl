@@ -1,6 +1,6 @@
 #version 460 core
 
-layout(location = 0) in vec4 i_vertex_position; // <vec2 pos, vec2 tex>
+layout(location = 0) in vec4 i_vertex_position;
 
 uniform mat4 u_model_matrix;
 uniform mat4 u_vp_matrix;

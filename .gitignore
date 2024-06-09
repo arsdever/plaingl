@@ -58,3 +58,6 @@ _deps
 
 # Built Visual Studio Code Extensions
 *.vsix
+
+# Vcpkg install dir
+/vcpkg_installed

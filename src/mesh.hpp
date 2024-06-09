@@ -1,5 +1,6 @@
 #pragma once
 
+#include "graphics_buffer.hpp"
 #include "vaomap.hpp"
 #include "vertex.hpp"
 
@@ -15,13 +16,6 @@ public:
     };
 
 public:
-    mesh();
-    mesh(mesh&& m);
-    mesh(const mesh& m) = delete;
-    mesh& operator=(mesh&& m);
-    mesh& operator=(const mesh& m) = delete;
-    ~mesh();
-
     void init();
 
     void set_vertices(std::vector<vertex3d> positions);
@@ -33,12 +27,15 @@ public:
     // manage the vao creation per context
     void render();
 
+    const graphics_buffer& get_vertex_buffer() const;
+    const graphics_buffer& get_index_buffer() const;
+
 private:
     std::vector<vertex3d> _vertices;
     std::vector<int> _indices;
     std::vector<submesh_info> _submeshes;
 
     vao_map _vao;
-    unsigned int _vbo = 0;
-    unsigned int _ebo = 0;
+    graphics_buffer _vbo { graphics_buffer::type::vertex };
+    graphics_buffer _ebo { graphics_buffer::type::index };
 };

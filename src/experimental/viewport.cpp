@@ -18,7 +18,7 @@ void render_quad(texture* _p)
     shader_program* quad_shader =
         asset_manager::default_asset_manager()->get_shader("surface");
     mesh* quad_mesh = asset_manager::default_asset_manager()->get_mesh("quad");
-    quad_shader->set_uniform("_i_input_image", std::make_tuple(0));
+    quad_shader->set_uniform("u_image", 0);
     _p->set_active_texture(0);
     quad_shader->use();
     quad_mesh->render();
@@ -64,6 +64,7 @@ std::shared_ptr<camera> viewport::get_camera() const
 
 void viewport::render()
 {
+    _current_viewport = this;
     auto cam = get_camera();
     if (cam == nullptr)
     {
@@ -87,5 +88,9 @@ void viewport::take_screenshot(std::string_view path)
     asset_manager::default_asset_manager()->save_asset(path, screenshot);
     delete screenshot;
 }
+
+viewport* viewport::current_viewport() { return _current_viewport; }
+
+viewport* viewport::_current_viewport { nullptr };
 
 } // namespace experimental

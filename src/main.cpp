@@ -1,4 +1,3 @@
-#include <precompile.hpp>
 #include <prof/profiler.hpp>
 
 #include "asset_manager.hpp"
@@ -14,6 +13,7 @@
 #include "components/text_component.hpp"
 #include "components/text_renderer_component.hpp"
 #include "components/walking_component.hpp"
+#include "experimental/input_system.hpp"
 #include "experimental/viewport.hpp"
 #include "experimental/window.hpp"
 #include "experimental/window_events.hpp"
@@ -52,12 +52,15 @@ ray_visualize_component* cast_ray;
 std::vector<std::shared_ptr<experimental::window>> windows;
 std::array<std::shared_ptr<camera>, 3> _view_cameras { nullptr };
 std::string console_string;
+int mesh_preview_texture_index { 0 };
 
 physics_engine p;
 } // namespace
 
+void load_internal_resources();
 void initScene();
 void initMainWindow();
+void initProfilerView();
 void initViewports();
 void setupMouseEvents();
 
@@ -79,6 +82,7 @@ int main(int argc, char** argv)
     game_object* selected_object = nullptr;
 
     initMainWindow();
+    initProfilerView();
     initViewports();
     setupMouseEvents();
     initScene();
@@ -93,7 +97,7 @@ int main(int argc, char** argv)
         }
     }
 
-    file mat_file("basic.mat");
+    file mat_file("resources/standard/basic.mat");
     mat_file.changed_externally +=
         [](file::event_type et) { log()->info("material file changed"); };
     mat_file.watch();
@@ -120,7 +124,6 @@ int main(int argc, char** argv)
     set_thread_name(thd, "physics_thread");
     set_thread_priority(thd, 15);
     // main_camera->set_background(glm::vec3 { 1, 0, 0 });
-    asset_manager::default_asset_manager()->load_asset("env.jpg");
     main_camera->set_background(
         asset_manager::default_asset_manager()->get_image("env"));
     // texture* txt = new texture;
@@ -129,10 +132,10 @@ int main(int argc, char** argv)
     int trigger_show = -1;
 
     auto wh = file::watch("./",
-                [](auto path, auto change)
+                          [](auto path, auto change)
     { log()->info("Path {} changed: {}", path, static_cast<int>(change)); });
 
-    input_system::on_keypress += [ &trigger_show ](int keycode)
+    experimental::input_system::on_keypress += [ &trigger_show ](int keycode)
     {
         if (keycode == GLFW_KEY_ENTER)
         {
@@ -211,8 +214,8 @@ int main(int argc, char** argv)
 
     std::stringstream ss;
     ss << std::this_thread::get_id();
-    prof::apply_for_data(ss.str(),
-                         [](const prof::data_sample& data) -> bool
+    prof::apply_data(ss.str(),
+                     [](const prof::data_sample& data) -> bool
     {
         log()->info("Profiling frame:\n\tfunction name: {}\n\tdepth: "
                     "{}\n\tduration: {}",
@@ -234,6 +237,7 @@ void initMainWindow()
 {
     windows.push_back(std::make_shared<experimental::window>());
     auto& wnd = windows.back();
+    wnd->on_user_initialize += [](auto) { load_internal_resources(); };
     wnd->init();
     wnd->resize(800, 800);
     wnd->get_events()->close += [](auto ce)
@@ -318,14 +322,17 @@ void initViewports()
     _view_cameras[ 0 ]->get_transform().set_position({ 100, 0, 0 });
     _view_cameras[ 0 ]->get_transform().set_rotation(glm::quatLookAt(
         glm::vec3 { -1.0f, 0.0f, 0.0f }, glm::vec3 { 0.0f, 1.0f, 0.0f }));
+    _view_cameras[ 0 ]->set_background(glm::vec3 { 0.1f, 0.0f, 0.0f });
 
     _view_cameras[ 1 ]->get_transform().set_position({ 0, 100, 0 });
     _view_cameras[ 1 ]->get_transform().set_rotation(glm::quatLookAt(
         glm::vec3 { 0.0f, -1.0f, 0.0f }, glm::vec3 { 0.0f, 0.0f, 1.0f }));
+    _view_cameras[ 1 ]->set_background(glm::vec3 { 0.0f, 0.1f, 0.0f });
 
     _view_cameras[ 2 ]->get_transform().set_position({ 0, 0, 100 });
     _view_cameras[ 2 ]->get_transform().set_rotation(glm::quatLookAt(
         glm::vec3 { 0.0f, 0.0f, -1.0f }, glm::vec3 { 0.0f, 1.0f, 0.0f }));
+    _view_cameras[ 2 ]->set_background(glm::vec3 { 0.0f, 0.0f, 0.1f });
 }
 
 void setupMouseEvents()
@@ -387,20 +394,6 @@ void initScene()
 {
     feature_flags::set_flag(feature_flags::flag_name::load_fbx_as_scene, false);
     auto* am = asset_manager::default_asset_manager();
-    am->load_asset("cube.fbx");
-    am->load_asset("sphere.fbx");
-    am->load_asset("susane_head.fbx");
-    am->load_asset("shader_ball.fbx");
-    am->load_asset("camera.fbx");
-    am->load_asset("text.mat");
-    am->load_asset("basic.mat");
-    am->load_asset("sample.png");
-    am->load_asset("brick.png");
-    am->load_asset("diffuse.png");
-    am->load_asset("albedo.jpg");
-    am->load_asset("metallic.jpg");
-    am->load_asset("roughness.jpg");
-
     material* basic_mat = am->get_material("basic");
     txt = new texture();
     image* img = am->get_image("albedo");
@@ -509,4 +502,47 @@ void initScene()
     object->create_component<light_component>()->set_light(l);
     object->get_transform().set_position(glm::vec3(5.0f, 0.0f, 0.0f));
     s.add_object(object);
+}
+
+void load_internal_resources()
+{
+    auto* am = asset_manager::default_asset_manager();
+    am->load_asset("resources/internal/camera_background.shader");
+
+    am->load_asset("resources/meshes/cube.fbx");
+    am->load_asset("resources/meshes/sphere.fbx");
+    am->load_asset("resources/meshes/susane_head.fbx");
+    am->load_asset("resources/meshes/shader_ball.fbx");
+    am->load_asset("resources/meshes/camera.fbx");
+    am->load_asset("resources/standard/text.mat");
+    am->load_asset("resources/standard/basic.mat");
+    am->load_asset("resources/images/sample.png");
+    am->load_asset("resources/images/brick.png");
+    am->load_asset("resources/images/diffuse.png");
+    am->load_asset("resources/images/albedo.jpg");
+    am->load_asset("resources/images/metallic.jpg");
+    am->load_asset("resources/images/roughness.jpg");
+    am->load_asset("resources/images/env.jpg");
+}
+
+void initProfilerView()
+{
+    windows.push_back(std::make_shared<experimental::window>());
+    auto& wnd = windows.back();
+    wnd->init();
+    wnd->resize(800, 200);
+    wnd->get_events()->close += [](auto ce)
+    { std::erase(windows, ce.get_sender()->shared_from_this()); };
+    wnd->get_events()->render += [](auto re)
+    {
+        // prof::draw_data dd;
+        // dd.height = re.get_sender()->get_height();
+        // dd.width = re.get_sender()->get_width();
+        // dd.zoom_x = .01f;
+        // dd.zoom_y = 1.0f;
+        // std::stringstream ss;
+        // ss << std::this_thread::get_id();
+        // prof::draw_overall_data(ss.str(), dd);
+    };
+    wnd->set_can_grab(false);
 }

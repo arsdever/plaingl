@@ -3,10 +3,10 @@
 namespace
 {
 
-template <typename T, size_t C>
+template <typename T, size_t C, typename S = std::array<T, C>>
 struct vertex_attribute
 {
-    using attribute_data_storage_type = std::array<T, C>;
+    using attribute_data_storage_type = S;
     using attribute_component_type = T;
 
     static constexpr size_t component_count = C;
@@ -55,10 +55,11 @@ using reverse_order_tuple = reverse_order_tuple_helper<T...>::type;
 
 } // namespace
 
-using position_3d_attribute = vertex_attribute<float, 3>;
-using position_2d_attribute = vertex_attribute<float, 2>;
-using normal_3d_attribute = vertex_attribute<float, 3>;
-using uv_attribute = vertex_attribute<float, 2>;
+using position_3d_attribute = vertex_attribute<float, 3, glm::vec3>;
+using position_2d_attribute = vertex_attribute<float, 2, glm::vec2>;
+using normal_3d_attribute = vertex_attribute<float, 3, glm::vec3>;
+using color_attribute = vertex_attribute<float, 4, glm::vec4>;
+using uv_attribute = vertex_attribute<float, 2, glm::vec2>;
 
 template <typename... ATTRIBUTES>
 struct vertex
@@ -76,9 +77,11 @@ struct vertex
     tuple_type _attributes;
 
     template <size_t I>
-    std::tuple_element<I, tuple_type>::type::attribute_data_storage_type& get()
+    std::tuple_element<attribute_count - I - 1,
+                       tuple_type>::type::attribute_data_storage_type&
+    get()
     {
-        return std::get<I>(_attributes).data;
+        return std::get<attribute_count - I - 1>(_attributes).data;
     }
 
     static void activate_attributes()
@@ -106,17 +109,30 @@ struct vertex
 };
 
 struct vertex3d
-    : vertex<position_3d_attribute, normal_3d_attribute, uv_attribute>
+    : vertex<position_3d_attribute,
+             normal_3d_attribute,
+             uv_attribute,
+             color_attribute>
 {
     position_3d_attribute::attribute_data_storage_type& position()
     {
-        return get<2>();
+        return get<0>();
     }
     normal_3d_attribute::attribute_data_storage_type& normal()
     {
         return get<1>();
     }
-    uv_attribute::attribute_data_storage_type& uv() { return get<0>(); }
+    uv_attribute::attribute_data_storage_type& uv() { return get<2>(); }
+    color_attribute::attribute_data_storage_type& color() { return get<3>(); }
+};
+
+struct vertex2d : vertex<position_2d_attribute, uv_attribute>
+{
+    position_2d_attribute::attribute_data_storage_type& position()
+    {
+        return get<0>();
+    }
+    uv_attribute::attribute_data_storage_type& uv() { return get<1>(); }
 };
 
 struct simple_vertex2d : vertex<position_2d_attribute>
@@ -133,4 +149,14 @@ struct simple_vertex3d : vertex<position_3d_attribute>
     {
         return get<0>();
     }
+};
+
+struct colored_vertex2d : vertex<position_2d_attribute, color_attribute>
+{
+    position_2d_attribute::attribute_data_storage_type& position()
+    {
+        return get<0>();
+    }
+
+    color_attribute::attribute_data_storage_type& color() { return get<1>(); }
 };

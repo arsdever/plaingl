@@ -15,6 +15,8 @@ static inline logger log() { return get_logger("asset_loader_mat"); }
 
 using json = nlohmann::json;
 
+namespace details
+{
 template <typename... Args, std::size_t... Is>
 std::tuple<Args...> from_json(const nlohmann::json& args,
                               std::index_sequence<Is...>)
@@ -28,26 +30,31 @@ std::tuple<Args...> from_json(const nlohmann::json& args,
         return { args[ Is ].get<Args>()... };
     }
 }
+} // namespace details
 
 void asset_loader_MAT::load(std::string_view path)
 {
     std::string content = file::read_all(path);
     json mat_struct = json::parse(content);
 
-    std::string shader_name = mat_struct[ "shader" ].get<std::string>();
+    std::string shader_exclusive_name =
+        mat_struct[ "shader" ].get<std::string>();
     auto* am = asset_manager::default_asset_manager();
     shader_program* sh;
+    std::filesystem::path dir = std::filesystem::path(path).parent_path();
+    std::string shader_name = (dir / shader_exclusive_name).string();
+    std::string shader_path = shader_name + ".shader";
 
     if (sh = am->get_shader(shader_name); !sh)
     {
-        am->load_asset(shader_name + ".shader");
+        am->load_asset(shader_path);
     }
 
-    if (sh = am->get_shader(shader_name); !sh)
+    if (sh = am->get_shader(shader_exclusive_name); !sh)
     {
         log()->error(
-            R"(Shader file " {} " required by material " {} " could not be found)",
-            shader_name + ".shader",
+            "(Shader file '{}' required by material '{}' could not be found) ",
+            shader_path,
             path);
         return;
     }
@@ -85,15 +92,15 @@ void asset_loader_MAT::load(std::string_view path)
             {
                 _material->set_property_value(
                     prop_name,
-                    from_json<float>(prop[ "value" ],
-                                     std::make_index_sequence<1>()));
+                    details::from_json<float>(prop[ "value" ],
+                                              std::make_index_sequence<1>()));
                 break;
             }
             case material_property::data_type::type_float_vector_4:
             {
                 _material->set_property_value(
                     prop_name,
-                    from_json<float, float, float, float>(
+                    details::from_json<float, float, float, float>(
                         prop[ "value" ], std::make_index_sequence<4>()));
                 break;
             }

@@ -1,0 +1,21 @@
+{
+  "name": "gamify",
+  "version": "0.0.1",
+  "homepage": "https://github.com/arsdever/gamify",
+  "description": "A simple game engine written in C++/OpenGL",
+  "license": "MIT",
+  "builtin-baseline": "6e31ee33cc9fc93599c4ceb38e229098cf339bb7",
+  "dependencies": [
+    "zlib",
+    "libpng",
+    "libjpeg-turbo",
+    "assimp",
+    "spdlog",
+    "freetype",
+    "nlohmann-json",
+    "glm",
+    "glfw3",
+    "vcpkg-cmake"
+  ],
+  "overrides": [{ "name": "glm", "version": "0.9.9.8" }]
+}

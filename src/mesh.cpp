@@ -1,57 +1,14 @@
 #include "mesh.hpp"
 
-mesh::mesh() { }
-
-mesh::mesh(mesh&& m)
-{
-    _vbo = m._vbo;
-    _ebo = m._ebo;
-    _vao = std::move(m._vao);
-    m._vbo = 0;
-    m._ebo = 0;
-}
-
-mesh& mesh::operator=(mesh&& m)
-{
-    _vbo = m._vbo;
-    _ebo = m._ebo;
-    _vao = std::move(m._vao);
-    m._vbo = 0;
-    m._ebo = 0;
-    return *this;
-}
-
-mesh::~mesh()
-{
-    glDeleteBuffers(1, &_vbo);
-    glDeleteBuffers(1, &_ebo);
-}
-
 void mesh::init()
 {
-    if (_vbo == 0)
-    {
-        glGenBuffers(1, &_vbo);
-        glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-    }
+    _vbo.set_element_stride(vertex3d::size);
+    _vbo.set_element_count(_vertices.size());
+    _vbo.set_data(_vertices.data());
 
-    if (_ebo == 0)
-    {
-        glGenBuffers(1, &_ebo);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ebo);
-    }
-
-    glBufferData(GL_ARRAY_BUFFER,
-                 _vertices.size() * vertex3d::size,
-                 _vertices.data(),
-                 GL_STATIC_DRAW);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER,
-                 _indices.size() * sizeof(int),
-                 _indices.data(),
-                 GL_STATIC_DRAW);
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    _ebo.set_element_stride(sizeof(int));
+    _ebo.set_element_count(_indices.size());
+    _ebo.set_data(_indices.data());
 }
 
 void mesh::set_vertices(std::vector<vertex3d> positions)
@@ -73,8 +30,8 @@ void mesh::render()
 {
     if (_vao.activate())
     {
-        glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ebo);
+        glBindBuffer(GL_ARRAY_BUFFER, _vbo.get_handle());
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ebo.get_handle());
         vertex3d::initialize_attributes();
     }
 
@@ -82,3 +39,7 @@ void mesh::render()
     glDrawElements(GL_TRIANGLES, _indices.size(), GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
 }
+
+const graphics_buffer& mesh::get_vertex_buffer() const { return _vbo; }
+
+const graphics_buffer& mesh::get_index_buffer() const { return _ebo; }

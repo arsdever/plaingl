@@ -5,6 +5,7 @@
 
 #include "components/text_renderer_component.hpp"
 
+#include "camera.hpp"
 #include "components/text_component.hpp"
 #include "font.hpp"
 #include "gizmo_drawer.hpp"
@@ -36,6 +37,8 @@ void text_renderer_component::render()
 {
     if (_material && get_component<text_component>())
     {
+        _material->set_property_value("u_vp_matrix",
+                                      camera::active_camera()->vp_matrix());
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         _material->activate();
@@ -106,8 +109,7 @@ void text_renderer_component::render()
 void text_renderer_component::draw_gizmos()
 {
     gizmo_drawer::instance()->get_shader().set_uniform(
-        "model_matrix",
-        std::make_tuple(get_game_object()->get_transform().get_matrix()));
+        "model_matrix", get_game_object()->get_transform().get_matrix());
 
     // while rendering local to world conversion is already considered
     glm::vec2 scale = glm::vec2(1);

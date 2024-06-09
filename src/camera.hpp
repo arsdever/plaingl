@@ -1,5 +1,6 @@
 #pragma once
 
+#include "graphics_buffer.hpp"
 #include "transform.hpp"
 
 class framebuffer;
@@ -53,6 +54,7 @@ public:
     glm::mat4 vp_matrix() const;
 
 private:
+    void render_texture_background();
     void render_on_private_texture() const;
     void render_gizmos() const;
     void setup_lights();
@@ -65,8 +67,7 @@ private:
     std::weak_ptr<texture> _user_render_texture {};
     glm::vec3 _background_color { 0.0f, 0.0f, 0.0f };
     std::unique_ptr<texture> _background_texture = nullptr;
-    std::unique_ptr<shader_program> _background_shader = nullptr;
-    unsigned _lights_buffer = 0;
+    graphics_buffer _lights_buffer { graphics_buffer::type::shader_storage };
     bool _gizmos_enabled = false;
     std::unique_ptr<framebuffer> _framebuffer { nullptr };
 

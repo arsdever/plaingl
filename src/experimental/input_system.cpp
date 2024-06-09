@@ -42,6 +42,7 @@ void input_system::set_key_down(int keycode, bool state)
     if (state)
     {
         _pressed_keys.emplace(keycode);
+        on_keypress(keycode);
     }
     else
     {
@@ -52,6 +53,7 @@ void input_system::set_key_down(int keycode, bool state)
 std::unordered_set<int> input_system::_pressed_keys;
 std::unordered_map<input_system::mouse_button, input_system::button_state>
     input_system::_mouse_buttons_state;
+event<void(int)> input_system::on_keypress;
 glm::ivec2 input_system::_mouse_position;
 
 } // namespace experimental

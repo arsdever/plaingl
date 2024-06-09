@@ -32,6 +32,7 @@ void asset_manager::load_asset(std::string_view path)
     {
         asset_loader_SHADER shader_loader;
         shader_loader.load(path);
+        shader_loader.get_shader_program()->set_name(filename);
         auto [ it, success ] = _shader_programs.try_emplace(
             filename, shader_loader.get_shader_program());
         return;
@@ -87,8 +88,7 @@ void asset_manager::save_asset<image>(std::string_view path, const image* img)
 }
 
 template <>
-void asset_manager::register_asset<mesh>(std::string_view name,
-                                         mesh* asset)
+void asset_manager::register_asset<mesh>(std::string_view name, mesh* asset)
 {
     _meshs.emplace(std::string(name), asset);
 }
@@ -194,18 +194,18 @@ void asset_manager::initialize()
 void asset_manager::initialize_quad_mesh()
 {
     auto quad_mesh = new mesh();
-    std::array<glm::vec2, 4> verts {
-        { { -1, -1 }, { -1, 1 }, { 1, 1 }, { 1, -1 } }
-    };
-
     std::vector<vertex3d> vertices;
-    for (auto& v : verts)
-    {
-        vertex3d single_vertex;
-        single_vertex.position() = { v.x, v.y, 0 };
-        single_vertex.uv() = { v.x, v.y };
-        vertices.push_back(std::move(single_vertex));
-    }
+    vertices.resize(4);
+    vertices[ 0 ].position() = { -1.0f, -1.0f, 0.0f };
+    vertices[ 1 ].position() = { 1.0f, -1.0f, 0.0f };
+    vertices[ 2 ].position() = { 1.0f, 1.0f, 0.0f };
+    vertices[ 3 ].position() = { -1.0f, 1.0f, 0.0f };
+
+    vertices[ 0 ].uv() = { 0.0f, 0.0f };
+    vertices[ 1 ].uv() = { 1.0f, 0.0f };
+    vertices[ 2 ].uv() = { 1.0f, 1.0f };
+    vertices[ 3 ].uv() = { 0.0f, 1.0f };
+
     quad_mesh->set_vertices(std::move(vertices));
     quad_mesh->set_indices({ 0, 1, 2, 0, 2, 3 });
     quad_mesh->init();
@@ -214,7 +214,7 @@ void asset_manager::initialize_quad_mesh()
 
 void asset_manager::initialize_surface_shader()
 {
-    _instance->load_asset("surface.shader");
+    _instance->load_asset("resources/standard/surface.shader");
 }
 
 std::string_view asset_manager::internal_resource_path() { return ""; }
