@@ -104,6 +104,12 @@ add_library(
 
 add_library(
   ${PROJECT}_project STATIC
+  experimental/project/components/component.cpp
+  experimental/project/components/component.hpp
+  experimental/project/components/transform.cpp
+  experimental/project/components/transform.hpp
+  experimental/project/application_context.cpp
+  experimental/project/application_context.hpp
   experimental/project/game_object.cpp
   experimental/project/game_object.hpp
   experimental/project/memory_manager.cpp

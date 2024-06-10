@@ -4,15 +4,7 @@
 
 #include "game_object.hpp"
 
-struct memory_manager::private_data
-{
-    entt::basic_registry<size_t> _registry;
-};
-
-memory_manager::memory_manager()
-    : _pdata { std::make_unique<private_data>() }
-{
-}
+memory_manager::memory_manager() = default;
 
 memory_manager::~memory_manager() = default;
 
@@ -41,15 +33,5 @@ memory_manager& memory_manager::instance()
     }
     return *_instance;
 }
-
-template <>
-std::shared_ptr<game_object> memory_manager::create<game_object>()
-{
-    auto object = std::shared_ptr<game_object>(new game_object);
-    object->_id =
-    instance()._pdata->_registry.create();
-    return object;
-}
-
 
 memory_manager* memory_manager::_instance = nullptr;

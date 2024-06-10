@@ -8,6 +8,9 @@ class object
 public:
     virtual ~object();
 
+    std::string name() const;
+    void set_name(const std::string& name);
+
     size_t id() const;
 
 protected:
@@ -24,4 +27,5 @@ public:
 
 private:
     size_t _id;
+    std::string _name;
 };
