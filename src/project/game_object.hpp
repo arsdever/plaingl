@@ -1,6 +1,6 @@
 #pragma once
 
-#include "experimental/project/object.hpp"
+#include "project/object.hpp"
 
 namespace components
 {

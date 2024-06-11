@@ -1,7 +1,7 @@
-#include "experimental/project/components/component.hpp"
+#include "project/components/component.hpp"
 
-#include "experimental/project/components/transform.hpp"
-#include "experimental/project/game_object.hpp"
+#include "project/components/transform.hpp"
+#include "project/game_object.hpp"
 
 namespace components
 {

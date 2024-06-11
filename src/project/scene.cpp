@@ -1,7 +1,7 @@
-#include "experimental/project/scene.hpp"
+#include "project/scene.hpp"
 
-#include "experimental/project/game_object.hpp"
-#include "experimental/project/memory_manager.hpp"
+#include "project/game_object.hpp"
+#include "project/memory_manager.hpp"
 
 scene::scene() = default;
 

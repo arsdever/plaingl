@@ -1,6 +1,6 @@
 #pragma once
 
-#include "experimental/project/components/component.hpp"
+#include "project/components/component.hpp"
 
 class game_object;
 

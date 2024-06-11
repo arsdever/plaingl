@@ -1,7 +1,7 @@
-#include "experimental/project/game_object.hpp"
+#include "project/game_object.hpp"
 
-#include "experimental/project/components/transform.hpp"
-#include "experimental/project/memory_manager.hpp"
+#include "project/components/transform.hpp"
+#include "project/memory_manager.hpp"
 
 game_object::game_object() = default;
 

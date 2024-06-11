@@ -2,7 +2,7 @@
 
 #include <entt/entt.hpp>
 
-#include "experimental/project/game_object.hpp"
+#include "project/game_object.hpp"
 
 class object;
 class game_object;

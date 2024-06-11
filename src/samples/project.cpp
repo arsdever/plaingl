@@ -1,6 +1,6 @@
-#include "experimental/project/application_context.hpp"
-#include "experimental/project/components/transform.hpp"
-#include "experimental/project/game_object.hpp"
+#include "project/application_context.hpp"
+#include "project/components/transform.hpp"
+#include "project/game_object.hpp"
 
 int main(int argc, char** argv)
 {

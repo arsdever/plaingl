@@ -1,8 +1,8 @@
 #include <glm/gtx/matrix_decompose.hpp>
 
-#include "experimental/project/components/transform.hpp"
+#include "project/components/transform.hpp"
 
-#include "experimental/project/memory_manager.hpp"
+#include "project/memory_manager.hpp"
 
 namespace components
 {
