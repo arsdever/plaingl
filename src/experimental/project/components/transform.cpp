@@ -115,7 +115,7 @@ bool transform::is_dirty() const
     if (!_game_object.has_parent())
         return _dirty;
 
-    return _game_object.get_parent().get_transform().is_dirty();
+    return _game_object.get_parent()->get_transform().is_dirty();
 }
 
 bool transform::recalculate_matrix() const
@@ -132,13 +132,13 @@ bool transform::recalculate_matrix() const
 
     if (_game_object.has_parent())
     {
-        if (_game_object.get_parent().get_transform().recalculate_matrix() &&
+        if (_game_object.get_parent()->get_transform().recalculate_matrix() &&
             !world_matrix_changed)
         {
             return false;
         }
         _world_matrix =
-            _game_object.get_parent().get_transform().get_matrix() * _matrix;
+            _game_object.get_parent()->get_transform().get_matrix() * _matrix;
     }
     else
     {

@@ -20,7 +20,7 @@ int main(int argc, char** argv)
 
     parent_object->set_name("Parent");
     object->set_name("Object in space");
-    object->set_parent(*parent_object);
+    parent_object->add_child(object);
 
     glm::mat4 world =
         object->get_transform()

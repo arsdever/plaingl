@@ -18,8 +18,14 @@ public:
     components::transform& get_transform() const;
 
     bool has_parent() const;
-    game_object& get_parent() const;
-    void set_parent(game_object&);
+    std::shared_ptr<game_object> get_parent() const;
+
+    std::shared_ptr<game_object> get_child_at(size_t index) const;
+    std::shared_ptr<game_object> get_child_by_name(std::string_view name) const;
+    void add_child(std::shared_ptr<game_object> child);
+    void remove_child(std::shared_ptr<game_object> child);
+    bool visit_children(
+        std::function<bool(const std::shared_ptr<game_object>&)> visitor) const;
 
     template <typename T, typename... ARGS>
         requires(std::is_base_of<components::component, T>::value)
@@ -35,10 +41,14 @@ public:
         return T::get(*this);
     }
 
+protected:
+    void set_parent(std::shared_ptr<game_object> parent);
+
 private:
     friend class memory_manager;
     game_object();
 
 private:
     std::weak_ptr<game_object> _parent;
+    std::vector<std::shared_ptr<game_object>> _children;
 };

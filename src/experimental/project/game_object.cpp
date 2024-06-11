@@ -20,6 +20,62 @@ components::transform& game_object::get_transform() const
 
 bool game_object::has_parent() const { return _parent.lock() != nullptr; }
 
-game_object& game_object::get_parent() const { return *_parent.lock(); }
+std::shared_ptr<game_object> game_object::get_parent() const
+{
+    return _parent.lock();
+}
 
-void game_object::set_parent(game_object& obj) { _parent = obj.shared_from_this(); }
+void game_object::set_parent(std::shared_ptr<game_object> obj)
+{
+    _parent = obj;
+}
+
+std::shared_ptr<game_object> game_object::get_child_at(size_t index) const
+{
+    if (index >= _children.size())
+        return nullptr;
+    return _children[ index ];
+}
+
+std::shared_ptr<game_object>
+game_object::get_child_by_name(std::string_view name) const
+{
+    std::shared_ptr<game_object> result;
+    visit_children(
+        [ & ](const std::shared_ptr<game_object>& obj)
+    {
+        if (obj->get_name() == name)
+        {
+            result = obj;
+            return false;
+        }
+        return true;
+    });
+    return result;
+}
+
+void game_object::add_child(std::shared_ptr<game_object> child)
+{
+    _children.push_back(child);
+    if (child->get_parent() != child)
+        child->set_parent(shared_from_this());
+}
+
+void game_object::remove_child(std::shared_ptr<game_object> child)
+{
+    auto rm = std::remove(_children.begin(), _children.end(), child);
+    std::for_each(
+        rm, _children.end(), [](auto& obj) { obj->set_parent(nullptr); });
+    _children.erase(rm, _children.end());
+}
+
+bool game_object::visit_children(
+    std::function<bool(const std::shared_ptr<game_object>&)> visitor) const
+{
+    for (auto& child : _children)
+    {
+        if (!visitor(child))
+            return false;
+    }
+    return true;
+}
