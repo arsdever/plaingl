@@ -115,7 +115,9 @@ add_library(
   experimental/project/memory_manager.cpp
   experimental/project/memory_manager.hpp
   experimental/project/object.cpp
-  experimental/project/object.hpp)
+  experimental/project/object.hpp
+  experimental/project/scene.cpp
+  experimental/project/scene.hpp)
 add_library(${PROJECT}::project ALIAS ${PROJECT}_project)
 target_link_libraries(${PROJECT}_project PUBLIC EnTT::EnTT ${PROJECT}::common)
 target_include_directories(${PROJECT}_project
