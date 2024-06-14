@@ -11,7 +11,6 @@ add_library(
   context_aware_object.hpp
   color.hpp
   logging.hpp
-  event.hpp
   feature_flags.hpp
   file.hpp
   file.cpp

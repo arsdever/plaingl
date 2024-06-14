@@ -1,4 +1,4 @@
-add_library(${PROJECT}_common OBJECT stdafx.cpp stdafx.hpp)
+add_library(${PROJECT}_common OBJECT stdafx.cpp stdafx.hpp event.hpp)
 add_library(${PROJECT}::common ALIAS ${PROJECT}_common)
 target_precompile_headers(${PROJECT}_common PUBLIC
                           "$<$<COMPILE_LANGUAGE:CXX>:stdafx.hpp>")
