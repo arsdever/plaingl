@@ -1,5 +1,6 @@
 #include "project/game_object.hpp"
 
+#include "project/components/component.hpp"
 #include "project/components/transform.hpp"
 #include "project/memory_manager.hpp"
 
@@ -78,4 +79,80 @@ bool game_object::visit_children(
             return false;
     }
     return true;
+}
+
+void game_object::visit_components(
+    std::function<bool(components::component&)> visitor) const
+{
+    memory_manager::visit_components(*this,
+                                     [ & ](auto& c)
+    {
+        if (visitor(c))
+            return true;
+        return false;
+    });
+}
+
+void game_object::set_active(bool active) { _is_active = active; }
+
+bool game_object::is_active() const { return _is_active; }
+
+void game_object::init()
+{
+    if (!is_active())
+    {
+        return;
+    }
+
+    visit_components(
+        [](auto& c) -> bool
+    {
+        c.init();
+        return true;
+    });
+}
+
+void game_object::update()
+{
+    if (!is_active())
+    {
+        return;
+    }
+
+    visit_components(
+        [](auto& c) -> bool
+    {
+        c.init();
+        return true;
+    });
+}
+
+void game_object::draw_gizmos()
+{
+    if (!is_active())
+    {
+        return;
+    }
+
+    visit_components(
+        [](auto& c) -> bool
+    {
+        c.update();
+        return true;
+    });
+}
+
+void game_object::deinit()
+{
+    if (!is_active())
+    {
+        return;
+    }
+
+    visit_components(
+        [](auto& c) -> bool
+    {
+        c.deinit();
+        return true;
+    });
 }

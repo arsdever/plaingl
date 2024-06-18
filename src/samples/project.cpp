@@ -94,6 +94,28 @@ void load_scene()
                   << std::endl;
         return true;
     });
+
+    sc->visit_root_objects(
+        [](std::shared_ptr<game_object>& object)
+    {
+        object->init();
+        return true;
+    });
+    while (1)
+    {
+        sc->visit_root_objects(
+            [](std::shared_ptr<game_object>& object)
+        {
+            object->init();
+            return true;
+        });
+    }
+    sc->visit_root_objects(
+        [](std::shared_ptr<game_object>& object)
+    {
+        object->init();
+        return true;
+    });
 }
 
 int main(int argc, char** argv)

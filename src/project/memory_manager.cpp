@@ -47,15 +47,42 @@ std::shared_ptr<game_object> memory_manager::get_object_by_id(uid id)
     return get_object(entity(id));
 }
 
+bool memory_manager::visit_components(
+    const game_object& obj, std::function<bool(components::component&)> visitor)
+{
+    auto ent = entity(obj.id());
+    for (auto [ _, storage ] : instance()._registry.storage())
+    {
+        if (storage.contains(ent))
+        {
+            entt::meta_type type = entt::resolve(storage.type());
+            if (auto component = type.from_void(storage.value(ent)))
+            {
+                if (auto c = component.try_cast<components::component>())
+                {
+                    if (!visitor(*c))
+                    {
+                        return false;
+                    }
+                }
+            }
+        }
+    }
+
+    return true;
+}
+
 nlohmann::json memory_manager::serialize()
 {
     json_serializer s;
     for (auto ent : instance()._registry.view<entt::entity>())
     {
+        auto obj = get_object(ent);
         s.start_object();
-        s.property("name", instance().get_object(ent)->get_name());
-        s.property("id", instance().get_object(ent)->id().id);
-        if (auto p = instance().get_object(ent)->get_parent(); p != nullptr)
+        s.property("name", obj->get_name());
+        s.property("id", obj->id().id);
+        s.property("is_active", obj->is_active());
+        if (auto p = obj->get_parent(); p != nullptr)
         {
             s.property("parent", p->id().id);
         }
@@ -86,6 +113,7 @@ void memory_manager::deserialize(const nlohmann::json& data)
         auto old_id = gobj->id();
         gobj->set_name(obj[ "name" ]);
         gobj->_id = uid { obj[ "id" ] };
+        gobj->_is_active = obj[ "is_active" ].get<bool>();
 
         auto n = instance()._objects.extract(old_id);
         n.key() = gobj->id();

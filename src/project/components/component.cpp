@@ -21,9 +21,34 @@ size_t component::register_component()
     return id;
 }
 
-void component::on_start() { }
+void component::set_active(bool active) { _is_active = active; }
+
+bool component::is_active() const { return _is_active; }
+
+void component::init()
+{
+    if (!is_active())
+        return;
+    on_init();
+}
+
+void component::update()
+{
+    if (!is_active())
+        return;
+    on_update();
+}
+
+void component::deinit()
+{
+    if (!is_active())
+        return;
+    on_deinit();
+}
+
+void component::on_init() { }
 
 void component::on_update() { }
 
-void component::on_destroy() { }
+void component::on_deinit() { }
 } // namespace components

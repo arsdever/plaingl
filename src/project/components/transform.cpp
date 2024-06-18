@@ -121,6 +121,7 @@ void transform::serialize<json_serializer>(json_serializer& s)
 {
     s.add_component(
         nlohmann::json { { "type", entt::hashed_string("transform").value() },
+                         { "is_active", is_active() },
                          { "transform",
                            {
                                { "position", to_json(_position) },
@@ -141,6 +142,8 @@ void transform::deserialize(const nlohmann::json& j)
                   j[ "rotation" ][ 2 ] };
 
     _scale = { j[ "scale" ][ 0 ], j[ "scale" ][ 1 ], j[ "scale" ][ 2 ] };
+
+    set_active(j[ "is_active" ]);
 }
 
 size_t transform::register_component()

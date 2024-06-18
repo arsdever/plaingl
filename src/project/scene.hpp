@@ -12,6 +12,9 @@ public:
     static std::shared_ptr<scene> load(std::string_view path);
 
     void add_root_object(std::shared_ptr<game_object> object);
+
+    bool visit_root_objects(
+        std::function<bool(std::shared_ptr<game_object>&)> visitor);
     bool visit_root_objects(
         std::function<bool(const std::shared_ptr<game_object>&)> visitor) const;
 
@@ -19,7 +22,6 @@ public:
     void unload();
 
     event<bool()> save_request;
-
 
 private:
     scene();

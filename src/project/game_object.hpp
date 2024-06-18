@@ -43,6 +43,17 @@ public:
         return T::get(*this);
     }
 
+    void
+    visit_components(std::function<bool(components::component&)> visitor) const;
+
+    void set_active(bool active = true);
+    bool is_active() const;
+
+    void init();
+    void update();
+    void draw_gizmos();
+    void deinit();
+
 protected:
     void set_parent(std::shared_ptr<game_object> parent);
 
@@ -51,6 +62,7 @@ private:
     game_object();
 
 private:
-    std::weak_ptr<game_object> _parent;
-    std::vector<std::shared_ptr<game_object>> _children;
+    bool _is_active { true };
+    std::weak_ptr<game_object> _parent {};
+    std::vector<std::shared_ptr<game_object>> _children {};
 };

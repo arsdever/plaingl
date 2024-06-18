@@ -13,6 +13,19 @@ void scene::add_root_object(std::shared_ptr<game_object> object)
 }
 
 bool scene::visit_root_objects(
+    std::function<bool(std::shared_ptr<game_object>&)> visitor)
+{
+    for (auto& object : _root_objects)
+    {
+        if (!visitor(object))
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool scene::visit_root_objects(
     std::function<bool(const std::shared_ptr<game_object>&)> visitor) const
 {
     for (auto& object : _root_objects)

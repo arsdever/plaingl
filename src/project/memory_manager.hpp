@@ -48,6 +48,10 @@ public:
         return instance()._registry.get<T>(entity(obj.id()));
     }
 
+    static bool
+    visit_components(const game_object& obj,
+                    std::function<bool(components::component&)> visitor);
+
     static nlohmann::json serialize();
     static void deserialize(const nlohmann::json& data);
 
