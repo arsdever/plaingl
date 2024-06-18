@@ -1,5 +1,7 @@
 #pragma once
 
+#include "project/uid.hpp"
+
 /**
  * @brief Generic high level object representation
  */
@@ -11,7 +13,7 @@ public:
     std::string get_name() const;
     void set_name(const std::string& name);
 
-    size_t id() const;
+    uid id() const;
 
 protected:
     /**
@@ -26,6 +28,6 @@ public:
     friend class memory_manager;
 
 private:
-    size_t _id;
+    uid _id;
     std::string _name;
 };

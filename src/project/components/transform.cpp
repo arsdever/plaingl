@@ -1,8 +1,14 @@
+#include <entt/entt.hpp>
 #include <glm/gtx/matrix_decompose.hpp>
 
 #include "project/components/transform.hpp"
 
 #include "project/memory_manager.hpp"
+#include "project/serialization_utilities.hpp"
+#include "project/serializer.hpp"
+#include "project/serializer_json.hpp"
+
+using namespace serialization::utilities;
 
 namespace components
 {
@@ -108,6 +114,47 @@ glm::dvec3 transform::get_up() const
 {
     return glm::normalize(glm::dvec3(get_matrix<relation_flag::local>() *
                                      glm::dvec4(0, 1, 0, 0)));
+}
+
+template <>
+void transform::serialize<json_serializer>(json_serializer& s)
+{
+    s.add_component(
+        nlohmann::json { { "type", entt::hashed_string("transform").value() },
+                         { "transform",
+                           {
+                               { "position", to_json(_position) },
+                               { "rotation", to_json(_rotation) },
+                               { "scale", to_json(_position) },
+                           } } });
+}
+
+void transform::deserialize(const nlohmann::json& j)
+{
+    _position = { j[ "position" ][ 0 ],
+                  j[ "position" ][ 1 ],
+                  j[ "position" ][ 2 ] };
+
+    _rotation = { j[ "rotation" ][ 3 ],
+                  j[ "rotation" ][ 0 ],
+                  j[ "rotation" ][ 1 ],
+                  j[ "rotation" ][ 2 ] };
+
+    _scale = { j[ "scale" ][ 0 ], j[ "scale" ][ 1 ], j[ "scale" ][ 2 ] };
+}
+
+size_t transform::register_component()
+{
+    static constexpr auto id = entt::hashed_string("transform");
+    entt::meta<transform>()
+        .type(id)
+        .base<component>()
+        .func<&transform::serialize<json_serializer>>(
+            entt::hashed_string("serialize"))
+        .func<&transform::serialize<json_serializer>>(
+            entt::hashed_string("deserialize"));
+    memory_manager::set_component_creator<transform>();
+    return id;
 }
 
 bool transform::is_dirty() const

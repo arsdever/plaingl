@@ -1,3 +1,5 @@
+#include <iostream>
+
 #include "project/scene.hpp"
 
 #include "project/game_object.hpp"
@@ -5,14 +7,43 @@
 
 scene::scene() = default;
 
-void scene::add_object(std::shared_ptr<game_object> object)
+void scene::add_root_object(std::shared_ptr<game_object> object)
 {
-    _objects.push_back(object);
+    _root_objects.push_back(object);
 }
 
-std::shared_ptr<game_object> scene::create_object()
+bool scene::visit_root_objects(
+    std::function<bool(const std::shared_ptr<game_object>&)> visitor) const
 {
-    auto object = memory_manager::create_game_object();
-    add_object(object);
-    return object;
+    for (auto& object : _root_objects)
+    {
+        if (!visitor(object))
+        {
+            return false;
+        }
+    }
+    return true;
 }
+
+std::shared_ptr<scene> scene::create()
+{
+    return std::shared_ptr<scene>(new scene());
+}
+
+void scene::save(std::string_view path)
+{
+    std::ofstream file { std::string(path) };
+    file << memory_manager::serialize().dump() << std::endl;
+}
+
+std::shared_ptr<scene> scene::load(std::string_view path)
+{
+    std::ifstream file { std::string(path) };
+    nlohmann::json data;
+    file >> data;
+    _active_scene = std::shared_ptr<scene>(new scene());
+    memory_manager::deserialize(data);
+    return _active_scene;
+}
+
+std::shared_ptr<scene> scene::_active_scene { nullptr };

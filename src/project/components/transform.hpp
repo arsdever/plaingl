@@ -1,5 +1,6 @@
 #pragma once
 
+#include <nlohmann/json_fwd.hpp>
 #include "project/components/component.hpp"
 
 class game_object;
@@ -17,8 +18,6 @@ public:
 
 public:
     transform(game_object& obj);
-
-    transform& create();
 
     static transform& create(game_object& obj);
     static transform& get(const game_object& obj);
@@ -39,6 +38,13 @@ public:
     glm::dvec3 get_forward() const;
     glm::dvec3 get_right() const;
     glm::dvec3 get_up() const;
+
+    static size_t register_component();
+
+    template <typename ST>
+    void serialize(ST& s);
+
+    void deserialize(const nlohmann::json& j);
 
 private:
     bool is_dirty() const;

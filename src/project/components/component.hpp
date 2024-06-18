@@ -20,6 +20,8 @@ public:
 
     transform& get_transform();
 
+    static size_t register_component();
+
 protected:
     component(const std::string& name, game_object& obj);
 

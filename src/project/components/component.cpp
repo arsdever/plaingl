@@ -1,3 +1,5 @@
+#include <entt/entt.hpp>
+
 #include "project/components/component.hpp"
 
 #include "project/components/transform.hpp"
@@ -10,6 +12,13 @@ component::component(const std::string& name, game_object& obj)
     , _game_object(obj)
 {
     set_name(name);
+}
+
+size_t component::register_component()
+{
+    static constexpr auto id = entt::hashed_string("component");
+    entt::meta<component>().type(id);
+    return id;
 }
 
 void component::on_start() { }
