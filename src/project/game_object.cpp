@@ -14,6 +14,16 @@ std::shared_ptr<game_object> game_object::create()
     return obj;
 }
 
+components::component& game_object::get(std::string_view class_name) const
+{
+    return memory_manager::get_component(*this, class_name);
+}
+
+components::component* game_object::try_get(std::string_view class_name) const
+{
+    return memory_manager::try_get_component(*this, class_name);
+}
+
 components::transform& game_object::get_transform() const
 {
     return get<components::transform>();
@@ -155,4 +165,9 @@ void game_object::deinit()
         c.deinit();
         return true;
     });
+}
+
+components::component& game_object::add(std::string_view class_name)
+{
+    return memory_manager::instance().create_component(*this, class_name);
 }

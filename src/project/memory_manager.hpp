@@ -21,6 +21,20 @@ public:
     static void deinitialize();
     static memory_manager& instance();
 
+    static entt::meta_type typeof(std::string_view class_name)
+    {
+        entt::hashed_string hs(class_name.data(), class_name.size());
+        return entt::resolve(hs);
+    }
+
+    template <typename T>
+    static entt::meta_type typeof()
+    {
+        return typeof(T::type_name);
+    }
+
+    static auto& storage_for(std::string_view class_name);
+
     static std::shared_ptr<game_object> get_object_by_id(uid id);
 
     static std::shared_ptr<game_object> create_game_object()
@@ -33,33 +47,24 @@ public:
         return obj;
     }
 
-    template <typename T, typename... ARGS>
-        requires(std::is_base_of<components::component, T>::value)
-    static T& create_component(game_object& obj, ARGS&&... args)
-    {
-        return instance()._registry.get_or_emplace<T>(
-            entity(obj.id()), std::forward<ARGS>(args)..., obj);
-    }
-
-    template <typename T>
-        requires(std::is_base_of<components::component, T>::value)
-    static T& get_component(const game_object& obj)
-    {
-        return instance()._registry.get<T>(entity(obj.id()));
-    }
+    static components::component& create_component(game_object& obj,
+                                                   std::string_view class_name);
+    static components::component& get_component(const game_object& obj,
+                                                std::string_view class_name);
+    static components::component*
+    try_get_component(const game_object& obj, std::string_view class_name);
 
     static bool
     visit_components(const game_object& obj,
-                    std::function<bool(components::component&)> visitor);
+                     std::function<bool(components::component&)> visitor);
 
     static nlohmann::json serialize();
     static void deserialize(const nlohmann::json& data);
 
     template <typename T>
-    static void set_component_creator()
+    static void register_component_type()
     {
-        _component_creators[ entt::type_id<T>().hash() ] = [](game_object& obj)
-        { create_component<T>(obj); };
+        instance()._registry.storage<T>(typeof<T>().id());
     }
 
 private:
@@ -71,6 +76,4 @@ private:
     static memory_manager* _instance;
     entt::registry _registry;
     std::unordered_map<uid, entt::entity> _objects;
-    static std::unordered_map<entt::id_type, std::function<void(game_object&)>>
-        _component_creators;
 };

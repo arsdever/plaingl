@@ -1,0 +1,12 @@
+message(STATUS "- project tests")
+enable_testing()
+
+add_executable(${PROJECT}_project_ut game_object.cpp)
+
+target_link_libraries(${PROJECT}_project_ut GTest::gtest_main
+                      ${PROJECT}::project ${PROJECT}::lib)
+
+target_precompile_headers(${PROJECT}_project_ut REUSE_FROM ${PROJECT}::project)
+
+include(GoogleTest)
+gtest_discover_tests(${PROJECT}_project_ut)

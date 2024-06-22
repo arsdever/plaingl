@@ -14,7 +14,7 @@ class component : public object
 public:
     game_object& get_game_object() const;
 
-    transform& get_transform();
+    transform& get_transform() const;
 
     static size_t register_component();
 
@@ -33,7 +33,6 @@ protected:
     virtual void on_deinit();
 
     game_object& _game_object;
-    transform& _transform;
 
 private:
     bool _is_active { true };

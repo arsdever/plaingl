@@ -7,8 +7,8 @@ set(INTERFACE_HEADERS
     serialization_utilities.hpp
     serializer.hpp
     serializer_json.hpp
-    components/component_registry.hpp
     components/component.hpp
+    components/mesh_filter.hpp
     components/transform.hpp)
 set(SOURCES
     application_context.cpp
@@ -17,6 +17,7 @@ set(SOURCES
     object.cpp
     scene.cpp
     components/component.cpp
+    components/mesh_filter.cpp
     components/transform.cpp)
 
 foreach(interface_header ${INTERFACE_HEADERS})

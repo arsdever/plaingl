@@ -2,7 +2,6 @@
 
 #include "memory_manager.hpp"
 
-#include "project/components/component_registry.hpp"
 #include "project/components/transform.hpp"
 #include "project/scene.hpp"
 #include "project/serializer_json.hpp"
@@ -35,6 +34,48 @@ memory_manager& memory_manager::instance()
         initialize();
     }
     return *_instance;
+}
+
+auto& memory_manager::storage_for(std::string_view class_name)
+{
+    return *instance()._registry.storage(typeof(class_name).id());
+}
+
+components::component&
+memory_manager::create_component(game_object& obj, std::string_view class_name)
+{
+    auto type = typeof(class_name);
+    auto* storage = instance()._registry.storage(type.id());
+    auto comp = type.construct(entt::forward_as_meta(obj));
+    auto base = type.base();
+    auto ent = entity(obj.id());
+    if (storage->contains(ent))
+    {
+        storage->remove(ent);
+    }
+    storage->push(entity(obj.id()), comp.data());
+
+    return get_component(obj, class_name);
+}
+
+components::component&
+memory_manager::get_component(const game_object& obj,
+                              std::string_view class_name)
+{
+    return *try_get_component(obj, class_name);
+}
+
+components::component*
+memory_manager::try_get_component(const game_object& obj,
+                                  std::string_view class_name)
+{
+    auto& storage = storage_for(class_name);
+    if (!storage.contains(entity(obj.id())))
+    {
+        return nullptr;
+    }
+
+    return static_cast<components::component*>(storage.value(entity(obj.id())));
 }
 
 std::shared_ptr<game_object> memory_manager::get_object(entt::entity ent)
@@ -134,11 +175,10 @@ void memory_manager::deserialize(const nlohmann::json& data)
         for (const auto& c : obj[ "components" ])
         {
             auto type = entt::resolve(c[ "type" ]);
-            auto comp = type.construct();
+            auto comp = type.construct(entt::forward_as_meta(*gobj));
             type.invoke(entt::hashed_string("deserialize"),
                         comp,
                         entt::forward_as_meta(c));
-            _component_creators.at(type.info().hash())(*gobj);
             for (auto&& curr : instance()._registry.storage())
             {
                 if (auto& storage = curr.second; storage.contains(ent))
@@ -164,6 +204,3 @@ entt::entity memory_manager::entity(uid id)
 }
 
 memory_manager* memory_manager::_instance = nullptr;
-
-std::unordered_map<entt::id_type, std::function<void(game_object&)>>
-    memory_manager::_component_creators;

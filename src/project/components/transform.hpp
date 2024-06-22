@@ -1,6 +1,7 @@
 #pragma once
 
 #include <nlohmann/json_fwd.hpp>
+
 #include "project/components/component.hpp"
 
 class game_object;
@@ -18,9 +19,6 @@ public:
 
 public:
     transform(game_object& obj);
-
-    static transform& create(game_object& obj);
-    static transform& get(const game_object& obj);
 
     void set_position(const glm::dvec3& position);
     void set_rotation(const glm::dquat& rotation);
@@ -40,6 +38,8 @@ public:
     glm::dvec3 get_up() const;
 
     static size_t register_component();
+    // TODO: this is a temporary solution for resolving the type_name
+    static constexpr const char type_name[] = "transform";
 
     template <typename ST>
     void serialize(ST& s);

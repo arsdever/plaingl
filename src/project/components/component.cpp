@@ -8,10 +8,16 @@
 namespace components
 {
 component::component(const std::string& name, game_object& obj)
-    : _transform(obj.get<transform>())
-    , _game_object(obj)
+    : _game_object(obj)
 {
     set_name(name);
+}
+
+game_object& component::get_game_object() const { return _game_object; }
+
+transform& component::get_transform() const
+{
+    return _game_object.get<transform>();
 }
 
 size_t component::register_component()

@@ -29,18 +29,30 @@ public:
     bool visit_children(
         std::function<bool(const std::shared_ptr<game_object>&)> visitor) const;
 
-    template <typename T, typename... ARGS>
+    components::component& add(std::string_view class_name);
+
+    template <typename T>
         requires(std::is_base_of<components::component, T>::value)
-    T& add(ARGS&&... args)
+    T& add()
     {
-        return T::create(*this, std::forward<ARGS>(args)...);
+        return static_cast<T&>(add(T::type_name));
     }
+
+    components::component& get(std::string_view class_name) const;
+    components::component* try_get(std::string_view class_name) const;
 
     template <typename T>
         requires(std::is_base_of<components::component, T>::value)
     T& get() const
     {
-        return T::get(*this);
+        return static_cast<T&>(get(T::type_name));
+    }
+
+    template <typename T>
+        requires(std::is_base_of<components::component, T>::value)
+    T* try_get() const
+    {
+        return static_cast<T*>(try_get(T::type_name));
     }
 
     void

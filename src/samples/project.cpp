@@ -1,6 +1,5 @@
 #include "project/application_context.hpp"
 #include "project/components/component.hpp"
-#include "project/components/component_registry.hpp"
 #include "project/components/transform.hpp"
 #include "project/game_object.hpp"
 #include "project/scene.hpp"
@@ -120,8 +119,9 @@ void load_scene()
 
 int main(int argc, char** argv)
 {
-    component_registry::register_components<components::component,
-                                            components::transform>();
+    components::component::register_component();
+    components::transform::register_component();
+
     std::string mode = "r";
     std::cin >> mode;
 

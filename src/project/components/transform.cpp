@@ -17,16 +17,6 @@ transform::transform(game_object& obj)
 {
 }
 
-transform& transform::create(game_object& obj)
-{
-    return memory_manager::create_component<transform>(obj);
-}
-
-transform& transform::get(const game_object& obj)
-{
-    return memory_manager::get_component<transform>(obj);
-}
-
 void transform::set_position(const glm::dvec3& position)
 {
     _position = position;
@@ -148,24 +138,25 @@ void transform::deserialize(const nlohmann::json& j)
 
 size_t transform::register_component()
 {
-    static constexpr auto id = entt::hashed_string("transform");
+    auto id = entt::hashed_string(type_name);
     entt::meta<transform>()
         .type(id)
         .base<component>()
+        .ctor<game_object&>()
         .func<&transform::serialize<json_serializer>>(
             entt::hashed_string("serialize"))
         .func<&transform::serialize<json_serializer>>(
             entt::hashed_string("deserialize"));
-    memory_manager::set_component_creator<transform>();
+    memory_manager::register_component_type<transform>();
     return id;
 }
 
 bool transform::is_dirty() const
 {
-    if (!_game_object.has_parent())
+    if (!get_game_object().has_parent())
         return _dirty;
 
-    return _game_object.get_parent()->get_transform().is_dirty();
+    return get_game_object().get_parent()->get_transform().is_dirty();
 }
 
 bool transform::recalculate_matrix() const
@@ -180,15 +171,19 @@ bool transform::recalculate_matrix() const
         _dirty = false;
     }
 
-    if (_game_object.has_parent())
+    if (get_game_object().has_parent())
     {
-        if (_game_object.get_parent()->get_transform().recalculate_matrix() &&
+        if (get_game_object()
+                .get_parent()
+                ->get_transform()
+                .recalculate_matrix() &&
             !world_matrix_changed)
         {
             return false;
         }
         _world_matrix =
-            _game_object.get_parent()->get_transform().get_matrix() * _matrix;
+            get_game_object().get_parent()->get_transform().get_matrix() *
+            _matrix;
     }
     else
     {
