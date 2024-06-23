@@ -11,15 +11,15 @@
 
 #include "asset_manager.hpp"
 #include "camera.hpp"
-#include "components/mesh_component.hpp"
-#include "components/mesh_renderer_component.hpp"
 #include "experimental/viewport.hpp"
 #include "experimental/window.hpp"
-#include "game_object.hpp"
+#include "project/game_object.hpp"
 #include "gl_error_handler.hpp"
 #include "light.hpp"
 #include "logging.hpp"
 #include "material.hpp"
+#include "project/components/mesh_filter.hpp"
+#include "project/components/mesh_renderer.hpp"
 #include "scene.hpp"
 #include "texture.hpp"
 
@@ -53,7 +53,7 @@ int main(int argc, char** argv)
 
         main_camera = std::make_shared<camera>();
         camera2 = std::make_shared<camera>();
-        current_scene = std::make_shared<scene>();
+        current_scene = scene::create();
         main_camera->set_active();
         init_scene({ main_camera.get(), camera2.get() });
         auto vp = std::make_shared<experimental::viewport>();
@@ -158,14 +158,11 @@ void init_scene(std::array<camera*, 2> cameras)
     cameras[ 1 ]->set_fov(90);
     cameras[ 1 ]->set_background(glm::vec3(.7, .6, .1));
 
-    game_object* object = new game_object;
-    object->create_component<mesh_component>();
-    object->create_component<mesh_renderer_component>();
-    object->get_component<mesh_component>()->set_mesh(
-        am->get_mesh("susane_head"));
-    object->get_component<mesh_renderer_component>()->set_material(basic_mat);
-    object->set_name("susane");
-    scene::get_active_scene()->add_object(object);
+    auto obj = game_object::create();
+    obj->add<components::mesh_filter>().set_mesh(am->get_mesh("susane_head"));
+    obj->add<components::mesh_renderer>().set_material(basic_mat);
+    obj->set_name("susane");
+    scene::get_active_scene()->add_root_object(obj);
 
     auto l = new light();
     l->set_color(glm::vec3(1.0f, 1.0f, 1.0f));

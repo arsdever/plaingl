@@ -20,8 +20,6 @@ add_library(
   framebuffer.cpp
   game_clock.hpp
   game_clock.cpp
-  game_object.hpp
-  game_object.cpp
   gizmo_drawer.hpp
   gizmo_drawer.cpp
   gl_error_handler.hpp
@@ -38,12 +36,6 @@ add_library(
   material.cpp
   mesh.hpp
   mesh.cpp
-  mouse_events_refiner.hpp
-  mouse_events_refiner.cpp
-  physics_engine.hpp
-  physics_engine.cpp
-  scene.hpp
-  scene.cpp
   shader.hpp
   shader.cpp
   vertex.hpp
@@ -59,10 +51,6 @@ add_library(
   utils.hpp
   vaomap.hpp
   vaomap.cpp
-  viewport.hpp
-  viewport.cpp
-  window.hpp
-  window.cpp
   experimental/input_system.hpp
   experimental/input_system.cpp
   experimental/viewport.hpp
@@ -71,37 +59,7 @@ add_library(
   experimental/window_events.cpp
   experimental/window.hpp
   experimental/window.cpp
-  asset_loaders/asset_loader.hpp
-  components/box_collider_component.hpp
-  components/box_collider_component.cpp
-  components/light_component.hpp
-  components/light_component.cpp
-  components/camera_component.hpp
-  components/camera_component.cpp
-  components/collider_component.hpp
-  components/fps_show_component.hpp
-  components/fps_show_component.cpp
-  components/jumpy_component.hpp
-  components/jumpy_component.cpp
-  components/mesh_component.hpp
-  components/mesh_component.cpp
-  components/mesh_renderer_component.hpp
-  components/mesh_renderer_component.cpp
-  components/plane_collider_component.hpp
-  components/plane_collider_component.cpp
-  components/ray_visualize_component.hpp
-  components/ray_visualize_component.cpp
-  components/renderer_component.hpp
-  components/sphere_collider_component.hpp
-  components/sphere_collider_component.cpp
-  components/text_component.hpp
-  components/text_component.cpp
-  components/text_renderer_component.hpp
-  components/text_renderer_component.cpp
-  components/transform_component.hpp
-  components/transform_component.cpp
-  components/walking_component.hpp
-  components/walking_component.cpp)
+  asset_loaders/asset_loader.hpp)
 
 set(PROJECT_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 link_libraries(spdlog::spdlog profiler::lib)
@@ -113,8 +71,14 @@ add_subdirectory(project)
 target_precompile_headers(${PROJECT}_lib REUSE_FROM ${PROJECT}::common)
 
 target_link_libraries(
-  ${PROJECT}_lib PUBLIC ${PROJECT}::common ${PROJECT}::includes
-                        ${PROJECT}::renderer freetype Winmm filewatch)
+  ${PROJECT}_lib
+  PUBLIC ${PROJECT}::common
+         ${PROJECT}::includes
+         ${PROJECT}::renderer
+         ${PROJECT}::project
+         freetype
+         Winmm
+         filewatch)
 
 add_library(${PROJECT}_includes INTERFACE)
 add_library(${PROJECT}::includes ALIAS ${PROJECT}_includes)

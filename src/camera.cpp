@@ -1,14 +1,15 @@
 #include "camera.hpp"
 
 #include "asset_manager.hpp"
-#include "components/renderer_component.hpp"
 #include "framebuffer.hpp"
-#include "game_object.hpp"
 #include "gizmo_drawer.hpp"
 #include "light.hpp"
 #include "logging.hpp"
 #include "material.hpp"
 #include "mesh.hpp"
+#include "project/components/mesh_renderer.hpp"
+#include "project/components/transform.hpp"
+#include "project/game_object.hpp"
 #include "scene.hpp"
 #include "shader.hpp"
 #include "texture.hpp"
@@ -192,20 +193,20 @@ void camera::render_on_private_texture() const
 
     if (scene::get_active_scene())
     {
-        for (auto* obj : scene::get_active_scene()->objects())
+        scene::get_active_scene()->visit_root_objects(
+            [](auto& obj)
         {
             if (!obj->is_active())
-            {
-                continue;
-            }
-            if (auto* renderer = obj->get_component<renderer_component>();
-                renderer)
+                return;
+
+            if (auto* renderer =
+                    obj->template try_get<components::mesh_renderer>())
             {
                 renderer->get_material()->set_property_value(
                     "u_model_matrix", obj->get_transform().get_matrix());
-                renderer->render();
+                // renderer->render();
             }
-        }
+        });
     }
     _framebuffer->unbind();
 }
@@ -216,18 +217,18 @@ void camera::render_gizmos() const
     glEnable(GL_BLEND);
     if (scene::get_active_scene())
     {
-        for (auto* obj : scene::get_active_scene()->objects())
+        scene::get_active_scene()->visit_root_objects(
+            [ this ](auto& obj)
         {
             if (!obj->is_active())
-            {
-                continue;
-            }
+                return;
+
             gizmo_drawer::instance()->get_shader().set_uniform(
                 "u_model_matrix", obj->get_transform().get_matrix());
             gizmo_drawer::instance()->get_shader().set_uniform("u_vp_matrix",
                                                                vp_matrix());
             obj->draw_gizmos();
-        }
+        });
     }
     glDisable(GL_BLEND);
     _framebuffer->unbind();
@@ -237,7 +238,7 @@ void camera::render_texture_background()
 {
     auto background_shader =
         asset_manager::default_asset_manager()->get_shader("camera_background");
-        _background_texture->set_active_texture(0);
+    _background_texture->set_active_texture(0);
     background_shader->set_uniform("u_environment_map", 0);
     background_shader->set_uniform("u_camera_matrix",
                                    glm::toMat4(get_transform().get_rotation()) *

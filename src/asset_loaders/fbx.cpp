@@ -8,15 +8,10 @@
 #include "asset_manager.hpp"
 #include "assimp/quaternion.h"
 #include "camera.hpp"
-#include "components/mesh_component.hpp"
-#include "components/mesh_renderer_component.hpp"
-#include "feature_flags.hpp"
-#include "game_object.hpp"
 #include "light.hpp"
 #include "logging.hpp"
 #include "material.hpp"
 #include "mesh.hpp"
-#include "scene.hpp"
 
 glm::vec3 convert(aiVector3D ai_vec3)
 {
@@ -42,12 +37,6 @@ void asset_loader_FBX::load(std::string_view path)
                               aiProcess_JoinIdenticalVertices |
                               aiProcess_SortByPType | aiProcess_EmbedTextures);
 
-    scene* s = nullptr;
-    if (feature_flags::get_flag(feature_flags::flag_name::load_fbx_as_scene))
-    {
-        s = new scene;
-    }
-
     auto log = get_logger("fbx_loader");
     std::queue<aiNode*> dfs_queue;
     dfs_queue.push(ai_scene->mRootNode);
@@ -63,7 +52,6 @@ void asset_loader_FBX::load(std::string_view path)
         log->info("Node: {} meshes: {}", node->mName.C_Str(), node->mNumMeshes);
         if (node->mNumMeshes > 0)
         {
-            game_object* obj = new game_object;
             mesh* m = nullptr;
             {
                 std::vector<const aiMesh*> ai_submeshes;
@@ -95,14 +83,6 @@ void asset_loader_FBX::load(std::string_view path)
             mat->set_property_value(
                 "u_albedo_color", 0.8f, 0.353f, 0.088f, 1.0f);
             mat->set_property_value("u_normal_texture_strength", 0.0f);
-
-            obj->create_component<mesh_renderer_component>()->set_material(mat);
-            obj->create_component<mesh_component>()->set_mesh(m);
-            obj->set_name(node->mName.C_Str());
-            if (s)
-            {
-                s->add_object(obj);
-            }
         }
     }
 

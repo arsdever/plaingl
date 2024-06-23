@@ -64,7 +64,7 @@ void load_scene()
     // parent_object->set_name("Parent");
     // object->set_name("Object in space");
     sc->visit_root_objects(
-        [](const std::shared_ptr<game_object>& object) -> bool
+        [](const std::shared_ptr<game_object>& object)
     {
         glm::mat4 world =
             object->get_transform()
@@ -92,30 +92,17 @@ void load_scene()
                              .get_scale<
                                  components::transform::relation_flag::world>())
                   << std::endl;
-        return true;
     });
 
-    sc->visit_root_objects(
-        [](std::shared_ptr<game_object>& object)
-    {
-        object->init();
-        return true;
-    });
+    sc->visit_root_objects([](std::shared_ptr<game_object>& object)
+    { object->init(); });
     while (1)
     {
-        sc->visit_root_objects(
-            [](std::shared_ptr<game_object>& object)
-        {
-            object->init();
-            return true;
-        });
+        sc->visit_root_objects([](std::shared_ptr<game_object>& object)
+        { object->init(); });
     }
-    sc->visit_root_objects(
-        [](std::shared_ptr<game_object>& object)
-    {
-        object->init();
-        return true;
-    });
+    sc->visit_root_objects([](std::shared_ptr<game_object>& object)
+    { object->init(); });
 }
 
 int main(int argc, char** argv)

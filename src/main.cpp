@@ -2,17 +2,17 @@
 
 #include "asset_manager.hpp"
 #include "camera.hpp"
-#include "components/box_collider_component.hpp"
-#include "components/camera_component.hpp"
-#include "components/fps_show_component.hpp"
-#include "components/light_component.hpp"
-#include "components/mesh_component.hpp"
-#include "components/mesh_renderer_component.hpp"
-#include "components/plane_collider_component.hpp"
-#include "components/ray_visualize_component.hpp"
-#include "components/text_component.hpp"
-#include "components/text_renderer_component.hpp"
-#include "components/walking_component.hpp"
+// #include "components/box_collider_component.hpp"
+// #include "components/camera_component.hpp"
+// #include "components/fps_show_component.hpp"
+// #include "components/light_component.hpp"
+// #include "components/mesh_component.hpp"
+// #include "components/mesh_renderer_component.hpp"
+// #include "components/plane_collider_component.hpp"
+// #include "components/ray_visualize_component.hpp"
+// #include "components/text_component.hpp"
+// #include "components/text_renderer_component.hpp"
+// #include "components/walking_component.hpp"
 #include "experimental/input_system.hpp"
 #include "experimental/viewport.hpp"
 #include "experimental/window.hpp"
@@ -21,13 +21,16 @@
 #include "file.hpp"
 #include "font.hpp"
 #include "game_clock.hpp"
-#include "game_object.hpp"
+#include "project/game_object.hpp"
 #include "image.hpp"
 #include "input_system.hpp"
 #include "light.hpp"
 #include "logging.hpp"
 #include "material.hpp"
-#include "physics_engine.hpp"
+#include "project/components/component_registry.hpp"
+#include "project/components/mesh_filter.hpp"
+#include "project/components/mesh_renderer.hpp"
+#include "project/components/transform.hpp"
 #include "scene.hpp"
 #include "shader.hpp"
 #include "texture.hpp"
@@ -41,20 +44,20 @@ namespace
 static logger log() { return get_logger("main"); }
 unsigned last_fps;
 font ttf;
-scene s;
+std::shared_ptr<scene> s;
 std::unordered_set<int> pressed_keys;
 std::shared_ptr<camera> main_camera;
 game_object* main_camera_object;
 game_object* _fps_text_object;
 texture* txt;
 texture* norm_txt;
-ray_visualize_component* cast_ray;
+// ray_visualize_component* cast_ray;
 std::vector<std::shared_ptr<experimental::window>> windows;
 std::array<std::shared_ptr<camera>, 3> _view_cameras { nullptr };
 std::string console_string;
 int mesh_preview_texture_index { 0 };
 
-physics_engine p;
+// physics_engine p;
 } // namespace
 
 void load_internal_resources();
@@ -73,6 +76,18 @@ static std::atomic_int counter = 0;
 
 int main(int argc, char** argv)
 {
+    // register components
+    component_registry::register_components();
+    // components::box_collider::register_component();
+    // components::plane_collider::register_component();
+    // components::walking::register_component();
+    // components::light::register_component();
+    // components::text_renderer::register_component();
+    // components::text::register_component();
+    // components::camera::register_component();
+    // components::fps_show::register_component();
+    // components::ray_visualize::register_component();
+
     configure_levels(argc, argv);
     game_clock* clock = game_clock::init();
     glfwInit();
@@ -91,10 +106,8 @@ int main(int argc, char** argv)
     // Probably should be done in some sort of scene loading procedure
     if (scene::get_active_scene())
     {
-        for (auto* obj : scene::get_active_scene()->objects())
-        {
-            obj->init();
-        }
+        scene::get_active_scene()->visit_root_objects([](auto obj)
+        { obj->init(); });
     }
 
     file mat_file("resources/standard/basic.mat");
@@ -188,10 +201,8 @@ int main(int argc, char** argv)
 
     while (!windows.empty())
     {
-        for (auto obj : scene::get_active_scene()->objects())
-        {
-            obj->update();
-        }
+        scene::get_active_scene()->visit_root_objects([](auto obj)
+        { obj->update(); });
 
         for (int i = 0; i < windows.size(); ++i)
         {
@@ -378,20 +389,21 @@ void setupMouseEvents()
                                            0,
                                            me.get_sender()->get_width(),
                                            me.get_sender()->get_height() });
-            cast_ray->set_ray(pos, glm::normalize(point - pos));
+            // cast_ray->set_ray(pos, glm::normalize(point - pos));
 
-            auto hit = p.raycast(pos, glm::normalize(point - pos));
+            // auto hit = p.raycast(pos, glm::normalize(point - pos));
 
-            if (hit.has_value())
-            {
-                // log()->info("hit collider");
-            }
+            // if (hit.has_value())
+            // {
+            //     log()->info("hit collider");
+            // }
         }
     };
 }
 
 void initScene()
 {
+    s = scene::create();
     feature_flags::set_flag(feature_flags::flag_name::load_fbx_as_scene, false);
     auto* am = asset_manager::default_asset_manager();
     material* basic_mat = am->get_material("basic");
@@ -419,13 +431,12 @@ void initScene()
     basic_mat->set_property_value("u_metallic_texture_strength", 1.0f);
     basic_mat->set_property_value("u_ao", 0.1f);
 
-    game_object* object = new game_object;
-    object->create_component<mesh_component>()->set_mesh(
+    auto object = game_object::create();
+    object->add<components::mesh_filter>().set_mesh(
         am->get_mesh("Shader Ball JL 01_mesh"));
-    object->create_component<mesh_renderer_component>()->set_material(
-        basic_mat);
+    object->add<components::mesh_renderer>().set_material(basic_mat);
     object->set_name("susane");
-    s.add_object(object);
+    s->add_root_object(object);
     // bc->set_position(glm::vec3(0, 0, 0));
     // bc->set_scale(glm::vec3(2, 1, 1));
     // bc->set_rotation(glm::quat(glm::ballRand(1.0f)));
@@ -444,36 +455,36 @@ void initScene()
     // collision_text_object->get_transform().set_scale({ 0.005f, 0.005f, 1.0f
     // });
 
-    game_object* ray = new game_object;
-    cast_ray = ray->create_component<ray_visualize_component>();
-    ray->set_name("cast_ray");
-    s.add_object(ray);
-    cast_ray->set_ray({ 0, 0, 0 }, { 0, 0, 1 });
+    // game_object* ray = new game_object;
+    // cast_ray = ray->create_component<ray_visualize_component>();
+    // ray->set_name("cast_ray");
+    // s.add_object(ray);
+    // cast_ray->set_ray({ 0, 0, 0 }, { 0, 0, 1 });
 
-    main_camera_object = new game_object();
-    main_camera_object->create_component<mesh_component>()->set_mesh(
-        am->get_mesh("camera"));
-    main_camera_object->create_component<mesh_renderer_component>()
-        ->set_material(am->get_material("basic"));
-    main_camera_object->create_component<camera_component>();
-    main_camera_object->get_component<camera_component>()->set_camera(
-        main_camera.get());
-    main_camera_object->set_name("main_camera");
-    s.add_object(main_camera_object);
+    // main_camera_object = new game_object();
+    // main_camera_object->create_component<mesh_component>()->set_mesh(
+    //     am->get_mesh("camera"));
+    // main_camera_object->create_component<mesh_renderer_component>()
+    //     ->set_material(am->get_material("basic"));
+    // main_camera_object->create_component<camera_component>();
+    // main_camera_object->get_component<camera_component>()->set_camera(
+    //     main_camera.get());
+    // main_camera_object->set_name("main_camera");
+    // s.add_object(main_camera_object);
 
-    _fps_text_object = new game_object;
-    _fps_text_object->create_component<text_component>();
-    _fps_text_object->create_component<text_renderer_component>();
-    _fps_text_object->create_component<fps_show_component>();
-    _fps_text_object->get_component<text_renderer_component>()->set_font(&ttf);
-    _fps_text_object->get_component<text_renderer_component>()->set_material(
-        am->get_material("text"));
-    am->get_material("text")->set_property_value(
-        "u_text_color", 1.0f, 1.0f, 1.0f);
-    _fps_text_object->get_transform().set_position({ 0.5f, 2.0f, 0.0f });
-    _fps_text_object->get_transform().set_scale({ 0.01f, 0.01f, 1.0f });
-    _fps_text_object->set_name("fps_text");
-    s.add_object(_fps_text_object);
+    // _fps_text_object = new game_object;
+    // _fps_text_object->create_component<text_component>();
+    // _fps_text_object->create_component<text_renderer_component>();
+    // _fps_text_object->create_component<fps_show_component>();
+    // _fps_text_object->get_component<text_renderer_component>()->set_font(&ttf);
+    // _fps_text_object->get_component<text_renderer_component>()->set_material(
+    //     am->get_material("text"));
+    // am->get_material("text")->set_property_value(
+    //     "u_text_color", 1.0f, 1.0f, 1.0f);
+    // _fps_text_object->get_transform().set_position({ 0.5f, 2.0f, 0.0f });
+    // _fps_text_object->get_transform().set_scale({ 0.01f, 0.01f, 1.0f });
+    // _fps_text_object->set_name("fps_text");
+    // s.add_object(_fps_text_object);
 
     main_camera->get_transform().set_position({ 0, 0, 3 });
     main_camera->get_transform().set_rotation(
@@ -483,25 +494,25 @@ void initScene()
                             1.0f,
                             0.0f,
                         }));
-    main_camera_object->get_transform() = main_camera->get_transform();
-    main_camera_object->create_component<walking_component>();
+    // main_camera_object->get_transform() = main_camera->get_transform();
+    // main_camera_object->create_component<walking_component>();
     main_camera->set_ortho(false);
 
     light* l = new light();
     l->set_color(glm::vec3(1.0f, 1.0f, 1.0f));
     l->set_intensity(10.0f);
-    object = new game_object;
-    object->create_component<light_component>()->set_light(l);
-    object->get_transform().set_position(glm::vec3(0.0f, 1.5f, 0.0f));
-    s.add_object(object);
+    // object = new game_object;
+    // object->create_component<light_component>()->set_light(l);
+    // object->get_transform().set_position(glm::vec3(0.0f, 1.5f, 0.0f));
+    // s.add_object(object);
 
     l = new light();
     l->set_color(glm::vec3(1.0f, 1.0f, 1.0f));
     l->set_intensity(100.0f);
-    object = new game_object;
-    object->create_component<light_component>()->set_light(l);
-    object->get_transform().set_position(glm::vec3(5.0f, 0.0f, 0.0f));
-    s.add_object(object);
+    // object = new game_object;
+    // object->create_component<light_component>()->set_light(l);
+    // object->get_transform().set_position(glm::vec3(5.0f, 0.0f, 0.0f));
+    // s.add_object(object);
 }
 
 void load_internal_resources()
