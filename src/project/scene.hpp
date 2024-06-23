@@ -10,13 +10,14 @@ class scene : public object
 public:
     static std::shared_ptr<scene> create();
     static std::shared_ptr<scene> load(std::string_view path);
+    static std::shared_ptr<scene> get_active_scene();
 
     void add_root_object(std::shared_ptr<game_object> object);
 
-    bool visit_root_objects(
-        std::function<bool(std::shared_ptr<game_object>&)> visitor);
-    bool visit_root_objects(
-        std::function<bool(const std::shared_ptr<game_object>&)> visitor) const;
+    void visit_root_objects(
+        std::function<void(std::shared_ptr<game_object>&)> visitor);
+    void visit_root_objects(
+        std::function<void(const std::shared_ptr<game_object>&)> visitor) const;
 
     void save(std::string_view path);
     void unload();
