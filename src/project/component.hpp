@@ -6,17 +6,15 @@ class game_object;
 
 namespace components
 {
-
 class transform;
+} // namespace components
 
 class component : public object
 {
 public:
     game_object& get_game_object() const;
 
-    transform& get_transform() const;
-
-    static size_t register_component();
+    components::transform& get_transform() const;
 
     void set_active(bool active = true);
     bool is_active() const;
@@ -26,7 +24,7 @@ public:
     void deinit();
 
 protected:
-    component(const std::string& name, game_object& obj);
+    component(std::string_view name, game_object& obj);
 
     virtual void on_init();
     virtual void on_update();
@@ -37,4 +35,3 @@ protected:
 private:
     bool _is_active { true };
 };
-} // namespace components

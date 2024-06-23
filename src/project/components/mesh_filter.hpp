@@ -2,7 +2,7 @@
 
 #include <nlohmann/json_fwd.hpp>
 
-#include "project/components/component.hpp"
+#include "project/component.hpp"
 
 class game_object;
 class mesh;
@@ -14,8 +14,7 @@ class mesh_filter : public component
 public:
     mesh_filter(game_object& obj);
 
-    static constexpr const char type_name[] = "mesh_filter";
-    static size_t register_component();
+    static constexpr std::string_view type_name = "mesh_filter";
 
     mesh* get_mesh() const;
     void set_mesh(mesh* m);

@@ -36,13 +36,38 @@ memory_manager& memory_manager::instance()
     return *_instance;
 }
 
-auto& memory_manager::storage_for(std::string_view class_name)
+size_t memory_manager::type_id(std::string_view class_name)
 {
-    return *instance()._registry.storage(typeof(class_name).id());
+    return entt::hashed_string(class_name.data(), class_name.size());
 }
 
-components::component&
-memory_manager::create_component(game_object& obj, std::string_view class_name)
+entt::meta_type memory_manager::typeof(std::string_view class_name)
+{
+    return entt::resolve(type_id(class_name));
+}
+
+auto& memory_manager::storage_for(std::string_view class_name)
+{
+    return *instance()._registry.storage(type_id(class_name));
+}
+
+std::shared_ptr<game_object> memory_manager::create_game_object()
+{
+    auto obj = std::shared_ptr<game_object>(new game_object);
+    auto ent = instance()._registry.create();
+    instance()._registry.emplace<std::shared_ptr<game_object>>(ent, obj);
+    instance()._registry.emplace<uid>(ent, obj->id());
+    instance()._objects.emplace(obj->id(), ent);
+    return obj;
+}
+
+void memory_manager::register_component_type(std::string_view type_name)
+{
+    auto& _ = instance()._registry.storage<component>(type_id(type_name));
+}
+
+component& memory_manager::create_component(game_object& obj,
+                                            std::string_view class_name)
 {
     auto type = typeof(class_name);
     auto* storage = instance()._registry.storage(type.id());
@@ -58,16 +83,14 @@ memory_manager::create_component(game_object& obj, std::string_view class_name)
     return get_component(obj, class_name);
 }
 
-components::component&
-memory_manager::get_component(const game_object& obj,
-                              std::string_view class_name)
+component& memory_manager::get_component(const game_object& obj,
+                                         std::string_view class_name)
 {
     return *try_get_component(obj, class_name);
 }
 
-components::component*
-memory_manager::try_get_component(const game_object& obj,
-                                  std::string_view class_name)
+component* memory_manager::try_get_component(const game_object& obj,
+                                             std::string_view class_name)
 {
     auto& storage = storage_for(class_name);
     if (!storage.contains(entity(obj.id())))
@@ -75,7 +98,7 @@ memory_manager::try_get_component(const game_object& obj,
         return nullptr;
     }
 
-    return static_cast<components::component*>(storage.value(entity(obj.id())));
+    return static_cast<component*>(storage.value(entity(obj.id())));
 }
 
 std::shared_ptr<game_object> memory_manager::get_object(entt::entity ent)
@@ -88,8 +111,8 @@ std::shared_ptr<game_object> memory_manager::get_object_by_id(uid id)
     return get_object(entity(id));
 }
 
-bool memory_manager::visit_components(
-    const game_object& obj, std::function<bool(components::component&)> visitor)
+bool memory_manager::visit_components(const game_object& obj,
+                                      std::function<bool(component&)> visitor)
 {
     auto ent = entity(obj.id());
     for (auto [ _, storage ] : instance()._registry.storage())
@@ -97,9 +120,9 @@ bool memory_manager::visit_components(
         if (storage.contains(ent))
         {
             entt::meta_type type = entt::resolve(storage.type());
-            if (auto component = type.from_void(storage.value(ent)))
+            if (auto meta_component = type.from_void(storage.value(ent)))
             {
-                if (auto c = component.try_cast<components::component>())
+                if (auto c = meta_component.try_cast<component>())
                 {
                     if (!visitor(*c))
                     {

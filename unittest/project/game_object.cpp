@@ -3,13 +3,13 @@
 #include "project/game_object.hpp"
 
 #include "mesh.hpp"
+#include "project/components/component_registry.hpp"
 #include "project/components/mesh_filter.hpp"
 #include "project/components/transform.hpp"
 
 TEST(ProjectGameObject, add_and_get_componennt)
 {
-    components::transform::register_component();
-    components::mesh_filter::register_component();
+    component_registry::register_components();
 
     auto obj = game_object::create();
     obj->set_name("test");

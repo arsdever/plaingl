@@ -4,9 +4,9 @@
 
 #include "project/object.hpp"
 
+class component;
 namespace components
 {
-class component;
 class transform;
 } // namespace components
 
@@ -29,34 +29,33 @@ public:
     bool visit_children(
         std::function<bool(const std::shared_ptr<game_object>&)> visitor) const;
 
-    components::component& add(std::string_view class_name);
+    component& add(std::string_view class_name);
 
     template <typename T>
-        requires(std::is_base_of<components::component, T>::value)
+        requires(std::is_base_of<component, T>::value)
     T& add()
     {
         return static_cast<T&>(add(T::type_name));
     }
 
-    components::component& get(std::string_view class_name) const;
-    components::component* try_get(std::string_view class_name) const;
+    component& get(std::string_view class_name) const;
+    component* try_get(std::string_view class_name) const;
 
     template <typename T>
-        requires(std::is_base_of<components::component, T>::value)
+        requires(std::is_base_of<component, T>::value)
     T& get() const
     {
         return static_cast<T&>(get(T::type_name));
     }
 
     template <typename T>
-        requires(std::is_base_of<components::component, T>::value)
+        requires(std::is_base_of<component, T>::value)
     T* try_get() const
     {
         return static_cast<T*>(try_get(T::type_name));
     }
 
-    void
-    visit_components(std::function<bool(components::component&)> visitor) const;
+    void visit_components(std::function<bool(component&)> visitor) const;
 
     void set_active(bool active = true);
     bool is_active() const;

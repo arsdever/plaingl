@@ -2,7 +2,7 @@
 
 #include <nlohmann/json_fwd.hpp>
 
-#include "project/components/component.hpp"
+#include "project/component.hpp"
 
 class game_object;
 
@@ -37,9 +37,9 @@ public:
     glm::dvec3 get_right() const;
     glm::dvec3 get_up() const;
 
-    static size_t register_component();
+    // static size_t register_component();
     // TODO: this is a temporary solution for resolving the type_name
-    static constexpr const char type_name[] = "transform";
+    static constexpr std::string_view type_name = "transform";
 
     template <typename ST>
     void serialize(ST& s);

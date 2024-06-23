@@ -1,30 +1,21 @@
 #include <entt/entt.hpp>
 
-#include "project/components/component.hpp"
+#include "project/component.hpp"
 
 #include "project/components/transform.hpp"
 #include "project/game_object.hpp"
 
-namespace components
-{
-component::component(const std::string& name, game_object& obj)
+component::component(std::string_view name, game_object& obj)
     : _game_object(obj)
 {
-    set_name(name);
+    set_name(std::string(name));
 }
 
 game_object& component::get_game_object() const { return _game_object; }
 
-transform& component::get_transform() const
+components::transform& component::get_transform() const
 {
-    return _game_object.get<transform>();
-}
-
-size_t component::register_component()
-{
-    static constexpr auto id = entt::hashed_string("component");
-    entt::meta<component>().type(id);
-    return id;
+    return _game_object.get<components::transform>();
 }
 
 void component::set_active(bool active) { _is_active = active; }
@@ -57,4 +48,3 @@ void component::on_init() { }
 void component::on_update() { }
 
 void component::on_deinit() { }
-} // namespace components

@@ -1,24 +1,15 @@
 set(HEADERS memory_manager.hpp)
 set(INTERFACE_HEADERS
     application_context.hpp
+    component.hpp
     game_object.hpp
     object.hpp
     scene.hpp
     serialization_utilities.hpp
     serializer.hpp
-    serializer_json.hpp
-    components/component.hpp
-    components/mesh_filter.hpp
-    components/transform.hpp)
-set(SOURCES
-    application_context.cpp
-    game_object.cpp
-    memory_manager.cpp
-    object.cpp
-    scene.cpp
-    components/component.cpp
-    components/mesh_filter.cpp
-    components/transform.cpp)
+    serializer_json.hpp)
+set(SOURCES application_context.cpp component.cpp game_object.cpp
+            memory_manager.cpp object.cpp scene.cpp)
 
 foreach(interface_header ${INTERFACE_HEADERS})
   get_filename_component(dir ${interface_header} DIRECTORY)
@@ -38,8 +29,14 @@ endforeach()
 add_library(${PROJECT}_project STATIC ${INTERFACE_HEADERS} ${HEADERS}
                                       ${SOURCES})
 add_library(${PROJECT}::project ALIAS ${PROJECT}_project)
-target_link_libraries(${PROJECT}_project PUBLIC EnTT::EnTT ${PROJECT}::common)
+target_link_libraries(
+  ${PROJECT}_project
+  PUBLIC ${PROJECT}::common
+  PRIVATE EnTT::EnTT)
 target_include_directories(
   ${PROJECT}_project
   # PUBLIC ${CMAKE_CURRENT_INSTALL_DIR}/include
   PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../)
+
+add_subdirectory(components)
+target_link_libraries(${PROJECT}_project PUBLIC ${PROJECT}::components)

@@ -1,6 +1,6 @@
 #include "project/game_object.hpp"
 
-#include "project/components/component.hpp"
+#include "project/component.hpp"
 #include "project/components/transform.hpp"
 #include "project/memory_manager.hpp"
 
@@ -14,12 +14,12 @@ std::shared_ptr<game_object> game_object::create()
     return obj;
 }
 
-components::component& game_object::get(std::string_view class_name) const
+component& game_object::get(std::string_view class_name) const
 {
     return memory_manager::get_component(*this, class_name);
 }
 
-components::component* game_object::try_get(std::string_view class_name) const
+component* game_object::try_get(std::string_view class_name) const
 {
     return memory_manager::try_get_component(*this, class_name);
 }
@@ -92,7 +92,7 @@ bool game_object::visit_children(
 }
 
 void game_object::visit_components(
-    std::function<bool(components::component&)> visitor) const
+    std::function<bool(component&)> visitor) const
 {
     memory_manager::visit_components(*this,
                                      [ & ](auto& c)
@@ -167,7 +167,7 @@ void game_object::deinit()
     });
 }
 
-components::component& game_object::add(std::string_view class_name)
+component& game_object::add(std::string_view class_name)
 {
     return memory_manager::instance().create_component(*this, class_name);
 }

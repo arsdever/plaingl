@@ -136,21 +136,6 @@ void transform::deserialize(const nlohmann::json& j)
     set_active(j[ "is_active" ]);
 }
 
-size_t transform::register_component()
-{
-    auto id = entt::hashed_string(type_name);
-    entt::meta<transform>()
-        .type(id)
-        .base<component>()
-        .ctor<game_object&>()
-        .func<&transform::serialize<json_serializer>>(
-            entt::hashed_string("serialize"))
-        .func<&transform::serialize<json_serializer>>(
-            entt::hashed_string("deserialize"));
-    memory_manager::register_component_type<transform>();
-    return id;
-}
-
 bool transform::is_dirty() const
 {
     if (!get_game_object().has_parent())
