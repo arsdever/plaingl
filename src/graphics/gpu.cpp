@@ -23,4 +23,7 @@ std::string_view gpu::get_device()
     }
     return device;
 }
+
+std::string gpu::vendor;
+std::string gpu::device;
 } // namespace graphics

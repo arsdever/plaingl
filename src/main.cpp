@@ -22,6 +22,7 @@
 #include "font.hpp"
 #include "game_clock.hpp"
 #include "game_object.hpp"
+#include "graphics/gpu.hpp"
 #include "image.hpp"
 #include "input_system.hpp"
 #include "light.hpp"
@@ -86,6 +87,10 @@ int main(int argc, char** argv)
     initViewports();
     setupMouseEvents();
     initScene();
+
+    log()->info("Using graphics card {} - {}",
+                graphics::gpu::get_vendor(),
+                graphics::gpu::get_device());
 
     // TODO: may not be the best place for object initialization
     // Probably should be done in some sort of scene loading procedure
