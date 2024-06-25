@@ -13,5 +13,6 @@ add_library(${PROJECT}::renderer ALIAS ${PROJECT}_renderer)
 target_precompile_headers(${PROJECT}_renderer REUSE_FROM ${PROJECT}::common)
 target_include_directories(
   ${PROJECT}_renderer PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${PROJECT_SRC_DIR})
-target_link_libraries(${PROJECT}_renderer PRIVATE glfw glm ${PROJECT}::common
-                                                  ${PROJECT}::glad)
+target_link_libraries(
+  ${PROJECT}_renderer PRIVATE glm ${PROJECT}::common ${PROJECT}::graphics
+                              ${PROJECT}::glad)

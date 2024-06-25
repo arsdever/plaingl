@@ -107,6 +107,7 @@ link_libraries(spdlog::spdlog profiler::lib)
 
 add_subdirectory(glad)
 add_subdirectory(common)
+add_subdirectory(graphics)
 add_subdirectory(renderer)
 
 target_precompile_headers(${PROJECT}_lib REUSE_FROM ${PROJECT}::common)
