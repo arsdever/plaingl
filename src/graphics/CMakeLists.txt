@@ -1,4 +1,5 @@
-add_library(${PROJECT}_graphics STATIC gpu.hpp gpu.cpp)
+add_library(${PROJECT}_graphics STATIC command_buffer.cpp command_buffer.hpp
+                                       gpu.cpp gpu.hpp)
 add_library(${PROJECT}::graphics ALIAS ${PROJECT}_graphics)
 
 target_precompile_headers(${PROJECT}_graphics REUSE_FROM ${PROJECT}::common)
