@@ -7,6 +7,8 @@
 #include "experimental/viewport.hpp"
 #include "glad/gl.h"
 #include "graphics/command.hpp"
+#include "graphics/commands/draw_elements.hpp"
+#include "graphics/graphics_channel.hpp"
 #include "graphics_buffer.hpp"
 #include "material.hpp"
 #include "mesh.hpp"
@@ -43,8 +45,6 @@ void renderer_3d::draw_mesh(mesh* m, material* mat)
                                 GL_UNSIGNED_INT,
                                 0 } };
 
-    glDrawElements(GL_TRIANGLES,
-                   m->get_index_buffer().get_element_count(),
-                   GL_UNSIGNED_INT,
-                   0);
+    graphics::graphics_channel::instance().post(std::move(cmd));
+    graphics::graphics_channel::instance().flush();
 }

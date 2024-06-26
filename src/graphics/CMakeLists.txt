@@ -1,8 +1,12 @@
 add_library(
   ${PROJECT}_graphics STATIC
+  # command_executors.cpp
+  command_executors.hpp
   command.hpp
   gpu.cpp
   gpu.hpp
+  graphics_channel.cpp
+  graphics_channel.hpp
   commands/command_type_traits.hpp
   commands/command_types.hpp
   commands/commands.hpp
