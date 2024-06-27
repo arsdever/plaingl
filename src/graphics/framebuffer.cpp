@@ -1,7 +1,7 @@
-#include "framebuffer.hpp"
+#include "graphics/framebuffer.hpp"
 
-#include "logging.hpp"
-#include "texture.hpp"
+#include "common/logging.hpp"
+#include "graphics/texture.hpp"
 
 namespace
 {
