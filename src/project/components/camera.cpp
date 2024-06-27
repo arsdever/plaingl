@@ -3,11 +3,16 @@
 
 #include "project/components/camera.hpp"
 
+#include "graphics/material.hpp"
+#include "project/components/mesh_filter.hpp"
+#include "project/components/mesh_renderer.hpp"
 #include "project/components/transform.hpp"
 #include "project/memory_manager.hpp"
+#include "project/scene.hpp"
 #include "project/serialization_utilities.hpp"
 #include "project/serializer.hpp"
 #include "project/serializer_json.hpp"
+#include "renderer/renderer_3d.hpp"
 
 using namespace serialization::utilities;
 
@@ -96,11 +101,25 @@ std::shared_ptr<texture> camera::get_background_texture() const
 
 void camera::render()
 {
-    glClearColor(_background_color.x,
-                 _background_color.y,
-                 _background_color.z,
-                 _background_color.w);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    // setup_lights();
+    render_on_private_texture();
+
+    // _framebuffer->bind();
+    // if (_background_texture)
+    // {
+    //     render_texture_background();
+    // }
+
+    // if (get_gizmos_enabled())
+    // {
+    //     render_gizmos();
+    // }
+
+    // _framebuffer->unbind();
+    // if (auto urt = _user_render_texture.lock())
+    // {
+    //     _framebuffer->copy_texture(urt.get());
+    // }
 }
 
 glm::mat4 camera::projection_matrix() const { return _projection_matrix; }
@@ -126,12 +145,22 @@ void camera::deserialize(const nlohmann::json& j)
     set_enabled(j[ "is_enabled" ]);
 }
 
+void camera::on_init()
+{
+    _view_matrix = glm::inverse(get_transform().get_matrix());
+    _projection_matrix = calculate_projection_matrix();
+}
+
 void camera::on_update()
 {
-    if (get_transform().is_updated())
+    auto& tr = get_transform();
+    if (tr.is_updated())
     {
-        _view_matrix_dirty = true;
+        _view_matrix = glm::inverse(tr.get_matrix());
     }
+
+    if (_projection_matrix_dirty)
+        _projection_matrix = calculate_projection_matrix();
 }
 
 void camera::set_projection_matrix(glm::mat4 mat)
@@ -170,37 +199,40 @@ void camera::render_texture_background()
 void camera::render_on_private_texture() const
 {
     // _framebuffer->bind();
-    // // TODO?: maybe better to clear with the specified background color
+    // TODO?: maybe better to clear with the specified background color
     // instead
-    // // of drawing background quad with that color
-    // glClearColor(
-    //     _background_color.x, _background_color.y, _background_color.z, 1.0f);
-    // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    // glEnable(GL_DEPTH_TEST);
+    // of drawing background quad with that color
+    glClearColor(
+        _background_color.x, _background_color.y, _background_color.z, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glEnable(GL_DEPTH_TEST);
 
-    // if (scene::get_active_scene())
-    // {
-    //     scene::get_active_scene()->visit_root_objects(
-    //         [](auto& obj)
-    //     {
-    //         if (!obj->is_active())
-    //             return;
+    if (scene::get_active_scene())
+    {
+        scene::get_active_scene()->visit_root_objects(
+            [ this ](auto& obj)
+        {
+            if (!obj->is_active())
+                return;
 
-    //         if (auto* renderer =
-    //                 obj->template try_get<components::mesh_renderer>())
-    //         {
-    //             auto* mesh =
-    //                 obj->template get<components::mesh_filter>().get_mesh();
-    //             auto* material = renderer->get_material();
-    //             if (material)
-    //             {
-    //                 material->set_property_value(
-    //                     "u_model_matrix", obj->get_transform().get_matrix());
-    //                 renderer_3d().draw_mesh(mesh, material);
-    //             }
-    //         }
-    //     });
-    // }
+            if (auto* renderer =
+                    obj->template try_get<components::mesh_renderer>())
+            {
+                auto* mesh =
+                    obj->template get<components::mesh_filter>().get_mesh();
+                auto* material = renderer->get_material();
+                if (material)
+                {
+                    material->set_property_value(
+                        "u_model_matrix",
+                        glm::mat4(obj->get_transform().get_matrix()));
+                    material->set_property_value("u_vp_matrix",
+                                                 glm::mat4(vp_matrix()));
+                    renderer_3d().draw_mesh(mesh, material);
+                }
+            }
+        });
+    }
     // _framebuffer->unbind();
 }
 

@@ -265,9 +265,8 @@ void initMainWindow()
         [ vp ](auto re) { vp->set_size(re.get_new_size()); };
     wnd->get_events()->render += [ vp ](auto re)
     {
-        // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        // vp->render();
-        components::camera::get_active()->render();
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        vp->render();
     };
     windows.back()->get_events()->resize += [ vp ](auto re)
     {

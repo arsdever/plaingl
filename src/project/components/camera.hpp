@@ -53,6 +53,7 @@ public:
     void deserialize(const nlohmann::json& j);
 
 protected:
+    void on_init() override;
     void on_update() override;
 
 private:
@@ -74,7 +75,6 @@ private:
     std::weak_ptr<texture> _background_texture {};
 
     glm::dmat4 _view_matrix;
-    bool _view_matrix_dirty { true };
     glm::dmat4 _projection_matrix;
     bool _projection_matrix_dirty { true };
 
