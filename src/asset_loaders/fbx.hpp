@@ -20,7 +20,6 @@ public:
 
 private:
     mesh* load_mesh(std::vector<const aiMesh*> ai_submeshes);
-    camera* load_camera(const aiCamera* ai_camera);
     light* load_light(const aiLight* ai_light);
 
 private:

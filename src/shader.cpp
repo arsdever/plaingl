@@ -1,6 +1,5 @@
 #include "shader.hpp"
 
-#include "camera.hpp"
 #include "file.hpp"
 #include "logging.hpp"
 

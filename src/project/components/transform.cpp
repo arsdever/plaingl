@@ -1,4 +1,3 @@
-#include <entt/entt.hpp>
 #include <glm/gtx/matrix_decompose.hpp>
 
 #include "project/components/transform.hpp"
@@ -21,18 +20,21 @@ void transform::set_position(const glm::dvec3& position)
 {
     _position = position;
     _dirty = true;
+    _updated = true;
 }
 
 void transform::set_rotation(const glm::dquat& rotation)
 {
     _rotation = rotation;
     _dirty = true;
+    _updated = true;
 }
 
 void transform::set_scale(const glm::dvec3& scale)
 {
     _scale = scale;
     _dirty = true;
+    _updated = true;
 }
 
 template <>
@@ -106,18 +108,19 @@ glm::dvec3 transform::get_up() const
                                      glm::dvec4(0, 1, 0, 0)));
 }
 
+bool transform::is_updated() const { return _updated; }
+
 template <>
 void transform::serialize<json_serializer>(json_serializer& s)
 {
-    s.add_component(
-        nlohmann::json { { "type", entt::hashed_string("transform").value() },
-                         { "is_active", is_active() },
-                         { "transform",
-                           {
-                               { "position", to_json(_position) },
-                               { "rotation", to_json(_rotation) },
-                               { "scale", to_json(_position) },
-                           } } });
+    s.add_component(nlohmann::json { { "type", type_id<transform>() },
+                                     { "is_enabled", is_enabled() },
+                                     { "transform",
+                                       {
+                                           { "position", to_json(_position) },
+                                           { "rotation", to_json(_rotation) },
+                                           { "scale", to_json(_position) },
+                                       } } });
 }
 
 void transform::deserialize(const nlohmann::json& j)
@@ -133,7 +136,7 @@ void transform::deserialize(const nlohmann::json& j)
 
     _scale = { j[ "scale" ][ 0 ], j[ "scale" ][ 1 ], j[ "scale" ][ 2 ] };
 
-    set_active(j[ "is_active" ]);
+    set_enabled(j[ "is_enabled" ]);
 }
 
 bool transform::is_dirty() const
@@ -190,4 +193,6 @@ bool transform::recalculate_matrix() const
 
     return world_matrix_changed;
 }
+
+void transform::on_update() { _updated = false; }
 } // namespace components

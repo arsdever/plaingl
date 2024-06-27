@@ -7,7 +7,6 @@
 
 #include "asset_manager.hpp"
 #include "assimp/quaternion.h"
-#include "camera.hpp"
 #include "light.hpp"
 #include "logging.hpp"
 #include "material.hpp"
@@ -86,26 +85,6 @@ void asset_loader_FBX::load(std::string_view path)
         }
     }
 
-    for (int i = 0; i < ai_scene->mNumCameras; ++i)
-    {
-        auto cam = load_camera(ai_scene->mCameras[ i ]);
-        const auto& ai_camera = *ai_scene->mCameras[ i ];
-        const auto& ai_camera_node =
-            *ai_scene->mRootNode->FindNode(ai_camera.mName);
-        aiMatrix4x4 camMat;
-        ai_camera.GetCameraMatrix(camMat);
-        aiMatrix4x4 final = ai_camera_node.mTransformation;
-        final *= camMat;
-        aiVector3D pos;
-        aiVector3D scale;
-        aiQuaternion rot;
-        final.Decompose(scale, rot, pos);
-        auto& t = cam->get_transform();
-        t.set_position(convert(pos) / convert(scale));
-        t.set_rotation(convert(rot));
-        log->info("Camera: {}", ai_camera.mName.C_Str());
-    }
-
     for (int i = 0; i < ai_scene->mNumLights; ++i)
     {
         auto l = new light;
@@ -177,14 +156,6 @@ mesh* asset_loader_FBX::load_mesh(std::vector<const aiMesh*> ai_submeshes)
     result->set_submeshes(std::move(submeshes));
     result->init();
 
-    return result;
-}
-
-camera* asset_loader_FBX::load_camera(const aiCamera* ai_camera)
-{
-    camera* result = new camera;
-    result->set_fov(ai_camera->mHorizontalFOV * 2.0f);
-    result->set_ortho(false);
     return result;
 }
 

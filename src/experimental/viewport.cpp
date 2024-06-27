@@ -4,10 +4,10 @@
 #include "experimental/viewport.hpp"
 
 #include "asset_manager.hpp"
-#include "camera.hpp"
 #include "experimental/window.hpp"
 #include "image.hpp"
 #include "mesh.hpp"
+#include "project/components/camera.hpp"
 #include "shader.hpp"
 #include "texture.hpp"
 
@@ -34,7 +34,6 @@ struct viewport::viewport_private
     glm::vec2 _position { 0, 0 };
     glm::vec2 _size { 0, 0 };
     std::shared_ptr<texture> _surface_texture { std::make_shared<texture>() };
-    std::weak_ptr<camera> _camera {};
 };
 
 viewport::viewport() { _p = std::make_unique<viewport_private>(); }
@@ -55,17 +54,10 @@ void viewport::set_size(glm::vec2 size)
 
 glm::vec2 viewport::get_size() const { return _p->_size; }
 
-void viewport::set_camera(std::weak_ptr<camera> cam) { _p->_camera = cam; }
-
-std::shared_ptr<camera> viewport::get_camera() const
-{
-    return _p->_camera.lock();
-}
-
 void viewport::render()
 {
     _current_viewport = this;
-    auto cam = get_camera();
+    auto cam = components::camera::get_active();
     if (cam == nullptr)
     {
         return;
@@ -73,7 +65,6 @@ void viewport::render()
 
     glViewport(0, 0, get_size().x, get_size().y);
     cam->set_render_size(get_size());
-    cam->set_gizmos_enabled(true);
     cam->set_render_texture(_p->_surface_texture);
     cam->render();
 

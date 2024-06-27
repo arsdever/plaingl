@@ -1,4 +1,3 @@
-#include <entt/entt.hpp>
 #include <glm/gtx/matrix_decompose.hpp>
 
 #include "project/components/mesh_renderer.hpp"
@@ -25,13 +24,13 @@ template <>
 void mesh_renderer::serialize<json_serializer>(json_serializer& s)
 {
     s.add_component(nlohmann::json {
-        { "type", entt::hashed_string("mesh_filter").value() },
-        { "is_active", is_active() },
+        { "type", type_id<mesh_renderer>() },
+        { "is_enabled", is_enabled() },
     });
 }
 
 void mesh_renderer::deserialize(const nlohmann::json& j)
 {
-    set_active(j[ "is_active" ]);
+    set_enabled(j[ "is_enabled" ]);
 }
 } // namespace components

@@ -105,5 +105,5 @@ int main(int argc, char** argv)
 
 void init_scene()
 {
-    camera::active_camera()->set_background(glm::vec3(.3, .6, .7));
+    camera::get_active()->set_background(glm::vec3(.3, .6, .7));
 }

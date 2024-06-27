@@ -16,12 +16,23 @@ public:
 
     components::transform& get_transform() const;
 
-    void set_active(bool active = true);
-    bool is_active() const;
+    inline void enable() { set_enabled(true); }
+    inline void disable() { set_enabled(false); }
+    void set_enabled(bool active = true);
+    bool is_enabled() const;
 
     void init();
     void update();
     void deinit();
+
+    static size_t type_id(std::string_view class_name);
+    static constexpr std::string_view type_name = "component";
+
+    template <typename T>
+    static size_t type_id()
+    {
+        return type_id(T::type_name);
+    }
 
 protected:
     component(std::string_view name, game_object& obj);
@@ -33,5 +44,5 @@ protected:
     std::reference_wrapper<game_object> _game_object;
 
 private:
-    bool _is_active { true };
+    bool _is_enabled { true };
 };

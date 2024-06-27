@@ -1,9 +1,8 @@
-#include <entt/entt.hpp>
-
 #include "project/component.hpp"
 
 #include "project/components/transform.hpp"
 #include "project/game_object.hpp"
+#include "project/memory_manager.hpp"
 
 component::component(std::string_view name, game_object& obj)
     : _game_object(obj)
@@ -18,29 +17,34 @@ components::transform& component::get_transform() const
     return _game_object.get().get<components::transform>();
 }
 
-void component::set_active(bool active) { _is_active = active; }
+void component::set_enabled(bool active) { _is_enabled = active; }
 
-bool component::is_active() const { return _is_active; }
+bool component::is_enabled() const { return _is_enabled; }
 
 void component::init()
 {
-    if (!is_active())
+    if (!is_enabled())
         return;
     on_init();
 }
 
 void component::update()
 {
-    if (!is_active())
+    if (!is_enabled())
         return;
     on_update();
 }
 
 void component::deinit()
 {
-    if (!is_active())
+    if (!is_enabled())
         return;
     on_deinit();
+}
+
+size_t component::type_id(std::string_view class_name)
+{
+    return memory_manager::type_id(class_name);
 }
 
 void component::on_init() { }

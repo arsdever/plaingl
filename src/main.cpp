@@ -1,7 +1,6 @@
 #include <prof/profiler.hpp>
 
 #include "asset_manager.hpp"
-#include "camera.hpp"
 // #include "components/box_collider_component.hpp"
 // #include "components/camera_component.hpp"
 // #include "components/fps_show_component.hpp"
@@ -27,6 +26,7 @@
 #include "light.hpp"
 #include "logging.hpp"
 #include "material.hpp"
+#include "project/components/camera.hpp"
 #include "project/components/component_registry.hpp"
 #include "project/components/mesh_filter.hpp"
 #include "project/components/mesh_renderer.hpp"
@@ -47,14 +47,12 @@ unsigned last_fps;
 font ttf;
 std::shared_ptr<scene> s;
 std::unordered_set<int> pressed_keys;
-std::shared_ptr<camera> main_camera;
-game_object* main_camera_object;
+std::shared_ptr<game_object> main_camera_object;
 game_object* _fps_text_object;
 texture* txt;
 texture* norm_txt;
 // ray_visualize_component* cast_ray;
 std::vector<std::shared_ptr<experimental::window>> windows;
-std::array<std::shared_ptr<camera>, 3> _view_cameras { nullptr };
 std::string console_string;
 int mesh_preview_texture_index { 0 };
 
@@ -65,7 +63,7 @@ void load_internal_resources();
 void initScene();
 void initMainWindow();
 void initProfilerView();
-void initViewports();
+// void initViewports();
 void setupMouseEvents();
 
 void on_error(int error_code, const char* description)
@@ -99,7 +97,7 @@ int main(int argc, char** argv)
 
     initMainWindow();
     initProfilerView();
-    initViewports();
+    // initViewports();
     setupMouseEvents();
     initScene();
 
@@ -141,9 +139,11 @@ int main(int argc, char** argv)
     } };
     set_thread_name(thd, "physics_thread");
     set_thread_priority(thd, 15);
-    // main_camera->set_background(glm::vec3 { 1, 0, 0 });
-    main_camera->set_background(
-        asset_manager::default_asset_manager()->get_image("env"));
+    auto txt = std::make_shared<texture>(std::move(texture::from_image(
+        asset_manager::default_asset_manager()->get_image("env"))));
+    auto camera = components::camera::get_active();
+    camera->set_background(glm::dvec4 { 1.0, 0.0, 0.0, 0.0 });
+    camera->set_background(txt);
     // texture* txt = new texture;
     // main_camera->set_render_texture(txt);
 
@@ -261,14 +261,13 @@ void initMainWindow()
     std::shared_ptr<viewport> vp = std::make_shared<viewport>();
     vp->initialize();
     wnd->add_viewport(vp);
-    main_camera = std::make_shared<camera>();
-    vp->set_camera(main_camera);
     wnd->get_events()->resize +=
         [ vp ](auto re) { vp->set_size(re.get_new_size()); };
     wnd->get_events()->render += [ vp ](auto re)
     {
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        vp->render();
+        // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        // vp->render();
+        components::camera::get_active()->render();
     };
     windows.back()->get_events()->resize += [ vp ](auto re)
     {
@@ -280,76 +279,76 @@ void initMainWindow()
     vp->set_size({ wnd->get_width(), wnd->get_height() });
 }
 
-void initViewports()
-{
-    windows.push_back(std::make_shared<experimental::window>());
-    auto wnd = windows.back();
-    wnd->init();
-    wnd->resize(400, 1200);
-    windows[ 0 ]->set_position(windows[ 1 ]->get_position().x +
-                                   windows[ 1 ]->get_width(),
-                               windows[ 1 ]->get_position().y);
+// void initViewports()
+// {
+//     windows.push_back(std::make_shared<experimental::window>());
+//     auto wnd = windows.back();
+//     wnd->init();
+//     wnd->resize(400, 1200);
+//     windows[ 0 ]->set_position(windows[ 1 ]->get_position().x +
+//                                    windows[ 1 ]->get_width(),
+//                                windows[ 1 ]->get_position().y);
 
-    wnd->get_events()->close += [](auto ce)
-    { std::erase(windows, ce.get_sender()->shared_from_this()); };
+//     wnd->get_events()->close += [](auto ce)
+//     { std::erase(windows, ce.get_sender()->shared_from_this()); };
 
-    for (int i = 0; i < _view_cameras.size(); ++i)
-    {
-        _view_cameras[ i ] = std::make_shared<camera>();
-        auto cam = _view_cameras[ i ];
-        auto vp = std::make_shared<experimental::viewport>();
-        vp->initialize();
-        vp->set_camera(cam);
-        cam->set_ortho(true);
-        wnd->add_viewport(vp);
-        wnd->get_events()->mouse_scroll += [ cam, vp ](auto we)
-        {
-            auto pos = we.get_local_position();
-            pos.y = we.get_sender()->get_height() - pos.y;
-            if (!rect_contains(vp->get_position(),
-                               vp->get_position() + vp->get_size(),
-                               pos))
-            {
-                return;
-            }
+//     for (int i = 0; i < _view_cameras.size(); ++i)
+//     {
+//         _view_cameras[ i ] = std::make_shared<camera>();
+//         auto cam = _view_cameras[ i ];
+//         auto vp = std::make_shared<experimental::viewport>();
+//         vp->initialize();
+//         vp->set_camera(cam);
+//         cam->set_ortho(true);
+//         wnd->add_viewport(vp);
+//         wnd->get_events()->mouse_scroll += [ cam, vp ](auto we)
+//         {
+//             auto pos = we.get_local_position();
+//             pos.y = we.get_sender()->get_height() - pos.y;
+//             if (!rect_contains(vp->get_position(),
+//                                vp->get_position() + vp->get_size(),
+//                                pos))
+//             {
+//                 return;
+//             }
 
-            cam->get_transform().set_position(
-                cam->get_transform().get_position() *
-                std::pow<float>(1.2, we.get_delta().y));
-        };
-        windows.back()->get_events()->resize += [ vp, i ](auto re)
-        {
-            vp->set_size({ re.get_new_size().x, re.get_new_size().y / 3.0 });
-            vp->set_position({ 0, re.get_new_size().y / 3.0 * i });
-        };
+//             cam->get_transform().set_position(
+//                 cam->get_transform().get_position() *
+//                 std::pow<float>(1.2, we.get_delta().y));
+//         };
+//         windows.back()->get_events()->resize += [ vp, i ](auto re)
+//         {
+//             vp->set_size({ re.get_new_size().x, re.get_new_size().y / 3.0 });
+//             vp->set_position({ 0, re.get_new_size().y / 3.0 * i });
+//         };
 
-        vp->set_size({ wnd->get_width(), wnd->get_height() / 3.0 });
-        vp->set_position({ 0, wnd->get_height() / 3.0 * i });
-    }
+//         vp->set_size({ wnd->get_width(), wnd->get_height() / 3.0 });
+//         vp->set_position({ 0, wnd->get_height() / 3.0 * i });
+//     }
 
-    windows.back()->get_events()->render += [](auto re)
-    {
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        for (auto vp : re.get_sender()->get_viewports())
-        {
-            vp->render();
-        }
-    };
-    _view_cameras[ 0 ]->get_transform().set_position({ 100, 0, 0 });
-    _view_cameras[ 0 ]->get_transform().set_rotation(glm::quatLookAt(
-        glm::vec3 { -1.0f, 0.0f, 0.0f }, glm::vec3 { 0.0f, 1.0f, 0.0f }));
-    _view_cameras[ 0 ]->set_background(glm::vec3 { 0.1f, 0.0f, 0.0f });
+//     windows.back()->get_events()->render += [](auto re)
+//     {
+//         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+//         for (auto vp : re.get_sender()->get_viewports())
+//         {
+//             vp->render();
+//         }
+//     };
+//     _view_cameras[ 0 ]->get_transform().set_position({ 100, 0, 0 });
+//     _view_cameras[ 0 ]->get_transform().set_rotation(glm::quatLookAt(
+//         glm::vec3 { -1.0f, 0.0f, 0.0f }, glm::vec3 { 0.0f, 1.0f, 0.0f }));
+//     _view_cameras[ 0 ]->set_background(glm::vec3 { 0.1f, 0.0f, 0.0f });
 
-    _view_cameras[ 1 ]->get_transform().set_position({ 0, 100, 0 });
-    _view_cameras[ 1 ]->get_transform().set_rotation(glm::quatLookAt(
-        glm::vec3 { 0.0f, -1.0f, 0.0f }, glm::vec3 { 0.0f, 0.0f, 1.0f }));
-    _view_cameras[ 1 ]->set_background(glm::vec3 { 0.0f, 0.1f, 0.0f });
+//     _view_cameras[ 1 ]->get_transform().set_position({ 0, 100, 0 });
+//     _view_cameras[ 1 ]->get_transform().set_rotation(glm::quatLookAt(
+//         glm::vec3 { 0.0f, -1.0f, 0.0f }, glm::vec3 { 0.0f, 0.0f, 1.0f }));
+//     _view_cameras[ 1 ]->set_background(glm::vec3 { 0.0f, 0.1f, 0.0f });
 
-    _view_cameras[ 2 ]->get_transform().set_position({ 0, 0, 100 });
-    _view_cameras[ 2 ]->get_transform().set_rotation(glm::quatLookAt(
-        glm::vec3 { 0.0f, 0.0f, -1.0f }, glm::vec3 { 0.0f, 1.0f, 0.0f }));
-    _view_cameras[ 2 ]->set_background(glm::vec3 { 0.0f, 0.0f, 0.1f });
-}
+//     _view_cameras[ 2 ]->get_transform().set_position({ 0, 0, 100 });
+//     _view_cameras[ 2 ]->get_transform().set_rotation(glm::quatLookAt(
+//         glm::vec3 { 0.0f, 0.0f, -1.0f }, glm::vec3 { 0.0f, 1.0f, 0.0f }));
+//     _view_cameras[ 2 ]->set_background(glm::vec3 { 0.0f, 0.0f, 0.1f });
+// }
 
 void setupMouseEvents()
 {
@@ -363,33 +362,24 @@ void setupMouseEvents()
                                                  -me.get_local_position().x,
                                                  0) *
                                        .1f)));
+
+            log()->info("camera direction {}",
+                        glm::to_string(
+                            main_camera_object->get_transform().get_forward()));
         }
         else
         {
+            auto cam = components::camera::get_active();
             // draw ray casted from camera
-            auto pos = me.get_sender()
-                           ->get_viewports()[ 0 ]
-                           ->get_camera()
-                           ->get_transform()
-                           .get_position();
-            auto rot = me.get_sender()
-                           ->get_viewports()[ 0 ]
-                           ->get_camera()
-                           ->get_transform()
-                           .get_rotation();
+            auto pos = cam->get_transform().get_position();
+            auto rot = cam->get_transform().get_rotation();
             glm::vec3 point =
                 glm::unProject(glm::vec3 { me.get_local_position().x,
                                            me.get_sender()->get_height() -
                                                me.get_local_position().y,
                                            0 },
-                               me.get_sender()
-                                   ->get_viewports()[ 0 ]
-                                   ->get_camera()
-                                   ->view_matrix(),
-                               me.get_sender()
-                                   ->get_viewports()[ 0 ]
-                                   ->get_camera()
-                                   ->projection_matrix(),
+                               cam->view_matrix(),
+                               cam->projection_matrix(),
                                glm::vec4 { 0,
                                            0,
                                            me.get_sender()->get_width(),
@@ -437,7 +427,9 @@ void initScene()
     basic_mat->set_property_value("u_ao", 0.1f);
 
     auto object = game_object::create();
-    object->add<components::mesh_filter>().set_mesh(
+    object->add<components::mesh_filter>();
+
+    object->get<components::mesh_filter>().set_mesh(
         am->get_mesh("Shader Ball JL 01_mesh"));
     object->add<components::mesh_renderer>().set_material(basic_mat);
     object->set_name("susane");
@@ -466,16 +458,14 @@ void initScene()
     // s.add_object(ray);
     // cast_ray->set_ray({ 0, 0, 0 }, { 0, 0, 1 });
 
-    // main_camera_object = new game_object();
+    main_camera_object = game_object::create();
     // main_camera_object->create_component<mesh_component>()->set_mesh(
     //     am->get_mesh("camera"));
     // main_camera_object->create_component<mesh_renderer_component>()
     //     ->set_material(am->get_material("basic"));
-    // main_camera_object->create_component<camera_component>();
-    // main_camera_object->get_component<camera_component>()->set_camera(
-    //     main_camera.get());
-    // main_camera_object->set_name("main_camera");
-    // s.add_object(main_camera_object);
+    auto& main_camera = main_camera_object->add<components::camera>();
+    main_camera_object->set_name("main_camera");
+    s->add_root_object(main_camera_object);
 
     // _fps_text_object = new game_object;
     // _fps_text_object->create_component<text_component>();
@@ -491,17 +481,17 @@ void initScene()
     // _fps_text_object->set_name("fps_text");
     // s.add_object(_fps_text_object);
 
-    main_camera->get_transform().set_position({ 0, 0, 3 });
-    main_camera->get_transform().set_rotation(
+    main_camera_object->get_transform().set_position({ 0, 0, 3 });
+    main_camera.get_transform().set_rotation(
         glm::quatLookAt(glm::vec3 { 0.0f, 0.0f, -1.0f },
                         glm::vec3 {
                             0.0f,
                             1.0f,
                             0.0f,
                         }));
-    // main_camera_object->get_transform() = main_camera->get_transform();
     // main_camera_object->create_component<walking_component>();
-    main_camera->set_ortho(false);
+    main_camera.set_orthogonal(false);
+    main_camera.set_active();
 
     light* l = new light();
     l->set_color(glm::vec3(1.0f, 1.0f, 1.0f));

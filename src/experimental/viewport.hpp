@@ -5,8 +5,6 @@
 
 #include <glm/fwd.hpp>
 
-class camera;
-
 namespace experimental
 {
 
@@ -34,9 +32,6 @@ public:
 
     void set_size(glm::vec2 size);
     glm::vec2 get_size() const;
-
-    void set_camera(std::weak_ptr<camera> cam);
-    std::shared_ptr<camera> get_camera() const;
 
     void render();
     void take_screenshot(std::string_view path);

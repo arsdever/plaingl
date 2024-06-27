@@ -37,6 +37,8 @@ public:
     glm::dvec3 get_right() const;
     glm::dvec3 get_up() const;
 
+    bool is_updated() const;
+
     // static size_t register_component();
     // TODO: this is a temporary solution for resolving the type_name
     static constexpr std::string_view type_name = "transform";
@@ -45,6 +47,9 @@ public:
     void serialize(ST& s);
 
     void deserialize(const nlohmann::json& j);
+
+protected:
+    virtual void on_update();
 
 private:
     bool is_dirty() const;
@@ -60,5 +65,6 @@ private:
     mutable glm::dmat4 _matrix { glm::identity<glm::dmat4>() };
     mutable glm::dmat4 _world_matrix { glm::identity<glm::dmat4>() };
     mutable bool _dirty { false };
+    mutable bool _updated { true };
 };
 } // namespace components

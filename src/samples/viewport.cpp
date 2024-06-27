@@ -11,15 +11,16 @@
 #include "experimental/viewport.hpp"
 
 #include "asset_manager.hpp"
-#include "camera.hpp"
 #include "experimental/window.hpp"
-#include "project/game_object.hpp"
 #include "gl_error_handler.hpp"
 #include "light.hpp"
 #include "logging.hpp"
 #include "material.hpp"
+#include "project/components/camera.hpp"
 #include "project/components/mesh_filter.hpp"
 #include "project/components/mesh_renderer.hpp"
+#include "project/components/transform.hpp"
+#include "project/game_object.hpp"
 #include "project/scene.hpp"
 #include "texture.hpp"
 
@@ -36,12 +37,12 @@ int main(int argc, char** argv)
     std::vector<std::shared_ptr<experimental::window>> windows;
     auto exp_window = std::make_shared<experimental::window>();
 
-    std::shared_ptr<camera> main_camera = nullptr;
+    std::shared_ptr<game_object> main_camera_object = nullptr;
     std::shared_ptr<scene> current_scene = nullptr;
 
     exp_window->on_user_initialize +=
         [ &current_scene,
-          &main_camera ](std::shared_ptr<experimental::window> wnd)
+          &main_camera_object ](std::shared_ptr<experimental::window> wnd)
     {
         // configure gl debug output
         glEnable(GL_DEBUG_OUTPUT);
@@ -50,12 +51,11 @@ int main(int argc, char** argv)
         glDebugMessageControl(
             GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
 
-        main_camera = std::make_shared<camera>();
+        main_camera_object = game_object::create();
         current_scene = scene::create();
-        main_camera->set_active();
+        main_camera_object->add<components::camera>().set_active();
         init_scene();
         auto vp = std::make_shared<experimental::viewport>();
-        vp->set_camera(main_camera);
         vp->set_size(wnd->get_size());
         wnd->add_viewport(vp);
     };
@@ -128,16 +128,17 @@ void init_scene()
     basic_mat->set_property_value("albedo_color", 1.0f, 0.8f, 0.2f);
     basic_mat->set_property_value("normal_texture_strength", 0.0f);
 
-    camera::active_camera()->get_transform().set_position({ 0, 0, 3 });
-    camera::active_camera()->get_transform().set_rotation(
+    components::camera::get_active()->get_transform().set_position({ 0, 0, 3 });
+    components::camera::get_active()->get_transform().set_rotation(
         glm::quatLookAt(glm::vec3 { 0.0f, 0.0f, 1.0f },
                         glm::vec3 {
                             0.0f,
                             1.0f,
                             0.0f,
                         }));
-    camera::active_camera()->set_ortho(false);
-    camera::active_camera()->set_background(glm::vec3(.3, .6, .7));
+    components::camera::get_active()->set_orthogonal(false);
+    components::camera::get_active()->set_background(
+        glm::dvec4(0.3, 0.6, 0.7, 1.0));
 
     auto obj = game_object::create();
     obj->add<components::mesh_filter>().set_mesh(am->get_mesh("susane_head"));

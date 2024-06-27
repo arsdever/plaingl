@@ -10,16 +10,17 @@
 #include <vector>
 
 #include "asset_manager.hpp"
-#include "camera.hpp"
 #include "experimental/viewport.hpp"
 #include "experimental/window.hpp"
-#include "project/game_object.hpp"
 #include "gl_error_handler.hpp"
 #include "light.hpp"
 #include "logging.hpp"
 #include "material.hpp"
+#include "project/components/camera.hpp"
 #include "project/components/mesh_filter.hpp"
 #include "project/components/mesh_renderer.hpp"
+#include "project/components/transform.hpp"
+#include "project/game_object.hpp"
 #include "scene.hpp"
 #include "texture.hpp"
 
@@ -28,7 +29,7 @@ namespace
 logger log() { return get_logger("window example"); }
 } // namespace
 
-void init_scene(std::array<camera*, 2> cameras);
+void init_scene();
 
 int main(int argc, char** argv)
 {
@@ -36,12 +37,12 @@ int main(int argc, char** argv)
     std::vector<std::shared_ptr<experimental::window>> windows;
     auto exp_window = std::make_shared<experimental::window>();
 
-    std::shared_ptr<camera> main_camera = nullptr;
-    std::shared_ptr<camera> camera2 = nullptr;
+    std::shared_ptr<game_object> main_camera_object = nullptr;
+    std::shared_ptr<game_object> camera2_object = nullptr;
     std::shared_ptr<scene> current_scene = nullptr;
 
     exp_window->on_user_initialize +=
-        [ &current_scene, &main_camera, &camera2 ](
+        [ &current_scene, &main_camera_object, &camera2_object ](
             std::shared_ptr<experimental::window> wnd)
     {
         // configure gl debug output
@@ -51,17 +52,15 @@ int main(int argc, char** argv)
         glDebugMessageControl(
             GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
 
-        main_camera = std::make_shared<camera>();
-        camera2 = std::make_shared<camera>();
+        main_camera_object = game_object::create();
+        camera2_object = game_object::create();
         current_scene = scene::create();
-        main_camera->set_active();
-        init_scene({ main_camera.get(), camera2.get() });
+        main_camera_object->get<components::camera>().set_active();
+        init_scene();
         auto vp = std::make_shared<experimental::viewport>();
-        vp->set_camera(main_camera);
         vp->set_size(glm::uvec2(wnd->get_size().x / 2, wnd->get_size().y));
         wnd->add_viewport(vp);
         vp = std::make_shared<experimental::viewport>();
-        vp->set_camera(camera2);
         vp->set_size(glm::uvec2(wnd->get_size().x / 2, wnd->get_size().y));
         vp->set_position(glm::uvec2(wnd->get_size().x / 2, 0));
         wnd->add_viewport(vp);
@@ -116,7 +115,7 @@ int main(int argc, char** argv)
     return 0;
 }
 
-void init_scene(std::array<camera*, 2> cameras)
+void init_scene()
 {
     auto* am = asset_manager::default_asset_manager();
     am->load_asset("susane_head.fbx");
@@ -135,28 +134,30 @@ void init_scene(std::array<camera*, 2> cameras)
     basic_mat->set_property_value("albedo_color", 1.0f, 0.8f, 0.2f);
     basic_mat->set_property_value("normal_texture_strength", 0.0f);
 
-    cameras[ 0 ]->get_transform().set_position({ 0, 0, 3 });
-    cameras[ 0 ]->get_transform().set_rotation(
+    components::camera::all()[ 0 ]->get_transform().set_position({ 0, 0, 3 });
+    components::camera::all()[ 0 ]->get_transform().set_rotation(
         glm::quatLookAt(glm::vec3 { 0.0f, 0.0f, 1.0f },
                         glm::vec3 {
                             0.0f,
                             1.0f,
                             0.0f,
                         }));
-    cameras[ 0 ]->set_ortho(false);
-    cameras[ 0 ]->set_background(glm::vec3(.3, .6, .7));
+    components::camera::all()[ 0 ]->set_orthogonal(false);
+    components::camera::all()[ 0 ]->set_background(
+        glm::dvec4(0.3, 0.6, 0.7, 1.0));
 
-    cameras[ 1 ]->get_transform().set_position({ 3, 0, 0 });
-    cameras[ 1 ]->get_transform().set_rotation(
+    components::camera::all()[ 1 ]->get_transform().set_position({ 3, 0, 0 });
+    components::camera::all()[ 1 ]->get_transform().set_rotation(
         glm::quatLookAt(glm::vec3 { 1.0f, 0.0f, 0.0f },
                         glm::vec3 {
                             0.0f,
                             1.0f,
                             0.0f,
                         }));
-    cameras[ 1 ]->set_ortho(false);
-    cameras[ 1 ]->set_fov(90);
-    cameras[ 1 ]->set_background(glm::vec3(.7, .6, .1));
+    components::camera::all()[ 1 ]->set_orthogonal(false);
+    components::camera::all()[ 1 ]->set_fov(90);
+    components::camera::all()[ 1 ]->set_background(
+        glm::dvec4(0.7, 0.6, 0.1, 1.0));
 
     auto obj = game_object::create();
     obj->add<components::mesh_filter>().set_mesh(am->get_mesh("susane_head"));

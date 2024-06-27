@@ -2,8 +2,6 @@ add_library(
   ${PROJECT}_lib STATIC
   asset_manager.hpp
   asset_manager.cpp
-  camera.hpp
-  camera.cpp
   component.hpp
   component.cpp
   context_aware_object.hpp
