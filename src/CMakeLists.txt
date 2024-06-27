@@ -65,6 +65,8 @@ set(PROJECT_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 link_libraries(spdlog::spdlog profiler::lib)
 
 add_subdirectory(glad)
+add_subdirectory(common)
+add_subdirectory(graphics)
 add_subdirectory(renderer)
 add_subdirectory(project)
 

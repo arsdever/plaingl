@@ -6,6 +6,9 @@
 #include "camera.hpp"
 #include "experimental/viewport.hpp"
 #include "glad/gl.h"
+#include "graphics/command.hpp"
+#include "graphics/commands/draw_elements.hpp"
+#include "graphics/graphics_channel.hpp"
 #include "graphics_buffer.hpp"
 #include "material.hpp"
 #include "mesh.hpp"
@@ -34,8 +37,14 @@ void renderer_3d::draw_mesh(mesh* m, material* mat)
 
     mat->activate();
 
-    glDrawElements(GL_TRIANGLES,
-                   m->get_index_buffer().get_element_count(),
-                   GL_UNSIGNED_INT,
-                   0);
+    auto cmd =
+        graphics::command { graphics::command_type::draw_elements,
+                            graphics::draw_elements_args {
+                                GL_TRIANGLES,
+                                m->get_index_buffer().get_element_count(),
+                                GL_UNSIGNED_INT,
+                                0 } };
+
+    graphics::graphics_channel::instance().post(std::move(cmd));
+    graphics::graphics_channel::instance().flush();
 }
