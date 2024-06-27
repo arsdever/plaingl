@@ -6,6 +6,7 @@
 
 class game_object;
 class texture;
+class framebuffer;
 
 namespace components
 {
@@ -13,6 +14,7 @@ class camera : public component
 {
 public:
     camera(game_object& obj);
+    camera& operator=(camera&& obj);
     ~camera() override;
 
     void set_fov(double fov);
@@ -76,9 +78,10 @@ private:
 
     glm::dmat4 _view_matrix;
     glm::dmat4 _projection_matrix;
-    bool _projection_matrix_dirty { true };
+    bool _projection_matrix_dirty { false };
 
     static camera* _active_camera;
     static std::vector<camera*> _cameras;
+    std::unique_ptr<framebuffer> _framebuffer { nullptr };
 };
 } // namespace components

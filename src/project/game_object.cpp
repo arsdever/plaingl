@@ -132,7 +132,7 @@ void game_object::update()
     visit_components(
         [](auto& c) -> bool
     {
-        c.init();
+        c.update();
         return true;
     });
 }
@@ -147,7 +147,7 @@ void game_object::draw_gizmos()
     visit_components(
         [](auto& c) -> bool
     {
-        c.update();
+        // c.draw_gizmos();
         return true;
     });
 }

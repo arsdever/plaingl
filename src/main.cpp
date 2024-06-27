@@ -96,7 +96,7 @@ int main(int argc, char** argv)
     game_object* selected_object = nullptr;
 
     initMainWindow();
-    initProfilerView();
+    // initProfilerView();
     // initViewports();
     setupMouseEvents();
     initScene();
@@ -520,6 +520,7 @@ void load_internal_resources()
     am->load_asset("resources/meshes/shader_ball.fbx");
     am->load_asset("resources/meshes/camera.fbx");
     am->load_asset("resources/standard/text.mat");
+    am->load_asset("resources/standard/surface.mat");
     am->load_asset("resources/standard/basic.mat");
     am->load_asset("resources/images/sample.png");
     am->load_asset("resources/images/brick.png");

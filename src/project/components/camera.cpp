@@ -3,6 +3,7 @@
 
 #include "project/components/camera.hpp"
 
+#include "graphics/framebuffer.hpp"
 #include "graphics/material.hpp"
 #include "project/components/mesh_filter.hpp"
 #include "project/components/mesh_renderer.hpp"
@@ -22,6 +23,8 @@ camera::camera(game_object& obj)
     : component("camera", obj)
 {
 }
+
+camera& camera::operator=(camera&& obj) = default;
 
 camera::~camera() { std::cout << "~camera" << std::endl; }
 
@@ -60,8 +63,12 @@ void camera::set_render_size(size_t width, size_t height)
 
 void camera::set_render_size(glm::uvec2 size)
 {
-    _render_size = glm::max(glm::uvec2 { 1, 1 }, size);
-    _projection_matrix_dirty = true;
+    if (_render_size != size)
+    {
+        _render_size = glm::max(glm::uvec2 { 1, 1 }, size);
+        _framebuffer->resize(_render_size);
+        _projection_matrix_dirty = true;
+    }
 }
 
 void camera::get_render_size(size_t& width, size_t& height) const
@@ -104,22 +111,19 @@ void camera::render()
     // setup_lights();
     render_on_private_texture();
 
-    // _framebuffer->bind();
-    // if (_background_texture)
-    // {
-    //     render_texture_background();
-    // }
+    _framebuffer->bind();
+    render_texture_background();
 
     // if (get_gizmos_enabled())
     // {
     //     render_gizmos();
     // }
 
-    // _framebuffer->unbind();
-    // if (auto urt = _user_render_texture.lock())
-    // {
-    //     _framebuffer->copy_texture(urt.get());
-    // }
+    _framebuffer->unbind();
+    if (auto urt = _user_render_texture.lock())
+    {
+        _framebuffer->copy_texture(urt.get());
+    }
 }
 
 glm::mat4 camera::projection_matrix() const { return _projection_matrix; }
@@ -149,18 +153,22 @@ void camera::on_init()
 {
     _view_matrix = glm::inverse(get_transform().get_matrix());
     _projection_matrix = calculate_projection_matrix();
+
+    _framebuffer = std::make_unique<framebuffer>();
+    _framebuffer->set_samples(32);
+    _framebuffer->resize(_render_size);
+    _framebuffer->initialize();
 }
 
 void camera::on_update()
 {
-    auto& tr = get_transform();
-    if (tr.is_updated())
-    {
-        _view_matrix = glm::inverse(tr.get_matrix());
-    }
+    _view_matrix = glm::inverse(get_transform().get_matrix());
 
     if (_projection_matrix_dirty)
+    {
         _projection_matrix = calculate_projection_matrix();
+        _projection_matrix_dirty = false;
+    }
 }
 
 void camera::set_projection_matrix(glm::mat4 mat)
@@ -198,7 +206,7 @@ void camera::render_texture_background()
 
 void camera::render_on_private_texture() const
 {
-    // _framebuffer->bind();
+    _framebuffer->bind();
     // TODO?: maybe better to clear with the specified background color
     // instead
     // of drawing background quad with that color
@@ -233,7 +241,7 @@ void camera::render_on_private_texture() const
             }
         });
     }
-    // _framebuffer->unbind();
+    _framebuffer->unbind();
 }
 
 void camera::setup_lights() { }
