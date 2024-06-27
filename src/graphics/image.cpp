@@ -1,6 +1,6 @@
-#include "image.hpp"
+#include "graphics/image.hpp"
 
-#include "texture.hpp"
+#include "graphics/texture.hpp"
 
 image::image() = default;
 

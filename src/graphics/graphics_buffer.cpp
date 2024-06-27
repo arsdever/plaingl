@@ -1,8 +1,6 @@
-#include <stdexcept>
+#include <glad/gl.h>
 
-#include "graphics_buffer.hpp"
-
-#include "glad/gl.h"
+#include "graphics/graphics_buffer.hpp"
 
 graphics_buffer::graphics_buffer(type type)
     : _type(type)

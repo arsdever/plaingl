@@ -1,6 +1,6 @@
 #pragma once
 
-#include "context_aware_object.hpp"
+#include "graphics/context_aware_object.hpp"
 
 struct GLFWwindow;
 

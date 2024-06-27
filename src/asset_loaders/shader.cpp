@@ -1,7 +1,7 @@
 #include "asset_loaders/shader.hpp"
 
-#include "../shader.hpp"
-#include "file.hpp"
+#include "common/file.hpp"
+#include "graphics/shader.hpp"
 
 void asset_loader_SHADER::load(std::string_view path)
 {

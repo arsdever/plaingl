@@ -1,8 +1,9 @@
 
-#include "file.hpp"
+#include <FileWatch.hpp>
 
-#include "FileWatch.hpp"
-#include "logging.hpp"
+#include "common/file.hpp"
+
+#include "common/logging.hpp"
 
 namespace
 {

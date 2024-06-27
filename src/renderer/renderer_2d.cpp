@@ -4,11 +4,11 @@
 // #include "camera.hpp"
 #include "experimental/viewport.hpp"
 #include "glad/gl.h"
+#include "graphics/shader.hpp"
+#include "graphics/vaomap.hpp"
+#include "graphics/vertex.hpp"
 #include "graphics_buffer.hpp"
 #include "renderer/algorithms/polygon_to_mesh.hpp"
-#include "shader.hpp"
-#include "vaomap.hpp"
-#include "vertex.hpp"
 
 void renderer_2d::draw_rect(glm::vec2 top_left,
                             glm::vec2 bottom_right,

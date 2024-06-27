@@ -1,6 +1,6 @@
-#include "vaomap.hpp"
+#include "graphics/vaomap.hpp"
 
-#include "vertex.hpp"
+#include "graphics/vertex.hpp"
 
 class GLFWwindow;
 

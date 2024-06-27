@@ -7,10 +7,10 @@
 
 #include "asset_manager.hpp"
 #include "assimp/quaternion.h"
+#include "common/logging.hpp"
+#include "graphics/material.hpp"
+#include "graphics/mesh.hpp"
 #include "light.hpp"
-#include "logging.hpp"
-#include "material.hpp"
-#include "mesh.hpp"
 
 glm::vec3 convert(aiVector3D ai_vec3)
 {

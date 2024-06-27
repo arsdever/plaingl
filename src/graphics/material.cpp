@@ -1,8 +1,8 @@
-#include "material.hpp"
+#include "graphics/material.hpp"
 
-#include "logging.hpp"
-#include "shader.hpp"
-#include "texture.hpp"
+#include "common/logging.hpp"
+#include "graphics/shader.hpp"
+#include "graphics/texture.hpp"
 
 namespace
 {

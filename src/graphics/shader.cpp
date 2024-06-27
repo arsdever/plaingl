@@ -1,7 +1,7 @@
-#include "shader.hpp"
+#include "graphics/shader.hpp"
 
-#include "file.hpp"
-#include "logging.hpp"
+#include "common/file.hpp"
+#include "common/logging.hpp"
 
 namespace
 {

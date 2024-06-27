@@ -1,7 +1,7 @@
 #pragma once
 
+#include "common/utils.hpp"
 #include "material_property.hpp"
-#include "utils.hpp"
 
 class shader_program;
 

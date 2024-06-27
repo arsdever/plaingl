@@ -1,7 +1,7 @@
 #pragma once
 
-#include "uniform_info.hpp"
-#include "utils.hpp"
+#include "common/utils.hpp"
+#include "graphics/uniform_info.hpp"
 
 enum class shader_type
 {

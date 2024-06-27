@@ -1,6 +1,6 @@
 #include <prof/profiler.hpp>
 
-#include "renderer_3d.hpp"
+#include "renderer/renderer_3d.hpp"
 
 #include "asset_manager.hpp"
 // #include "camera.hpp"
@@ -8,12 +8,12 @@
 #include "glad/gl.h"
 #include "graphics/command.hpp"
 #include "graphics/commands/draw_elements.hpp"
+#include "graphics/graphics_buffer.hpp"
 #include "graphics/graphics_channel.hpp"
-#include "graphics_buffer.hpp"
-#include "material.hpp"
-#include "mesh.hpp"
-#include "vaomap.hpp"
-#include "vertex.hpp"
+#include "graphics/material.hpp"
+#include "graphics/mesh.hpp"
+#include "graphics/vaomap.hpp"
+#include "graphics/vertex.hpp"
 
 void renderer_3d::draw_mesh(mesh* m, material* mat)
 {

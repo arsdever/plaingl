@@ -1,11 +1,11 @@
 // TODO: investigate PBO and integrate
 // https://www.songho.ca/opengl/gl_pbo.html
 
-#include "texture.hpp"
+#include "graphics/texture.hpp"
 
-#include "image.hpp"
-#include "logging.hpp"
-#include "utils.hpp"
+#include "common/logging.hpp"
+#include "common/utils.hpp"
+#include "graphics/image.hpp"
 
 namespace
 {

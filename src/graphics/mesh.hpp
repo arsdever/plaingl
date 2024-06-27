@@ -1,8 +1,8 @@
 #pragma once
 
-#include "graphics_buffer.hpp"
-#include "vaomap.hpp"
-#include "vertex.hpp"
+#include "graphics/graphics_buffer.hpp"
+#include "graphics/vaomap.hpp"
+#include "graphics/vertex.hpp"
 
 struct GLFWwindow;
 

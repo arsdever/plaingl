@@ -1,7 +1,7 @@
 #pragma once
 
-#include "renderer.hpp"
-#include "vaomap.hpp"
+#include "renderer/renderer.hpp"
+#include "graphics/vaomap.hpp"
 
 class material;
 class mesh;

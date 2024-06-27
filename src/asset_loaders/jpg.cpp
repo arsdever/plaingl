@@ -9,7 +9,7 @@
 
 #include "asset_loaders/jpg.hpp"
 
-#include "image.hpp"
+#include "graphics/image.hpp"
 
 struct my_error_mgr
 {
