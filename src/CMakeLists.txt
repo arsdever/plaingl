@@ -1,5 +1,3 @@
-add_subdirectory(common)
-
 add_library(
   ${PROJECT}_lib STATIC
   asset_manager.hpp
@@ -76,7 +74,7 @@ target_link_libraries(
   ${PROJECT}_lib
   PUBLIC ${PROJECT}::common
          ${PROJECT}::includes
-         ${PROJECT}::renderer
+         ${PROJECT}::graphics
          ${PROJECT}::project
          freetype
          Winmm
