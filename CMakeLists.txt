@@ -29,10 +29,12 @@ add_subdirectory(src)
 target_link_libraries(profiler_lib PUBLIC ${PROJECT}::glad)
 
 if(BUILD_TESTING)
+  message(STATUS "Building tests")
   set(${PROJECT}_TESTING_ENABLED ON)
 endif()
 
 if(${PROJECT}_TESTING_ENABLED)
+  enable_testing()
   add_subdirectory(unittest)
   add_subdirectory(test)
 endif()
