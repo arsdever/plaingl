@@ -10,11 +10,14 @@
             entt::meta<components::c>()                                        \
                 .type(id)                                                      \
                 .base<component>()                                             \
-                .ctor<game_object&>()                                          \
+                .ctor<&entt::registry::emplace_or_replace<components::c,       \
+                                                          game_object&>,       \
+                      entt::as_ref_t>()                                        \
+                .func<entt::overload<components::c*(entt::entity)>(            \
+                    &entt::registry::try_get<components::c>)>(                 \
+                    entt::hashed_string("try_get"))                            \
                 .func<&components::c ::serialize<json_serializer>>(            \
-                    entt::hashed_string("serialize"))                          \
-                .func<&components::c ::serialize<json_serializer>>(            \
-                    entt::hashed_string("deserialize"));                       \
+                    entt::hashed_string("serialize"));                         \
             memory_manager::register_component_type(components::c::type_name); \
             return id;                                                         \
         }                                                                      \

@@ -30,7 +30,7 @@ protected:
     virtual void on_update();
     virtual void on_deinit();
 
-    game_object& _game_object;
+    std::reference_wrapper<game_object> _game_object;
 
 private:
     bool _is_active { true };

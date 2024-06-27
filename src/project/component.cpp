@@ -15,7 +15,7 @@ game_object& component::get_game_object() const { return _game_object; }
 
 components::transform& component::get_transform() const
 {
-    return _game_object.get<components::transform>();
+    return _game_object.get().get<components::transform>();
 }
 
 void component::set_active(bool active) { _is_active = active; }

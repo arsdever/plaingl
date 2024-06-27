@@ -1,4 +1,6 @@
+#include <entt/entity/fwd.hpp>
 #include <entt/entt.hpp>
+#include <entt/meta/utility.hpp>
 
 #include "memory_manager.hpp"
 
@@ -70,17 +72,10 @@ component& memory_manager::create_component(game_object& obj,
                                             std::string_view class_name)
 {
     auto type = typeof(class_name);
-    auto* storage = instance()._registry.storage(type.id());
-    auto comp = type.construct(entt::forward_as_meta(obj));
-    auto base = type.base();
-    auto ent = entity(obj.id());
-    if (storage->contains(ent))
-    {
-        storage->remove(ent);
-    }
-    storage->push(entity(obj.id()), comp.data());
-
-    return get_component(obj, class_name);
+    auto comp = type.construct(entt::forward_as_meta(instance()._registry),
+                               entity(obj.id()),
+                               entt::forward_as_meta(obj));
+    return *(static_cast<component*>(comp.data()));
 }
 
 component& memory_manager::get_component(const game_object& obj,
@@ -92,13 +87,12 @@ component& memory_manager::get_component(const game_object& obj,
 component* memory_manager::try_get_component(const game_object& obj,
                                              std::string_view class_name)
 {
-    auto& storage = storage_for(class_name);
-    if (!storage.contains(entity(obj.id())))
-    {
-        return nullptr;
-    }
-
-    return static_cast<component*>(storage.value(entity(obj.id())));
+    auto type = typeof(class_name);
+    auto comp = type.invoke(entt::hashed_string("try_get"),
+                            {},
+                            entt::forward_as_meta(instance()._registry),
+                            entity(obj.id()));
+    return (*comp).try_cast<component>();
 }
 
 std::shared_ptr<game_object> memory_manager::get_object(entt::entity ent)
