@@ -12,7 +12,7 @@ using namespace serialization::utilities;
 namespace components
 {
 mesh_renderer::mesh_renderer(game_object& obj)
-    : component("mesh_renderer", obj)
+    : component(type_name, obj)
 {
 }
 

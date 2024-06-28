@@ -12,7 +12,7 @@ using namespace serialization::utilities;
 namespace components
 {
 mesh_filter::mesh_filter(game_object& obj)
-    : component("mesh_filter", obj)
+    : component(type_name, obj)
 {
 }
 

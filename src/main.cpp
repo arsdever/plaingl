@@ -23,11 +23,11 @@
 #include "graphics/gpu.hpp"
 #include "image.hpp"
 #include "input_system.hpp"
-#include "light.hpp"
 #include "logging.hpp"
 #include "material.hpp"
 #include "project/components/camera.hpp"
 #include "project/components/component_registry.hpp"
+#include "project/components/light.hpp"
 #include "project/components/mesh_filter.hpp"
 #include "project/components/mesh_renderer.hpp"
 #include "project/components/transform.hpp"
@@ -142,7 +142,7 @@ int main(int argc, char** argv)
     auto txt = std::make_shared<texture>(std::move(texture::from_image(
         asset_manager::default_asset_manager()->get_image("env"))));
     auto camera = components::camera::get_active();
-    camera->set_background(glm::dvec4 { 1.0, 0.0, 0.0, 0.0 });
+    // camera->set_background(glm::dvec4 { 1.0, 0.0, 0.0, 0.0 });
     camera->set_background(txt);
     // texture* txt = new texture;
     // main_camera->set_render_texture(txt);
@@ -361,10 +361,6 @@ void setupMouseEvents()
                                                  -me.get_local_position().x,
                                                  0) *
                                        .1f)));
-
-            log()->info("camera direction {}",
-                        glm::to_string(
-                            main_camera_object->get_transform().get_forward()));
         }
         else
         {
@@ -492,17 +488,19 @@ void initScene()
     main_camera.set_orthogonal(false);
     main_camera.set_active();
 
-    light* l = new light();
-    l->set_color(glm::vec3(1.0f, 1.0f, 1.0f));
-    l->set_intensity(10.0f);
+    auto light_obj_1 = game_object::create();
+    auto& l = light_obj_1->add<components::light>();
+    l.set_color(glm::dvec4(1.0));
+    l.set_intensity(10.0);
     // object = new game_object;
     // object->create_component<light_component>()->set_light(l);
     // object->get_transform().set_position(glm::vec3(0.0f, 1.5f, 0.0f));
     // s.add_object(object);
 
-    l = new light();
-    l->set_color(glm::vec3(1.0f, 1.0f, 1.0f));
-    l->set_intensity(100.0f);
+    auto light_obj_2 = game_object::create();
+    auto& l2 = light_obj_2->add<components::light>();
+    l2.set_color(glm::dvec4(1.0));
+    l2.set_intensity(10.0);
     // object = new game_object;
     // object->create_component<light_component>()->set_light(l);
     // object->get_transform().set_position(glm::vec3(5.0f, 0.0f, 0.0f));

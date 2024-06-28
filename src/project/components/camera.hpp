@@ -7,6 +7,7 @@
 class game_object;
 class texture;
 class framebuffer;
+class graphics_buffer;
 
 namespace components
 {
@@ -75,6 +76,7 @@ private:
     std::weak_ptr<texture> _user_render_texture {};
     glm::dvec4 _background_color { 0.0 };
     std::weak_ptr<texture> _background_texture {};
+    std::unique_ptr<graphics_buffer> _lights_buffer {};
 
     glm::dmat4 _view_matrix;
     glm::dmat4 _projection_matrix;

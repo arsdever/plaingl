@@ -33,6 +33,7 @@ file(REMOVE ${CMAKE_CURRENT_BINARY_DIR}/component_list_inc.hpp)
 file(REMOVE ${CMAKE_CURRENT_BINARY_DIR}/component_list.hpp)
 
 define_component(camera)
+define_component(light)
 define_component(mesh_filter)
 define_component(mesh_renderer)
 define_component(transform)

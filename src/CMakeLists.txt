@@ -16,8 +16,6 @@ add_library(
   gl_error_handler.cpp
   input_system.hpp
   input_system.cpp
-  light.hpp
-  light.cpp
   texture_viewer.hpp
   texture_viewer.cpp
   thread.hpp

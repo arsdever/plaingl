@@ -4,7 +4,9 @@
 #include "project/components/camera.hpp"
 
 #include "graphics/framebuffer.hpp"
+#include "graphics/graphics_buffer.hpp"
 #include "graphics/material.hpp"
+#include "project/components/light.hpp"
 #include "project/components/mesh_filter.hpp"
 #include "project/components/mesh_renderer.hpp"
 #include "project/components/transform.hpp"
@@ -108,7 +110,7 @@ std::shared_ptr<texture> camera::get_background_texture() const
 
 void camera::render()
 {
-    // setup_lights();
+    setup_lights();
     render_on_private_texture();
 
     _framebuffer->bind();
@@ -158,6 +160,8 @@ void camera::on_init()
     _framebuffer->set_samples(32);
     _framebuffer->resize(_render_size);
     _framebuffer->initialize();
+    _lights_buffer = std::make_unique<graphics_buffer>(
+        graphics_buffer::type::shader_storage);
 }
 
 void camera::on_update()
@@ -244,7 +248,45 @@ void camera::render_on_private_texture() const
     _framebuffer->unbind();
 }
 
-void camera::setup_lights() { }
+void camera::setup_lights()
+{
+    const auto& lights = light::get_all_lights();
+    struct glsl_lights_t
+    {
+        glm::vec3 position;
+        float intensity;
+        glm::vec3 direction;
+        float radius;
+        glm::vec3 color;
+        uint32_t type;
+    };
+
+    std::vector<glsl_lights_t> glsl_lights;
+    glsl_lights.resize(lights.size());
+    size_t i = 0;
+
+    auto size_calculated = sizeof(glsl_lights_t);
+    auto size_1 = (4 * 3 * sizeof(float)) * glsl_lights.size();
+
+    for (const auto& light : lights)
+    {
+        glsl_lights[ i ].position = light->get_transform().get_position();
+        glsl_lights[ i ].direction = glm::normalize(
+            light->get_transform().get_rotation() * glm::dvec3 { 0, 0, 1 });
+        glsl_lights[ i ].color = light->get_color();
+        glsl_lights[ i ].intensity = light->get_intensity();
+        glsl_lights[ i ].radius = light->get_radius();
+        glsl_lights[ i ].type = static_cast<uint32_t>(light->get_type());
+        ++i;
+    }
+
+    _lights_buffer->set_element_stride(4 * 3 * sizeof(float));
+    _lights_buffer->set_element_count(glsl_lights.size());
+    _lights_buffer->set_usage_type(graphics_buffer::usage_type::dynamic_copy);
+    _lights_buffer->set_data(glsl_lights.data());
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, _lights_buffer->get_handle());
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, _lights_buffer->get_handle());
+}
 
 glm::mat4 camera::calculate_projection_matrix() const
 {
