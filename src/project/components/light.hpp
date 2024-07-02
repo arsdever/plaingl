@@ -33,8 +33,6 @@ public:
     type get_type() const;
     void set_type(type light_type);
 
-    static const std::vector<light*>& get_all_lights();
-
     static constexpr std::string_view type_name = "light";
 
     template <typename ST>
@@ -46,6 +44,5 @@ private:
     double _intensity { 1.0 };
     type _light_type { type::OMNI };
     double _radius { 1.0 };
-    static std::vector<light*> _lights;
 };
 } // namespace components

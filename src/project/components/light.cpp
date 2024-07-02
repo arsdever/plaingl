@@ -15,10 +15,9 @@ namespace components
 light::light(game_object& obj)
     : component(type_name, obj)
 {
-    _lights.push_back(this);
 }
 
-light::~light() { std::erase(_lights, this); }
+light::~light() = default;
 
 glm::dvec4 light::get_color() const { return _color; }
 
@@ -36,8 +35,6 @@ light::type light::get_type() const { return _light_type; }
 
 void light::set_type(type light_type) { _light_type = light_type; }
 
-const std::vector<light*>& light::get_all_lights() { return light::_lights; }
-
 template <>
 void light::serialize(json_serializer& j)
 {
@@ -51,6 +48,4 @@ void light::deserialize(const nlohmann::json& j)
 {
     set_enabled(j[ "is_enabled" ]);
 }
-
-std::vector<light*> light::_lights;
 } // namespace components

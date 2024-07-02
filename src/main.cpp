@@ -494,8 +494,10 @@ void initScene()
     l.set_intensity(10.0);
     // object = new game_object;
     // object->create_component<light_component>()->set_light(l);
-    // object->get_transform().set_position(glm::vec3(0.0f, 1.5f, 0.0f));
+    light_obj_1->get_transform().set_position(glm::vec3(0.0f, 1.5f, 0.0f));
     // s.add_object(object);
+    light_obj_1->set_name("light_1");
+    s->add_root_object(light_obj_1);
 
     auto light_obj_2 = game_object::create();
     auto& l2 = light_obj_2->add<components::light>();
@@ -503,8 +505,9 @@ void initScene()
     l2.set_intensity(10.0);
     // object = new game_object;
     // object->create_component<light_component>()->set_light(l);
-    // object->get_transform().set_position(glm::vec3(5.0f, 0.0f, 0.0f));
-    // s.add_object(object);
+    light_obj_2->get_transform().set_position(glm::vec3(5.0f, 0.0f, 0.0f));
+    light_obj_2->set_name("light_1");
+    s->add_root_object(light_obj_2);
 }
 
 void load_internal_resources()

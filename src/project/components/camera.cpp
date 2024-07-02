@@ -240,6 +240,9 @@ void camera::render_on_private_texture() const
                         glm::mat4(obj->get_transform().get_matrix()));
                     material->set_property_value("u_vp_matrix",
                                                  glm::mat4(vp_matrix()));
+                    material->set_property_value(
+                        "u_camera_position",
+                        glm::vec3(get_transform().get_position()));
                     renderer_3d().draw_mesh(mesh, material);
                 }
             }
@@ -250,7 +253,6 @@ void camera::render_on_private_texture() const
 
 void camera::setup_lights()
 {
-    const auto& lights = light::get_all_lights();
     struct glsl_lights_t
     {
         glm::vec3 position;
@@ -262,23 +264,25 @@ void camera::setup_lights()
     };
 
     std::vector<glsl_lights_t> glsl_lights;
-    glsl_lights.resize(lights.size());
     size_t i = 0;
 
-    auto size_calculated = sizeof(glsl_lights_t);
-    auto size_1 = (4 * 3 * sizeof(float)) * glsl_lights.size();
-
-    for (const auto& light : lights)
+    scene::get_active_scene()->visit_root_objects(
+        [ &i, &glsl_lights ](auto& obj)
     {
-        glsl_lights[ i ].position = light->get_transform().get_position();
-        glsl_lights[ i ].direction = glm::normalize(
-            light->get_transform().get_rotation() * glm::dvec3 { 0, 0, 1 });
-        glsl_lights[ i ].color = light->get_color();
-        glsl_lights[ i ].intensity = light->get_intensity();
-        glsl_lights[ i ].radius = light->get_radius();
-        glsl_lights[ i ].type = static_cast<uint32_t>(light->get_type());
-        ++i;
-    }
+        if (auto* light = obj->try_get<components::light>())
+        {
+            glsl_lights.push_back({});
+            auto& glight = glsl_lights.back();
+            glight.position = light->get_transform().get_position();
+            glight.direction = glm::normalize(
+                light->get_transform().get_rotation() * glm::dvec3 { 0, 0, 1 });
+            glight.color = light->get_color();
+            glight.intensity = light->get_intensity();
+            glight.radius = light->get_radius();
+            glight.type = static_cast<uint32_t>(light->get_type());
+            ++i;
+        }
+    });
 
     _lights_buffer->set_element_stride(4 * 3 * sizeof(float));
     _lights_buffer->set_element_count(glsl_lights.size());
