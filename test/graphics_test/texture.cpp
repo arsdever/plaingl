@@ -1,6 +1,6 @@
 #include <array>
 
-#include "asset_manager.hpp"
+#include "core/asset_manager.hpp"
 #include "experimental/window.hpp"
 #include "graphics_buffer.hpp"
 #include "shader.hpp"

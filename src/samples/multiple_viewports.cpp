@@ -9,7 +9,7 @@
 #include <memory>
 #include <vector>
 
-#include "asset_manager.hpp"
+#include "core/asset_manager.hpp"
 #include "experimental/viewport.hpp"
 #include "experimental/window.hpp"
 #include "gl_error_handler.hpp"

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "asset_loaders/asset_loader.hpp"
+#include "core/asset_loaders/asset_loader.hpp"
 
 class shader_program;
 

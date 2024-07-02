@@ -5,11 +5,11 @@
 #include "asset_loaders/mat.hpp"
 #include "asset_loaders/png.hpp"
 #include "asset_loaders/shader.hpp"
-#include "file.hpp"
-#include "image.hpp"
-#include "logging.hpp"
-#include "mesh.hpp"
-#include "shader.hpp"
+#include "common/file.hpp"
+#include "common/logging.hpp"
+#include "graphics/image.hpp"
+#include "graphics/mesh.hpp"
+#include "graphics/shader.hpp"
 
 namespace
 {

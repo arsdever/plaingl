@@ -1,6 +1,6 @@
 #include <prof/profiler.hpp>
 
-#include "asset_manager.hpp"
+#include "core/asset_manager.hpp"
 // #include "components/box_collider_component.hpp"
 // #include "components/camera_component.hpp"
 // #include "components/fps_show_component.hpp"

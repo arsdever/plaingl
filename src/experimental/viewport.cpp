@@ -3,7 +3,7 @@
 
 #include "experimental/viewport.hpp"
 
-#include "asset_manager.hpp"
+#include "core/asset_manager.hpp"
 #include "experimental/window.hpp"
 #include "image.hpp"
 #include "material.hpp"

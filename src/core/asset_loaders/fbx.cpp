@@ -3,11 +3,11 @@
 #include <assimp/scene.h>
 #include <glm/vec3.hpp>
 
-#include "asset_loaders/fbx.hpp"
+#include "core/asset_loaders/fbx.hpp"
 
-#include "asset_manager.hpp"
 #include "assimp/quaternion.h"
 #include "common/logging.hpp"
+#include "core/asset_manager.hpp"
 #include "graphics/material.hpp"
 #include "graphics/mesh.hpp"
 

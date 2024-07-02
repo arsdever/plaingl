@@ -2,7 +2,7 @@
 
 #include <vector>
 
-#include "asset_loaders/asset_loader.hpp"
+#include "core/asset_loaders/asset_loader.hpp"
 
 class mesh;
 class camera;

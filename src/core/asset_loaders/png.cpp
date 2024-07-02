@@ -1,8 +1,8 @@
 #include <png.h>
 
-#include "asset_loaders/png.hpp"
+#include "core/asset_loaders/png.hpp"
 
-#include "image.hpp"
+#include "graphics/image.hpp"
 
 void asset_loader_PNG::load(std::string_view path)
 {
