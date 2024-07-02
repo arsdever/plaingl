@@ -38,10 +38,8 @@ public:
     void set_render_texture(std::weak_ptr<texture> render_texture);
     std::shared_ptr<texture> get_render_texture() const;
 
-    void set_background(glm::dvec4 color);
-    void set_background(std::weak_ptr<texture> img);
+    void set_background_color(glm::dvec4 color);
     glm::dvec4 get_background_color() const;
-    std::shared_ptr<texture> get_background_texture() const;
 
     void render();
 
@@ -75,7 +73,6 @@ private:
     bool _is_orthogonal { false };
     std::weak_ptr<texture> _user_render_texture {};
     glm::dvec4 _background_color { 0.0 };
-    std::weak_ptr<texture> _background_texture {};
     std::unique_ptr<graphics_buffer> _lights_buffer {};
 
     glm::dmat4 _view_matrix;

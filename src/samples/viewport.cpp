@@ -137,7 +137,7 @@ void init_scene()
                             0.0f,
                         }));
     components::camera::get_active()->set_orthogonal(false);
-    components::camera::get_active()->set_background(
+    components::camera::get_active()->set_background_color(
         glm::dvec4(0.3, 0.6, 0.7, 1.0));
 
     auto obj = game_object::create();

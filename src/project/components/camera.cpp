@@ -3,6 +3,7 @@
 
 #include "project/components/camera.hpp"
 
+#include "core/asset_manager.hpp"
 #include "graphics/framebuffer.hpp"
 #include "graphics/graphics_buffer.hpp"
 #include "graphics/material.hpp"
@@ -91,21 +92,14 @@ std::shared_ptr<texture> camera::get_render_texture() const
     return _user_render_texture.lock();
 }
 
-void camera::set_background(glm::dvec4 color) { _background_color = color; }
-
-void camera::set_background(std::weak_ptr<texture> img)
+void camera::set_background_color(glm::dvec4 color)
 {
-    _background_texture = img;
+    _background_color = color;
 }
 
 glm::dvec4 camera::get_background_color() const
 {
     return glm::dvec4(_background_color);
-}
-
-std::shared_ptr<texture> camera::get_background_texture() const
-{
-    return _background_texture.lock();
 }
 
 void camera::render()
@@ -184,28 +178,12 @@ void camera::set_view_matrix(glm::mat4 mat) { _view_matrix = std::move(mat); }
 
 void camera::render_texture_background()
 {
-    return;
-    // TODO: As we no longer keep the transform, it will be way easier and
-    // probably also cheaper to render a sphere instead of a quad
-
-    // auto background_shader =
-    //     asset_manager::default_asset_manager()->get_shader("camera_background");
-    // _background_texture->set_active_texture(0);
-    // background_shader->set_uniform("u_environment_map", 0);
-    // background_shader->set_uniform("u_camera_matrix",
-    //                                glm::toMat4(get_transform().get_rotation())
-    //                                *
-    //                                    glm::inverse(projection_matrix()));
-    // if (_background_texture)
-    // {
-    //     _background_texture->set_active_texture(0);
-    // }
-
-    // background_shader->use();
-    // mesh* quad_mesh =
-    // asset_manager::default_asset_manager()->get_mesh("quad");
-    // quad_mesh->render();
-    // shader_program::unuse();
+    auto* mat = asset_manager::default_asset_manager()->get_material("skybox");
+    mat->set_property_value("u_model_matrix", glm::identity<glm::mat4>());
+    mat->set_property_value("u_vp_matrix", glm::mat4(vp_matrix()));
+    renderer_3d().draw_mesh(
+        asset_manager::default_asset_manager()->get_mesh("env_sphere_mesh"),
+        mat);
 }
 
 void camera::render_on_private_texture() const

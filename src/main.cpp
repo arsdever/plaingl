@@ -139,11 +139,8 @@ int main(int argc, char** argv)
     } };
     set_thread_name(thd, "physics_thread");
     set_thread_priority(thd, 15);
-    auto txt = std::make_shared<texture>(std::move(texture::from_image(
-        asset_manager::default_asset_manager()->get_image("env"))));
     auto camera = components::camera::get_active();
     // camera->set_background(glm::dvec4 { 1.0, 0.0, 0.0, 0.0 });
-    camera->set_background(txt);
     // texture* txt = new texture;
     // main_camera->set_render_texture(txt);
 
@@ -517,10 +514,12 @@ void load_internal_resources()
 
     am->load_asset("resources/meshes/cube.fbx");
     am->load_asset("resources/meshes/sphere.fbx");
+    am->load_asset("resources/meshes/env_sphere.fbx");
     am->load_asset("resources/meshes/susane_head.fbx");
     am->load_asset("resources/meshes/shader_ball.fbx");
     am->load_asset("resources/meshes/camera.fbx");
     am->load_asset("resources/standard/text.mat");
+    am->load_asset("resources/standard/skybox.mat");
     am->load_asset("resources/standard/surface.mat");
     am->load_asset("resources/standard/basic.mat");
     am->load_asset("resources/images/sample.png");
