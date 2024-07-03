@@ -1,0 +1,9 @@
+{
+  "shader": "surface",
+  "properties": [
+    {
+      "name": "u_image",
+      "type": "image"
+    }
+  ]
+}

@@ -3,7 +3,11 @@
 
 #include "project/components/camera.hpp"
 
+#include "core/asset_manager.hpp"
+#include "graphics/framebuffer.hpp"
+#include "graphics/graphics_buffer.hpp"
 #include "graphics/material.hpp"
+#include "project/components/light.hpp"
 #include "project/components/mesh_filter.hpp"
 #include "project/components/mesh_renderer.hpp"
 #include "project/components/transform.hpp"
@@ -22,6 +26,8 @@ camera::camera(game_object& obj)
     : component("camera", obj)
 {
 }
+
+camera& camera::operator=(camera&& obj) = default;
 
 camera::~camera() { std::cout << "~camera" << std::endl; }
 
@@ -60,8 +66,12 @@ void camera::set_render_size(size_t width, size_t height)
 
 void camera::set_render_size(glm::uvec2 size)
 {
-    _render_size = glm::max(glm::uvec2 { 1, 1 }, size);
-    _projection_matrix_dirty = true;
+    if (_render_size != size)
+    {
+        _render_size = glm::max(glm::uvec2 { 1, 1 }, size);
+        _framebuffer->resize(_render_size);
+        _projection_matrix_dirty = true;
+    }
 }
 
 void camera::get_render_size(size_t& width, size_t& height) const
@@ -82,11 +92,9 @@ std::shared_ptr<texture> camera::get_render_texture() const
     return _user_render_texture.lock();
 }
 
-void camera::set_background(glm::dvec4 color) { _background_color = color; }
-
-void camera::set_background(std::weak_ptr<texture> img)
+void camera::set_background_color(glm::dvec4 color)
 {
-    _background_texture = img;
+    _background_color = color;
 }
 
 glm::dvec4 camera::get_background_color() const
@@ -94,32 +102,24 @@ glm::dvec4 camera::get_background_color() const
     return glm::dvec4(_background_color);
 }
 
-std::shared_ptr<texture> camera::get_background_texture() const
-{
-    return _background_texture.lock();
-}
-
 void camera::render()
 {
-    // setup_lights();
+    setup_lights();
     render_on_private_texture();
 
-    // _framebuffer->bind();
-    // if (_background_texture)
-    // {
-    //     render_texture_background();
-    // }
+    _framebuffer->bind();
+    render_texture_background();
 
     // if (get_gizmos_enabled())
     // {
     //     render_gizmos();
     // }
 
-    // _framebuffer->unbind();
-    // if (auto urt = _user_render_texture.lock())
-    // {
-    //     _framebuffer->copy_texture(urt.get());
-    // }
+    _framebuffer->unbind();
+    if (auto urt = _user_render_texture.lock())
+    {
+        _framebuffer->copy_texture(urt.get());
+    }
 }
 
 glm::mat4 camera::projection_matrix() const { return _projection_matrix; }
@@ -149,18 +149,24 @@ void camera::on_init()
 {
     _view_matrix = glm::inverse(get_transform().get_matrix());
     _projection_matrix = calculate_projection_matrix();
+
+    _framebuffer = std::make_unique<framebuffer>();
+    _framebuffer->set_samples(32);
+    _framebuffer->resize(_render_size);
+    _framebuffer->initialize();
+    _lights_buffer = std::make_unique<graphics_buffer>(
+        graphics_buffer::type::shader_storage);
 }
 
 void camera::on_update()
 {
-    auto& tr = get_transform();
-    if (tr.is_updated())
-    {
-        _view_matrix = glm::inverse(tr.get_matrix());
-    }
+    _view_matrix = glm::inverse(get_transform().get_matrix());
 
     if (_projection_matrix_dirty)
+    {
         _projection_matrix = calculate_projection_matrix();
+        _projection_matrix_dirty = false;
+    }
 }
 
 void camera::set_projection_matrix(glm::mat4 mat)
@@ -172,33 +178,17 @@ void camera::set_view_matrix(glm::mat4 mat) { _view_matrix = std::move(mat); }
 
 void camera::render_texture_background()
 {
-    return;
-    // TODO: As we no longer keep the transform, it will be way easier and
-    // probably also cheaper to render a sphere instead of a quad
-
-    // auto background_shader =
-    //     asset_manager::default_asset_manager()->get_shader("camera_background");
-    // _background_texture->set_active_texture(0);
-    // background_shader->set_uniform("u_environment_map", 0);
-    // background_shader->set_uniform("u_camera_matrix",
-    //                                glm::toMat4(get_transform().get_rotation())
-    //                                *
-    //                                    glm::inverse(projection_matrix()));
-    // if (_background_texture)
-    // {
-    //     _background_texture->set_active_texture(0);
-    // }
-
-    // background_shader->use();
-    // mesh* quad_mesh =
-    // asset_manager::default_asset_manager()->get_mesh("quad");
-    // quad_mesh->render();
-    // shader_program::unuse();
+    auto* mat = asset_manager::default_asset_manager()->get_material("skybox");
+    mat->set_property_value("u_model_matrix", glm::identity<glm::mat4>());
+    mat->set_property_value("u_vp_matrix", glm::mat4(vp_matrix()));
+    renderer_3d().draw_mesh(
+        asset_manager::default_asset_manager()->get_mesh("env_sphere_mesh"),
+        mat);
 }
 
 void camera::render_on_private_texture() const
 {
-    // _framebuffer->bind();
+    _framebuffer->bind();
     // TODO?: maybe better to clear with the specified background color
     // instead
     // of drawing background quad with that color
@@ -228,15 +218,57 @@ void camera::render_on_private_texture() const
                         glm::mat4(obj->get_transform().get_matrix()));
                     material->set_property_value("u_vp_matrix",
                                                  glm::mat4(vp_matrix()));
+                    material->set_property_value(
+                        "u_camera_position",
+                        glm::vec3(get_transform().get_position()));
                     renderer_3d().draw_mesh(mesh, material);
                 }
             }
         });
     }
-    // _framebuffer->unbind();
+    _framebuffer->unbind();
 }
 
-void camera::setup_lights() { }
+void camera::setup_lights()
+{
+    struct glsl_lights_t
+    {
+        glm::vec3 position;
+        float intensity;
+        glm::vec3 direction;
+        float radius;
+        glm::vec3 color;
+        uint32_t type;
+    };
+
+    std::vector<glsl_lights_t> glsl_lights;
+    size_t i = 0;
+
+    scene::get_active_scene()->visit_root_objects(
+        [ &i, &glsl_lights ](auto& obj)
+    {
+        if (auto* light = obj->try_get<components::light>())
+        {
+            glsl_lights.push_back({});
+            auto& glight = glsl_lights.back();
+            glight.position = light->get_transform().get_position();
+            glight.direction = glm::normalize(
+                light->get_transform().get_rotation() * glm::dvec3 { 0, 0, 1 });
+            glight.color = light->get_color();
+            glight.intensity = light->get_intensity();
+            glight.radius = light->get_radius();
+            glight.type = static_cast<uint32_t>(light->get_type());
+            ++i;
+        }
+    });
+
+    _lights_buffer->set_element_stride(4 * 3 * sizeof(float));
+    _lights_buffer->set_element_count(glsl_lights.size());
+    _lights_buffer->set_usage_type(graphics_buffer::usage_type::dynamic_copy);
+    _lights_buffer->set_data(glsl_lights.data());
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, _lights_buffer->get_handle());
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, _lights_buffer->get_handle());
+}
 
 glm::mat4 camera::calculate_projection_matrix() const
 {

@@ -3,11 +3,10 @@
 /* clang-format on */
 
 #include <jpeglib.h>
-#include <png.h>
 #include <setjmp.h>
 #include <turbojpeg.h>
 
-#include "asset_loaders/jpg.hpp"
+#include "core/asset_loaders/jpg.hpp"
 
 #include "graphics/image.hpp"
 

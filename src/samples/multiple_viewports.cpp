@@ -9,14 +9,14 @@
 #include <memory>
 #include <vector>
 
-#include "asset_manager.hpp"
+#include "core/asset_manager.hpp"
 #include "experimental/viewport.hpp"
 #include "experimental/window.hpp"
 #include "gl_error_handler.hpp"
-#include "light.hpp"
 #include "logging.hpp"
 #include "material.hpp"
 #include "project/components/camera.hpp"
+#include "project/components/light.hpp"
 #include "project/components/mesh_filter.hpp"
 #include "project/components/mesh_renderer.hpp"
 #include "project/components/transform.hpp"
@@ -143,7 +143,7 @@ void init_scene()
                             0.0f,
                         }));
     components::camera::all()[ 0 ]->set_orthogonal(false);
-    components::camera::all()[ 0 ]->set_background(
+    components::camera::all()[ 0 ]->set_background_color(
         glm::dvec4(0.3, 0.6, 0.7, 1.0));
 
     components::camera::all()[ 1 ]->get_transform().set_position({ 3, 0, 0 });
@@ -156,7 +156,7 @@ void init_scene()
                         }));
     components::camera::all()[ 1 ]->set_orthogonal(false);
     components::camera::all()[ 1 ]->set_fov(90);
-    components::camera::all()[ 1 ]->set_background(
+    components::camera::all()[ 1 ]->set_background_color(
         glm::dvec4(0.7, 0.6, 0.1, 1.0));
 
     auto obj = game_object::create();
@@ -165,7 +165,8 @@ void init_scene()
     obj->set_name("susane");
     scene::get_active_scene()->add_root_object(obj);
 
-    auto l = new light();
-    l->set_color(glm::vec3(1.0f, 1.0f, 1.0f));
-    l->set_intensity(5.0f);
+    auto lo = game_object::create();
+    auto& l = lo->add<components::light>();
+    l.set_color(glm::dvec4(1.0));
+    l.set_intensity(5.0);
 }

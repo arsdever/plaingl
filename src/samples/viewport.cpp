@@ -10,13 +10,13 @@
 
 #include "experimental/viewport.hpp"
 
-#include "asset_manager.hpp"
+#include "core/asset_manager.hpp"
 #include "experimental/window.hpp"
 #include "gl_error_handler.hpp"
-#include "light.hpp"
 #include "logging.hpp"
 #include "material.hpp"
 #include "project/components/camera.hpp"
+#include "project/components/light.hpp"
 #include "project/components/mesh_filter.hpp"
 #include "project/components/mesh_renderer.hpp"
 #include "project/components/transform.hpp"
@@ -137,7 +137,7 @@ void init_scene()
                             0.0f,
                         }));
     components::camera::get_active()->set_orthogonal(false);
-    components::camera::get_active()->set_background(
+    components::camera::get_active()->set_background_color(
         glm::dvec4(0.3, 0.6, 0.7, 1.0));
 
     auto obj = game_object::create();
@@ -146,7 +146,8 @@ void init_scene()
     obj->set_name("susane");
     scene::get_active_scene()->add_root_object(obj);
 
-    auto l = new light();
-    l->set_color(glm::vec3(1.0f, 1.0f, 1.0f));
-    l->set_intensity(5.0f);
+    auto lo = game_object::create();
+    auto& l = lo->add<components::light>();
+    l.set_color(glm::dvec4(1.0));
+    l.set_intensity(5.0);
 }

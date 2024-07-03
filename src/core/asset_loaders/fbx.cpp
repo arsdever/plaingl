@@ -3,14 +3,13 @@
 #include <assimp/scene.h>
 #include <glm/vec3.hpp>
 
-#include "asset_loaders/fbx.hpp"
+#include "core/asset_loaders/fbx.hpp"
 
-#include "asset_manager.hpp"
 #include "assimp/quaternion.h"
 #include "common/logging.hpp"
+#include "core/asset_manager.hpp"
 #include "graphics/material.hpp"
 #include "graphics/mesh.hpp"
-#include "light.hpp"
 
 glm::vec3 convert(aiVector3D ai_vec3)
 {
@@ -84,27 +83,6 @@ void asset_loader_FBX::load(std::string_view path)
             mat->set_property_value("u_normal_texture_strength", 0.0f);
         }
     }
-
-    for (int i = 0; i < ai_scene->mNumLights; ++i)
-    {
-        auto l = new light;
-        const auto& ai_light = *ai_scene->mLights[ i ];
-        const auto& ai_light_node =
-            *ai_scene->mRootNode->FindNode(ai_light.mName);
-        aiMatrix4x4 mat = ai_light_node.mTransformation;
-        aiVector3D pos;
-        aiVector3D scale;
-        aiQuaternion rot;
-        mat.Decompose(scale, rot, pos);
-        l->get_transform().set_position(convert(ai_light.mPosition + pos) /
-                                        100.0f);
-        glm::vec3 combined_intensity_color = convert(ai_light.mColorDiffuse);
-        auto intensity = std::max(
-            std::max(combined_intensity_color.x, combined_intensity_color.y),
-            combined_intensity_color.z);
-        l->set_color(combined_intensity_color / intensity);
-        l->set_intensity(intensity / 100);
-    }
 }
 
 mesh* asset_loader_FBX::load_mesh(std::vector<const aiMesh*> ai_submeshes)
@@ -156,11 +134,5 @@ mesh* asset_loader_FBX::load_mesh(std::vector<const aiMesh*> ai_submeshes)
     result->set_submeshes(std::move(submeshes));
     result->init();
 
-    return result;
-}
-
-light* asset_loader_FBX::load_light(const aiLight* ai_light)
-{
-    light* result = new light;
     return result;
 }

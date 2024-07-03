@@ -1,12 +1,12 @@
 #include <nlohmann/json.hpp>
 #include <png.h>
 
-#include "asset_loaders/mat.hpp"
+#include "core/asset_loaders/mat.hpp"
 
-#include "asset_manager.hpp"
-#include "file.hpp"
-#include "logging.hpp"
-#include "material.hpp"
+#include "common/file.hpp"
+#include "common/logging.hpp"
+#include "core/asset_manager.hpp"
+#include "graphics/material.hpp"
 
 namespace
 {

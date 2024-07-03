@@ -2,7 +2,7 @@
 
 #include "renderer/renderer_3d.hpp"
 
-#include "asset_manager.hpp"
+#include "core/asset_manager.hpp"
 // #include "camera.hpp"
 #include "experimental/viewport.hpp"
 #include "glad/gl.h"

@@ -5,8 +5,9 @@ target_include_directories(
   ${PROJECT}_components
   PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/.. ${PROJECT_SRC_DIR}
   PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
-target_link_libraries(${PROJECT}_components PUBLIC ${PROJECT}::common
-                                                   ${PROJECT}::renderer)
+target_link_libraries(
+  ${PROJECT}_components PUBLIC ${PROJECT}::common ${PROJECT}::core
+                               ${PROJECT}::renderer)
 
 macro(define_component component_name)
   target_sources(${PROJECT}_components PUBLIC ${component_name}.hpp)
@@ -33,6 +34,7 @@ file(REMOVE ${CMAKE_CURRENT_BINARY_DIR}/component_list_inc.hpp)
 file(REMOVE ${CMAKE_CURRENT_BINARY_DIR}/component_list.hpp)
 
 define_component(camera)
+define_component(light)
 define_component(mesh_filter)
 define_component(mesh_renderer)
 define_component(transform)

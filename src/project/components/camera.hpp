@@ -6,6 +6,8 @@
 
 class game_object;
 class texture;
+class framebuffer;
+class graphics_buffer;
 
 namespace components
 {
@@ -13,6 +15,7 @@ class camera : public component
 {
 public:
     camera(game_object& obj);
+    camera& operator=(camera&& obj);
     ~camera() override;
 
     void set_fov(double fov);
@@ -35,10 +38,8 @@ public:
     void set_render_texture(std::weak_ptr<texture> render_texture);
     std::shared_ptr<texture> get_render_texture() const;
 
-    void set_background(glm::dvec4 color);
-    void set_background(std::weak_ptr<texture> img);
+    void set_background_color(glm::dvec4 color);
     glm::dvec4 get_background_color() const;
-    std::shared_ptr<texture> get_background_texture() const;
 
     void render();
 
@@ -72,13 +73,14 @@ private:
     bool _is_orthogonal { false };
     std::weak_ptr<texture> _user_render_texture {};
     glm::dvec4 _background_color { 0.0 };
-    std::weak_ptr<texture> _background_texture {};
+    std::unique_ptr<graphics_buffer> _lights_buffer {};
 
     glm::dmat4 _view_matrix;
     glm::dmat4 _projection_matrix;
-    bool _projection_matrix_dirty { true };
+    bool _projection_matrix_dirty { false };
 
     static camera* _active_camera;
     static std::vector<camera*> _cameras;
+    std::unique_ptr<framebuffer> _framebuffer { nullptr };
 };
 } // namespace components

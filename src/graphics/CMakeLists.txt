@@ -4,6 +4,8 @@ add_library(
   command_executors.hpp
   command.hpp
   context_aware_object.hpp
+  framebuffer.hpp
+  framebuffer.cpp
   gpu.cpp
   gpu.hpp
   graphics_buffer.cpp

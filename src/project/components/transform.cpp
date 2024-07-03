@@ -12,7 +12,7 @@ using namespace serialization::utilities;
 namespace components
 {
 transform::transform(game_object& obj)
-    : component("Transform", obj)
+    : component(type_name, obj)
 {
 }
 
