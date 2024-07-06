@@ -7,7 +7,9 @@ set(PROJECT gamify)
 
 project(${PROJECT} LANGUAGES C CXX)
 
+include(cmake/FindLua.cmake)
 include($ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake)
+
 find_package(ZLIB REQUIRED)
 find_package(PNG REQUIRED)
 find_package(JPEG REQUIRED)
@@ -17,6 +19,7 @@ find_package(glfw3 REQUIRED)
 find_package(assimp REQUIRED)
 find_package(spdlog REQUIRED)
 find_package(freetype REQUIRED)
+find_package(sol2 REQUIRED)
 
 add_subdirectory(thirdparty/prof)
 
