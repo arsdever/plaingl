@@ -60,6 +60,8 @@ using position_2d_attribute = vertex_attribute<float, 2, glm::vec2>;
 using normal_3d_attribute = vertex_attribute<float, 3, glm::vec3>;
 using color_attribute = vertex_attribute<float, 4, glm::vec4>;
 using uv_attribute = vertex_attribute<float, 2, glm::vec2>;
+using tangent_attribute = vertex_attribute<float, 3, glm::vec3>;
+using bitangent_attribute = vertex_attribute<float, 3, glm::vec3>;
 
 template <typename... ATTRIBUTES>
 struct vertex
@@ -112,7 +114,9 @@ struct vertex3d
     : vertex<position_3d_attribute,
              normal_3d_attribute,
              uv_attribute,
-             color_attribute>
+             color_attribute,
+             tangent_attribute,
+             bitangent_attribute>
 {
     position_3d_attribute::attribute_data_storage_type& position()
     {
@@ -124,6 +128,14 @@ struct vertex3d
     }
     uv_attribute::attribute_data_storage_type& uv() { return get<2>(); }
     color_attribute::attribute_data_storage_type& color() { return get<3>(); }
+    tangent_attribute::attribute_data_storage_type& tangent()
+    {
+        return get<4>();
+    }
+    bitangent_attribute::attribute_data_storage_type& bitangent()
+    {
+        return get<5>();
+    }
 };
 
 struct vertex2d : vertex<position_2d_attribute, uv_attribute>
