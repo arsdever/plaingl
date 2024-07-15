@@ -113,11 +113,11 @@ void init_scene()
 {
     auto* am = asset_manager::default_asset_manager();
     am->load_asset("susane_head.fbx");
-    am->load_asset("basic.mat");
+    am->load_asset("standard.mat");
     am->load_asset("brick.png");
     am->load_asset("diffuse.png");
 
-    material* basic_mat = am->get_material("basic");
+    material* basic_mat = am->get_material("standard");
     auto txt = new texture();
     image* img = am->get_image("diffuse");
     *txt = std::move(texture::from_image(img));
