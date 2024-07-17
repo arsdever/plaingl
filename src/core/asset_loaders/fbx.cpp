@@ -115,6 +115,18 @@ mesh* asset_loader_FBX::load_mesh(std::vector<const aiMesh*> ai_submeshes)
                 ai_mesh->mTextureCoords[ 0 ][ vertex_index ].x,
                 ai_mesh->mTextureCoords[ 0 ][ vertex_index ].y,
             };
+
+            vertices.back().tangent() = {
+                ai_mesh->mTangents[ vertex_index ].x,
+                ai_mesh->mTangents[ vertex_index ].y,
+                ai_mesh->mTangents[ vertex_index ].z
+            };
+
+            vertices.back().bitangent() = {
+                ai_mesh->mBitangents[ vertex_index ].x,
+                ai_mesh->mBitangents[ vertex_index ].y,
+                ai_mesh->mBitangents[ vertex_index ].z
+            };
         }
 
         for (int face_index = 0; face_index < ai_mesh->mNumFaces; ++face_index)

@@ -39,6 +39,7 @@ add_subdirectory(glad)
 add_subdirectory(graphics)
 add_subdirectory(renderer)
 add_subdirectory(project)
+add_subdirectory(tools)
 
 target_precompile_headers(${PROJECT}_lib REUSE_FROM ${PROJECT}::common)
 
@@ -59,5 +60,7 @@ target_include_directories(${PROJECT}_includes
 
 add_executable(${PROJECT} main.cpp)
 target_link_libraries(${PROJECT} PUBLIC ${PROJECT}::lib)
+
+target_link_libraries(${PROJECT} PRIVATE ${PROJECT}::tools::mesh_viewer)
 
 add_subdirectory(samples)

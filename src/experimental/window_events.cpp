@@ -151,15 +151,22 @@ glm::vec2 move_event::get_old_position() const { return _old_position; }
 
 glm::vec2 move_event::get_new_position() const { return _new_position; }
 
-key_event::key_event(
-    type t, int scancode, modifiers mods, bool repeated, window* sender)
+key_event::key_event(type t,
+                     int scancode,
+                     int key,
+                     modifiers mods,
+                     bool repeated,
+                     window* sender)
     : input_event(t, mods, sender)
     , _scancode(scancode)
+    , _key(key)
     , _is_repeated(repeated)
 {
 }
 
 int key_event::get_scancode() const { return _scancode; }
+
+int key_event::get_key() const { return _key; }
 
 bool key_event::get_is_repeated() const { return _is_repeated; }
 

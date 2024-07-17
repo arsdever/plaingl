@@ -215,6 +215,7 @@ void asset_manager::initialize_quad_mesh()
 void asset_manager::initialize_surface_shader()
 {
     _instance->load_asset("resources/standard/surface.shader");
+    _instance->load_asset("resources/standard/standard.mat");
 }
 
 std::string_view asset_manager::internal_resource_path() { return ""; }

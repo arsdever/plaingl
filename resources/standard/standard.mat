@@ -14,7 +14,7 @@
     {
       "name": "u_albedo_texture_strength",
       "type": "float",
-      "value": 1
+      "value": 0
     },
     {
       "name": "u_albedo_texture",
@@ -23,7 +23,7 @@
     {
       "name": "u_normal_texture_strength",
       "type": "float",
-      "value": 1
+      "value": 0
     },
     {
       "name": "u_normal_texture",
@@ -31,7 +31,8 @@
     },
     {
       "name": "u_metallic",
-      "type": "float"
+      "type": "float",
+      "value": 0
     },
     {
       "name": "u_metallic_texture_strength",
@@ -53,11 +54,13 @@
     },
     {
       "name": "u_roughness",
-      "type": "float"
+      "type": "float",
+      "value": 0.5
     },
     {
       "name": "u_ao",
-      "type": "float"
+      "type": "float",
+      "value": 0.2
     },
     {
       "name": "u_camera_position",

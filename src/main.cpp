@@ -1,3 +1,4 @@
+#include <GLFW/glfw3.h>
 #include <prof/profiler.hpp>
 
 #include "core/asset_manager.hpp"
@@ -37,6 +38,7 @@
 #include "texture.hpp"
 #include "texture_viewer.hpp"
 #include "thread.hpp"
+#include "tools/mesh_viewer/mesh_viewer.hpp"
 
 using namespace experimental;
 
@@ -101,6 +103,11 @@ int main(int argc, char** argv)
     setupMouseEvents();
     initScene();
 
+    auto mv = std::make_shared<mesh_viewer>();
+    mv->init();
+    mv->set_mesh(asset_manager::default_asset_manager()->meshes()[ 4 ]);
+    windows.push_back(mv);
+
     log()->info("Using graphics card {} - {}",
                 graphics::gpu::get_vendor(),
                 graphics::gpu::get_device());
@@ -113,7 +120,7 @@ int main(int argc, char** argv)
         { obj->init(); });
     }
 
-    file mat_file("resources/standard/basic.mat");
+    file mat_file("resources/standard/standard.mat");
     mat_file.changed_externally +=
         [](file::event_type et) { log()->info("material file changed"); };
     mat_file.watch();
@@ -145,60 +152,105 @@ int main(int argc, char** argv)
     // main_camera->set_render_texture(txt);
 
     int trigger_show = -1;
+    bool console_mode = false;
 
     auto wh = file::watch("./",
                           [](auto path, auto change)
     { log()->info("Path {} changed: {}", path, static_cast<int>(change)); });
 
-    experimental::input_system::on_keypress += [ &trigger_show ](int keycode)
+    experimental::input_system::on_keypress +=
+        [ &console_mode, &trigger_show, mv ](int keycode)
     {
+        if (keycode == GLFW_KEY_GRAVE_ACCENT)
+        {
+            console_mode = !console_mode;
+            if (console_mode)
+            {
+                log()->info("Entering console mode:");
+            }
+            else
+            {
+                log()->info("Leaving console mode");
+            }
+        }
+
+        if (!console_mode)
+            return;
+
         if (keycode == GLFW_KEY_ENTER)
         {
             if (console_string.empty())
-            {
                 return;
-            }
 
-            int num = std::stoi(console_string);
+            std::transform(console_string.begin(),
+                           console_string.end(),
+                           console_string.begin(),
+                           ::tolower);
 
-            if (num >= 0 && num < texture::_textures.size())
+            if (console_string.starts_with("show"))
             {
-                trigger_show = num;
+                console_string = console_string.substr(5);
+                if (console_string.starts_with("texture"))
+                {
+                    console_string = console_string.substr(7);
+                    int num = std::stoi(console_string);
+
+                    if (num >= 0 && num < texture::_textures.size())
+                    {
+                        trigger_show = num;
+                    }
+                }
+                else if (console_string.starts_with("mesh"))
+                {
+                    console_string = console_string.substr(4);
+                    int num = std::stoi(console_string);
+                    mesh* m { nullptr };
+                    if (num >= 0 && num < asset_manager::default_asset_manager()
+                                              ->meshes()
+                                              .size())
+                    {
+                        m = asset_manager::default_asset_manager()
+                                ->meshes()[ num ];
+                    }
+                    mv->set_mesh(m);
+                }
+            }
+            if (console_string.starts_with("clone"))
+            {
+                console_string = console_string.substr(6);
+                int num = std::stoi(console_string);
+                if (num >= 0 && num < texture::_textures.size())
+                {
+                    (new texture)->clone(texture::_textures[ num ]);
+                }
+            }
+            if (console_string.starts_with("print textures"))
+            {
+                for (int i = 0; i < texture::_textures.size(); ++i)
+                {
+                    log()->info("Texture {}: id {}",
+                                i,
+                                texture::_textures[ i ]->native_id());
+                }
             }
 
             console_string = "";
         }
 
-        if (keycode >= '0' && keycode <= '9')
+        if (keycode < 255 && (std::isalnum(keycode) || std::isspace(keycode)))
         {
             console_string += keycode;
         }
 
-        if (keycode == 'C')
+        if (keycode == GLFW_KEY_BACKSPACE)
         {
-            if (console_string.empty())
+            if (!console_string.empty())
             {
-                return;
+                console_string.pop_back();
             }
-
-            int num = std::stoi(console_string);
-            if (num >= 0 && num < texture::_textures.size())
-            {
-                (new texture)->clone(texture::_textures[ num ]);
-            }
-
-            console_string = "";
         }
 
-        if (keycode == 'P')
-        {
-            for (int i = 0; i < texture::_textures.size(); ++i)
-            {
-                log()->info("Texture {}: id {}",
-                            i,
-                            texture::_textures[ i ]->native_id());
-            }
-        }
+        log()->info("Console: {}", console_string);
     };
 
     while (!windows.empty())
@@ -314,8 +366,8 @@ void initMainWindow()
 //         };
 //         windows.back()->get_events()->resize += [ vp, i ](auto re)
 //         {
-//             vp->set_size({ re.get_new_size().x, re.get_new_size().y / 3.0 });
-//             vp->set_position({ 0, re.get_new_size().y / 3.0 * i });
+//             vp->set_size({ re.get_new_size().x, re.get_new_size().y / 3.0
+//             }); vp->set_position({ 0, re.get_new_size().y / 3.0 * i });
 //         };
 
 //         vp->set_size({ wnd->get_width(), wnd->get_height() / 3.0 });
@@ -332,17 +384,20 @@ void initMainWindow()
 //     };
 //     _view_cameras[ 0 ]->get_transform().set_position({ 100, 0, 0 });
 //     _view_cameras[ 0 ]->get_transform().set_rotation(glm::quatLookAt(
-//         glm::vec3 { -1.0f, 0.0f, 0.0f }, glm::vec3 { 0.0f, 1.0f, 0.0f }));
+//         glm::vec3 { -1.0f, 0.0f, 0.0f }, glm::vec3 { 0.0f, 1.0f, 0.0f
+//         }));
 //     _view_cameras[ 0 ]->set_background(glm::vec3 { 0.1f, 0.0f, 0.0f });
 
 //     _view_cameras[ 1 ]->get_transform().set_position({ 0, 100, 0 });
 //     _view_cameras[ 1 ]->get_transform().set_rotation(glm::quatLookAt(
-//         glm::vec3 { 0.0f, -1.0f, 0.0f }, glm::vec3 { 0.0f, 0.0f, 1.0f }));
+//         glm::vec3 { 0.0f, -1.0f, 0.0f }, glm::vec3 { 0.0f, 0.0f, 1.0f
+//         }));
 //     _view_cameras[ 1 ]->set_background(glm::vec3 { 0.0f, 0.1f, 0.0f });
 
 //     _view_cameras[ 2 ]->get_transform().set_position({ 0, 0, 100 });
 //     _view_cameras[ 2 ]->get_transform().set_rotation(glm::quatLookAt(
-//         glm::vec3 { 0.0f, 0.0f, -1.0f }, glm::vec3 { 0.0f, 1.0f, 0.0f }));
+//         glm::vec3 { 0.0f, 0.0f, -1.0f }, glm::vec3 { 0.0f, 1.0f, 0.0f
+//         }));
 //     _view_cameras[ 2 ]->set_background(glm::vec3 { 0.0f, 0.0f, 0.1f });
 // }
 
@@ -393,7 +448,7 @@ void initScene()
     s = scene::create();
     feature_flags::set_flag(feature_flags::flag_name::load_fbx_as_scene, false);
     auto* am = asset_manager::default_asset_manager();
-    material* basic_mat = am->get_material("basic");
+    material* basic_mat = am->get_material("standard");
     txt = new texture();
     image* img = am->get_image("albedo");
     *txt = std::move(texture::from_image(img));
@@ -441,7 +496,8 @@ void initScene()
     //     ->set_material(am->get_material("text"));
     // s.add_object(collision_text_object);
     // bc->_text = ct;
-    // collision_text_object->get_transform().set_scale({ 0.005f, 0.005f, 1.0f
+    // collision_text_object->get_transform().set_scale({ 0.005f,
+    // 0.005f, 1.0f
     // });
 
     // game_object* ray = new game_object;
@@ -454,7 +510,7 @@ void initScene()
     // main_camera_object->create_component<mesh_component>()->set_mesh(
     //     am->get_mesh("camera"));
     // main_camera_object->create_component<mesh_renderer_component>()
-    //     ->set_material(am->get_material("basic"));
+    //     ->set_material(am->get_material("standard"));
     auto& main_camera = main_camera_object->add<components::camera>();
     main_camera_object->set_name("main_camera");
     s->add_root_object(main_camera_object);
@@ -521,7 +577,8 @@ void load_internal_resources()
     am->load_asset("resources/standard/text.mat");
     am->load_asset("resources/standard/skybox.mat");
     am->load_asset("resources/standard/surface.mat");
-    am->load_asset("resources/standard/basic.mat");
+    am->load_asset("resources/standard/standard.mat");
+    am->load_asset("resources/standard/mesh_viewer.mat");
     am->load_asset("resources/images/sample.png");
     am->load_asset("resources/images/brick.png");
     am->load_asset("resources/images/diffuse.png");

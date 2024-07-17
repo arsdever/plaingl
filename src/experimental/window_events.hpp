@@ -193,15 +193,18 @@ class key_event : public input_event
 public:
     key_event(type t,
               int scancode,
+              int key,
               modifiers mods,
               bool repeated = false,
               window* sender = nullptr);
 
     int get_scancode() const;
+    int get_key() const;
     bool get_is_repeated() const;
 
 private:
     int _scancode;
+    int _key;
     bool _is_repeated { false };
 };
 

@@ -131,8 +131,8 @@ void window::init()
         return;
     }
 
-    on_user_initialize(shared_from_this());
     configure_input_system();
+    on_user_initialize(shared_from_this());
 }
 
 void window::activate() { glfwMakeContextCurrent(_p->_glfw_window_handle); }
@@ -517,8 +517,12 @@ void window::configure_input_system()
             f = &_this->_p->_events->key_repeat;
             is_repeat = true;
         }
-        (*f)(key_event(
-            type, scancode, _this->_p->_mouse_state._mods, is_repeat, _this));
+        (*f)(key_event(type,
+                       scancode,
+                       key,
+                       _this->_p->_mouse_state._mods,
+                       is_repeat,
+                       _this));
 
         if (_this->get_is_input_source())
         {
