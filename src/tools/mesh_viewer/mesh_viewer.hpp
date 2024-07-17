@@ -23,6 +23,7 @@ private:
     std::unique_ptr<graphics_buffer> _light_buffer { nullptr };
     glm::vec2 _rotation { 0 };
     glm::vec2 _rotation_start_point { 0 };
+    double _zoom { 1.0 };
     bool _draw_wireframe { false };
     unsigned _mode { 0 };
 };

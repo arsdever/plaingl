@@ -64,13 +64,15 @@ void mesh_viewer::initialize()
     {
         if (e.get_buttons() & (1 << GLFW_MOUSE_BUTTON_1))
         {
-            _rotation.x += e.get_local_position().y - _rotation_start_point.y;
-            _rotation.y += e.get_local_position().x - _rotation_start_point.x;
+            _rotation.x -= e.get_local_position().y - _rotation_start_point.y;
+            _rotation.y -= e.get_local_position().x - _rotation_start_point.x;
             _rotation_start_point = e.get_local_position();
         }
     };
     get_events()->resize +=
         [ this ](auto e) { resize(e.get_new_size().x, e.get_new_size().y); };
+    get_events()->mouse_scroll +=
+        [ this ](auto e) { _zoom *= std::pow(2.0, e.get_delta().y / 10.0); };
     glEnable(GL_DEPTH_TEST);
 }
 
@@ -81,7 +83,7 @@ void mesh_viewer::render()
 
     auto mat =
         asset_manager::default_asset_manager()->get_material("mesh_viewer");
-    auto camera_position = glm::vec3(0, 0, 8);
+    auto camera_position = glm::vec3(0, 0, _zoom * 8);
 
     glm::mat4 camera_matrix =
         glm::perspective(glm::radians(30.0f),
@@ -90,16 +92,16 @@ void mesh_viewer::render()
                          0.1f,
                          100.0f) *
         glm::lookAt(camera_position, glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+    glm::mat4 model = glm::identity<glm::mat4>();
+    model = glm::rotate(model, _rotation.y * 0.01f, glm::vec3(0, 1, 0));
+    model = glm::rotate(model, _rotation.x * 0.01f, glm::vec3(1, 0, 0));
+    camera_matrix = camera_matrix * glm::inverse(model);
     mat->set_property_value("u_vp_matrix", camera_matrix);
     mat->set_property_value("u_model_matrix", glm::identity<glm::mat4>());
     mat->set_property_value("u_camera_position", camera_position);
     mat->set_property_value("u_mode", _mode);
 
-    glm::mat4 model = glm::identity<glm::mat4>();
-    model = glm::rotate(model, _rotation.y * 0.01f, glm::vec3(0, 1, 0));
-    model = glm::rotate(model, _rotation.x * 0.01f, glm::vec3(1, 0, 0));
-
-    mat->set_property_value("u_model_matrix", model);
+    mat->set_property_value("u_model_matrix", glm::identity<glm::mat4>());
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glViewport(0, 0, get_width(), get_height());
     glClearColor(0.0f, 0.15f, 0.2f, 1.0f);
