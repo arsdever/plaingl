@@ -2,6 +2,8 @@
 
 #include "renderer/renderer.hpp"
 
+class font;
+
 class renderer_2d : public renderer
 {
 public:
@@ -10,4 +12,9 @@ public:
                    float border_thickness,
                    glm::vec4 border_color,
                    glm::vec4 fill_color);
+
+    void draw_text(glm::vec2 baseline,
+                   const font& f,
+                   const glm::vec2& window_size,
+                   std::string_view text);
 };

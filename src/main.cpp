@@ -33,6 +33,7 @@
 #include "project/components/mesh_renderer.hpp"
 #include "project/components/transform.hpp"
 #include "project/game_object.hpp"
+#include "renderer/renderer_2d.hpp"
 #include "scene.hpp"
 #include "shader.hpp"
 #include "texture.hpp"
@@ -316,6 +317,12 @@ void initMainWindow()
     {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         vp->render();
+
+        renderer_2d().draw_text(
+            { 0, 0 },
+            ttf,
+            { re.get_sender()->get_width(), re.get_sender()->get_height() },
+            "Hello world");
     };
     windows.back()->get_events()->resize += [ vp ](auto re)
     {
@@ -486,7 +493,7 @@ void initScene()
     // bc->set_rotation(glm::quat(glm::ballRand(1.0f)));
     // bc->set_rotation(glm::quat(glm::radians(glm::vec3 { 0, 30, 0 })));
 
-    ttf.load("font.ttf", 16);
+    ttf.load("font.ttf", 18);
     // game_object* collision_text_object = new game_object;
     // auto* ct = collision_text_object->create_component<text_component>();
     // collision_text_object->create_component<text_renderer_component>();

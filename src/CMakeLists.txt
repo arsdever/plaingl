@@ -7,8 +7,6 @@ add_library(
   component.cpp
   color.hpp
   feature_flags.hpp
-  font.hpp
-  font.cpp
   game_clock.hpp
   game_clock.cpp
   gizmo_drawer.hpp
