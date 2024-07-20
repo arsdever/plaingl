@@ -33,6 +33,7 @@
 #include "project/components/mesh_renderer.hpp"
 #include "project/components/transform.hpp"
 #include "project/game_object.hpp"
+#include "renderer/renderer_2d.hpp"
 #include "scene.hpp"
 #include "shader.hpp"
 #include "texture.hpp"
@@ -55,8 +56,131 @@ texture* txt;
 texture* norm_txt;
 // ray_visualize_component* cast_ray;
 std::vector<std::shared_ptr<experimental::window>> windows;
-std::string console_string;
 int mesh_preview_texture_index { 0 };
+
+class console
+{
+public:
+    void setup()
+    {
+        experimental::input_system::on_keypress += [ this ](int keycode)
+        {
+            if (keycode == GLFW_KEY_GRAVE_ACCENT)
+            {
+                if (is_active())
+                {
+                    deactivate();
+                }
+                else
+                {
+                    activate();
+                }
+            }
+
+            if (!is_active())
+                return;
+
+            if (keycode == GLFW_KEY_ENTER)
+            {
+                if (_text.empty())
+                    return;
+
+                std::transform(
+                    _text.begin(), _text.end(), _text.begin(), ::tolower);
+
+                if (_text.starts_with("show"))
+                {
+                    _text = _text.substr(5);
+                    if (_text.starts_with("texture"))
+                    {
+                        _text = _text.substr(7);
+                        int num = std::stoi(_text);
+
+                        if (num >= 0 && num < texture::_textures.size())
+                        {
+                            show_texture_action(texture::_textures[ num ]);
+                        }
+                    }
+                    else if (_text.starts_with("mesh"))
+                    {
+                        _text = _text.substr(4);
+                        int num = std::stoi(_text);
+                        mesh* m { nullptr };
+                        if (num >= 0 &&
+                            num < asset_manager::default_asset_manager()
+                                      ->meshes()
+                                      .size())
+                        {
+                            m = asset_manager::default_asset_manager()
+                                    ->meshes()[ num ];
+                        }
+                        show_mesh_action(m);
+                    }
+                }
+                if (_text.starts_with("clone"))
+                {
+                    _text = _text.substr(6);
+                    int num = std::stoi(_text);
+                    if (num >= 0 && num < texture::_textures.size())
+                    {
+                        (new texture)->clone(texture::_textures[ num ]);
+                    }
+                }
+                if (_text.starts_with("print textures"))
+                {
+                    for (int i = 0; i < texture::_textures.size(); ++i)
+                    {
+                        log()->info("Texture {}: id {}",
+                                    i,
+                                    texture::_textures[ i ]->native_id());
+                    }
+                }
+
+                _text = "";
+            }
+
+            if (keycode < 255 &&
+                (std::isalnum(keycode) || std::isspace(keycode)))
+            {
+                _text += std::tolower(keycode);
+            }
+
+            if (keycode == GLFW_KEY_BACKSPACE)
+            {
+                if (!_text.empty())
+                {
+                    _text.pop_back();
+                }
+            }
+
+            log()->info("Console: {}", _text);
+        };
+    }
+
+    bool is_active() const { return _active; }
+
+    void activate()
+    {
+        log()->info("Entering console mode:");
+        _active = true;
+        _text.clear();
+    }
+
+    void deactivate()
+    {
+        log()->info("Leaving console mode");
+        _active = false;
+    }
+
+    std::string_view current_text() const { return _text; }
+
+    event<void(texture*)> show_texture_action;
+    event<void(mesh*)> show_mesh_action;
+
+private:
+    bool _active = false;
+    std::string _text = "";
+}* pconsole;
 
 // physics_engine p;
 } // namespace
@@ -103,10 +227,15 @@ int main(int argc, char** argv)
     setupMouseEvents();
     initScene();
 
+    pconsole = new console;
+    pconsole->setup();
+
     auto mv = std::make_shared<mesh_viewer>();
     mv->init();
     mv->set_mesh(asset_manager::default_asset_manager()->meshes()[ 4 ]);
     windows.push_back(mv);
+
+    pconsole->show_mesh_action += [ mv ](mesh* m) { mv->set_mesh(m); };
 
     log()->info("Using graphics card {} - {}",
                 graphics::gpu::get_vendor(),
@@ -151,107 +280,15 @@ int main(int argc, char** argv)
     // texture* txt = new texture;
     // main_camera->set_render_texture(txt);
 
-    int trigger_show = -1;
+    texture* txt_show = nullptr;
     bool console_mode = false;
+
+    pconsole->show_texture_action +=
+        [ &txt_show ](texture* t) { txt_show = t; };
 
     auto wh = file::watch("./",
                           [](auto path, auto change)
     { log()->info("Path {} changed: {}", path, static_cast<int>(change)); });
-
-    experimental::input_system::on_keypress +=
-        [ &console_mode, &trigger_show, mv ](int keycode)
-    {
-        if (keycode == GLFW_KEY_GRAVE_ACCENT)
-        {
-            console_mode = !console_mode;
-            if (console_mode)
-            {
-                log()->info("Entering console mode:");
-            }
-            else
-            {
-                log()->info("Leaving console mode");
-            }
-        }
-
-        if (!console_mode)
-            return;
-
-        if (keycode == GLFW_KEY_ENTER)
-        {
-            if (console_string.empty())
-                return;
-
-            std::transform(console_string.begin(),
-                           console_string.end(),
-                           console_string.begin(),
-                           ::tolower);
-
-            if (console_string.starts_with("show"))
-            {
-                console_string = console_string.substr(5);
-                if (console_string.starts_with("texture"))
-                {
-                    console_string = console_string.substr(7);
-                    int num = std::stoi(console_string);
-
-                    if (num >= 0 && num < texture::_textures.size())
-                    {
-                        trigger_show = num;
-                    }
-                }
-                else if (console_string.starts_with("mesh"))
-                {
-                    console_string = console_string.substr(4);
-                    int num = std::stoi(console_string);
-                    mesh* m { nullptr };
-                    if (num >= 0 && num < asset_manager::default_asset_manager()
-                                              ->meshes()
-                                              .size())
-                    {
-                        m = asset_manager::default_asset_manager()
-                                ->meshes()[ num ];
-                    }
-                    mv->set_mesh(m);
-                }
-            }
-            if (console_string.starts_with("clone"))
-            {
-                console_string = console_string.substr(6);
-                int num = std::stoi(console_string);
-                if (num >= 0 && num < texture::_textures.size())
-                {
-                    (new texture)->clone(texture::_textures[ num ]);
-                }
-            }
-            if (console_string.starts_with("print textures"))
-            {
-                for (int i = 0; i < texture::_textures.size(); ++i)
-                {
-                    log()->info("Texture {}: id {}",
-                                i,
-                                texture::_textures[ i ]->native_id());
-                }
-            }
-
-            console_string = "";
-        }
-
-        if (keycode < 255 && (std::isalnum(keycode) || std::isspace(keycode)))
-        {
-            console_string += keycode;
-        }
-
-        if (keycode == GLFW_KEY_BACKSPACE)
-        {
-            if (!console_string.empty())
-            {
-                console_string.pop_back();
-            }
-        }
-
-        log()->info("Console: {}", console_string);
-    };
 
     while (!windows.empty())
     {
@@ -266,14 +303,10 @@ int main(int argc, char** argv)
         }
         clock->frame();
 
-        if (trigger_show >= 0)
+        if (txt_show != 0)
         {
-            texture* txt = texture::_textures[ trigger_show ];
-            log()->info("Showing texture at {} with id {}",
-                        trigger_show,
-                        txt->native_id());
-            texture_viewer::show_preview(txt);
-            trigger_show = -1;
+            texture_viewer::show_preview(txt_show);
+            txt_show = nullptr;
         }
     }
 
@@ -316,6 +349,16 @@ void initMainWindow()
     {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         vp->render();
+
+        if (pconsole->is_active())
+        {
+            std::string p = std::format("> {}", pconsole->current_text());
+            renderer_2d().draw_text(
+                { 0, 0 },
+                ttf,
+                { re.get_sender()->get_width(), re.get_sender()->get_height() },
+                p);
+        }
     };
     windows.back()->get_events()->resize += [ vp ](auto re)
     {
@@ -486,7 +529,7 @@ void initScene()
     // bc->set_rotation(glm::quat(glm::ballRand(1.0f)));
     // bc->set_rotation(glm::quat(glm::radians(glm::vec3 { 0, 30, 0 })));
 
-    ttf.load("font.ttf", 16);
+    ttf.load("font.ttf", 18);
     // game_object* collision_text_object = new game_object;
     // auto* ct = collision_text_object->create_component<text_component>();
     // collision_text_object->create_component<text_renderer_component>();

@@ -4,7 +4,11 @@
 // #include "camera.hpp"
 #include "experimental/viewport.hpp"
 #include "glad/gl.h"
+#include "graphics/font.hpp"
+#include "graphics/material.hpp"
+#include "graphics/mesh.hpp"
 #include "graphics/shader.hpp"
+#include "graphics/texture.hpp"
 #include "graphics/vaomap.hpp"
 #include "graphics/vertex.hpp"
 #include "graphics_buffer.hpp"
@@ -90,6 +94,109 @@ void renderer_2d::draw_rect(glm::vec2 top_left,
                    indices.size() - 6,
                    GL_UNSIGNED_INT,
                    (void*)(6 * sizeof(unsigned)));
+
+    glEnable(GL_DEPTH_TEST);
+}
+
+template <typename T>
+glm::tvec2<T> map_from_window(const glm::tvec2<T>& p,
+                              const glm::uvec2& window_size)
+{
+    return glm::tvec2<T>(p.x / static_cast<T>(window_size.x),
+                         p.y / static_cast<T>(window_size.y)) *
+               static_cast<T>(2) -
+           glm::tvec2<T>(1);
+}
+
+void renderer_2d::draw_text(glm::vec2 baseline,
+                            const font& f,
+                            const glm::vec2& window_size,
+                            std::string_view text)
+{
+    glDisable(GL_DEPTH_TEST);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    // iterate through all characters
+    std::string::const_iterator c;
+    // while rendering local to world conversion is already considered
+    glm::vec2 scale = glm::vec2(1);
+    glm::vec2 cursor_position = { 0.0f, 0.0f };
+
+    std::vector<vertex3d> vertices;
+    std::vector<int> indices;
+
+    // tl, tr, br, bl
+    std::array<vertex3d, 4> quad_vertices {};
+
+    for (const auto& c : text)
+    {
+        const font::character& ch = f[ static_cast<size_t>(c) ];
+
+        float xpos = cursor_position.x + ch._bearing.x * scale.x;
+        float ypos = cursor_position.y - (ch._size.y - ch._bearing.y) * scale.y;
+
+        float w = ch._size.x * scale.x;
+        float h = ch._size.y * scale.y;
+
+        quad_vertices[ 0 ].position() = {
+            map_from_window(glm::vec2 { xpos, ypos }, window_size), 0.0f
+        };
+        quad_vertices[ 1 ].position() = {
+            map_from_window(glm::vec2 { xpos, ypos + h }, window_size), 0.0f
+        };
+        quad_vertices[ 2 ].position() = {
+            map_from_window(glm::vec2 { xpos + w, ypos }, window_size), 0.0f
+        };
+        quad_vertices[ 3 ].position() = {
+            map_from_window(glm::vec2 { xpos + w, ypos + h }, window_size), 0.0f
+        };
+
+        quad_vertices[ 2 ].uv() = glm::vec2 {
+            ch._texture_offset.x + ch._size.x, ch._texture_offset.y + ch._size.y
+        } / static_cast<glm::vec2>(f.atlas().get_size());
+        quad_vertices[ 3 ].uv() = glm::vec2 { ch._texture_offset.x + ch._size.x,
+                                              ch._texture_offset.y } /
+                                  static_cast<glm::vec2>(f.atlas().get_size());
+        quad_vertices[ 0 ].uv() = glm::vec2 {
+            ch._texture_offset.x, ch._texture_offset.y + ch._size.y
+        } / static_cast<glm::vec2>(f.atlas().get_size());
+        quad_vertices[ 1 ].uv() =
+            glm::vec2 { ch._texture_offset.x, ch._texture_offset.y } /
+            static_cast<glm::vec2>(f.atlas().get_size());
+
+        const auto n = vertices.size();
+
+        for (int i = 0; i < 4; i++)
+        {
+            vertices.push_back(quad_vertices[ i ]);
+            indices.push_back(n);
+            indices.push_back(n + 1);
+            indices.push_back(n + 2);
+            indices.push_back(n + 2);
+            indices.push_back(n + 1);
+            indices.push_back(n + 3);
+        }
+
+        // now advance cursors for next glyph (note that advance is number
+        // of 1/64 pixels)
+        cursor_position.x +=
+            (ch._advance >> 6) *
+            scale.x; // bitshift by 6 to get value in pixels (2^6 = 64)
+    }
+
+    mesh text_mesh;
+    text_mesh.set_vertices(std::move(vertices));
+    text_mesh.set_indices(std::move(indices));
+    text_mesh.init();
+
+    auto surface_shader =
+        asset_manager::default_asset_manager()->get_material("surface");
+
+    surface_shader->set_property_value("u_image",
+                                       &(const_cast<font&>(f).atlas()));
+    surface_shader->activate();
+    text_mesh.render();
 
     glEnable(GL_DEPTH_TEST);
 }

@@ -6,6 +6,8 @@ add_library(
   context_aware_object.hpp
   framebuffer.hpp
   framebuffer.cpp
+  font.cpp
+  font.hpp
   gpu.cpp
   gpu.hpp
   graphics_buffer.cpp
