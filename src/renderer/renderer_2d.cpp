@@ -223,5 +223,6 @@ void renderer_2d::draw_text(glm::vec2 baseline,
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 #endif
 
+    glDisable(GL_BLEND);
     glEnable(GL_DEPTH_TEST);
 }
