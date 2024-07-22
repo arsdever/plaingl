@@ -40,9 +40,15 @@ struct console::impl
 
     void eval()
     {
+        if (input.empty())
+            return;
+
         std::string str = input;
         input.clear();
         auto tokens = console::tokenize(str);
+        if (tokens.empty())
+            return;
+
         auto token_it = tokens.begin();
         std::string path;
         command_lookup_node* node = nullptr;
@@ -101,7 +107,7 @@ void console::input(int ch)
             if (_impl->input.size() > 0)
                 _impl->input.pop_back();
         }
-        else
+        else if (ch < 256 && (std::isalnum(ch) || std::isspace(ch)))
         {
             _impl->input += std::tolower(ch);
         }

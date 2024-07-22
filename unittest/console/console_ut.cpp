@@ -16,6 +16,26 @@ TEST(Console, tokenize)
               (std::vector<std::string_view> {}));
 }
 
+TEST(Console, empty_string)
+{
+    console c;
+    c.input("\n\n\n\n");
+    c.processor().execute_all();
+
+    c.input("   \n");
+    c.processor().execute_all();
+
+    c.input('\n');
+    c.processor().execute_all();
+
+    c.input(GLFW_KEY_ENTER);
+    c.processor().execute_all();
+
+    c.input("   ");
+    c.input(GLFW_KEY_ENTER);
+    c.processor().execute_all();
+}
+
 TEST(Console, register_command)
 {
     static int my_variable = 0;
