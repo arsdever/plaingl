@@ -24,10 +24,14 @@ protected:
      */
     object();
 
+    void register_object();
+
 public:
     friend class memory_manager;
 
 private:
     uid _id;
     std::string _name;
+
+    static std::unordered_map<size_t, std::weak_ptr<object>> _objects;
 };

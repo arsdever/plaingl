@@ -4,6 +4,8 @@ set(INTERFACE_HEADERS
     component.hpp
     game_object.hpp
     object.hpp
+    project_commands.hpp
+    project_commands.cpp
     scene.hpp
     serialization_utilities.hpp
     serializer.hpp

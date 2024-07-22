@@ -1,5 +1,6 @@
 #include <GLFW/glfw3.h>
 #include <prof/profiler.hpp>
+#include <spdlog/common.h>
 
 #include "core/asset_manager.hpp"
 // #include "components/box_collider_component.hpp"
@@ -13,6 +14,7 @@
 // #include "components/text_component.hpp"
 // #include "components/text_renderer_component.hpp"
 // #include "components/walking_component.hpp"
+#include "core/command_dispatcher.hpp"
 #include "experimental/input_system.hpp"
 #include "experimental/viewport.hpp"
 #include "experimental/window.hpp"
@@ -33,6 +35,7 @@
 #include "project/components/mesh_renderer.hpp"
 #include "project/components/transform.hpp"
 #include "project/game_object.hpp"
+#include "project/project_commands.hpp"
 #include "renderer/renderer_2d.hpp"
 #include "scene.hpp"
 #include "shader.hpp"
@@ -57,6 +60,7 @@ texture* norm_txt;
 // ray_visualize_component* cast_ray;
 std::vector<std::shared_ptr<experimental::window>> windows;
 int mesh_preview_texture_index { 0 };
+core::command_dispatcher _cmd_center;
 
 class console
 {
@@ -87,6 +91,9 @@ public:
 
                 std::transform(
                     _text.begin(), _text.end(), _text.begin(), ::tolower);
+
+                add_history(_text);
+                std::shared_ptr<core::command> cmd { nullptr };
 
                 if (_text.starts_with("show"))
                 {
@@ -135,8 +142,52 @@ public:
                                     texture::_textures[ i ]->native_id());
                     }
                 }
+                else if (_text.starts_with("create"))
+                {
+                    _text = _text.substr(7);
+                    if (_text.starts_with("gameobject"))
+                    {
+                        cmd =
+                            std::make_shared<project::cmd_create_game_object>();
+                    }
+                }
+                else if (_text.starts_with("select"))
+                {
+                    _text = _text.substr(6);
+                    int trimspace = _text.find_first_not_of(' ');
+                    if (_text.empty() || trimspace == std::string::npos)
+                    {
+                        cmd = std::make_shared<
+                            project::cmd_print_selected_object>();
+                    }
+                    else
+                    {
+                        _text = _text.substr(trimspace);
+                        auto num = std::stoull(_text);
+                        cmd = std::make_shared<project::cmd_select_object>(
+                            uid(num));
+                    }
+                }
+                else if (_text.starts_with("rename"))
+                {
+                    _text = _text.substr(7);
+                    int trimspace = _text.find_first_not_of(' ');
+                    if (trimspace != std::string::npos)
+                    {
+                        _text = _text.substr(trimspace);
+                    }
 
-                _text = "";
+                    if (!_text.empty())
+                    {
+                        cmd =
+                            std::make_shared<project::cmd_rename_object>(_text);
+                    }
+                }
+
+                if (cmd)
+                    _cmd_center.dispatch(cmd);
+
+                _text.clear();
             }
 
             if (keycode < 255 &&
@@ -153,23 +204,71 @@ public:
                 }
             }
 
-            log()->info("Console: {}", _text);
+            log()->debug("Console: {}", _text);
         };
+    }
+
+    void register_for_logs()
+    {
+        class console_sink
+            : public spdlog::sinks::base_sink<spdlog::details::null_mutex>
+        {
+        public:
+            console_sink(console* c)
+                : _console(c)
+            {
+            }
+
+        protected:
+            void sink_it_(const spdlog::details::log_msg& msg) override
+            {
+                _console->add_history(
+                    std::string(msg.payload.data(), msg.payload.size()));
+            }
+            void flush_() override { }
+
+        private:
+            console* _console;
+        };
+
+        auto sink = std::make_shared<console_sink>(this);
+        std::static_pointer_cast<spdlog::sinks::dist_sink_st>(
+            spdlog::default_logger()->sinks()[ 0 ])
+            ->add_sink(sink);
+        sink->set_level(spdlog::level::info);
     }
 
     bool is_active() const { return _active; }
 
     void activate()
     {
-        log()->info("Entering console mode:");
+        log()->debug("Entering console mode:");
         _active = true;
         _text.clear();
     }
 
     void deactivate()
     {
-        log()->info("Leaving console mode");
+        log()->debug("Leaving console mode");
         _active = false;
+    }
+
+    void add_history(std::string text)
+    {
+        _history[ _history_counter++ % _history.size() ] = std::move(text);
+    }
+
+    template <size_t N>
+    std::array<std::string_view, N> history() const
+    {
+        std::array<std::string_view, N> result;
+        for (int i = 0; i < N; ++i)
+        {
+            result[ i ] =
+                _history[ (_history_counter - i - 1) % _history.size() ];
+        }
+
+        return result;
     }
 
     std::string_view current_text() const { return _text; }
@@ -178,8 +277,10 @@ public:
     event<void(mesh*)> show_mesh_action;
 
 private:
-    bool _active = false;
-    std::string _text = "";
+    bool _active { false };
+    std::string _text { "" };
+    std::array<std::string, 100> _history;
+    size_t _history_counter { 0 };
 }* pconsole;
 
 // physics_engine p;
@@ -213,7 +314,7 @@ int main(int argc, char** argv)
     // components::fps_show::register_component();
     // components::ray_visualize::register_component();
 
-    configure_levels(argc, argv);
+    configure_logging(argc, argv);
     game_clock* clock = game_clock::init();
     glfwInit();
     glfwSetErrorCallback(on_error);
@@ -290,6 +391,8 @@ int main(int argc, char** argv)
                           [](auto path, auto change)
     { log()->info("Path {} changed: {}", path, static_cast<int>(change)); });
 
+    pconsole->register_for_logs();
+
     while (!windows.empty())
     {
         scene::get_active_scene()->visit_root_objects([](auto obj)
@@ -302,6 +405,7 @@ int main(int argc, char** argv)
             window->update();
         }
         clock->frame();
+        _cmd_center.execute_all();
 
         if (txt_show != 0)
         {
@@ -352,12 +456,38 @@ void initMainWindow()
 
         if (pconsole->is_active())
         {
+            float scale = 1.0f;
+            const auto line_height = 18.0f * scale;
+            renderer_2d().draw_rect(
+                { 0, 0 },
+                { re.get_sender()->get_width(), line_height * 11 + 10 },
+                { re.get_sender()->get_width(), re.get_sender()->get_height() },
+                0,
+                glm::vec4(0),
+                glm::vec4(0));
+            auto history = pconsole->history<10>();
+            auto baseline = line_height + 5;
+            for (int i = 0; i < history.size(); ++i)
+            {
+                auto& text = history[ history.size() - i - 1 ];
+                if (!text.empty())
+                {
+                    renderer_2d().draw_text({ 5, baseline },
+                                            ttf,
+                                            { re.get_sender()->get_width(),
+                                              re.get_sender()->get_height() },
+                                            text,
+                                            scale);
+                }
+                baseline += line_height;
+            }
             std::string p = std::format("> {}", pconsole->current_text());
             renderer_2d().draw_text(
-                { 0, 0 },
+                { 5, baseline },
                 ttf,
                 { re.get_sender()->get_width(), re.get_sender()->get_height() },
-                p);
+                p,
+                scale);
         }
     };
     windows.back()->get_events()->resize += [ vp ](auto re)
@@ -529,7 +659,7 @@ void initScene()
     // bc->set_rotation(glm::quat(glm::ballRand(1.0f)));
     // bc->set_rotation(glm::quat(glm::radians(glm::vec3 { 0, 30, 0 })));
 
-    ttf.load("font.ttf", 18);
+    ttf.load("font.ttf", 12);
     // game_object* collision_text_object = new game_object;
     // auto* ct = collision_text_object->create_component<text_component>();
     // collision_text_object->create_component<text_renderer_component>();
@@ -602,7 +732,7 @@ void initScene()
     // object = new game_object;
     // object->create_component<light_component>()->set_light(l);
     light_obj_2->get_transform().set_position(glm::vec3(5.0f, 0.0f, 0.0f));
-    light_obj_2->set_name("light_1");
+    light_obj_2->set_name("light_2");
     s->add_root_object(light_obj_2);
 }
 
@@ -620,6 +750,7 @@ void load_internal_resources()
     am->load_asset("resources/standard/text.mat");
     am->load_asset("resources/standard/skybox.mat");
     am->load_asset("resources/standard/surface.mat");
+    am->load_asset("resources/standard/canvas.shader");
     am->load_asset("resources/standard/standard.mat");
     am->load_asset("resources/standard/mesh_viewer.mat");
     am->load_asset("resources/images/sample.png");
@@ -629,6 +760,7 @@ void load_internal_resources()
     am->load_asset("resources/images/metallic.jpg");
     am->load_asset("resources/images/roughness.jpg");
     am->load_asset("resources/images/env.jpg");
+    am->load_asset("resources/images/white.png");
 }
 
 void initProfilerView()

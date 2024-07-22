@@ -35,7 +35,9 @@ public:
 
     static auto& storage_for(std::string_view class_name);
 
-    static std::shared_ptr<game_object> get_object_by_id(uid id);
+    static std::shared_ptr<object> get_object_by_id(uid id);
+
+    static std::shared_ptr<game_object> get_game_object_by_id(uid id);
 
     static std::shared_ptr<game_object> create_game_object();
 
@@ -62,5 +64,6 @@ private:
 private:
     static memory_manager* _instance;
     entt::registry _registry;
-    std::unordered_map<uid, entt::entity> _objects;
+    std::unordered_map<uid, std::weak_ptr<object>> _objects;
+    std::unordered_map<uid, entt::entity> _entities;
 };

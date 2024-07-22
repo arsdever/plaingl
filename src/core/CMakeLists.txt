@@ -1,5 +1,7 @@
-add_library(${PROJECT}_core STATIC asset_manager.hpp asset_manager.cpp
-                                   asset_loaders/asset_loader.hpp)
+add_library(
+  ${PROJECT}_core STATIC
+  asset_manager.hpp asset_manager.cpp command_dispatcher.cpp
+  command_dispatcher.hpp command.hpp asset_loaders/asset_loader.hpp)
 add_library(${PROJECT}::core ALIAS ${PROJECT}_core)
 
 target_link_libraries(${PROJECT}_core PUBLIC ${PROJECT}::common)
