@@ -14,7 +14,7 @@ public:
         // offset from baseline to left/top of glyph
         glm::uvec2 _bearing;
         // offset to advance to next glyph
-        long _advance;
+        float _advance;
     };
 
 public:

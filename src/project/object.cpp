@@ -31,3 +31,5 @@ std::string object::get_name() const { return _name; }
 void object::set_name(const std::string& name) { _name = name; }
 
 uid object::id() const { return _id; }
+
+std::unordered_map<size_t, std::weak_ptr<object>> object::_objects;

@@ -14,14 +14,26 @@
 #include "graphics_buffer.hpp"
 #include "renderer/algorithms/polygon_to_mesh.hpp"
 
+template <typename T>
+glm::tvec2<T> map_from_window(const glm::tvec2<T>& p,
+                              const glm::uvec2& window_size)
+{
+    return glm::tvec2<T>(p.x / static_cast<T>(window_size.x),
+                         (window_size.y - p.y) /
+                             static_cast<T>(window_size.y)) *
+               static_cast<T>(2) -
+           glm::tvec2<T>(1);
+}
+
 void renderer_2d::draw_rect(glm::vec2 top_left,
                             glm::vec2 bottom_right,
+                            glm::vec2 window_size,
                             float border_thickness,
                             glm::vec4 border_color,
                             glm::vec4 fill_color)
 {
     std::vector<glm::vec2> points;
-    std::vector<colored_vertex2d> vertices;
+    std::vector<vertex3d> vertices;
     std::vector<unsigned> indices;
 
     glm::vec2 bottom_left { top_left.x, bottom_right.y };
@@ -35,34 +47,39 @@ void renderer_2d::draw_rect(glm::vec2 top_left,
 
     for (const auto& point : points)
     {
-        colored_vertex2d v;
-        v.position() = point;
-        v.color() = fill_color;
+        vertex3d v;
+        v.position() =
+            glm::vec3(map_from_window<float>(point, window_size), 0.0f);
+        v.uv() = map_from_window<float>(point, window_size);
         vertices.push_back(v);
     }
 
     indices = { 0, 1, 2, 0, 2, 3 };
     unsigned index_offset = vertices.size();
 
-    polygon_to_mesh(
-        points,
-        true,
-        border_thickness,
-        [ border_color, &vertices ](glm::vec2 v)
+    if (border_thickness > 0.0f)
     {
-        colored_vertex2d vert;
-        vert.position() = v;
-        vert.color() = border_color;
-        vertices.push_back(vert);
-    },
-        [ index_offset, &indices ](unsigned i)
-    { indices.push_back(i + index_offset); });
+        polygon_to_mesh(
+            points,
+            true,
+            border_thickness,
+            [ border_color, window_size, &vertices ](glm::vec2 v)
+        {
+            vertex3d vert;
+            vert.position() =
+                glm::vec3(map_from_window<float>(v, window_size), 0.0f);
+            vert.uv() = map_from_window<float>(v, window_size);
+            vertices.push_back(vert);
+        },
+            [ index_offset, &indices ](unsigned i)
+        { indices.push_back(i + index_offset); });
+    }
 
     vao_map vao;
     graphics_buffer vbo(graphics_buffer::type::vertex);
     graphics_buffer ebo(graphics_buffer::type::index);
 
-    vbo.set_element_stride(colored_vertex2d::size);
+    vbo.set_element_stride(vertex3d::size);
     vbo.set_element_count(vertices.size());
     ebo.set_element_stride(sizeof(unsigned));
     ebo.set_element_count(indices.size());
@@ -73,45 +90,38 @@ void renderer_2d::draw_rect(glm::vec2 top_left,
     {
         glBindBuffer(GL_ARRAY_BUFFER, vbo.get_handle());
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo.get_handle());
-        colored_vertex2d::initialize_attributes();
+        vertex3d::initialize_attributes();
     }
 
     glDisable(GL_DEPTH_TEST);
-    colored_vertex2d::activate_attributes();
+    vertex3d::activate_attributes();
 
     auto shader_2d =
-        asset_manager::default_asset_manager()->get_shader("canvas");
+        asset_manager::default_asset_manager()->get_material("surface");
 
     glm::uvec2 usize = experimental::viewport::current_viewport()->get_size();
-    shader_2d->set_uniform("u_view_dimensions", usize);
-    shader_2d->set_uniform("u_color", fill_color);
-    shader_2d->use();
+    shader_2d->set_property_value("u_color", fill_color);
+    shader_2d->activate();
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 
-    shader_2d->set_uniform("u_color", border_color);
-    shader_2d->use();
-    glDrawElements(GL_TRIANGLES,
-                   indices.size() - 6,
-                   GL_UNSIGNED_INT,
-                   (void*)(6 * sizeof(unsigned)));
+    if (border_thickness > 0.0f)
+    {
+        shader_2d->set_property_value("u_color", border_color);
+        shader_2d->activate();
+        glDrawElements(GL_TRIANGLES,
+                       indices.size() - 6,
+                       GL_UNSIGNED_INT,
+                       (void*)(6 * sizeof(unsigned)));
+    }
 
     glEnable(GL_DEPTH_TEST);
-}
-
-template <typename T>
-glm::tvec2<T> map_from_window(const glm::tvec2<T>& p,
-                              const glm::uvec2& window_size)
-{
-    return glm::tvec2<T>(p.x / static_cast<T>(window_size.x),
-                         p.y / static_cast<T>(window_size.y)) *
-               static_cast<T>(2) -
-           glm::tvec2<T>(1);
 }
 
 void renderer_2d::draw_text(glm::vec2 baseline,
                             const font& f,
                             const glm::vec2& window_size,
-                            std::string_view text)
+                            std::string_view text,
+                            float fscale)
 {
     glDisable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
@@ -120,8 +130,8 @@ void renderer_2d::draw_text(glm::vec2 baseline,
     // iterate through all characters
     std::string::const_iterator c;
     // while rendering local to world conversion is already considered
-    glm::vec2 scale = glm::vec2(1);
-    glm::vec2 cursor_position = { 0.0f, 0.0f };
+    glm::vec2 scale = glm::vec2(fscale);
+    glm::vec2 cursor_position = baseline;
 
     std::vector<vertex3d> vertices;
     std::vector<int> indices;
@@ -134,36 +144,39 @@ void renderer_2d::draw_text(glm::vec2 baseline,
         const font::character& ch = f[ static_cast<size_t>(c) ];
 
         float xpos = cursor_position.x + ch._bearing.x * scale.x;
-        float ypos = cursor_position.y - (ch._size.y - ch._bearing.y) * scale.y;
+        float ypos = cursor_position.y - ch._bearing.y * scale.y;
 
         float w = ch._size.x * scale.x;
         float h = ch._size.y * scale.y;
 
         quad_vertices[ 0 ].position() = {
-            map_from_window(glm::vec2 { xpos, ypos }, window_size), 0.0f
+            map_from_window<float>(glm::vec2 { xpos, ypos + h }, window_size),
+            0.0f
         };
         quad_vertices[ 1 ].position() = {
-            map_from_window(glm::vec2 { xpos, ypos + h }, window_size), 0.0f
+            map_from_window<float>(glm::vec2 { xpos, ypos }, window_size), 0.0f
         };
-        quad_vertices[ 2 ].position() = {
-            map_from_window(glm::vec2 { xpos + w, ypos }, window_size), 0.0f
-        };
+        quad_vertices[ 2 ].position() = { map_from_window<float>(
+                                              glm::vec2 { xpos + w, ypos + h },
+                                              window_size),
+                                          0.0f };
         quad_vertices[ 3 ].position() = {
-            map_from_window(glm::vec2 { xpos + w, ypos + h }, window_size), 0.0f
+            map_from_window<float>(glm::vec2 { xpos + w, ypos }, window_size),
+            0.0f
         };
 
-        quad_vertices[ 2 ].uv() = glm::vec2 {
-            ch._texture_offset.x + ch._size.x, ch._texture_offset.y + ch._size.y
-        } / static_cast<glm::vec2>(f.atlas().get_size());
-        quad_vertices[ 3 ].uv() = glm::vec2 { ch._texture_offset.x + ch._size.x,
-                                              ch._texture_offset.y } /
-                                  static_cast<glm::vec2>(f.atlas().get_size());
         quad_vertices[ 0 ].uv() = glm::vec2 {
             ch._texture_offset.x, ch._texture_offset.y + ch._size.y
         } / static_cast<glm::vec2>(f.atlas().get_size());
         quad_vertices[ 1 ].uv() =
             glm::vec2 { ch._texture_offset.x, ch._texture_offset.y } /
             static_cast<glm::vec2>(f.atlas().get_size());
+        quad_vertices[ 2 ].uv() = glm::vec2 {
+            ch._texture_offset.x + ch._size.x, ch._texture_offset.y + ch._size.y
+        } / static_cast<glm::vec2>(f.atlas().get_size());
+        quad_vertices[ 3 ].uv() = glm::vec2 { ch._texture_offset.x + ch._size.x,
+                                              ch._texture_offset.y } /
+                                  static_cast<glm::vec2>(f.atlas().get_size());
 
         const auto n = vertices.size();
 
@@ -181,7 +194,7 @@ void renderer_2d::draw_text(glm::vec2 baseline,
         // now advance cursors for next glyph (note that advance is number
         // of 1/64 pixels)
         cursor_position.x +=
-            (ch._advance >> 6) *
+            ch._advance / 64.0f *
             scale.x; // bitshift by 6 to get value in pixels (2^6 = 64)
     }
 
@@ -193,10 +206,23 @@ void renderer_2d::draw_text(glm::vec2 baseline,
     auto surface_shader =
         asset_manager::default_asset_manager()->get_material("surface");
 
+    surface_shader->set_property_value("u_color", glm::vec4(1.0f));
     surface_shader->set_property_value("u_image",
                                        &(const_cast<font&>(f).atlas()));
     surface_shader->activate();
     text_mesh.render();
 
+#ifdef RENDER_TEXT_CHAR_BORDER
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    surface_shader->set_property_value("u_color", glm::vec4(1.0f));
+    texture white = texture::from_image(
+        asset_manager::default_asset_manager()->get_image("white"));
+    surface_shader->set_property_value("u_image", &white);
+    surface_shader->activate();
+    text_mesh.render();
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+#endif
+
+    glDisable(GL_BLEND);
     glEnable(GL_DEPTH_TEST);
 }

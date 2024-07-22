@@ -38,6 +38,7 @@ add_subdirectory(graphics)
 add_subdirectory(renderer)
 add_subdirectory(project)
 add_subdirectory(tools)
+add_subdirectory(console)
 
 target_precompile_headers(${PROJECT}_lib REUSE_FROM ${PROJECT}::common)
 
@@ -57,7 +58,7 @@ target_include_directories(${PROJECT}_includes
                            INTERFACE ${CMAKE_CURRENT_SOURCE_DIR} glad/include)
 
 add_executable(${PROJECT} main.cpp)
-target_link_libraries(${PROJECT} PUBLIC ${PROJECT}::lib)
+target_link_libraries(${PROJECT} PUBLIC ${PROJECT}::lib ${PROJECT}::console)
 
 target_link_libraries(${PROJECT} PRIVATE ${PROJECT}::tools::mesh_viewer)
 

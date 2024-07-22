@@ -59,7 +59,8 @@ std::shared_ptr<game_object> memory_manager::create_game_object()
     auto ent = instance()._registry.create();
     instance()._registry.emplace<std::shared_ptr<game_object>>(ent, obj);
     instance()._registry.emplace<uid>(ent, obj->id());
-    instance()._objects.emplace(obj->id(), ent);
+    instance()._entities.emplace(obj->id(), ent);
+    instance()._objects.emplace(obj->id(), obj);
     return obj;
 }
 
@@ -100,7 +101,12 @@ std::shared_ptr<game_object> memory_manager::get_object(entt::entity ent)
     return instance()._registry.get<std::shared_ptr<game_object>>(ent);
 }
 
-std::shared_ptr<game_object> memory_manager::get_object_by_id(uid id)
+std::shared_ptr<object> memory_manager::get_object_by_id(uid id)
+{
+    return instance()._objects.at(id).lock();
+}
+
+std::shared_ptr<game_object> memory_manager::get_game_object_by_id(uid id)
 {
     return get_object(entity(id));
 }
@@ -173,9 +179,9 @@ void memory_manager::deserialize(const nlohmann::json& data)
         gobj->_id = uid { obj[ "id" ] };
         gobj->_is_active = obj[ "is_active" ].get<bool>();
 
-        auto n = instance()._objects.extract(old_id);
+        auto n = instance()._entities.extract(old_id);
         n.key() = gobj->id();
-        instance()._objects.insert(std::move(n));
+        instance()._entities.insert(std::move(n));
         auto ent = entity(gobj->id());
 
         if (obj.contains("parent"))
@@ -217,7 +223,7 @@ uid memory_manager::id(entt::entity ent)
 
 entt::entity memory_manager::entity(uid id)
 {
-    return instance()._objects.at(id);
+    return instance()._entities.at(id);
 }
 
 memory_manager* memory_manager::_instance = nullptr;
