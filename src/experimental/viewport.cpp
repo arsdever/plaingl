@@ -20,6 +20,7 @@ void render_quad(texture* _p)
     material* surface_mat =
         asset_manager::default_asset_manager()->get_material("surface");
     mesh* quad_mesh = asset_manager::default_asset_manager()->get_mesh("quad");
+    surface_mat->set_property_value("u_color", glm::vec4(1.0f));
     surface_mat->set_property_value("u_image", _p);
     renderer_3d().draw_mesh(quad_mesh, surface_mat);
     shader_program::unuse();

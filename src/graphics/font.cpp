@@ -52,7 +52,7 @@ void font::load(std::string path, float size)
     glPixelStorei(GL_UNPACK_ALIGNMENT,
                   1); // disable byte-alignment restriction
 
-    for (unsigned int c = 0; c < 1024; c++)
+    for (unsigned int c = 0; c < 256; c++)
     {
         // load character glyph
         if (FT_Load_Char(face, c, FT_LOAD_RENDER))
@@ -81,7 +81,7 @@ void font::load(std::string path, float size)
                          { face->glyph->bitmap.width,
                            face->glyph->bitmap.rows },
                          { face->glyph->bitmap_left, face->glyph->bitmap_top },
-                         face->glyph->advance.x };
+                         static_cast<float>(face->glyph->advance.x) };
         _character_map.insert(std::pair<char, character>(c, ch));
 
         _atlas->set_rect_data(
