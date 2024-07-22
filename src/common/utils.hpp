@@ -9,6 +9,13 @@ struct string_hash
         std::hash<std::string_view> hasher;
         return hasher(char_string);
     }
+
+    std::size_t operator()(const std::string& string) const
+    {
+        std::hash<std::string_view> hasher;
+        return hasher(string);
+    }
+
     std::size_t operator()(std::string_view string_view) const
     {
         std::hash<std::string_view> hasher;

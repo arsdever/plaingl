@@ -36,17 +36,12 @@ std::shared_ptr<game_object> cmd_create_game_object::get_object() const
 
 // void cmd_destroy_game_object::execute() { _obj->destroy(); }
 
-cmd_rename_object::cmd_rename_object(std::string name)
-    : _name(std::move(name))
-{
-}
-
 void cmd_rename_object::execute()
 {
     if (auto obj = _selected_object.lock(); obj != nullptr)
     {
         auto old_name = obj->get_name();
-        obj->set_name(_name);
+        obj->set_name(get<0>());
         log()->info("Object renamed ({}): {} -> {}",
                     obj->id().id,
                     old_name,
@@ -58,14 +53,9 @@ void cmd_rename_object::execute()
     }
 }
 
-cmd_select_object::cmd_select_object(uid obj_id)
-    : _object_id(obj_id)
-{
-}
-
 void cmd_select_object::execute()
 {
-    auto obj = memory_manager::get_object_by_id(_object_id);
+    auto obj = memory_manager::get_object_by_id(uid(get<0>()));
     _selected_object = obj;
     log()->info("Selected object {} ({})", obj->get_name(), obj->id().id);
 }

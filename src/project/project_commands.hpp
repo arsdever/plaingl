@@ -8,7 +8,7 @@ class object;
 
 namespace project
 {
-class cmd_create_game_object : public core::command
+class cmd_create_game_object : public core::command<>
 {
 public:
     void execute() override;
@@ -29,27 +29,21 @@ private:
 //     std::shared_ptr<game_object> _obj;
 // };
 
-class cmd_rename_object : public core::command
+class cmd_rename_object : public core::command<std::string>
 {
 public:
-    cmd_rename_object(std::string name);
+    using command::command;
     void execute() override;
-
-private:
-    std::string _name;
 };
 
-class cmd_select_object : public core::command
+class cmd_select_object : public core::command<size_t>
 {
 public:
-    cmd_select_object(uid obj_id);
+    using command::command;
     void execute() override;
-
-private:
-    uid _object_id;
 };
 
-class cmd_print_selected_object : public core::command
+class cmd_print_selected_object : public core::command<>
 {
 public:
     void execute() override;

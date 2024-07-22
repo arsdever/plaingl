@@ -4,15 +4,15 @@
 
 namespace core
 {
-class command;
+class command_base;
 
 class command_dispatcher
 {
 public:
-    void dispatch(std::shared_ptr<command> cmd);
+    void dispatch(std::shared_ptr<command_base> cmd);
     void execute_all();
 
 private:
-    std::queue<std::shared_ptr<command>> _command_queue;
+    std::queue<std::shared_ptr<command_base>> _command_queue;
 };
 } // namespace core

@@ -4,7 +4,7 @@
 
 namespace core
 {
-void command_dispatcher::dispatch(std::shared_ptr<command> cmd)
+void command_dispatcher::dispatch(std::shared_ptr<command_base> cmd)
 {
     _command_queue.push(cmd);
 }

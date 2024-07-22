@@ -2,6 +2,7 @@
 #include <prof/profiler.hpp>
 #include <spdlog/common.h>
 
+#include "console/console.hpp"
 #include "core/asset_manager.hpp"
 // #include "components/box_collider_component.hpp"
 // #include "components/camera_component.hpp"
@@ -60,228 +61,57 @@ texture* norm_txt;
 // ray_visualize_component* cast_ray;
 std::vector<std::shared_ptr<experimental::window>> windows;
 int mesh_preview_texture_index { 0 };
-core::command_dispatcher _cmd_center;
+std::unique_ptr<console> pconsole;
 
-class console
+class cmd_show_texture : public core::command<int>
 {
 public:
-    void setup()
+    using command::command;
+    void execute() override
     {
-        experimental::input_system::on_keypress += [ this ](int keycode)
+        int num = get<0>();
+        if (num >= 0 && num < texture::_textures.size())
         {
-            if (keycode == GLFW_KEY_GRAVE_ACCENT)
-            {
-                if (is_active())
-                {
-                    deactivate();
-                }
-                else
-                {
-                    activate();
-                }
-            }
-
-            if (!is_active())
-                return;
-
-            if (keycode == GLFW_KEY_ENTER)
-            {
-                if (_text.empty())
-                    return;
-
-                std::transform(
-                    _text.begin(), _text.end(), _text.begin(), ::tolower);
-
-                add_history(_text);
-                std::shared_ptr<core::command> cmd { nullptr };
-
-                if (_text.starts_with("show"))
-                {
-                    _text = _text.substr(5);
-                    if (_text.starts_with("texture"))
-                    {
-                        _text = _text.substr(7);
-                        int num = std::stoi(_text);
-
-                        if (num >= 0 && num < texture::_textures.size())
-                        {
-                            show_texture_action(texture::_textures[ num ]);
-                        }
-                    }
-                    else if (_text.starts_with("mesh"))
-                    {
-                        _text = _text.substr(4);
-                        int num = std::stoi(_text);
-                        mesh* m { nullptr };
-                        if (num >= 0 &&
-                            num < asset_manager::default_asset_manager()
-                                      ->meshes()
-                                      .size())
-                        {
-                            m = asset_manager::default_asset_manager()
-                                    ->meshes()[ num ];
-                        }
-                        show_mesh_action(m);
-                    }
-                }
-                if (_text.starts_with("clone"))
-                {
-                    _text = _text.substr(6);
-                    int num = std::stoi(_text);
-                    if (num >= 0 && num < texture::_textures.size())
-                    {
-                        (new texture)->clone(texture::_textures[ num ]);
-                    }
-                }
-                if (_text.starts_with("print textures"))
-                {
-                    for (int i = 0; i < texture::_textures.size(); ++i)
-                    {
-                        log()->info("Texture {}: id {}",
-                                    i,
-                                    texture::_textures[ i ]->native_id());
-                    }
-                }
-                else if (_text.starts_with("create"))
-                {
-                    _text = _text.substr(7);
-                    if (_text.starts_with("gameobject"))
-                    {
-                        cmd =
-                            std::make_shared<project::cmd_create_game_object>();
-                    }
-                }
-                else if (_text.starts_with("select"))
-                {
-                    _text = _text.substr(6);
-                    int trimspace = _text.find_first_not_of(' ');
-                    if (_text.empty() || trimspace == std::string::npos)
-                    {
-                        cmd = std::make_shared<
-                            project::cmd_print_selected_object>();
-                    }
-                    else
-                    {
-                        _text = _text.substr(trimspace);
-                        auto num = std::stoull(_text);
-                        cmd = std::make_shared<project::cmd_select_object>(
-                            uid(num));
-                    }
-                }
-                else if (_text.starts_with("rename"))
-                {
-                    _text = _text.substr(7);
-                    int trimspace = _text.find_first_not_of(' ');
-                    if (trimspace != std::string::npos)
-                    {
-                        _text = _text.substr(trimspace);
-                    }
-
-                    if (!_text.empty())
-                    {
-                        cmd =
-                            std::make_shared<project::cmd_rename_object>(_text);
-                    }
-                }
-
-                if (cmd)
-                    _cmd_center.dispatch(cmd);
-
-                _text.clear();
-            }
-
-            if (keycode < 255 &&
-                (std::isalnum(keycode) || std::isspace(keycode)))
-            {
-                _text += std::tolower(keycode);
-            }
-
-            if (keycode == GLFW_KEY_BACKSPACE)
-            {
-                if (!_text.empty())
-                {
-                    _text.pop_back();
-                }
-            }
-
-            log()->debug("Console: {}", _text);
-        };
-    }
-
-    void register_for_logs()
-    {
-        class console_sink
-            : public spdlog::sinks::base_sink<spdlog::details::null_mutex>
-        {
-        public:
-            console_sink(console* c)
-                : _console(c)
-            {
-            }
-
-        protected:
-            void sink_it_(const spdlog::details::log_msg& msg) override
-            {
-                _console->add_history(
-                    std::string(msg.payload.data(), msg.payload.size()));
-            }
-            void flush_() override { }
-
-        private:
-            console* _console;
-        };
-
-        auto sink = std::make_shared<console_sink>(this);
-        std::static_pointer_cast<spdlog::sinks::dist_sink_st>(
-            spdlog::default_logger()->sinks()[ 0 ])
-            ->add_sink(sink);
-        sink->set_level(spdlog::level::info);
-    }
-
-    bool is_active() const { return _active; }
-
-    void activate()
-    {
-        log()->debug("Entering console mode:");
-        _active = true;
-        _text.clear();
-    }
-
-    void deactivate()
-    {
-        log()->debug("Leaving console mode");
-        _active = false;
-    }
-
-    void add_history(std::string text)
-    {
-        _history[ _history_counter++ % _history.size() ] = std::move(text);
-    }
-
-    template <size_t N>
-    std::array<std::string_view, N> history() const
-    {
-        std::array<std::string_view, N> result;
-        for (int i = 0; i < N; ++i)
-        {
-            result[ i ] =
-                _history[ (_history_counter - i - 1) % _history.size() ];
+            on_show_texture(texture::_textures[ num ]);
         }
-
-        return result;
     }
 
-    std::string_view current_text() const { return _text; }
+    static event<void(texture*)> on_show_texture;
+};
 
-    event<void(texture*)> show_texture_action;
-    event<void(mesh*)> show_mesh_action;
+class cmd_show_mesh : public core::command<int>
+{
+public:
+    using command::command;
+    void execute() override
+    {
+        int num = get<0>();
+        if (num >= 0 &&
+            num < asset_manager::default_asset_manager()->meshes().size())
+        {
+            on_show_mesh(
+                asset_manager::default_asset_manager()->meshes()[ num ]);
+        }
+    }
 
-private:
-    bool _active { false };
-    std::string _text { "" };
-    std::array<std::string, 100> _history;
-    size_t _history_counter { 0 };
-}* pconsole;
+    static event<void(mesh*)> on_show_mesh;
+};
+
+class cmd_list_textures : public core::command<>
+{
+public:
+    void execute() override
+    {
+        for (int i = 0; i < texture::_textures.size(); ++i)
+        {
+            log()->info(
+                "Texture {}: id {}", i, texture::_textures[ i ]->native_id());
+        }
+    }
+};
+
+event<void(texture*)> cmd_show_texture::on_show_texture;
+event<void(mesh*)> cmd_show_mesh::on_show_mesh;
 
 // physics_engine p;
 } // namespace
@@ -328,15 +158,44 @@ int main(int argc, char** argv)
     setupMouseEvents();
     initScene();
 
-    pconsole = new console;
-    pconsole->setup();
+    experimental::input_system::on_keypress += [](int keycode)
+    {
+        if (keycode == GLFW_KEY_GRAVE_ACCENT)
+        {
+            if (pconsole->is_active())
+            {
+                pconsole->deactivate();
+            }
+            else
+            {
+                pconsole->activate();
+            }
+        }
+        else if (pconsole->is_active())
+        {
+            pconsole->input(keycode);
+        }
+    };
+
+    pconsole = std::make_unique<console>();
+    pconsole->register_for_logs();
+    pconsole->register_command<cmd_show_texture, int>("show.texture");
+    pconsole->register_command<cmd_show_mesh, int>("show.mesh");
+    pconsole->register_command<cmd_list_textures>("list.textures");
+    pconsole->register_command<project::cmd_create_game_object>(
+        "create.gameobject");
+    pconsole->register_command<project::cmd_print_selected_object>(
+        "show.selected");
+    pconsole->register_command<project::cmd_rename_object, std::string>(
+        "rename");
+    pconsole->register_command<project::cmd_select_object, size_t>("select");
 
     auto mv = std::make_shared<mesh_viewer>();
     mv->init();
     mv->set_mesh(asset_manager::default_asset_manager()->meshes()[ 4 ]);
     windows.push_back(mv);
 
-    pconsole->show_mesh_action += [ mv ](mesh* m) { mv->set_mesh(m); };
+    cmd_show_mesh::on_show_mesh += [ mv ](mesh* m) { mv->set_mesh(m); };
 
     log()->info("Using graphics card {} - {}",
                 graphics::gpu::get_vendor(),
@@ -384,14 +243,12 @@ int main(int argc, char** argv)
     texture* txt_show = nullptr;
     bool console_mode = false;
 
-    pconsole->show_texture_action +=
+    cmd_show_texture::on_show_texture +=
         [ &txt_show ](texture* t) { txt_show = t; };
 
     auto wh = file::watch("./",
                           [](auto path, auto change)
     { log()->info("Path {} changed: {}", path, static_cast<int>(change)); });
-
-    pconsole->register_for_logs();
 
     while (!windows.empty())
     {
@@ -405,7 +262,7 @@ int main(int argc, char** argv)
             window->update();
         }
         clock->frame();
-        _cmd_center.execute_all();
+        pconsole->processor().execute_all();
 
         if (txt_show != 0)
         {
@@ -481,7 +338,7 @@ void initMainWindow()
                 }
                 baseline += line_height;
             }
-            std::string p = std::format("> {}", pconsole->current_text());
+            std::string p = std::format("> {}", pconsole->get_current_input());
             renderer_2d().draw_text(
                 { 5, baseline },
                 ttf,
