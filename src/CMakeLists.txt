@@ -13,8 +13,6 @@ add_library(
   gizmo_drawer.cpp
   gl_error_handler.hpp
   gl_error_handler.cpp
-  input_system.hpp
-  input_system.cpp
   texture_viewer.hpp
   texture_viewer.cpp
   thread.hpp
