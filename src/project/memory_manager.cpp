@@ -69,6 +69,16 @@ void memory_manager::register_component_type(std::string_view type_name)
     auto& _ = instance()._registry.storage<component>(type_id(type_name));
 }
 
+void memory_manager::for_each_object(
+    std::function<void(std::shared_ptr<object>&)> func)
+{
+    for (auto& [ _, obj ] : instance()._objects)
+    {
+        if (auto sobj = obj.lock(); sobj != nullptr)
+            func(sobj);
+    }
+}
+
 component& memory_manager::create_component(game_object& obj,
                                             std::string_view class_name)
 {
