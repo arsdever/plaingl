@@ -23,8 +23,6 @@ void main()
     fragment_position = vec3(u_model_matrix * vec4(i_vertex_position, 1.0));
     fragment_normal = i_vertex_normal;
     fragment_uv = i_vertex_uv;
-    vec4 ft = mvp * vec4(i_vertex_tangent, 1);
-    fragment_tangent = ft.xyz / ft.w;
-    vec4 fbt = mvp * vec4(i_vertex_bitangent, 1);
-    fragment_bitangent = fbt.xyz / fbt.w;
+    fragment_tangent = i_vertex_tangent;
+    fragment_bitangent = i_vertex_bitangent;
 }

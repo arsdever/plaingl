@@ -26,7 +26,6 @@
 #include "game_clock.hpp"
 #include "graphics/gpu.hpp"
 #include "image.hpp"
-#include "input_system.hpp"
 #include "logging.hpp"
 #include "material.hpp"
 #include "project/components/camera.hpp"
@@ -89,12 +88,19 @@ public:
         if (num >= 0 &&
             num < asset_manager::default_asset_manager()->meshes().size())
         {
-            on_show_mesh(
+            auto mv = std::make_shared<mesh_viewer>();
+            mv->init();
+            mv->set_mesh(
                 asset_manager::default_asset_manager()->meshes()[ num ]);
+            mv->get_events()->close += [](auto e)
+            {
+                windows.erase(std::remove(windows.begin(),
+                                          windows.end(),
+                                          e.get_sender()->shared_from_this()));
+            };
+            windows.push_back(mv);
         }
     }
-
-    static event<void(mesh*)> on_show_mesh;
 };
 
 class cmd_list_textures : public core::command<>
@@ -111,7 +117,6 @@ public:
 };
 
 event<void(texture*)> cmd_show_texture::on_show_texture;
-event<void(mesh*)> cmd_show_mesh::on_show_mesh;
 
 // physics_engine p;
 } // namespace
@@ -189,13 +194,7 @@ int main(int argc, char** argv)
     pconsole->register_command<project::cmd_rename_object, std::string>(
         "rename");
     pconsole->register_command<project::cmd_select_object, size_t>("select");
-
-    auto mv = std::make_shared<mesh_viewer>();
-    mv->init();
-    mv->set_mesh(asset_manager::default_asset_manager()->meshes()[ 4 ]);
-    windows.push_back(mv);
-
-    cmd_show_mesh::on_show_mesh += [ mv ](mesh* m) { mv->set_mesh(m); };
+    pconsole->register_command<project::cmd_list_objects>("list.objects");
 
     log()->info("Using graphics card {} - {}",
                 graphics::gpu::get_vendor(),
@@ -311,10 +310,12 @@ void initMainWindow()
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         vp->render();
 
+        float scale = 1.0f;
+        const auto line_height = 18.0f * scale;
+        auto baseline = line_height + 5;
+        auto yoffset = 0.0f;
         if (pconsole->is_active())
         {
-            float scale = 1.0f;
-            const auto line_height = 18.0f * scale;
             renderer_2d().draw_rect(
                 { 0, 0 },
                 { re.get_sender()->get_width(), line_height * 11 + 10 },
@@ -322,8 +323,8 @@ void initMainWindow()
                 0,
                 glm::vec4(0),
                 glm::vec4(0));
+            yoffset = line_height * 11 + 10;
             auto history = pconsole->history<10>();
-            auto baseline = line_height + 5;
             for (int i = 0; i < history.size(); ++i)
             {
                 auto& text = history[ history.size() - i - 1 ];
@@ -345,6 +346,65 @@ void initMainWindow()
                 { re.get_sender()->get_width(), re.get_sender()->get_height() },
                 p,
                 scale);
+            baseline += 2 * line_height;
+        }
+
+        if (auto obj = project::selected_object(); obj != nullptr)
+        {
+            renderer_2d().draw_rect(
+                { 0, yoffset },
+                { re.get_sender()->get_width(),
+                  line_height * 5 + 10 + yoffset },
+                { re.get_sender()->get_width(), re.get_sender()->get_height() },
+                0,
+                glm::vec4(0),
+                glm::vec4(0));
+
+            std::string p = std::format("{:10}: {}", "name", obj->get_name());
+            renderer_2d().draw_text(
+                { 5, baseline },
+                ttf,
+                { re.get_sender()->get_width(), re.get_sender()->get_height() },
+                p,
+                scale);
+
+            baseline += line_height;
+            if (auto gobj = std::dynamic_pointer_cast<game_object>(obj);
+                gobj != nullptr)
+            {
+                p = std::format(
+                    "{:10}: {}",
+                    "position",
+                    glm::to_string(gobj->get_transform().get_position()));
+                renderer_2d().draw_text({ 5, baseline },
+                                        ttf,
+                                        { re.get_sender()->get_width(),
+                                          re.get_sender()->get_height() },
+                                        p,
+                                        scale);
+                baseline += line_height;
+                p = std::format(
+                    "{:10}: {}",
+                    "rotation",
+                    glm::to_string(gobj->get_transform().get_rotation()));
+                renderer_2d().draw_text({ 5, baseline },
+                                        ttf,
+                                        { re.get_sender()->get_width(),
+                                          re.get_sender()->get_height() },
+                                        p,
+                                        scale);
+                baseline += line_height;
+                p = std::format(
+                    "{:10}: {}",
+                    "scale",
+                    glm::to_string(gobj->get_transform().get_scale()));
+                renderer_2d().draw_text({ 5, baseline },
+                                        ttf,
+                                        { re.get_sender()->get_width(),
+                                          re.get_sender()->get_height() },
+                                        p,
+                                        scale);
+            }
         }
     };
     windows.back()->get_events()->resize += [ vp ](auto re)
@@ -602,6 +662,7 @@ void load_internal_resources()
     am->load_asset("resources/meshes/sphere.fbx");
     am->load_asset("resources/meshes/env_sphere.fbx");
     am->load_asset("resources/meshes/susane_head.fbx");
+    am->load_asset("resources/meshes/susane_head_low.fbx");
     am->load_asset("resources/meshes/shader_ball.fbx");
     am->load_asset("resources/meshes/camera.fbx");
     am->load_asset("resources/standard/text.mat");
