@@ -2,8 +2,8 @@
 #include <prof/profiler.hpp>
 #include <spdlog/common.h>
 
-#include "console/console.hpp"
 #include "core/asset_manager.hpp"
+#include "tools/console/console.hpp"
 // #include "components/box_collider_component.hpp"
 // #include "components/camera_component.hpp"
 // #include "components/fps_show_component.hpp"
