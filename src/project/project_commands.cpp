@@ -64,6 +64,13 @@ void cmd_select_object::execute()
     else
     {
         auto obj = memory_manager::get_object_by_id(uid(get<0>()));
+        if (obj == nullptr)
+        {
+            log()->info("Object with id {} not found", get<0>());
+            return;
+        }
+
+        _selected_object = obj;
         log()->info("Selected object {} ({})", obj->get_name(), obj->id().id);
     }
 }
