@@ -55,9 +55,9 @@ target_include_directories(${PROJECT}_includes
                            INTERFACE ${CMAKE_CURRENT_SOURCE_DIR} glad/include)
 
 add_executable(${PROJECT} main.cpp)
-target_link_libraries(${PROJECT} PUBLIC ${PROJECT}::lib
-                                        ${PROJECT}::tools::console)
-
-target_link_libraries(${PROJECT} PRIVATE ${PROJECT}::tools::mesh_viewer)
+target_link_libraries(
+  ${PROJECT}
+  PUBLIC ${PROJECT}::lib
+  PRIVATE ${PROJECT}::tools)
 
 add_subdirectory(samples)

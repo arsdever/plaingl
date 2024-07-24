@@ -43,6 +43,7 @@
 #include "texture_viewer.hpp"
 #include "thread.hpp"
 #include "tools/mesh_viewer/mesh_viewer.hpp"
+#include "tools/profiler/profiler.hpp"
 
 using namespace experimental;
 
@@ -242,6 +243,16 @@ int main(int argc, char** argv)
     texture* txt_show = nullptr;
     bool console_mode = false;
 
+    auto profview = std::make_shared<profiler>();
+    profview->init();
+    profview->get_events()->close += [](auto ce)
+    {
+        windows.erase(std::remove(windows.begin(),
+                                  windows.end(),
+                                  ce.get_sender()->shared_from_this()));
+    };
+    windows.push_back(profview);
+
     cmd_show_texture::on_show_texture +=
         [ &txt_show ](texture* t) { txt_show = t; };
 
@@ -251,14 +262,16 @@ int main(int argc, char** argv)
 
     while (!windows.empty())
     {
-        scene::get_active_scene()->visit_root_objects([](auto obj)
-        { obj->update(); });
-
-        for (int i = 0; i < windows.size(); ++i)
         {
             auto p = prof::profile_frame(__FUNCTION__);
-            auto window = windows[ i ];
-            window->update();
+            scene::get_active_scene()->visit_root_objects([](auto obj)
+            { obj->update(); });
+
+            for (int i = 0; i < windows.size(); ++i)
+            {
+                auto window = windows[ i ];
+                window->update();
+            }
         }
         clock->frame();
         pconsole->processor().execute_all();
