@@ -1,6 +1,6 @@
 #include <GLFW/glfw3.h>
 
-#include "console/console.hpp"
+#include "tools/console/console.hpp"
 
 #include "common/logging.hpp"
 #include "common/utils.hpp"

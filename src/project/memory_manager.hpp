@@ -56,6 +56,8 @@ public:
 
     static void register_component_type(std::string_view type_name);
 
+    void for_each_object(std::function<void(std::shared_ptr<object>&)> func);
+
 private:
     static std::shared_ptr<game_object> get_object(entt::entity ent);
     static entt::entity entity(uid id);

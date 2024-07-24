@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
 
-#include "console/console.hpp"
 #include "core/command.hpp"
 #include "core/command_dispatcher.hpp"
+#include "tools/console/console.hpp"
 
 TEST(Console, tokenize)
 {

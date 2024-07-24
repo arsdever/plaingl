@@ -48,4 +48,12 @@ class cmd_print_selected_object : public core::command<>
 public:
     void execute() override;
 };
+
+class cmd_list_objects : public core::command<>
+{
+public:
+    void execute() override;
+};
+
+std::shared_ptr<object> selected_object();
 } // namespace project

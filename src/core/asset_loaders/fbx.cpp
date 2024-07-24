@@ -6,10 +6,16 @@
 #include "core/asset_loaders/fbx.hpp"
 
 #include "assimp/quaternion.h"
+#include "common/file.hpp"
 #include "common/logging.hpp"
 #include "core/asset_manager.hpp"
 #include "graphics/material.hpp"
 #include "graphics/mesh.hpp"
+
+namespace
+{
+logger log() { return get_logger("fbx_loader"); }
+} // namespace
 
 glm::vec3 convert(aiVector3D ai_vec3)
 {
@@ -28,6 +34,11 @@ glm::vec3 convert(aiColor3D ai_quat)
 
 void asset_loader_FBX::load(std::string_view path)
 {
+    if (!file::exists(path))
+    {
+        log()->warn("File does not exist: {}", path);
+    }
+
     Assimp::Importer importer;
     const aiScene* ai_scene =
         importer.ReadFile(path.data(),
@@ -35,7 +46,12 @@ void asset_loader_FBX::load(std::string_view path)
                               aiProcess_JoinIdenticalVertices |
                               aiProcess_SortByPType | aiProcess_EmbedTextures);
 
-    auto log = get_logger("fbx_loader");
+    if (!ai_scene)
+    {
+        log()->error("Failed to load: {}", path);
+        return;
+    }
+
     std::queue<aiNode*> dfs_queue;
     dfs_queue.push(ai_scene->mRootNode);
     while (!dfs_queue.empty())
@@ -47,7 +63,8 @@ void asset_loader_FBX::load(std::string_view path)
             dfs_queue.push(node->mChildren[ i ]);
         }
 
-        log->info("Node: {} meshes: {}", node->mName.C_Str(), node->mNumMeshes);
+        log()->info(
+            "Node: {} meshes: {}", node->mName.C_Str(), node->mNumMeshes);
         if (node->mNumMeshes > 0)
         {
             mesh* m = nullptr;

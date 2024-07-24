@@ -21,6 +21,7 @@ void cmd_create_game_object::execute()
                 _obj->get_name(),
                 _obj->id().id,
                 scene::get_active_scene()->id().id);
+    _selected_object = _obj;
 }
 
 std::shared_ptr<game_object> cmd_create_game_object::get_object() const
@@ -55,9 +56,23 @@ void cmd_rename_object::execute()
 
 void cmd_select_object::execute()
 {
-    auto obj = memory_manager::get_object_by_id(uid(get<0>()));
-    _selected_object = obj;
-    log()->info("Selected object {} ({})", obj->get_name(), obj->id().id);
+    if (get<0>() == 0)
+    {
+        _selected_object = {};
+        log()->info("Unselecting the object");
+    }
+    else
+    {
+        auto obj = memory_manager::get_object_by_id(uid(get<0>()));
+        if (obj == nullptr)
+        {
+            log()->info("Object with id {} not found", get<0>());
+            return;
+        }
+
+        _selected_object = obj;
+        log()->info("Selected object {} ({})", obj->get_name(), obj->id().id);
+    }
 }
 
 void cmd_print_selected_object::execute()
@@ -67,4 +82,13 @@ void cmd_print_selected_object::execute()
         log()->info("Selected object {} ({})", obj->get_name(), obj->id().id);
     }
 }
+
+void cmd_list_objects::execute()
+{
+    log()->info("List of objects:");
+    memory_manager::instance().for_each_object([](std::shared_ptr<object>& obj)
+    { log()->info("  {} ({})", obj->get_name(), obj->id().id); });
+}
+
+std::shared_ptr<object> selected_object() { return _selected_object.lock(); }
 } // namespace project
