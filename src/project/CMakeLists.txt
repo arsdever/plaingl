@@ -1,6 +1,5 @@
 set(HEADERS memory_manager.hpp)
 set(INTERFACE_HEADERS
-    application_context.hpp
     component.hpp
     game_object.hpp
     object.hpp
@@ -10,8 +9,8 @@ set(INTERFACE_HEADERS
     serialization_utilities.hpp
     serializer.hpp
     serializer_json.hpp)
-set(SOURCES application_context.cpp component.cpp game_object.cpp
-            memory_manager.cpp object.cpp scene.cpp)
+set(SOURCES component.cpp game_object.cpp memory_manager.cpp object.cpp
+            scene.cpp)
 
 foreach(interface_header ${INTERFACE_HEADERS})
   get_filename_component(dir ${interface_header} DIRECTORY)

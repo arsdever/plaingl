@@ -1,4 +1,3 @@
-#include "project/application_context.hpp"
 #include "project/component.hpp"
 #include "project/components/component_registry.hpp"
 #include "project/components/transform.hpp"
@@ -8,7 +7,6 @@
 void create_scene_from_scratch()
 {
     auto sc = scene::create();
-    auto app = application_context();
 
     auto parent_object = game_object::create();
     auto object = game_object::create();

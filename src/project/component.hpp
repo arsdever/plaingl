@@ -1,8 +1,7 @@
 #pragma once
 
+#include "project/game_object.hpp"
 #include "project/object.hpp"
-
-class game_object;
 
 namespace components
 {

@@ -247,7 +247,7 @@ void camera::setup_lights()
     scene::get_active_scene()->visit_root_objects(
         [ &i, &glsl_lights ](auto& obj)
     {
-        if (auto* light = obj->try_get<components::light>())
+        if (auto* light = obj->template try_get<components::light>())
         {
             glsl_lights.push_back({});
             auto& glight = glsl_lights.back();
