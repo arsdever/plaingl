@@ -106,12 +106,21 @@ component& memory_manager::get_component(const game_object& obj,
 component* memory_manager::try_get_component(const game_object& obj,
                                              std::string_view class_name)
 {
-    auto type = impl::typeof(class_name);
-    auto comp = type.invoke(entt::hashed_string("try_get"),
-                            {},
-                            entt::forward_as_meta(instance()._impl->_registry),
-                            instance()._impl->entity(obj.id()));
-    return (*comp).try_cast<component>();
+    auto entity = instance()._impl->entity(obj.id());
+    // try to lookup by base class
+    for (auto&& storage_info : instance()._impl->_registry.storage())
+    {
+        entt::meta_type type = entt::resolve(storage_info.second.type());
+        if (type.can_cast(impl::typeof(class_name)))
+        {
+            if (auto& storage = storage_info.second; storage.contains(entity))
+            {
+                return static_cast<component*>(storage.value(entity));
+            }
+        }
+    }
+
+    return nullptr;
 }
 
 std::shared_ptr<object> memory_manager::get_object_by_id(uid id)
