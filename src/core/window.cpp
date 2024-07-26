@@ -111,6 +111,17 @@ void window::init()
         _this->_p->_size = { w, h };
         _this->get_events()->resize(
             resize_event(old_size, _this->_p->_size, _this));
+        auto ctx = glfwGetCurrentContext();
+        if (ctx != wnd)
+        {
+            glfwMakeContextCurrent(wnd);
+        }
+        glViewport(0, 0, w, h);
+
+        if (ctx != wnd)
+        {
+            glfwMakeContextCurrent(ctx);
+        }
     });
 
     glfwSetWindowPosCallback(_p->_glfw_window_handle,

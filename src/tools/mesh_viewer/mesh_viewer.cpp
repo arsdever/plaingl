@@ -69,8 +69,6 @@ void mesh_viewer::initialize()
             _rotation_start_point = e.get_local_position();
         }
     };
-    get_events()->resize +=
-        [ this ](auto e) { resize(e.get_new_size().x, e.get_new_size().y); };
     get_events()->mouse_scroll +=
         [ this ](auto e) { _zoom *= std::pow(2.0, e.get_delta().y / 10.0); };
     glEnable(GL_DEPTH_TEST);

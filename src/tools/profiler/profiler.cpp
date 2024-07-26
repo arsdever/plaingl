@@ -37,11 +37,6 @@ void profiler::initialize()
 {
     _impl = std::make_unique<impl>();
     get_events()->render += [ this ](auto e) { render(); };
-    get_events()->resize += [ this ](auto e)
-    {
-        resize(e.get_new_size().x, e.get_new_size().y);
-        glViewport(0, 0, e.get_new_size().x, e.get_new_size().y);
-    };
     glEnable(GL_DEPTH_TEST);
 }
 
