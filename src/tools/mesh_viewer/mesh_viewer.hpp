@@ -9,7 +9,7 @@ class mesh_viewer : public core::window
 {
 public:
     mesh_viewer();
-    ~mesh_viewer();
+    ~mesh_viewer() override;
 
     void set_mesh(mesh* m);
     void set_mode(unsigned mode);

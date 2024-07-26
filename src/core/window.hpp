@@ -23,7 +23,7 @@ class window : public std::enable_shared_from_this<window>
 {
 public:
     window();
-    ~window();
+    virtual ~window();
 
     void init();
     void activate();

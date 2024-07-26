@@ -6,7 +6,7 @@ class profiler : public core::window
 {
 public:
     profiler();
-    ~profiler();
+    ~profiler() override;
 
 protected:
     void initialize();
