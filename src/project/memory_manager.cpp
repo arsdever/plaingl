@@ -1,41 +1,57 @@
 #include <entt/entity/fwd.hpp>
 #include <entt/entt.hpp>
 #include <entt/meta/utility.hpp>
+#include <nlohmann/json.hpp>
 
 #include "memory_manager.hpp"
 
 #include "project/components/transform.hpp"
+#include "project/game_object.hpp"
 #include "project/scene.hpp"
 #include "project/serializer_json.hpp"
 
-memory_manager::memory_manager() = default;
+struct memory_manager::impl
+{
+    entt::registry _registry;
+    std::unordered_map<uid, entt::entity> _entities;
+
+    inline auto& storage_for(std::string_view class_name)
+    {
+        return *_registry.storage(type_id(class_name));
+    }
+
+    static entt::meta_type typeof(std::string_view class_name)
+    {
+        return entt::resolve(type_id(class_name));
+    }
+
+    template <typename T>
+    static entt::meta_type typeof()
+    {
+        return typeof(T::type_name);
+    }
+
+    entt::entity entity(uid id) { return _entities.at(id); }
+
+    uid id(entt::entity ent) { return _registry.get<uid>(ent); }
+
+    std::shared_ptr<game_object> get_object(entt::entity ent)
+    {
+        return _registry.get<std::shared_ptr<game_object>>(ent);
+    }
+};
+
+memory_manager::memory_manager()
+    : _impl(std::make_unique<impl>())
+{
+}
 
 memory_manager::~memory_manager() = default;
 
-void memory_manager::initialize()
-{
-    if (!_instance)
-    {
-        _instance = new memory_manager;
-    }
-}
-
-void memory_manager::deinitialize()
-{
-    if (_instance)
-    {
-        delete _instance;
-        _instance = nullptr;
-    }
-}
-
 memory_manager& memory_manager::instance()
 {
-    if (!_instance)
-    {
-        initialize();
-    }
-    return *_instance;
+    static memory_manager instance;
+    return instance;
 }
 
 size_t memory_manager::type_id(std::string_view class_name)
@@ -43,30 +59,21 @@ size_t memory_manager::type_id(std::string_view class_name)
     return entt::hashed_string(class_name.data(), class_name.size());
 }
 
-entt::meta_type memory_manager::typeof(std::string_view class_name)
-{
-    return entt::resolve(type_id(class_name));
-}
-
-auto& memory_manager::storage_for(std::string_view class_name)
-{
-    return *instance()._registry.storage(type_id(class_name));
-}
-
 std::shared_ptr<game_object> memory_manager::create_game_object()
 {
     auto obj = std::shared_ptr<game_object>(new game_object);
-    auto ent = instance()._registry.create();
-    instance()._registry.emplace<std::shared_ptr<game_object>>(ent, obj);
-    instance()._registry.emplace<uid>(ent, obj->id());
-    instance()._entities.emplace(obj->id(), ent);
+    auto ent = instance()._impl->_registry.create();
+    instance()._impl->_registry.emplace<std::shared_ptr<game_object>>(ent, obj);
+    instance()._impl->_registry.emplace<uid>(ent, obj->id());
+    instance()._impl->_entities.emplace(obj->id(), ent);
     instance()._objects.emplace(obj->id(), obj);
     return obj;
 }
 
 void memory_manager::register_component_type(std::string_view type_name)
 {
-    auto& _ = instance()._registry.storage<component>(type_id(type_name));
+    auto& _ =
+        instance()._impl->_registry.storage<component>(type_id(type_name));
 }
 
 void memory_manager::for_each_object(
@@ -82,10 +89,11 @@ void memory_manager::for_each_object(
 component& memory_manager::create_component(game_object& obj,
                                             std::string_view class_name)
 {
-    auto type = typeof(class_name);
-    auto comp = type.construct(entt::forward_as_meta(instance()._registry),
-                               entity(obj.id()),
-                               entt::forward_as_meta(obj));
+    auto type = impl::typeof(class_name);
+    auto comp =
+        type.construct(entt::forward_as_meta(instance()._impl->_registry),
+                       instance()._impl->entity(obj.id()),
+                       entt::forward_as_meta(obj));
     return *(static_cast<component*>(comp.data()));
 }
 
@@ -98,17 +106,21 @@ component& memory_manager::get_component(const game_object& obj,
 component* memory_manager::try_get_component(const game_object& obj,
                                              std::string_view class_name)
 {
-    auto type = typeof(class_name);
-    auto comp = type.invoke(entt::hashed_string("try_get"),
-                            {},
-                            entt::forward_as_meta(instance()._registry),
-                            entity(obj.id()));
-    return (*comp).try_cast<component>();
-}
+    auto entity = instance()._impl->entity(obj.id());
+    // try to lookup by base class
+    for (auto&& storage_info : instance()._impl->_registry.storage())
+    {
+        entt::meta_type type = entt::resolve(storage_info.second.type());
+        if (type.can_cast(impl::typeof(class_name)))
+        {
+            if (auto& storage = storage_info.second; storage.contains(entity))
+            {
+                return static_cast<component*>(storage.value(entity));
+            }
+        }
+    }
 
-std::shared_ptr<game_object> memory_manager::get_object(entt::entity ent)
-{
-    return instance()._registry.get<std::shared_ptr<game_object>>(ent);
+    return nullptr;
 }
 
 std::shared_ptr<object> memory_manager::get_object_by_id(uid id)
@@ -116,16 +128,16 @@ std::shared_ptr<object> memory_manager::get_object_by_id(uid id)
     return instance()._objects.at(id).lock();
 }
 
-std::shared_ptr<game_object> memory_manager::get_game_object_by_id(uid id)
+std::shared_ptr<game_object> memory_manager::get_game_object(uid id)
 {
-    return get_object(entity(id));
+    return instance()._impl->get_object(instance()._impl->entity(id));
 }
 
 bool memory_manager::visit_components(const game_object& obj,
                                       std::function<bool(component&)> visitor)
 {
-    auto ent = entity(obj.id());
-    for (auto [ _, storage ] : instance()._registry.storage())
+    auto ent = instance()._impl->entity(obj.id());
+    for (auto [ _, storage ] : instance()._impl->_registry.storage())
     {
         if (storage.contains(ent))
         {
@@ -149,9 +161,9 @@ bool memory_manager::visit_components(const game_object& obj,
 nlohmann::json memory_manager::serialize()
 {
     json_serializer s;
-    for (auto ent : instance()._registry.view<entt::entity>())
+    for (auto ent : instance()._impl->_registry.view<entt::entity>())
     {
-        auto obj = get_object(ent);
+        auto obj = instance()._impl->get_object(ent);
         s.start_object();
         s.property("name", obj->get_name());
         s.property("id", obj->id().id);
@@ -160,7 +172,7 @@ nlohmann::json memory_manager::serialize()
         {
             s.property("parent", p->id().id);
         }
-        for (auto [ _, storage ] : instance()._registry.storage())
+        for (auto [ _, storage ] : instance()._impl->_registry.storage())
         {
             if (storage.contains(ent))
             {
@@ -189,10 +201,10 @@ void memory_manager::deserialize(const nlohmann::json& data)
         gobj->_id = uid { obj[ "id" ] };
         gobj->_is_active = obj[ "is_active" ].get<bool>();
 
-        auto n = instance()._entities.extract(old_id);
+        auto n = instance()._impl->_entities.extract(old_id);
         n.key() = gobj->id();
-        instance()._entities.insert(std::move(n));
-        auto ent = entity(gobj->id());
+        instance()._impl->_entities.insert(std::move(n));
+        auto ent = instance()._impl->entity(gobj->id());
 
         if (obj.contains("parent"))
         {
@@ -202,8 +214,9 @@ void memory_manager::deserialize(const nlohmann::json& data)
         {
             scene::_active_scene->add_root_object(gobj);
         }
-        instance()._registry.replace<std::shared_ptr<game_object>>(ent, gobj);
-        instance()._registry.replace<uid>(ent, gobj->id());
+        instance()._impl->_registry.replace<std::shared_ptr<game_object>>(ent,
+                                                                          gobj);
+        instance()._impl->_registry.replace<uid>(ent, gobj->id());
 
         for (const auto& c : obj[ "components" ])
         {
@@ -212,7 +225,7 @@ void memory_manager::deserialize(const nlohmann::json& data)
             type.invoke(entt::hashed_string("deserialize"),
                         comp,
                         entt::forward_as_meta(c));
-            for (auto&& curr : instance()._registry.storage())
+            for (auto&& curr : instance()._impl->_registry.storage())
             {
                 if (auto& storage = curr.second; storage.contains(ent))
                 {
@@ -225,15 +238,3 @@ void memory_manager::deserialize(const nlohmann::json& data)
         }
     }
 }
-
-uid memory_manager::id(entt::entity ent)
-{
-    return instance()._registry.get<uid>(ent);
-}
-
-entt::entity memory_manager::entity(uid id)
-{
-    return instance()._entities.at(id);
-}
-
-memory_manager* memory_manager::_instance = nullptr;
