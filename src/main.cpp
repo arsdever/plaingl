@@ -42,6 +42,7 @@
 #include "texture.hpp"
 #include "texture_viewer.hpp"
 #include "thread.hpp"
+#include "tools/editor/editor_window.hpp"
 #include "tools/mesh_viewer/mesh_viewer.hpp"
 #include "tools/profiler/profiler.hpp"
 
@@ -252,6 +253,16 @@ int main(int argc, char** argv)
                                   ce.get_sender()->shared_from_this()));
     };
     windows.push_back(profview);
+
+    auto ew = std::make_shared<editor_window>();
+    ew->init();
+    ew->get_events()->close += [](auto ce)
+    {
+        windows.erase(std::remove(windows.begin(),
+                                  windows.end(),
+                                  ce.get_sender()->shared_from_this()));
+    };
+    windows.push_back(ew);
 
     cmd_show_texture::on_show_texture +=
         [ &txt_show ](texture* t) { txt_show = t; };
@@ -548,6 +559,7 @@ void setupMouseEvents()
 void initScene()
 {
     s = scene::create();
+    s->set_name("Main scene");
     feature_flags::set_flag(feature_flags::flag_name::load_fbx_as_scene, false);
     auto* am = asset_manager::default_asset_manager();
     material* basic_mat = am->get_material("standard");
