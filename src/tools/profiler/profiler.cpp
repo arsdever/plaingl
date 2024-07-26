@@ -28,7 +28,7 @@ profiler::profiler()
     set_title("Profiler");
     resize(600, 600);
     on_user_initialize +=
-        [ this ](std::shared_ptr<experimental::window>) { initialize(); };
+        [ this ](std::shared_ptr<core::window>) { initialize(); };
 }
 
 profiler::~profiler() { }

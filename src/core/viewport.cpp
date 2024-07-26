@@ -1,17 +1,17 @@
 #include <glad/gl.h>
 #include <glm/vec2.hpp>
 
-#include "experimental/viewport.hpp"
+#include "core/viewport.hpp"
 
 #include "core/asset_manager.hpp"
-#include "experimental/window.hpp"
-#include "image.hpp"
-#include "material.hpp"
-#include "mesh.hpp"
+#include "core/window.hpp"
+#include "graphics/image.hpp"
+#include "graphics/material.hpp"
+#include "graphics/mesh.hpp"
+#include "graphics/shader.hpp"
+#include "graphics/texture.hpp"
 #include "project/components/camera.hpp"
 #include "renderer/renderer_3d.hpp"
-#include "shader.hpp"
-#include "texture.hpp"
 
 namespace
 {
@@ -27,7 +27,7 @@ void render_quad(texture* _p)
 }
 } // namespace
 
-namespace experimental
+namespace core
 {
 
 struct viewport::viewport_private
@@ -85,4 +85,4 @@ viewport* viewport::current_viewport() { return _current_viewport; }
 
 viewport* viewport::_current_viewport { nullptr };
 
-} // namespace experimental
+} // namespace core

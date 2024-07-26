@@ -1,7 +1,7 @@
 #include "tools/mesh_viewer/mesh_viewer.hpp"
 
 #include "core/asset_manager.hpp"
-#include "experimental/window.hpp"
+#include "core/window.hpp"
 #include "graphics/material.hpp"
 #include "graphics/mesh.hpp"
 #include "graphics_buffer.hpp"
@@ -12,7 +12,7 @@ mesh_viewer::mesh_viewer()
 {
     resize(600, 600);
     on_user_initialize +=
-        [ this ](std::shared_ptr<experimental::window>) { initialize(); };
+        [ this ](std::shared_ptr<core::window>) { initialize(); };
 }
 
 mesh_viewer::~mesh_viewer() = default;

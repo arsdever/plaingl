@@ -7,7 +7,7 @@
 
 #include "event.hpp"
 
-namespace experimental
+namespace core
 {
 
 class window;
@@ -244,4 +244,4 @@ private:
     static float _default_drag_distance;
 };
 
-} // namespace experimental
+} // namespace core

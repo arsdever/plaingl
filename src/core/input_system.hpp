@@ -7,7 +7,7 @@
 
 #include "event.hpp"
 
-namespace experimental
+namespace core
 {
 
 class input_system
@@ -54,4 +54,4 @@ private:
     static glm::ivec2 _mouse_position;
 };
 
-} // namespace experimental
+} // namespace core
