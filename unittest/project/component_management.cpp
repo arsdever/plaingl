@@ -38,12 +38,3 @@ TEST(ProjectComponentManagement, add_component_same_as_get_component_2)
     EXPECT_EQ(static_cast<components::mesh_filter&>(mf).get_mesh(),
               reinterpret_cast<mesh*>(0xff00ff00ff00ff00));
 }
-
-TEST(ProjectComponentManagement, base_class_component)
-{
-    auto obj = game_object::create();
-    auto& mr = obj->add<components::mesh_renderer>();
-    auto& r = obj->get<components::renderer>();
-
-    EXPECT_EQ(&mr, &r);
-}

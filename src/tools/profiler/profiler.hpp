@@ -1,8 +1,8 @@
 #pragma once
 
-#include "experimental/window.hpp"
+#include "core/window.hpp"
 
-class profiler : public experimental::window
+class profiler : public core::window
 {
 public:
     profiler();

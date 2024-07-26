@@ -1,10 +1,11 @@
 #include <array>
 
+#include "texture.hpp"
+
 #include "core/asset_manager.hpp"
-#include "experimental/window.hpp"
+#include "core/window.hpp"
 #include "graphics_buffer.hpp"
 #include "shader.hpp"
-#include "texture.hpp"
 #include "vaomap.hpp"
 #include "vertex.hpp"
 
@@ -39,10 +40,9 @@ std::array<graphics_buffer, 2> init_quad_mesh()
 int main(int argc, char** argv)
 {
     glfwInit();
-    std::shared_ptr<experimental::window> wnd_interpolation =
-        std::make_shared<experimental::window>();
-    std::shared_ptr<experimental::window> wnd_repeat =
-        std::make_shared<experimental::window>();
+    std::shared_ptr<core::window> wnd_interpolation =
+        std::make_shared<core::window>();
+    std::shared_ptr<core::window> wnd_repeat = std::make_shared<core::window>();
 
     wnd_interpolation->set_title("Sampling mode visualization");
     wnd_interpolation->resize(400, 200);

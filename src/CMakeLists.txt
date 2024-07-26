@@ -18,15 +18,7 @@ add_library(
   thread.hpp
   thread.cpp
   transform.hpp
-  transform.cpp
-  experimental/input_system.hpp
-  experimental/input_system.cpp
-  experimental/viewport.hpp
-  experimental/viewport.cpp
-  experimental/window_events.hpp
-  experimental/window_events.cpp
-  experimental/window.hpp
-  experimental/window.cpp)
+  transform.cpp)
 add_library(${PROJECT}::lib ALIAS ${PROJECT}_lib)
 
 add_subdirectory(common)

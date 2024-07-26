@@ -6,9 +6,9 @@
 #include <glm/ext.hpp>
 #include <prof/profiler.hpp>
 
-#include "experimental/window.hpp"
+#include "core/window.hpp"
 
-#include "experimental/window_events.hpp"
+#include "core/window_events.hpp"
 #include "input_system.hpp"
 #include "logging.hpp"
 
@@ -16,11 +16,11 @@ namespace
 {
 logger log() { return get_logger("window"); }
 
-experimental::mouse_event::modifiers
+core::mouse_event::modifiers
 glfw_keyboard_modifiers_to_mouse_event_modifiers(int mods)
 {
-    experimental::mouse_event::modifiers modifiers;
-    modifiers = static_cast<experimental::mouse_event::modifiers>(mods);
+    core::mouse_event::modifiers modifiers;
+    modifiers = static_cast<core::mouse_event::modifiers>(mods);
     return modifiers;
 }
 
@@ -29,7 +29,7 @@ static constexpr double DRAG_START_DISTANCE { 5.0 };
 
 } // namespace
 
-namespace experimental
+namespace core
 {
 
 struct window::window_private_data
@@ -533,4 +533,4 @@ void window::configure_input_system()
 
 std::shared_ptr<window> window::_main_window = nullptr;
 
-} // namespace experimental
+} // namespace core

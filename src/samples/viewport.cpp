@@ -8,10 +8,10 @@
 #include <memory>
 #include <vector>
 
-#include "experimental/viewport.hpp"
+#include "core/viewport.hpp"
 
 #include "core/asset_manager.hpp"
-#include "experimental/window.hpp"
+#include "core/window.hpp"
 #include "gl_error_handler.hpp"
 #include "logging.hpp"
 #include "material.hpp"
@@ -34,15 +34,14 @@ void init_scene();
 int main(int argc, char** argv)
 {
     glfwInit();
-    std::vector<std::shared_ptr<experimental::window>> windows;
-    auto exp_window = std::make_shared<experimental::window>();
+    std::vector<std::shared_ptr<core::window>> windows;
+    auto exp_window = std::make_shared<core::window>();
 
     std::shared_ptr<game_object> main_camera_object = nullptr;
     std::shared_ptr<scene> current_scene = nullptr;
 
-    exp_window->on_user_initialize +=
-        [ &current_scene,
-          &main_camera_object ](std::shared_ptr<experimental::window> wnd)
+    exp_window->on_user_initialize += [ &current_scene, &main_camera_object ](
+                                          std::shared_ptr<core::window> wnd)
     {
         // configure gl debug output
         glEnable(GL_DEBUG_OUTPUT);
@@ -55,7 +54,7 @@ int main(int argc, char** argv)
         current_scene = scene::create();
         main_camera_object->add<components::camera>().set_active();
         init_scene();
-        auto vp = std::make_shared<experimental::viewport>();
+        auto vp = std::make_shared<core::viewport>();
         vp->set_size(wnd->get_size());
         wnd->add_viewport(vp);
     };

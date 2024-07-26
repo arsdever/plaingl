@@ -5,10 +5,10 @@
 
 #include <glm/fwd.hpp>
 
+#include "core/window_events.hpp"
 #include "event.hpp"
-#include "experimental/window_events.hpp"
 
-namespace experimental
+namespace core
 {
 
 class viewport;
@@ -80,4 +80,4 @@ private:
     static std::shared_ptr<window> _main_window;
 };
 
-} // namespace experimental
+} // namespace core

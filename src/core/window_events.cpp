@@ -1,7 +1,7 @@
 #include <GLFW/glfw3.h>
 #include <glm/ext.hpp>
 
-#include "experimental/window_events.hpp"
+#include "core/window_events.hpp"
 
 #include "logging.hpp"
 
@@ -12,7 +12,7 @@ namespace
 logger log() { return get_logger("events"); }
 } // namespace
 
-namespace experimental
+namespace core
 {
 
 window_event::window_event(type t, window* sender)
@@ -170,4 +170,4 @@ int key_event::get_key() const { return _key; }
 
 bool key_event::get_is_repeated() const { return _is_repeated; }
 
-} // namespace experimental
+} // namespace core

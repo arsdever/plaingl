@@ -1,6 +1,6 @@
 #include <glm/vec2.hpp>
 
-#include "experimental/input_system.hpp"
+#include "core/input_system.hpp"
 
 #include "logging.hpp"
 
@@ -9,7 +9,7 @@ namespace
 inline logger log() { return get_logger("input_system"); }
 } // namespace
 
-namespace experimental
+namespace core
 {
 
 void input_system::set_mouse_position(glm::ivec2 pos) { _mouse_position = pos; }
@@ -56,4 +56,4 @@ std::unordered_map<input_system::mouse_button, input_system::button_state>
 event<void(int)> input_system::on_keypress;
 glm::ivec2 input_system::_mouse_position;
 
-} // namespace experimental
+} // namespace core

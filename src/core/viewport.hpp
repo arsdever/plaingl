@@ -5,7 +5,7 @@
 
 #include <glm/fwd.hpp>
 
-namespace experimental
+namespace core
 {
 
 class window;
@@ -43,4 +43,4 @@ private:
     static viewport* _current_viewport;
 };
 
-} // namespace experimental
+} // namespace core

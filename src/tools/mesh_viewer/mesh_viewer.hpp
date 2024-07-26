@@ -1,11 +1,11 @@
 #pragma once
 
-#include "experimental/window.hpp"
+#include "core/window.hpp"
 
 class graphics_buffer;
 class mesh;
 
-class mesh_viewer : public experimental::window
+class mesh_viewer : public core::window
 {
 public:
     mesh_viewer();

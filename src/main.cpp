@@ -16,10 +16,10 @@
 // #include "components/text_renderer_component.hpp"
 // #include "components/walking_component.hpp"
 #include "core/command_dispatcher.hpp"
-#include "experimental/input_system.hpp"
-#include "experimental/viewport.hpp"
-#include "experimental/window.hpp"
-#include "experimental/window_events.hpp"
+#include "core/input_system.hpp"
+#include "core/viewport.hpp"
+#include "core/window.hpp"
+#include "core/window_events.hpp"
 #include "feature_flags.hpp"
 #include "file.hpp"
 #include "font.hpp"
@@ -45,7 +45,7 @@
 #include "tools/mesh_viewer/mesh_viewer.hpp"
 #include "tools/profiler/profiler.hpp"
 
-using namespace experimental;
+using namespace core;
 
 namespace
 {
@@ -59,7 +59,7 @@ game_object* _fps_text_object;
 texture* txt;
 texture* norm_txt;
 // ray_visualize_component* cast_ray;
-std::vector<std::shared_ptr<experimental::window>> windows;
+std::vector<std::shared_ptr<core::window>> windows;
 int mesh_preview_texture_index { 0 };
 std::unique_ptr<console> pconsole;
 
@@ -164,7 +164,7 @@ int main(int argc, char** argv)
     setupMouseEvents();
     initScene();
 
-    experimental::input_system::on_keypress += [](int keycode)
+    core::input_system::on_keypress += [](int keycode)
     {
         if (keycode == GLFW_KEY_GRAVE_ACCENT)
         {
@@ -306,7 +306,7 @@ int main(int argc, char** argv)
 
 void initMainWindow()
 {
-    windows.push_back(std::make_shared<experimental::window>());
+    windows.push_back(std::make_shared<core::window>());
     auto& wnd = windows.back();
     wnd->on_user_initialize += [](auto) { load_internal_resources(); };
     wnd->init();
@@ -432,7 +432,7 @@ void initMainWindow()
 
 // void initViewports()
 // {
-//     windows.push_back(std::make_shared<experimental::window>());
+//     windows.push_back(std::make_shared<core::window>());
 //     auto wnd = windows.back();
 //     wnd->init();
 //     wnd->resize(400, 1200);
@@ -447,7 +447,7 @@ void initMainWindow()
 //     {
 //         _view_cameras[ i ] = std::make_shared<camera>();
 //         auto cam = _view_cameras[ i ];
-//         auto vp = std::make_shared<experimental::viewport>();
+//         auto vp = std::make_shared<core::viewport>();
 //         vp->initialize();
 //         vp->set_camera(cam);
 //         cam->set_ortho(true);
@@ -506,8 +506,7 @@ void initMainWindow()
 
 void setupMouseEvents()
 {
-    experimental::window::get_main_window()->get_events()->mouse_move +=
-        [](auto me)
+    core::window::get_main_window()->get_events()->mouse_move += [](auto me)
     {
         if (me.get_sender()->get_has_grab())
         {
@@ -696,7 +695,7 @@ void load_internal_resources()
 
 void initProfilerView()
 {
-    windows.push_back(std::make_shared<experimental::window>());
+    windows.push_back(std::make_shared<core::window>());
     auto& wnd = windows.back();
     wnd->init();
     wnd->resize(800, 200);
