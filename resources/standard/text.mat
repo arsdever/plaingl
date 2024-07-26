@@ -2,8 +2,18 @@
   "shader": "text",
   "properties": [
     {
-      "name": "u_text",
+      "name": "u_image",
       "type": "image"
+    },
+    {
+      "name": "u_color",
+      "type": "vec4",
+      "value": [
+        1,
+        1,
+        1,
+        1
+      ]
     },
     {
       "name": "u_model_matrix",
@@ -12,10 +22,6 @@
     {
       "name": "u_vp_matrix",
       "type": "mat44"
-    },
-    {
-      "name": "u_text_color",
-      "type": "vec3"
     }
   ]
 }

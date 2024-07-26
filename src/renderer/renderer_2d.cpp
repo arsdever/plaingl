@@ -204,7 +204,7 @@ void renderer_2d::draw_text(glm::vec2 baseline,
     text_mesh.init();
 
     auto surface_shader =
-        asset_manager::default_asset_manager()->get_material("surface");
+        asset_manager::default_asset_manager()->get_material("text");
 
     surface_shader->set_property_value("u_color", glm::vec4(1.0f));
     surface_shader->set_property_value("u_image",

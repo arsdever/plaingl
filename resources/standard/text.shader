@@ -1,2 +1,2 @@
-../shaders/text.vert
+../shaders/surface.vert
 ../shaders/text.frag
