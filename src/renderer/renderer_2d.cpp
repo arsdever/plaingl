@@ -1,7 +1,6 @@
 #include "renderer_2d.hpp"
 
 #include "core/asset_manager.hpp"
-// #include "camera.hpp"
 #include "core/viewport.hpp"
 #include "glad/gl.h"
 #include "graphics/font.hpp"
@@ -100,6 +99,9 @@ void renderer_2d::draw_rect(glm::vec2 top_left,
         asset_manager::default_asset_manager()->get_material("surface");
 
     glm::uvec2 usize = core::viewport::current_viewport()->get_size();
+    auto white_pixel = texture::from_image(
+        asset_manager::default_asset_manager()->get_image("white"));
+    shader_2d->set_property_value("u_image", &white_pixel);
     shader_2d->set_property_value("u_color", fill_color);
     shader_2d->activate();
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);

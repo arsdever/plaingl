@@ -9,6 +9,7 @@
 struct editor_window::impl
 {
     font _font;
+    std::unordered_map<glm::vec4, std::shared_ptr<object>> _object_map;
 };
 
 editor_window::editor_window()
@@ -32,22 +33,39 @@ void editor_window::render()
     glClear(GL_COLOR_BUFFER_BIT);
 
     const auto line_height = 14;
-    const auto line_padding = 2;
-    renderer_2d().draw_text({ 5, 19 },
+    const glm::vec2 line_padding { 0, 2 };
+    glm::vec2 offset {};
+    const auto scene_name_size =
+        _impl->_font.get_text_size(scene::get_active_scene()->get_name());
+    renderer_2d().draw_rect(offset,
+                            offset + scene_name_size,
+                            { get_width(), get_height() },
+                            0,
+                            glm::vec4(0),
+                            glm::vec4(.3f, .2f, 0, 1));
+    renderer_2d().draw_text(offset + glm::vec2 { 0, line_height },
                             _impl->_font,
                             { get_width(), get_height() },
                             scene::get_active_scene()->get_name());
 
-    int element_index = 1;
+    offset.y += scene_name_size.y;
+    offset.x += 20;
     scene::get_active_scene()->visit_root_objects(
-        [ this, &element_index ](auto obj)
+        [ this, line_padding, &offset ](auto obj)
     {
-        renderer_2d().draw_text(
-            { 5, 19 + (line_height + line_padding) * element_index },
-            _impl->_font,
-            { get_width(), get_height() },
-            std::format(" |-> {}", obj->get_name()));
+        auto str = std::format("[ ] |-> {}", obj->get_name());
+        auto name_size = _impl->_font.get_text_size(str);
+        renderer_2d().draw_rect(offset,
+                                offset + name_size,
+                                { get_width(), get_height() },
+                                0,
+                                glm::vec4(0),
+                                glm::vec4(.2f, .3f, 0, 0));
+        renderer_2d().draw_text(offset + glm::vec2 { 0, line_height },
+                                _impl->_font,
+                                { get_width(), get_height() },
+                                str);
 
-        ++element_index;
+        offset.y += name_size.y;
     });
 }

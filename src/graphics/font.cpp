@@ -18,6 +18,7 @@ font::font() = default;
 void font::load(std::string path, float size)
 {
     _font_file_path = std::move(path);
+    _font_size = size;
     FT_Library ft;
     if (FT_Init_FreeType(&ft))
     {
@@ -26,13 +27,13 @@ void font::load(std::string path, float size)
     }
 
     FT_Face face;
-    if (FT_New_Face(ft, "resources/font.ttf", 0, &face))
+    if (FT_New_Face(ft, _font_file_path.c_str(), 0, &face))
     {
         log()->error("FREETYPE: Failed to load font");
         return;
     }
 
-    FT_Set_Pixel_Sizes(face, 0, size);
+    FT_Set_Pixel_Sizes(face, 0, _font_size);
     if (FT_Load_Char(face, 'X', FT_LOAD_RENDER))
     {
         log()->error("FREETYTPE: Failed to load Glyph");
@@ -93,6 +94,51 @@ void font::load(std::string path, float size)
     FT_Done_Face(face);
     FT_Done_FreeType(ft);
     log()->info("Done packing");
+}
+
+glm::vec2 font::get_text_size(std::string_view text) const
+{
+    FT_Library ft;
+    if (FT_Init_FreeType(&ft))
+    {
+        log()->error("FREETYPE: Could not init FreeType Library");
+        return {};
+    }
+
+    FT_Face face;
+    if (FT_New_Face(ft, _font_file_path.c_str(), 0, &face))
+    {
+        log()->error("FREETYPE: Failed to load font");
+        return {};
+    }
+
+    FT_Set_Pixel_Sizes(face, 0, _font_size);
+    if (FT_Load_Char(face, 'X', FT_LOAD_RENDER))
+    {
+        log()->error("FREETYTPE: Failed to load Glyph");
+        return {};
+    }
+
+    glm::vec2 pen { 0, 0 };
+    glm::vec2 size { 0 };
+
+    size.y = face->size->metrics.height;
+
+    for (auto ch : text)
+    {
+        // load character glyph
+        if (FT_Load_Char(face, ch, FT_LOAD_NO_BITMAP))
+        {
+            log()->error("FREETYTPE: Failed to load Glyph");
+            continue;
+        }
+
+        size.x += face->glyph->advance.x;
+    }
+
+    FT_Done_Face(face);
+    FT_Done_FreeType(ft);
+    return size / 64.0f;
 }
 
 texture& font::atlas() { return *_atlas; }

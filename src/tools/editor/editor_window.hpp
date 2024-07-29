@@ -12,6 +12,6 @@ private:
     void initialize();
     void render();
 
-struct impl;
-std::unique_ptr<impl> _impl;
+    struct impl;
+    std::unique_ptr<impl> _impl;
 };

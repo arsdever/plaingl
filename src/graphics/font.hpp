@@ -23,6 +23,7 @@ public:
     void load(std::string path, float size);
     texture& atlas();
     const texture& atlas() const;
+    glm::vec2 get_text_size(std::string_view text) const;
 
     const character& operator[](unsigned int ch) const;
 
@@ -45,6 +46,7 @@ private:
 
 private:
     std::string _font_file_path;
+    size_t _font_size;
     std::map<unsigned int, character> _character_map;
     std::shared_ptr<texture> _atlas;
 };
