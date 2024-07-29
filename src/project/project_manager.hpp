@@ -8,13 +8,13 @@ class component;
 class game_object;
 class object;
 
-class memory_manager
+class project_manager
 {
 public:
-    memory_manager();
-    ~memory_manager();
+    project_manager();
+    ~project_manager();
 
-    static memory_manager& instance();
+    static project_manager& instance();
 
     static size_t type_id(std::string_view class_name);
 
@@ -53,6 +53,12 @@ public:
 
     static void
     for_each_object(std::function<void(std::shared_ptr<object>&)> func);
+
+    static void set_object_selection(std::shared_ptr<object> obj);
+    static void set_object_selection(std::vector<std::shared_ptr<object>> obj);
+    static void add_object_to_selection(std::shared_ptr<object> obj);
+    static void
+    add_objects_to_selection(std::vector<std::shared_ptr<object>> obj);
 
 private:
     struct impl;

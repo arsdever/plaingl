@@ -1,4 +1,4 @@
-set(HEADERS memory_manager.hpp)
+set(HEADERS project_manager.hpp)
 set(INTERFACE_HEADERS
     component.hpp
     game_object.hpp
@@ -9,7 +9,7 @@ set(INTERFACE_HEADERS
     serialization_utilities.hpp
     serializer.hpp
     serializer_json.hpp)
-set(SOURCES component.cpp game_object.cpp memory_manager.cpp object.cpp
+set(SOURCES component.cpp game_object.cpp project_manager.cpp object.cpp
             scene.cpp)
 
 foreach(interface_header ${INTERFACE_HEADERS})

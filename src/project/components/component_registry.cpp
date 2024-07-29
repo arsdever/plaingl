@@ -3,7 +3,7 @@
 #include "project/components/component_registry.hpp"
 
 #include "component_list_inc.hpp"
-#include "project/memory_manager.hpp"
+#include "project/project_manager.hpp"
 #include "project/serializer_json.hpp"
 
 void component_registry::register_components()

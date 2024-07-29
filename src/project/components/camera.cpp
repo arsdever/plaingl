@@ -11,7 +11,7 @@
 #include "project/components/mesh_filter.hpp"
 #include "project/components/mesh_renderer.hpp"
 #include "project/components/transform.hpp"
-#include "project/memory_manager.hpp"
+#include "project/project_manager.hpp"
 #include "project/scene.hpp"
 #include "project/serialization_utilities.hpp"
 #include "project/serializer.hpp"

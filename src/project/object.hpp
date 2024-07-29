@@ -27,7 +27,7 @@ protected:
     void register_object();
 
 public:
-    friend class memory_manager;
+    friend class project_manager;
 
 private:
     uid _id;

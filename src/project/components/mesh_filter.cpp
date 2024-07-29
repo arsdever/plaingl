@@ -2,7 +2,7 @@
 
 #include "project/components/mesh_filter.hpp"
 
-#include "project/memory_manager.hpp"
+#include "project/project_manager.hpp"
 #include "project/serialization_utilities.hpp"
 #include "project/serializer.hpp"
 #include "project/serializer_json.hpp"

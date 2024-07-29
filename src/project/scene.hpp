@@ -30,5 +30,5 @@ private:
     std::vector<std::shared_ptr<game_object>> _root_objects;
     static std::shared_ptr<scene> _active_scene;
 
-    friend class memory_manager;
+    friend class project_manager;
 };

@@ -3,7 +3,7 @@
 #include "project/scene.hpp"
 
 #include "project/game_object.hpp"
-#include "project/memory_manager.hpp"
+#include "project/project_manager.hpp"
 
 scene::scene() = default;
 
@@ -40,7 +40,7 @@ std::shared_ptr<scene> scene::create()
 void scene::save(std::string_view path)
 {
     std::ofstream file { std::string(path) };
-    file << memory_manager::serialize().dump() << std::endl;
+    file << project_manager::serialize().dump() << std::endl;
 }
 
 std::shared_ptr<scene> scene::load(std::string_view path)
@@ -49,7 +49,7 @@ std::shared_ptr<scene> scene::load(std::string_view path)
     nlohmann::json data;
     file >> data;
     _active_scene = std::shared_ptr<scene>(new scene());
-    memory_manager::deserialize(data);
+    project_manager::deserialize(data);
     return _active_scene;
 }
 

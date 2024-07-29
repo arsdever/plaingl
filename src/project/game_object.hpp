@@ -69,7 +69,7 @@ protected:
     void set_parent(std::shared_ptr<game_object> parent);
 
 private:
-    friend class memory_manager;
+    friend class project_manager;
     game_object();
 
 private:
