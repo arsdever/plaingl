@@ -262,3 +262,16 @@ void project_manager::add_objects_to_selection(
     instance()._impl->_selected_objects.insert(
         instance()._impl->_selected_objects.end(), obj.begin(), obj.end());
 }
+
+bool project_manager::for_each_selected_object(
+    std::function<bool(std::shared_ptr<object>)> func)
+{
+    for (auto& obj : instance()._impl->_selected_objects)
+    {
+        if (!func(obj))
+        {
+            return false;
+        }
+    }
+    return true;
+}

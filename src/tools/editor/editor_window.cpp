@@ -5,6 +5,7 @@
 #include "core/window_events.hpp"
 #include "graphics/font.hpp"
 #include "project/game_object.hpp"
+#include "project/project_manager.hpp"
 #include "project/scene.hpp"
 #include "renderer/renderer_2d.hpp"
 
@@ -58,21 +59,26 @@ void editor_window::initialize()
     };
     get_events()->mouse_click += [ this ](auto me)
     {
+        std::vector<std::shared_ptr<object>> selected_objects;
         for (auto& region : _impl->regions)
         {
-            if (me.get_modifiers() & core::input_event::modifiers::Control)
+            if (!(me.get_modifiers() & core::input_event::modifiers::Control))
             {
-                region.second.selected |=
-                    region.second.contains(me.get_local_position());
-                log()->info("Adding to selection");
+                region.second.selected = false;
             }
-            else
+
+            if (region.second.contains(me.get_local_position()))
             {
-                region.second.selected =
-                    region.second.contains(me.get_local_position());
-                log()->info("Selecting");
+                region.second.selected = !region.second.selected;
+            }
+
+            if (region.second.selected)
+            {
+                selected_objects.push_back(region.first);
             }
         }
+
+        project_manager::set_object_selection(selected_objects);
     };
 }
 

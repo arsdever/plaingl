@@ -59,6 +59,7 @@ public:
     static void add_object_to_selection(std::shared_ptr<object> obj);
     static void
     add_objects_to_selection(std::vector<std::shared_ptr<object>> obj);
+    static bool for_each_selected_object(std::function<bool(std::shared_ptr<object>)> func);
 
 private:
     struct impl;

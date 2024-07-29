@@ -3,6 +3,7 @@
 #include <spdlog/common.h>
 
 #include "core/asset_manager.hpp"
+#include "project_manager.hpp"
 #include "tools/console/console.hpp"
 // #include "components/box_collider_component.hpp"
 // #include "components/camera_component.hpp"
@@ -373,63 +374,75 @@ void initMainWindow()
             baseline += 2 * line_height;
         }
 
-        if (auto obj = project::selected_object(); obj != nullptr)
+        glm::vec2 origin { 0, yoffset };
+        project_manager::for_each_selected_object(
+            [ &, baseline ](auto obj) -> bool
         {
-            renderer_2d().draw_rect(
-                { 0, yoffset },
-                { re.get_sender()->get_width(),
-                  line_height * 5 + 10 + yoffset },
-                { re.get_sender()->get_width(), re.get_sender()->get_height() },
-                0,
-                glm::vec4(0),
-                glm::vec4(0));
-
-            std::string p = std::format("{:10}: {}", "name", obj->get_name());
-            renderer_2d().draw_text(
-                { 5, baseline },
-                ttf,
-                { re.get_sender()->get_width(), re.get_sender()->get_height() },
-                p,
-                scale);
-
-            baseline += line_height;
-            if (auto gobj = std::dynamic_pointer_cast<game_object>(obj);
-                gobj != nullptr)
+            auto render_gameobject_data = [ & ]()
             {
-                p = std::format(
-                    "{:10}: {}",
-                    "position",
-                    glm::to_string(gobj->get_transform().get_position()));
-                renderer_2d().draw_text({ 5, baseline },
+                auto bl = baseline;
+                renderer_2d().draw_rect(
+                    origin,
+                    origin + glm::vec2 { re.get_sender()->get_width(),
+                                         line_height * 5 + 10 + yoffset },
+                    { re.get_sender()->get_width(),
+                      re.get_sender()->get_height() },
+                    0,
+                    glm::vec4(0),
+                    glm::vec4(0, 0, 0, .1f));
+
+                std::string p =
+                    std::format("{:10}: {}", "name", obj->get_name());
+                renderer_2d().draw_text(origin + glm::vec2 { 5, bl },
                                         ttf,
                                         { re.get_sender()->get_width(),
                                           re.get_sender()->get_height() },
                                         p,
                                         scale);
-                baseline += line_height;
-                p = std::format(
-                    "{:10}: {}",
-                    "rotation",
-                    glm::to_string(gobj->get_transform().get_rotation()));
-                renderer_2d().draw_text({ 5, baseline },
-                                        ttf,
-                                        { re.get_sender()->get_width(),
-                                          re.get_sender()->get_height() },
-                                        p,
-                                        scale);
-                baseline += line_height;
-                p = std::format(
-                    "{:10}: {}",
-                    "scale",
-                    glm::to_string(gobj->get_transform().get_scale()));
-                renderer_2d().draw_text({ 5, baseline },
-                                        ttf,
-                                        { re.get_sender()->get_width(),
-                                          re.get_sender()->get_height() },
-                                        p,
-                                        scale);
-            }
-        }
+
+                bl += line_height;
+                if (auto gobj = std::dynamic_pointer_cast<game_object>(obj);
+                    gobj != nullptr)
+                {
+                    p = std::format(
+                        "{:10}: {}",
+                        "position",
+                        glm::to_string(gobj->get_transform().get_position()));
+                    renderer_2d().draw_text(origin + glm::vec2 { 5, bl },
+                                            ttf,
+                                            { re.get_sender()->get_width(),
+                                              re.get_sender()->get_height() },
+                                            p,
+                                            scale);
+                    bl += line_height;
+                    p = std::format(
+                        "{:10}: {}",
+                        "rotation",
+                        glm::to_string(gobj->get_transform().get_rotation()));
+                    renderer_2d().draw_text(origin + glm::vec2 { 5, bl },
+                                            ttf,
+                                            { re.get_sender()->get_width(),
+                                              re.get_sender()->get_height() },
+                                            p,
+                                            scale);
+                    bl += line_height;
+                    p = std::format(
+                        "{:10}: {}",
+                        "scale",
+                        glm::to_string(gobj->get_transform().get_scale()));
+                    renderer_2d().draw_text(origin + glm::vec2 { 5, bl },
+                                            ttf,
+                                            { re.get_sender()->get_width(),
+                                              re.get_sender()->get_height() },
+                                            p,
+                                            scale);
+                }
+                origin += glm::vec2 { 0, line_height * 5 + 10 };
+            };
+
+            render_gameobject_data();
+            return true;
+        });
     };
     windows.back()->get_events()->resize += [ vp ](auto re)
     {
@@ -600,7 +613,7 @@ void initScene()
     // bc->set_rotation(glm::quat(glm::ballRand(1.0f)));
     // bc->set_rotation(glm::quat(glm::radians(glm::vec3 { 0, 30, 0 })));
 
-    ttf.load("font.ttf", 12);
+    ttf.load("resources/font.ttf", 12);
     // game_object* collision_text_object = new game_object;
     // auto* ct = collision_text_object->create_component<text_component>();
     // collision_text_object->create_component<text_renderer_component>();
