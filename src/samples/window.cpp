@@ -3,13 +3,13 @@
 #include <GLFW/glfw3.h>
 /* clang-format on */
 
+#include <functional>
 #include <memory>
 #include <vector>
-#include <functional>
 
 #include <assert.h>
 
-#include "experimental/window.hpp"
+#include "core/window.hpp"
 
 #include "gl_error_handler.hpp"
 #include "logging.hpp"
@@ -22,10 +22,10 @@ logger log() { return get_logger("window example"); }
 int main(int argc, char** argv)
 {
     glfwInit();
-    std::vector<std::shared_ptr<experimental::window>> windows;
-    auto exp_window = std::make_shared<experimental::window>();
+    std::vector<std::shared_ptr<core::window>> windows;
+    auto exp_window = std::make_shared<core::window>();
 
-    exp_window->on_user_initialize += [](std::shared_ptr<experimental::window>)
+    exp_window->on_user_initialize += [](std::shared_ptr<core::window>)
     {
         // configure gl debug output
         glEnable(GL_DEBUG_OUTPUT);

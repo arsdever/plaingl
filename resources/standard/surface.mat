@@ -1,0 +1,19 @@
+{
+  "shader": "surface",
+  "properties": [
+    {
+      "name": "u_color",
+      "type": "vec4",
+      "value": [
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "name": "u_image",
+      "type": "image"
+    }
+  ]
+}

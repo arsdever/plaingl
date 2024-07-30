@@ -17,6 +17,7 @@ find_package(glfw3 REQUIRED)
 find_package(assimp REQUIRED)
 find_package(spdlog REQUIRED)
 find_package(freetype REQUIRED)
+find_package(EnTT REQUIRED)
 
 add_subdirectory(thirdparty/prof)
 
@@ -27,10 +28,13 @@ add_subdirectory(src)
 
 target_link_libraries(profiler_lib PUBLIC ${PROJECT}::glad)
 
-if(ENABLE_TESTING)
+if(BUILD_TESTING)
+  message(STATUS "Building tests")
   set(${PROJECT}_TESTING_ENABLED ON)
 endif()
 
 if(${PROJECT}_TESTING_ENABLED)
+  enable_testing()
+  add_subdirectory(unittest)
   add_subdirectory(test)
 endif()

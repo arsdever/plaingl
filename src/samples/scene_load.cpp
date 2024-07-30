@@ -7,8 +7,8 @@
 
 #include "asset_manager.hpp"
 #include "camera.hpp"
-#include "experimental/viewport.hpp"
-#include "experimental/window.hpp"
+#include "core/viewport.hpp"
+#include "core/window.hpp"
 #include "feature_flags.hpp"
 #include "gl_error_handler.hpp"
 #include "logging.hpp"
@@ -23,15 +23,15 @@ void init_scene();
 int main(int argc, char** argv)
 {
     glfwInit();
-    std::vector<std::shared_ptr<experimental::window>> windows;
-    auto exp_window = std::make_shared<experimental::window>();
+    std::vector<std::shared_ptr<core::window>> windows;
+    auto exp_window = std::make_shared<core::window>();
 
     std::shared_ptr<camera> main_camera = nullptr;
 
     feature_flags::set_flag(feature_flags::flag_name::load_fbx_as_scene, true);
 
     exp_window->on_user_initialize +=
-        [ &main_camera ](std::shared_ptr<experimental::window> wnd)
+        [ &main_camera ](std::shared_ptr<core::window> wnd)
     {
         // configure gl debug output
         glEnable(GL_DEBUG_OUTPUT);
@@ -47,7 +47,7 @@ int main(int argc, char** argv)
         main_camera = std::shared_ptr<camera>(camera::all_cameras()[ 0 ]);
         main_camera->set_active();
         init_scene();
-        auto vp = std::make_shared<experimental::viewport>();
+        auto vp = std::make_shared<core::viewport>();
         vp->set_camera(main_camera);
         vp->set_size(wnd->get_size());
         wnd->add_viewport(vp);
@@ -105,5 +105,5 @@ int main(int argc, char** argv)
 
 void init_scene()
 {
-    camera::active_camera()->set_background(glm::vec3(.3, .6, .7));
+    camera::get_active()->set_background(glm::vec3(.3, .6, .7));
 }
