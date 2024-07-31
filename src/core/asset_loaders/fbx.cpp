@@ -34,7 +34,7 @@ glm::vec3 convert(aiColor3D ai_quat)
 
 void asset_loader_FBX::load(std::string_view path)
 {
-    if (!file::exists(path))
+    if (!common::file::exists(path))
     {
         log()->warn("File does not exist: {}", path);
     }

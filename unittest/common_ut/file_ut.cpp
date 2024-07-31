@@ -2,6 +2,8 @@
 
 #include "common/file.hpp"
 
+using file = common::file;
+
 TEST(File, read_all_directly)
 {
     {

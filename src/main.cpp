@@ -209,9 +209,9 @@ int main(int argc, char** argv)
         { obj->init(); });
     }
 
-    file mat_file("resources/standard/standard.mat");
-    mat_file.changed +=
-        [](file::change_type et) { log()->info("material file changed"); };
+    common::file mat_file("resources/standard/standard.mat");
+    mat_file.changed += [](common::file::change_type et)
+    { log()->info("material file changed"); };
 
     // start a physics thread
     // TODO: these should move into physics engine class

@@ -18,7 +18,7 @@ static logger log() { return get_logger("asset_manager"); }
 
 void asset_manager::load_asset(std::string_view path)
 {
-    auto [ _, filename, extension ] = file::parse_path(path);
+    auto [ _, filename, extension ] = common::file::parse_path(path);
 #ifdef GAMIFY_SUPPORTS_FBX
     if (extension == ".fbx")
     {
@@ -75,7 +75,7 @@ void asset_manager::load_asset(std::string_view path)
 template <>
 void asset_manager::save_asset<image>(std::string_view path, const image* img)
 {
-    auto [ _, filename, extension ] = file::parse_path(path);
+    auto [ _, filename, extension ] = common::file::parse_path(path);
 #ifdef GAMIFY_SUPPORTS_PNG
     if (extension == ".png")
     {

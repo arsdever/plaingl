@@ -2,6 +2,8 @@
 
 #include "common/event.hpp"
 
+namespace common
+{
 class file
 {
 public:
@@ -177,3 +179,4 @@ T file::read_all(std::string_view path)
     file f { std::string(path) };
     return f.read_all<T>();
 }
+} // namespace common

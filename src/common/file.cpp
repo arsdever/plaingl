@@ -7,6 +7,8 @@
 #    include "common/impl/file_win.hpp"
 #endif
 
+namespace common
+{
 file::file(std::string path)
     : _impl(std::make_unique<impl>(std::move(path), nullptr))
 {
@@ -70,3 +72,4 @@ file file::create(std::string_view path, std::string_view contents)
 bool file::exists() const { return impl::exists(_impl->path); }
 
 bool file::exists(std::string_view path) { return impl::exists(path); }
+} // namespace common

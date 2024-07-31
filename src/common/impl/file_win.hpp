@@ -5,6 +5,8 @@
 #include "common/file.hpp"
 #include "common/logging.hpp"
 
+namespace common
+{
 namespace
 {
 inline logger log() { return get_logger("file"); }
@@ -147,3 +149,4 @@ struct file::impl
         return result;
     }
 };
+} // namespace common
