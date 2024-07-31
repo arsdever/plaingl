@@ -13,6 +13,11 @@ target_precompile_headers(${PROJECT}_common PUBLIC
 target_include_directories(${PROJECT}_common PUBLIC ${PROJECT_SRC_DIR}
                                                     ${CMAKE_CURRENT_SOURCE_DIR})
 
+if(WIN32)
+  target_sources(${PROJECT}_common PRIVATE impl/file_win.hpp)
+  target_link_libraries(${PROJECT}_common PRIVATE kernel32)
+endif()
+
 target_link_libraries(
   ${PROJECT}_common
   PUBLIC ${PROJECT}::glad glfw glm spdlog::spdlog

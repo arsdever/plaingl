@@ -12,5 +12,6 @@ FetchContent_MakeAvailable(googletest)
 
 enable_testing()
 
+add_subdirectory(common_ut)
 add_subdirectory(console)
 add_subdirectory(project)
