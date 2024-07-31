@@ -210,7 +210,7 @@ int main(int argc, char** argv)
     }
 
     common::file mat_file("resources/standard/standard.mat");
-    mat_file.changed += [](common::file::change_type et)
+    mat_file.changed += [](common::file_change_type et)
     { log()->info("material file changed"); };
 
     // start a physics thread

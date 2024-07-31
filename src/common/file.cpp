@@ -2,6 +2,7 @@
 #include "common/file.hpp"
 
 #include "common/logging.hpp"
+#include "file_watcher.hpp"
 
 #ifdef WIN32
 #    include "common/impl/file_win.hpp"
@@ -12,12 +13,20 @@ namespace common
 file::file(std::string path)
     : _impl(std::make_unique<impl>(std::move(path), nullptr))
 {
+    _watcher = file_watcher(_impl->path,
+                            [ this ](std::string_view path,
+                                     file_change_type type) { changed(type); });
 }
 
 file::file(file&& o)
 {
     _impl = std::move(o._impl);
-    o._impl = std::make_unique<impl>(_impl->path, nullptr);
+    _watcher = std::move(o._watcher);
+    o._impl = std::make_unique<impl>("", nullptr);
+    o._watcher =
+        file_watcher(_impl->path,
+                     [ this ](std::string_view path, file_change_type type)
+    { changed(type); });
 }
 
 file& file::operator=(file&& o) = default;

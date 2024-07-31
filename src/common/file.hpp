@@ -1,6 +1,7 @@
 #pragma once
 
 #include "common/event.hpp"
+#include "common/file_watcher.hpp"
 
 namespace common
 {
@@ -17,18 +18,6 @@ public:
         write = 2,
         read_write = read | write,
         append = 4,
-    };
-
-    /**
-     * @brief File change type
-     */
-    enum class change_type
-    {
-        created,
-        removed,
-        modified,
-        renamed,
-        unknown,
     };
 
 public:
@@ -115,7 +104,7 @@ public:
     T read_all();
 
     // TODO: implement
-    event<void(change_type)> changed;
+    event<void(file_change_type)> changed;
 
     static file create(std::string_view path, std::string_view contents = "");
     template <typename T = std::string>
@@ -129,9 +118,9 @@ private:
     size_t read_data(char* buffer, size_t length);
 
 private:
-    struct watch;
     struct impl;
     std::unique_ptr<impl> _impl;
+    file_watcher _watcher;
 };
 
 template <typename T>
