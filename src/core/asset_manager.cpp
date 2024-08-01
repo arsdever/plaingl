@@ -6,6 +6,7 @@
 #include "asset_loaders/png.hpp"
 #include "asset_loaders/shader.hpp"
 #include "common/file.hpp"
+#include "common/filesystem.hpp"
 #include "common/logging.hpp"
 #include "graphics/image.hpp"
 #include "graphics/mesh.hpp"
@@ -18,9 +19,10 @@ static logger log() { return get_logger("asset_manager"); }
 
 void asset_manager::load_asset(std::string_view path)
 {
-    auto [ _, filename, extension ] = common::file::parse_path(path);
+    auto filepath = common::filesystem::path(path);
+    std::string name_string = std::string(filepath.stem());
 #ifdef GAMIFY_SUPPORTS_FBX
-    if (extension == ".fbx")
+    if (filepath.extension() == "fbx")
     {
         asset_loader_FBX fbx_loader;
         fbx_loader.load(path);
@@ -28,56 +30,57 @@ void asset_manager::load_asset(std::string_view path)
     }
 #endif
 #ifdef GAMIFY_SUPPORTS_SHADER
-    if (extension == ".shader")
+    if (filepath.extension() == "shader")
     {
         asset_loader_SHADER shader_loader;
         shader_loader.load(path);
-        shader_loader.get_shader_program()->set_name(filename);
+        shader_loader.get_shader_program()->set_name(name_string);
         auto [ it, success ] = _shader_programs.try_emplace(
-            filename, shader_loader.get_shader_program());
+            name_string, shader_loader.get_shader_program());
         return;
     }
 #endif
 #ifdef GAMIFY_SUPPORTS_MAT
-    if (extension == ".mat")
+    if (filepath.extension() == "mat")
     {
         asset_loader_MAT mat_loader;
         mat_loader.load(path);
         auto [ it, success ] =
-            _materials.try_emplace(filename, mat_loader.get_material());
+            _materials.try_emplace(name_string, mat_loader.get_material());
         return;
     }
 #endif
 #ifdef GAMIFY_SUPPORTS_JPG
-    if (extension == ".jpg" || extension == ".jpeg")
+    if (filepath.extension() == "jpg" || filepath.extension() == "jpeg")
     {
         asset_loader_JPG jpg_loader;
         jpg_loader.load(path);
         auto [ it, success ] =
-            _images.try_emplace(filename, jpg_loader.get_image());
+            _images.try_emplace(name_string, jpg_loader.get_image());
         return;
     }
 #endif
 #ifdef GAMIFY_SUPPORTS_PNG
-    if (extension == ".png")
+    if (filepath.extension() == "png")
     {
         asset_loader_PNG png_loader;
         png_loader.load(path);
         auto [ it, success ] =
-            _images.try_emplace(filename, png_loader.get_image());
+            _images.try_emplace(name_string, png_loader.get_image());
         return;
     }
 #endif
 
-    log()->error("Asset manager doesn't support {} format", extension);
+    log()->error("Asset manager doesn't support {} format",
+                 filepath.extension());
 }
 
 template <>
 void asset_manager::save_asset<image>(std::string_view path, const image* img)
 {
-    auto [ _, filename, extension ] = common::file::parse_path(path);
+    auto filepath = common::filesystem::path(path);
 #ifdef GAMIFY_SUPPORTS_PNG
-    if (extension == ".png")
+    if (filepath.extension() == "png")
     {
         asset_loader_PNG png_loader;
         png_loader.set_image(const_cast<image*>(img));

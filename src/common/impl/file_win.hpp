@@ -188,4 +188,65 @@ struct file::impl
         return result;
     }
 };
+
+struct filesystem_impl
+{
+    static std::string convert_to_absolute_path(std::string_view path)
+    {
+        std::string result;
+        static constexpr DWORD MAX_PATH_LENGTH = 4096;
+        result.resize(MAX_PATH_LENGTH);
+        auto sz = GetFullPathNameA(
+            path.data(), MAX_PATH_LENGTH, result.data(), nullptr);
+        result.resize(sz);
+        static constexpr std::array<std::string_view, 3> slashes = { "\\\\",
+                                                                     "\\",
+                                                                     "\\/" };
+
+        auto current = result.begin();
+        auto replace = result.begin();
+        while (replace != result.end())
+        {
+            while (*current != '\\')
+            {
+                *current = *replace;
+                ++current;
+                ++replace;
+
+                if (replace == result.end())
+                    break;
+            }
+
+            std::string_view viewer(current, result.end());
+
+            for (auto s : slashes)
+            {
+                if (viewer.starts_with(s))
+                {
+                    *current = '/';
+                    replace = current + s.size() - 1;
+                    break;
+                }
+            }
+
+            if (replace == result.end())
+                break;
+
+            ++current;
+            ++replace;
+        }
+        result.erase(current, result.end());
+        return result;
+    }
+
+    static std::string current_dir()
+    {
+        std::string result;
+        static constexpr DWORD MAX_PATH_LENGTH = 4096;
+        result.resize(MAX_PATH_LENGTH);
+        auto sz = GetCurrentDirectory(MAX_PATH_LENGTH, result.data());
+        result.resize(sz);
+        return result;
+    }
+};
 } // namespace common

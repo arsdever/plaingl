@@ -4,6 +4,7 @@
 #include "core/asset_loaders/mat.hpp"
 
 #include "common/file.hpp"
+#include "common/filesystem.hpp"
 #include "common/logging.hpp"
 #include "core/asset_manager.hpp"
 #include "graphics/material.hpp"
@@ -14,6 +15,7 @@ static inline logger log() { return get_logger("asset_loader_mat"); }
 } // namespace
 
 using json = nlohmann::json;
+namespace fs = common::filesystem;
 
 namespace details
 {
@@ -41,11 +43,13 @@ void asset_loader_MAT::load(std::string_view path)
         mat_struct[ "shader" ].get<std::string>();
     auto* am = asset_manager::default_asset_manager();
     shader_program* sh;
-    std::filesystem::path dir = std::filesystem::path(path).parent_path();
-    std::string shader_name = (dir / shader_exclusive_name).string();
-    std::string shader_path = shader_name + ".shader";
+    std::string shader_path(
+        (fs::path(fs::path(path).full_path_without_filename()) /
+             shader_exclusive_name +
+         ".shader")
+            .full_path());
 
-    if (sh = am->get_shader(shader_name); !sh)
+    if (sh = am->get_shader(shader_exclusive_name); !sh)
     {
         am->load_asset(shader_path);
     }

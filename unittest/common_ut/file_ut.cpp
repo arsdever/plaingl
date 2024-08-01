@@ -1,9 +1,10 @@
 #include <gtest/gtest.h>
 
 #include "common/file.hpp"
-#include "common/logging.hpp"
+#include "common/filesystem.hpp"
 
 using file = common::file;
+namespace fs = common::filesystem;
 
 TEST(File, read_all_directly)
 {
@@ -222,4 +223,40 @@ TEST(File, watch_for_changes)
     f.remove();
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
     EXPECT_EQ(counter, ++check_counter);
+}
+
+TEST(File, file_path)
+{
+    fs::path p { "test.txt" };
+    EXPECT_EQ("test.txt", p.filename());
+    EXPECT_EQ("test", p.stem());
+    EXPECT_EQ("txt", p.extension());
+    EXPECT_EQ("common_ut", p.directory());
+
+    fs::path p1 { "non_existing_file.extension" };
+    EXPECT_EQ("non_existing_file.extension", p1.filename());
+    EXPECT_EQ("non_existing_file", p1.stem());
+    EXPECT_EQ("extension", p1.extension());
+    EXPECT_EQ("common_ut", p1.directory());
+
+    fs::path p2 { "./hello\\..\\\\dir/..\\/another_dir\\../directory/"
+                  "non_existing_file.extension" };
+    EXPECT_EQ("non_existing_file.extension", p2.filename());
+    EXPECT_EQ("non_existing_file", p2.stem());
+    EXPECT_EQ("extension", p2.extension());
+    EXPECT_EQ("directory", p2.directory());
+
+    auto cd = fs::path::current_dir();
+    EXPECT_EQ(cd.full_path(), p.full_path_without_filename());
+    EXPECT_EQ(cd.full_path(), p1.full_path_without_filename());
+}
+
+TEST(File, file_path_operations)
+{
+    fs::path p { "test.txt" };
+    EXPECT_EQ("test.txt", p.filename());
+    EXPECT_NE("test.txt", p.directory());
+    EXPECT_EQ("test", (p + "text").stem());
+    EXPECT_EQ("test.txt", (p / "text").directory());
+    EXPECT_EQ("test.txt", (p / "text/..").filename());
 }
