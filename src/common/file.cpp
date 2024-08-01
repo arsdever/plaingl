@@ -89,15 +89,6 @@ size_t file::get_size() const { return _impl->get_content_size(); }
 
 std::string_view file::get_filepath() const { return _impl->path; }
 
-std::tuple<std::string, std::string, std::string>
-file::parse_path(std::string_view path)
-{
-    std::filesystem::path p { path };
-    return { p.root_directory().generic_string(),
-             p.stem().generic_string(),
-             p.extension().generic_string() };
-}
-
 size_t file::read_data(char* buffer, size_t length)
 {
     return _impl->read(buffer, length);

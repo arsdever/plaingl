@@ -5,6 +5,8 @@ add_library(
   file_watcher.hpp
   file.cpp
   file.hpp
+  filesystem.cpp
+  filesystem.hpp
   logging.hpp
   stdafx.cpp
   stdafx.hpp

@@ -135,9 +135,6 @@ public:
     static size_t append(std::string_view path, const T& data);
     static bool exists(std::string_view path);
 
-    static std::tuple<std::string, std::string, std::string>
-    parse_path(std::string_view path);
-
 private:
     size_t read_data(char* buffer, size_t length);
 
