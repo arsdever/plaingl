@@ -6,6 +6,12 @@ class path
 {
 public:
     path(std::string_view path);
+    path(const path& path);
+    path& operator=(const path& path);
+    path(path&& path) = default;
+    path& operator=(path&& path) = default;
+
+    inline std::string_view relative_path() const { return _path; }
 
     inline std::string_view filename() const { return _filename; }
 
@@ -24,6 +30,18 @@ public:
 
     static path current_dir();
 
+    path operator/(const path& p);
+    path& operator/=(const path& p);
+    path operator/(std::string_view s);
+    path& operator/=(std::string_view s);
+    path operator+(const path& p);
+    path& operator+=(const path& p);
+    path operator+(std::string_view s);
+    path& operator+=(std::string_view s);
+
+private:
+    void resolve();
+
 private:
     std::string _path;
     std::string _full_path;
@@ -33,7 +51,4 @@ private:
     std::string_view _directory;
     std::string_view _full_path_without_filename;
 };
-
-std::tuple<std::string, std::string, std::string>
-parse_path(std::string_view path);
 } // namespace common::filesystem
