@@ -21,8 +21,11 @@ find_package(EnTT REQUIRED)
 
 add_subdirectory(thirdparty/prof)
 
-add_library(filewatch INTERFACE IMPORTED)
-target_include_directories(filewatch INTERFACE "thirdparty/filewatch")
+if(EXISTS ${CMAKE_CURRENT_LIST_DIR}/thirdparty/filewatch)
+  add_library(filewatch INTERFACE IMPORTED)
+  target_include_directories(filewatch INTERFACE "thirdparty/filewatch")
+  set(USE_FILEWATCH TRUE)
+endif()
 
 add_subdirectory(src)
 

@@ -1,80 +1,221 @@
 #pragma once
 
 #include "common/event.hpp"
+#include "common/file_watcher.hpp"
 
+namespace common
+{
 class file
 {
-private:
-    enum class state
-    {
-        invalid,
-        closed,
-        open_read,
-        open_write,
-    };
-
-    struct private_data;
-
 public:
-    enum class event_type
+    /**
+     * @brief File open mode
+     */
+    enum class open_mode
     {
-        added,
-        removed,
-        modified,
-        renamed,
-        unknown,
-    };
-
-    class file_watch_hook
-    {
-    private:
-        struct pdata;
-
-    public:
-        file_watch_hook(pdata&&);
-        file_watch_hook& operator=(file_watch_hook&&);
-        file_watch_hook(file_watch_hook&&);
-        file_watch_hook() = delete;
-        file_watch_hook(const file_watch_hook&) = delete;
-        file_watch_hook& operator=(const file_watch_hook&) = delete;
-        ~file_watch_hook();
-
-    private:
-        std::unique_ptr<pdata> _p;
+        not_open = 0,
+        read = 1,
+        write = 2,
+        read_write = read | write,
+        append = 4,
     };
 
 public:
     file(std::string path);
     file(const file&) = delete;
     file& operator=(const file&) = delete;
-    file(file&& o) = default;
-    file& operator=(file&& o) = default;
+    file(file&& o);
+    file& operator=(file&& o);
     ~file();
 
-    void open(std::string_view mode) const;
-    void close() const;
-    size_t size() const;
+    /**
+     * @brief Open the file
+     *
+     * @param mode the open mode
+     */
+    void open(open_mode mode);
+
+    /**
+     * @brief Close the file
+     */
+    void close();
+
+    /**
+     * @brief Remove the file
+     */
+    void remove();
+
+    /**
+     * @brief Set the cursor position
+     * @param pos the new cursor position from the beginning of the file
+     */
+    void seek(size_t pos);
+
+    /**
+     * @brief Get the file size in bytes
+     * @return size_t the file size
+     */
+    size_t get_size() const;
+
+    /**
+     * @brief Check if the file is open
+     * @return true if the file is open
+     */
+    bool is_open() const;
+
+    /**
+     * @brief Check if the file exists
+     * @return true if the file exists
+     */
     bool exists() const;
-    void watch();
 
-    size_t read(char* buffer, size_t length) const;
-    std::string read_all() const;
+    /**
+     * @brief Get the file path
+     * @return std::string_view the file path
+     */
+    std::string_view get_filepath() const;
 
-    event<void(event_type)> changed_externally;
+    /**
+     * @brief Read some bytes of the file.
+     *
+     * @note Reading starts at the current cursor position.
+     *
+     * @param buffer a buffer into which the data will be read
+     * @param length the number of bytes to be read
+     * @return size_t the number of bytes actually read
+     */
+    size_t read(char* buffer, size_t length);
 
-    static file_watch_hook
-    watch(std::string_view path,
-          std::function<void(std::string_view, event_type)> functor);
-    static event<void(std::string_view)> generic_file_change;
+    /**
+     * @brief Read some content of the file.
+     *
+     * @note Reading starts at the current cursor position.
+     *
+     * @tparam T a container type into which the data will be read
+     * @param length the number of elements to be read
+     * @return T the elements actually read
+     */
+    template <typename T = std::string>
+    T read(size_t length);
 
-    static std::string read_all(std::string_view path);
+    /**
+     * @brief Read all the content of the file.
+     *
+     * @note After reading the cursor will be placed at the end of the file.
+     *
+     * @return std::string the content of the file
+     */
+    template <typename T = std::string>
+    T read_all();
+
+    size_t write(const char* buffer, size_t length);
+
+    template <typename T = std::string>
+    size_t write(const T& data);
+
+    inline size_t write(const char* data)
+    {
+        return write(std::string_view(data));
+    }
+
+    // TODO: implement
+    event<void(file_change_type)> changed;
+
+    static file create(std::string_view path, std::string_view contents = "");
+    static void remove(std::string_view path);
+    template <typename T = std::string>
+    static T read_all(std::string_view path);
+    template <typename T = std::string>
+    static size_t write(std::string_view path, const T& data);
+    inline static size_t write(std::string_view path, const char* data)
+    {
+        return write(path, std::string_view(data));
+    }
+    template <typename T = std::string>
+    static size_t append(std::string_view path, const T& data);
     static bool exists(std::string_view path);
+
     static std::tuple<std::string, std::string, std::string>
     parse_path(std::string_view path);
 
 private:
-    std::string read_all_open() const;
+    size_t read_data(char* buffer, size_t length);
 
 private:
-    std::unique_ptr<private_data> _pdata;
+    struct impl;
+    std::unique_ptr<impl> _impl;
+    file_watcher _watcher;
 };
+
+template <typename T>
+T file::read(size_t length)
+{
+    T result;
+    result.resize(length);
+
+    static constexpr size_t result_element_size =
+        sizeof(typename T::value_type);
+
+    size_t sz = read(reinterpret_cast<char*>(result.data()),
+                     length * result_element_size);
+
+    result.resize(sz / result_element_size);
+
+    if constexpr (std::is_same_v<std::string, T>)
+    {
+        std::string::size_type pos = 0; // Must initialize
+        while ((pos = result.find("\r\n", pos)) != std::string::npos)
+        {
+            result.erase(pos, 1);
+        }
+    }
+
+    return result;
+}
+
+template <typename T>
+T file::read_all()
+{
+    if (!is_open())
+        open(open_mode::read);
+
+    static constexpr size_t result_element_size =
+        sizeof(typename T::value_type);
+    auto length = get_size() / result_element_size;
+
+    return read<T>(length);
+}
+
+template <typename T>
+size_t file::write(const T& data)
+{
+    static constexpr size_t result_element_size =
+        sizeof(typename T::value_type);
+    auto length = data.size() * result_element_size;
+
+    return write(reinterpret_cast<const char*>(data.data()), length);
+}
+
+template <typename T>
+T file::read_all(std::string_view path)
+{
+    file f { std::string(path) };
+    return f.read_all<T>();
+}
+
+template <typename T>
+size_t file::write(std::string_view path, const T& data)
+{
+    file f { std::string(path) };
+    f.open(open_mode::write);
+    return f.write(data);
+}
+
+template <typename T>
+size_t file::append(std::string_view path, const T& data)
+{
+    file f { std::string(path) };
+    f.open(open_mode::append);
+    return f.write(data);
+}
+} // namespace common

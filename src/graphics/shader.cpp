@@ -112,7 +112,7 @@ shader shader::from_file(std::string_view path)
     }
     shader result(type);
 
-    std::string data = file::read_all(path);
+    std::string data = common::file::read_all(path);
     result.set_path(path);
     result.init();
     result.set_source(data);

@@ -209,10 +209,9 @@ int main(int argc, char** argv)
         { obj->init(); });
     }
 
-    file mat_file("resources/standard/standard.mat");
-    mat_file.changed_externally +=
-        [](file::event_type et) { log()->info("material file changed"); };
-    mat_file.watch();
+    common::file mat_file("resources/standard/standard.mat");
+    mat_file.changed += [](common::file_change_type et)
+    { log()->info("material file changed"); };
 
     // start a physics thread
     // TODO: these should move into physics engine class
@@ -256,9 +255,9 @@ int main(int argc, char** argv)
     cmd_show_texture::on_show_texture +=
         [ &txt_show ](texture* t) { txt_show = t; };
 
-    auto wh = file::watch("./",
-                          [](auto path, auto change)
-    { log()->info("Path {} changed: {}", path, static_cast<int>(change)); });
+    // auto wh = file::watch("./",
+    //                       [](auto path, auto change)
+    // { log()->info("Path {} changed: {}", path, static_cast<int>(change)); });
 
     while (!windows.empty())
     {
