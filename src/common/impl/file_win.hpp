@@ -22,9 +22,13 @@ struct file::impl
     void open(file::open_mode mode)
     {
         size_t win_mode = 0;
+        size_t create_mode = OPEN_ALWAYS;
         switch (mode)
         {
-        case file::open_mode::read: win_mode = GENERIC_READ; break;
+        case file::open_mode::read:
+            win_mode = GENERIC_READ;
+            create_mode = OPEN_EXISTING;
+            break;
         case file::open_mode::write: win_mode = GENERIC_WRITE; break;
         case file::open_mode::read_write:
             win_mode = GENERIC_READ | GENERIC_WRITE;
@@ -37,7 +41,7 @@ struct file::impl
                           win_mode,
                           0,
                           nullptr,
-                          OPEN_EXISTING,
+                          create_mode,
                           FILE_ATTRIBUTE_NORMAL,
                           nullptr);
 
@@ -57,6 +61,22 @@ struct file::impl
 
         CloseHandle(file);
         file = nullptr;
+    }
+
+    void remove()
+    {
+        close();
+
+        remove(path);
+    }
+
+    static void remove(std::string_view path)
+    {
+        if (!DeleteFile(path.data()))
+        {
+            DWORD error = GetLastError();
+            log()->error("Error removing file {}: {}", path, error);
+        }
     }
 
     size_t get_content_size()
@@ -84,6 +104,25 @@ struct file::impl
         }
 
         return bytes_read;
+    }
+
+    size_t write(const void* buffer, size_t size)
+    {
+        if (file == nullptr)
+            return 0;
+
+        DWORD bytes_written { 0 };
+        if (!WriteFile(file,
+                       buffer,
+                       static_cast<DWORD>(size),
+                       &bytes_written,
+                       nullptr))
+        {
+            DWORD error = GetLastError();
+            log()->error("Error writing to file {}: {}", path, error);
+        }
+
+        return bytes_written;
     }
 
     void seek(size_t position)

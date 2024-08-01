@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 
 #include "common/file.hpp"
+#include "common/logging.hpp"
 
 using file = common::file;
 
@@ -16,7 +17,7 @@ TEST(File, read_all_directly)
     }
 }
 
-TEST(File, read_all_ignore_newline_modifications)
+TEST(File, read_as_binary_file)
 {
     file f { "test.txt" };
     std::string contents = "Hello world !!!\r\n";
@@ -131,4 +132,94 @@ TEST(File, check_filepath)
     EXPECT_EQ("non_existing_file.extension", f1.get_filepath());
 }
 
-// TODO: add testcase for changed
+TEST(File, create_and_remove)
+{
+    file f { "create_and_remove.txt" };
+    EXPECT_FALSE(f.exists());
+    f.open(file::open_mode::read);
+    EXPECT_FALSE(f.exists());
+    EXPECT_FALSE(f.is_open());
+    f.open(file::open_mode::write);
+    EXPECT_TRUE(f.exists());
+    EXPECT_TRUE(f.is_open());
+    f.remove();
+    EXPECT_FALSE(f.is_open());
+    EXPECT_FALSE(f.exists());
+}
+
+TEST(File, change_content)
+{
+    file f { "change_content.txt" };
+    f.open(file::open_mode::read_write);
+    f.write("Hello world !!!\n");
+    f.seek(0);
+    EXPECT_EQ("Hello world !!!\n", f.read_all());
+    f.seek(0);
+    f.write("Goodbye");
+    f.seek(0);
+    EXPECT_EQ("Goodbyeorld !!!\n", f.read_all());
+    f.remove();
+    EXPECT_FALSE(f.exists());
+}
+
+TEST(File, write_structures)
+{
+    struct content
+    {
+        bool b;
+        char c;
+        short s;
+        int i;
+
+        bool operator==(const content& o) const
+        {
+            return b == o.b && c == o.c && s == o.s && i == o.i;
+        }
+    };
+
+    file f { "write_structures.hex" };
+    f.open(file::open_mode::read_write);
+
+    std::vector<content> v;
+    v.push_back({ true, 'H', 53, 232345 });
+    v.push_back({ false, 'W', 0x1510, 0x30201510 });
+
+    f.write(v);
+    f.seek(0);
+
+    std::vector<content> v2 = f.template read_all<std::vector<content>>();
+    EXPECT_EQ(v, v2);
+
+    f.remove();
+}
+
+TEST(File, direct_file_access)
+{
+    static constexpr auto filename = "direct_file_access.txt";
+    file::write(filename, "Hello world !!!\n");
+    EXPECT_TRUE(file::exists(filename));
+    EXPECT_EQ("Hello world !!!\n", file::read_all(filename));
+    file::append(filename, "Goodbye world\n");
+    EXPECT_EQ("Hello world !!!\nGoodbye world\n", file::read_all(filename));
+    file::remove(filename);
+    EXPECT_FALSE(file::exists(filename));
+}
+
+TEST(File, watch_for_changes)
+{
+    size_t counter = 0;
+    size_t check_counter = 0;
+    file f { "watch_for_changes.txt" };
+    f.changed += [ &counter ](auto type) { ++counter; };
+    f.open(file::open_mode::write);
+    f.write("Hello world !!!\n");
+    EXPECT_EQ(counter, ++check_counter);
+    f.seek(0);
+    f.write("Goodbye");
+    f.close();
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    EXPECT_EQ(counter, ++check_counter);
+    f.remove();
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    EXPECT_EQ(counter, ++check_counter);
+}

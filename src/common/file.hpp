@@ -41,6 +41,11 @@ public:
     void close();
 
     /**
+     * @brief Remove the file
+     */
+    void remove();
+
+    /**
      * @brief Set the cursor position
      * @param pos the new cursor position from the beginning of the file
      */
@@ -103,12 +108,31 @@ public:
     template <typename T = std::string>
     T read_all();
 
+    size_t write(const char* buffer, size_t length);
+
+    template <typename T = std::string>
+    size_t write(const T& data);
+
+    inline size_t write(const char* data)
+    {
+        return write(std::string_view(data));
+    }
+
     // TODO: implement
     event<void(file_change_type)> changed;
 
     static file create(std::string_view path, std::string_view contents = "");
+    static void remove(std::string_view path);
     template <typename T = std::string>
     static T read_all(std::string_view path);
+    template <typename T = std::string>
+    static size_t write(std::string_view path, const T& data);
+    inline static size_t write(std::string_view path, const char* data)
+    {
+        return write(path, std::string_view(data));
+    }
+    template <typename T = std::string>
+    static size_t append(std::string_view path, const T& data);
     static bool exists(std::string_view path);
 
     static std::tuple<std::string, std::string, std::string>
@@ -163,9 +187,35 @@ T file::read_all()
 }
 
 template <typename T>
+size_t file::write(const T& data)
+{
+    static constexpr size_t result_element_size =
+        sizeof(typename T::value_type);
+    auto length = data.size() * result_element_size;
+
+    return write(reinterpret_cast<const char*>(data.data()), length);
+}
+
+template <typename T>
 T file::read_all(std::string_view path)
 {
     file f { std::string(path) };
     return f.read_all<T>();
+}
+
+template <typename T>
+size_t file::write(std::string_view path, const T& data)
+{
+    file f { std::string(path) };
+    f.open(open_mode::write);
+    return f.write(data);
+}
+
+template <typename T>
+size_t file::append(std::string_view path, const T& data)
+{
+    file f { std::string(path) };
+    f.open(open_mode::append);
+    return f.write(data);
 }
 } // namespace common

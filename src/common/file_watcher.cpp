@@ -19,5 +19,11 @@ file_watcher& file_watcher::operator=(file_watcher&&) = default;
 
 file_watcher::file_watcher(file_watcher&&) = default;
 
+file_watcher::file_watcher(const file_watcher&) = default;
+
+file_watcher& file_watcher::operator=(const file_watcher&) = default;
+
 file_watcher::~file_watcher() = default;
+
+bool file_watcher::is_valid() const { return _impl != nullptr; }
 } // namespace common
