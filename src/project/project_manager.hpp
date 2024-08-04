@@ -6,13 +6,13 @@
 
 #include "project/uid.hpp"
 
-class memory_manager
+class project_manager
 {
 public:
-    memory_manager();
-    ~memory_manager();
+    project_manager();
+    ~project_manager();
 
-    static memory_manager& instance();
+    static project_manager& instance();
 
     static size_t type_id(std::string_view class_name);
 

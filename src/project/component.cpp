@@ -2,7 +2,7 @@
 
 #include "project/components/transform.hpp"
 #include "project/game_object.hpp"
-#include "project/memory_manager.hpp"
+#include "project/project_manager.hpp"
 
 component::component(std::string_view name, game_object& obj)
     : _game_object(obj)
@@ -44,7 +44,7 @@ void component::deinit()
 
 size_t component::type_id(std::string_view class_name)
 {
-    return memory_manager::type_id(class_name);
+    return project_manager::type_id(class_name);
 }
 
 void component::on_init() { }

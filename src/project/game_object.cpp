@@ -2,13 +2,13 @@
 
 #include "project/component.hpp"
 #include "project/components/transform.hpp"
-#include "project/memory_manager.hpp"
+#include "project/project_manager.hpp"
 
 game_object::game_object() = default;
 
 std::shared_ptr<game_object> game_object::create()
 {
-    auto obj = memory_manager::create_game_object();
+    auto obj = project_manager::create_game_object();
     obj->add<components::transform>();
     obj->set_name("New game object");
     return obj;
@@ -16,12 +16,12 @@ std::shared_ptr<game_object> game_object::create()
 
 component& game_object::get(std::string_view class_name) const
 {
-    return memory_manager::get_component(*this, class_name);
+    return project_manager::get_component(*this, class_name);
 }
 
 component* game_object::try_get(std::string_view class_name) const
 {
-    return memory_manager::try_get_component(*this, class_name);
+    return project_manager::try_get_component(*this, class_name);
 }
 
 components::transform& game_object::get_transform() const
@@ -94,8 +94,8 @@ bool game_object::visit_children(
 void game_object::visit_components(
     std::function<bool(component&)> visitor) const
 {
-    memory_manager::visit_components(*this,
-                                     [ & ](auto& c)
+    project_manager::visit_components(*this,
+                                      [ & ](auto& c)
     {
         if (visitor(c))
             return true;
@@ -169,5 +169,5 @@ void game_object::deinit()
 
 component& game_object::add(std::string_view class_name)
 {
-    return memory_manager::instance().create_component(*this, class_name);
+    return project_manager::instance().create_component(*this, class_name);
 }

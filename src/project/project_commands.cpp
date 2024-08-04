@@ -7,8 +7,8 @@
 #include "components/mesh_filter.hpp"
 #include "components/mesh_renderer.hpp"
 #include "components/transform.hpp"
-#include "memory_manager.hpp"
 #include "project/game_object.hpp"
+#include "project/project_manager.hpp"
 #include "project/scene.hpp"
 
 namespace project
@@ -143,7 +143,7 @@ void cmd_select_object::execute()
     }
     else
     {
-        auto obj = memory_manager::get_object_by_id(uid(get<0>()));
+        auto obj = project_manager::get_object_by_id(uid(get<0>()));
         if (obj == nullptr)
         {
             log()->info("Object with id {} not found", get<0>());
@@ -166,7 +166,7 @@ void cmd_print_selected_object::execute()
 void cmd_list_objects::execute()
 {
     log()->info("List of objects:");
-    memory_manager::instance().for_each_object([](std::shared_ptr<object>& obj)
+    project_manager::instance().for_each_object([](std::shared_ptr<object>& obj)
     { log()->info("  {} ({})", obj->get_name(), obj->id().id); });
 }
 

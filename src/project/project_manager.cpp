@@ -3,14 +3,13 @@
 #include <entt/meta/utility.hpp>
 #include <nlohmann/json.hpp>
 
-#include "memory_manager.hpp"
-
 #include "project/components/transform.hpp"
 #include "project/game_object.hpp"
 #include "project/scene.hpp"
 #include "project/serializer_json.hpp"
+#include "project_manager.hpp"
 
-struct memory_manager::impl
+struct project_manager::impl
 {
     entt::registry _registry;
     std::unordered_map<uid, entt::entity> _entities;
@@ -41,25 +40,25 @@ struct memory_manager::impl
     }
 };
 
-memory_manager::memory_manager()
+project_manager::project_manager()
     : _impl(std::make_unique<impl>())
 {
 }
 
-memory_manager::~memory_manager() = default;
+project_manager::~project_manager() = default;
 
-memory_manager& memory_manager::instance()
+project_manager& project_manager::instance()
 {
-    static memory_manager instance;
+    static project_manager instance;
     return instance;
 }
 
-size_t memory_manager::type_id(std::string_view class_name)
+size_t project_manager::type_id(std::string_view class_name)
 {
     return entt::hashed_string(class_name.data(), class_name.size());
 }
 
-std::shared_ptr<game_object> memory_manager::create_game_object()
+std::shared_ptr<game_object> project_manager::create_game_object()
 {
     auto obj = std::shared_ptr<game_object>(new game_object);
     auto ent = instance()._impl->_registry.create();
@@ -70,13 +69,13 @@ std::shared_ptr<game_object> memory_manager::create_game_object()
     return obj;
 }
 
-void memory_manager::register_component_type(std::string_view type_name)
+void project_manager::register_component_type(std::string_view type_name)
 {
     auto& _ =
         instance()._impl->_registry.storage<component>(type_id(type_name));
 }
 
-void memory_manager::for_each_object(
+void project_manager::for_each_object(
     std::function<void(std::shared_ptr<object>&)> func)
 {
     for (auto& [ _, obj ] : instance()._objects)
@@ -86,8 +85,8 @@ void memory_manager::for_each_object(
     }
 }
 
-component& memory_manager::create_component(game_object& obj,
-                                            std::string_view class_name)
+component& project_manager::create_component(game_object& obj,
+                                             std::string_view class_name)
 {
     auto type = impl::typeof(class_name);
     auto comp =
@@ -97,14 +96,14 @@ component& memory_manager::create_component(game_object& obj,
     return *(static_cast<component*>(comp.data()));
 }
 
-component& memory_manager::get_component(const game_object& obj,
-                                         std::string_view class_name)
+component& project_manager::get_component(const game_object& obj,
+                                          std::string_view class_name)
 {
     return *try_get_component(obj, class_name);
 }
 
-component* memory_manager::try_get_component(const game_object& obj,
-                                             std::string_view class_name)
+component* project_manager::try_get_component(const game_object& obj,
+                                              std::string_view class_name)
 {
     auto entity = instance()._impl->entity(obj.id());
     // try to lookup by base class
@@ -123,18 +122,18 @@ component* memory_manager::try_get_component(const game_object& obj,
     return nullptr;
 }
 
-std::shared_ptr<object> memory_manager::get_object_by_id(uid id)
+std::shared_ptr<object> project_manager::get_object_by_id(uid id)
 {
     return instance()._objects.at(id).lock();
 }
 
-std::shared_ptr<game_object> memory_manager::get_game_object(uid id)
+std::shared_ptr<game_object> project_manager::get_game_object(uid id)
 {
     return instance()._impl->get_object(instance()._impl->entity(id));
 }
 
-bool memory_manager::visit_components(const game_object& obj,
-                                      std::function<bool(component&)> visitor)
+bool project_manager::visit_components(const game_object& obj,
+                                       std::function<bool(component&)> visitor)
 {
     auto ent = instance()._impl->entity(obj.id());
     for (auto [ _, storage ] : instance()._impl->_registry.storage())
@@ -158,7 +157,7 @@ bool memory_manager::visit_components(const game_object& obj,
     return true;
 }
 
-nlohmann::json memory_manager::serialize()
+nlohmann::json project_manager::serialize()
 {
     json_serializer s;
     for (auto ent : instance()._impl->_registry.view<entt::entity>())
@@ -191,7 +190,7 @@ nlohmann::json memory_manager::serialize()
     return s.root();
 }
 
-void memory_manager::deserialize(const nlohmann::json& data)
+void project_manager::deserialize(const nlohmann::json& data)
 {
     for (const auto& obj : data[ "objects" ])
     {
