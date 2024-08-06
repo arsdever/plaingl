@@ -1,6 +1,10 @@
 #include "common/filesystem.hpp"
 
-#include "common/impl/file_win.hpp"
+#if defined(WIN32)
+#    include "common/impl/file_win.hpp"
+#elif defined(__linux__)
+#    include "common/impl/file_linux.hpp"
+#endif
 
 namespace common::filesystem
 {
