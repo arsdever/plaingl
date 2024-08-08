@@ -3,15 +3,28 @@
 #include <entt/meta/utility.hpp>
 #include <nlohmann/json.hpp>
 
+#include "project_manager.hpp"
+
+#include "common/logging.hpp"
+#include "component_interface/component_registry.hpp"
+#include "project/components/camera.hpp"
+#include "project/components/light.hpp"
+#include "project/components/mesh_filter.hpp"
+#include "project/components/mesh_renderer.hpp"
 #include "project/components/transform.hpp"
 #include "project/game_object.hpp"
 #include "project/scene.hpp"
 #include "project/serializer_json.hpp"
-#include "project_manager.hpp"
+
+namespace
+{
+logger log() { return get_logger("project_manager"); }
+}; // namespace
 
 struct project_manager::impl
 {
     entt::registry _registry;
+    std::unordered_map<uid, std::weak_ptr<object>> _objects;
     std::unordered_map<uid, entt::entity> _entities;
 
     inline auto& storage_for(std::string_view class_name)
@@ -19,9 +32,28 @@ struct project_manager::impl
         return *_registry.storage(type_id(class_name));
     }
 
+    static entt::meta_type typeof(size_t type_identifier)
+    {
+        return entt::resolve(component_registry::ctx, type_identifier);
+    }
+
     static entt::meta_type typeof(std::string_view class_name)
     {
-        return entt::resolve(type_id(class_name));
+        log()->trace("Looking up for type {}", class_name);
+        auto tid = type_id(class_name);
+        auto t = typeof(tid);
+        if (t)
+        {
+            log()->trace("Found type {} (id {})", class_name, tid);
+            return t;
+        }
+
+        return {};
+    }
+
+    static entt::meta_type typeof(entt::type_info ti)
+    {
+        return typeof(ti.index());
     }
 
     template <typename T>
@@ -38,6 +70,13 @@ struct project_manager::impl
     {
         return _registry.get<std::shared_ptr<game_object>>(ent);
     }
+
+    template <typename T, typename F>
+    static void register_component_type(std::string_view type_name)
+    {
+        component_registry::register_component<component, F>(
+            component_registry::ctx, type_name);
+    }
 };
 
 project_manager::project_manager()
@@ -47,11 +86,17 @@ project_manager::project_manager()
 
 project_manager::~project_manager() = default;
 
-project_manager& project_manager::instance()
+void project_manager::initialize()
 {
-    static project_manager instance;
-    return instance;
+    _instance = std::unique_ptr<project_manager>(new project_manager());
+    component_registry::register_components<components::camera,
+                                            components::light,
+                                            components::mesh_filter,
+                                            components::mesh_renderer,
+                                            components::transform>();
 }
+
+void project_manager::shutdown() { _instance = nullptr; }
 
 size_t project_manager::type_id(std::string_view class_name)
 {
@@ -61,24 +106,18 @@ size_t project_manager::type_id(std::string_view class_name)
 std::shared_ptr<game_object> project_manager::create_game_object()
 {
     auto obj = std::shared_ptr<game_object>(new game_object);
-    auto ent = instance()._impl->_registry.create();
-    instance()._impl->_registry.emplace<std::shared_ptr<game_object>>(ent, obj);
-    instance()._impl->_registry.emplace<uid>(ent, obj->id());
-    instance()._impl->_entities.emplace(obj->id(), ent);
-    instance()._objects.emplace(obj->id(), obj);
+    auto ent = _instance->_impl->_registry.create();
+    _instance->_impl->_registry.emplace<std::shared_ptr<game_object>>(ent, obj);
+    _instance->_impl->_registry.emplace<uid>(ent, obj->id());
+    _instance->_impl->_entities.emplace(obj->id(), ent);
+    _instance->_impl->_objects.emplace(obj->id(), obj);
     return obj;
-}
-
-void project_manager::register_component_type(std::string_view type_name)
-{
-    auto& _ =
-        instance()._impl->_registry.storage<component>(type_id(type_name));
 }
 
 void project_manager::for_each_object(
     std::function<void(std::shared_ptr<object>&)> func)
 {
-    for (auto& [ _, obj ] : instance()._objects)
+    for (auto& [ _, obj ] : _instance->_impl->_objects)
     {
         if (auto sobj = obj.lock(); sobj != nullptr)
             func(sobj);
@@ -90,8 +129,9 @@ component& project_manager::create_component(game_object& obj,
 {
     auto type = impl::typeof(class_name);
     auto comp =
-        type.construct(entt::forward_as_meta(instance()._impl->_registry),
-                       instance()._impl->entity(obj.id()),
+        type.construct(entt::forward_as_meta(_instance->_impl->_registry),
+                       class_name,
+                       _instance->_impl->entity(obj.id()),
                        entt::forward_as_meta(obj));
     return *(static_cast<component*>(comp.data()));
 }
@@ -105,11 +145,12 @@ component& project_manager::get_component(const game_object& obj,
 component* project_manager::try_get_component(const game_object& obj,
                                               std::string_view class_name)
 {
-    auto entity = instance()._impl->entity(obj.id());
+    auto entity = _instance->_impl->entity(obj.id());
     // try to lookup by base class
-    for (auto&& storage_info : instance()._impl->_registry.storage())
+    for (auto&& storage_info : _instance->_impl->_registry.storage())
     {
-        entt::meta_type type = entt::resolve(storage_info.second.type());
+        entt::meta_type type =
+            entt::resolve(component_registry::ctx, storage_info.second.type());
         if (type.can_cast(impl::typeof(class_name)))
         {
             if (auto& storage = storage_info.second; storage.contains(entity))
@@ -124,23 +165,23 @@ component* project_manager::try_get_component(const game_object& obj,
 
 std::shared_ptr<object> project_manager::get_object_by_id(uid id)
 {
-    return instance()._objects.at(id).lock();
+    return _instance->_impl->_objects.at(id).lock();
 }
 
 std::shared_ptr<game_object> project_manager::get_game_object(uid id)
 {
-    return instance()._impl->get_object(instance()._impl->entity(id));
+    return _instance->_impl->get_object(_instance->_impl->entity(id));
 }
 
 bool project_manager::visit_components(const game_object& obj,
                                        std::function<bool(component&)> visitor)
 {
-    auto ent = instance()._impl->entity(obj.id());
-    for (auto [ _, storage ] : instance()._impl->_registry.storage())
+    auto ent = _instance->_impl->entity(obj.id());
+    for (auto [ name, storage ] : _instance->_impl->_registry.storage())
     {
         if (storage.contains(ent))
         {
-            entt::meta_type type = entt::resolve(storage.type());
+            entt::meta_type type = impl::typeof(name);
             if (auto meta_component = type.from_void(storage.value(ent)))
             {
                 if (auto c = meta_component.try_cast<component>())
@@ -160,9 +201,9 @@ bool project_manager::visit_components(const game_object& obj,
 nlohmann::json project_manager::serialize()
 {
     json_serializer s;
-    for (auto ent : instance()._impl->_registry.view<entt::entity>())
+    for (auto ent : _instance->_impl->_registry.view<entt::entity>())
     {
-        auto obj = instance()._impl->get_object(ent);
+        auto obj = _instance->_impl->get_object(ent);
         s.start_object();
         s.property("name", obj->get_name());
         s.property("id", obj->id().id);
@@ -171,11 +212,11 @@ nlohmann::json project_manager::serialize()
         {
             s.property("parent", p->id().id);
         }
-        for (auto [ _, storage ] : instance()._impl->_registry.storage())
+        for (auto [ _, storage ] : _instance->_impl->_registry.storage())
         {
             if (storage.contains(ent))
             {
-                entt::meta_type type = entt::resolve(storage.type());
+                entt::meta_type type = impl::typeof(storage.type());
                 auto serializer = type.func(entt::hashed_string("serialize"));
                 if (serializer)
                 {
@@ -200,10 +241,10 @@ void project_manager::deserialize(const nlohmann::json& data)
         gobj->_id = uid { obj[ "id" ] };
         gobj->_is_active = obj[ "is_active" ].get<bool>();
 
-        auto n = instance()._impl->_entities.extract(old_id);
+        auto n = _instance->_impl->_entities.extract(old_id);
         n.key() = gobj->id();
-        instance()._impl->_entities.insert(std::move(n));
-        auto ent = instance()._impl->entity(gobj->id());
+        _instance->_impl->_entities.insert(std::move(n));
+        auto ent = _instance->_impl->entity(gobj->id());
 
         if (obj.contains("parent"))
         {
@@ -213,9 +254,9 @@ void project_manager::deserialize(const nlohmann::json& data)
         {
             scene::_active_scene->add_root_object(gobj);
         }
-        instance()._impl->_registry.replace<std::shared_ptr<game_object>>(ent,
+        _instance->_impl->_registry.replace<std::shared_ptr<game_object>>(ent,
                                                                           gobj);
-        instance()._impl->_registry.replace<uid>(ent, gobj->id());
+        _instance->_impl->_registry.replace<uid>(ent, gobj->id());
 
         for (const auto& c : obj[ "components" ])
         {
@@ -224,7 +265,7 @@ void project_manager::deserialize(const nlohmann::json& data)
             type.invoke(entt::hashed_string("deserialize"),
                         comp,
                         entt::forward_as_meta(c));
-            for (auto&& curr : instance()._impl->_registry.storage())
+            for (auto&& curr : _instance->_impl->_registry.storage())
             {
                 if (auto& storage = curr.second; storage.contains(ent))
                 {
@@ -237,3 +278,5 @@ void project_manager::deserialize(const nlohmann::json& data)
         }
     }
 }
+
+std::unique_ptr<project_manager> project_manager::_instance { nullptr };

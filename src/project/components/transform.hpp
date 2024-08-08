@@ -4,7 +4,7 @@
 
 #include "project/project_fwd.hpp"
 
-#include "project/component.hpp"
+#include "project/component_interface/component.hpp"
 
 namespace components
 {
@@ -18,6 +18,8 @@ public:
     };
 
 public:
+    using base = component;
+
     transform(game_object& obj);
 
     void set_position(const glm::dvec3& position);

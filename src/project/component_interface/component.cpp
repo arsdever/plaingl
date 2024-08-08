@@ -1,4 +1,4 @@
-#include "project/component.hpp"
+#include "project/component_interface/component.hpp"
 
 #include "project/components/transform.hpp"
 #include "project/game_object.hpp"
@@ -14,7 +14,8 @@ game_object& component::get_game_object() const { return _game_object; }
 
 components::transform& component::get_transform() const
 {
-    return _game_object.get().get<components::transform>();
+    return static_cast<components::transform&>(
+        _game_object.get().get("transform"));
 }
 
 void component::set_enabled(bool active) { _is_enabled = active; }

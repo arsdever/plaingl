@@ -1,5 +1,5 @@
-#include "project/component.hpp"
-#include "project/components/component_registry.hpp"
+#include "project/component_interface/component.hpp"
+#include "project/component_interface/component_registry.hpp"
 #include "project/components/transform.hpp"
 #include "project/game_object.hpp"
 #include "project/scene.hpp"
@@ -105,8 +105,6 @@ void load_scene()
 
 int main(int argc, char** argv)
 {
-    component_registry::register_components();
-
     std::string mode = "r";
     std::cin >> mode;
 

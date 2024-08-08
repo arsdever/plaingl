@@ -12,9 +12,9 @@
 #include "core/window.hpp"
 #include "graphics/texture.hpp"
 #include "project/components/camera.hpp"
-#include "project/components/component_registry.hpp"
 #include "project/game_object.hpp"
 #include "project/project_commands.hpp"
+#include "project/project_manager.hpp"
 #include "project/scene.hpp"
 #include "scripting/backend.hpp"
 #include "tools/console/console.hpp"
@@ -27,6 +27,8 @@ logger log() { return get_logger("app"); }
 application::application()
     : _console(std::make_shared<console>())
 {
+    project_manager::initialize();
+
     glfwInit();
     auto main_window = std::make_shared<core::window>();
     main_window->resize(800, 600);
@@ -51,7 +53,6 @@ application::application()
     scripting::backend::initialize();
 
     load_assets();
-    register_components();
     setup_console();
 }
 
@@ -77,6 +78,7 @@ void application::shutdown()
 {
     _is_running = false;
     scene::get_active_scene()->unload();
+    project_manager::shutdown();
     assets::asset_manager::shutdown();
 }
 
@@ -154,11 +156,6 @@ void application::load_assets()
 {
     auto project_path = common::filesystem::path::current_dir() / "resources";
     assets::asset_manager::initialize(project_path.full_path());
-}
-
-void application::register_components()
-{
-    component_registry::register_components();
 }
 
 void application::render_game()

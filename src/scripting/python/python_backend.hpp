@@ -3,7 +3,8 @@
 namespace pybind11
 {
 class scoped_interpreter;
-}
+class module_;
+} // namespace pybind11
 
 namespace scripting
 {
@@ -17,6 +18,8 @@ struct backend::impl
     std::unique_ptr<pybind11::scoped_interpreter> _interpreter;
 
 private:
+    struct module_wrapper;
     void initialize_project_module();
+    std::vector<pybind11::module_> _modules;
 };
 } // namespace scripting

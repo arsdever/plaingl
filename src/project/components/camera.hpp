@@ -5,13 +5,15 @@
 #include "graphics/graphics_fwd.hpp"
 #include "project/project_fwd.hpp"
 
-#include "project/component.hpp"
+#include "project/component_interface/component.hpp"
 
 namespace components
 {
 class camera : public component
 {
 public:
+    using base = component;
+
     camera(game_object& obj);
     camera& operator=(camera&& obj);
     ~camera() override;

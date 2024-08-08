@@ -68,6 +68,7 @@ std::shared_ptr<scene> cmd_load_scene::default_scene()
     go->add<components::mesh_filter>().set_mesh(m.get());
     go->add<components::mesh_renderer>().set_material(mat);
     go->set_name("suzanne");
+    go->add("camera_movement");
     s->add_root_object(go);
 
     go = game_object::create();
@@ -166,7 +167,7 @@ void cmd_print_selected_object::execute()
 void cmd_list_objects::execute()
 {
     log()->info("List of objects:");
-    project_manager::instance().for_each_object([](std::shared_ptr<object>& obj)
+    project_manager::for_each_object([](std::shared_ptr<object>& obj)
     { log()->info("  {} ({})", obj->get_name(), obj->id().id); });
 }
 

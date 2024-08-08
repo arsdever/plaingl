@@ -1,6 +1,6 @@
 #include "project/game_object.hpp"
 
-#include "project/component.hpp"
+#include "project/component_interface/component.hpp"
 #include "project/components/transform.hpp"
 #include "project/project_manager.hpp"
 
@@ -9,7 +9,7 @@ game_object::game_object() = default;
 std::shared_ptr<game_object> game_object::create()
 {
     auto obj = project_manager::create_game_object();
-    obj->add<components::transform>();
+    obj->add("transform");
     obj->set_name("New game object");
     return obj;
 }
@@ -26,7 +26,7 @@ component* game_object::try_get(std::string_view class_name) const
 
 components::transform& game_object::get_transform() const
 {
-    return get<components::transform>();
+    return static_cast<components::transform&>(get("transform"));
 }
 
 bool game_object::has_parent() const { return _parent.lock() != nullptr; }
@@ -169,5 +169,5 @@ void game_object::deinit()
 
 component& game_object::add(std::string_view class_name)
 {
-    return project_manager::instance().create_component(*this, class_name);
+    return project_manager::create_component(*this, class_name);
 }

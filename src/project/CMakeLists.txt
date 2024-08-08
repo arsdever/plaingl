@@ -1,6 +1,5 @@
 set(HEADERS project_manager.hpp)
 set(INTERFACE_HEADERS
-    component.hpp
     game_object.hpp
     object.hpp
     project_commands.hpp
@@ -9,8 +8,7 @@ set(INTERFACE_HEADERS
     serialization_utilities.hpp
     serializer.hpp
     serializer_json.hpp)
-set(SOURCES component.cpp game_object.cpp project_manager.cpp object.cpp
-            scene.cpp)
+set(SOURCES game_object.cpp project_manager.cpp object.cpp scene.cpp)
 
 foreach(interface_header ${INTERFACE_HEADERS})
   get_filename_component(dir ${interface_header} DIRECTORY)
@@ -33,8 +31,9 @@ add_library(${PROJECT}::project ALIAS ${PROJECT}_project)
 target_link_libraries(
   ${PROJECT}_project
   PUBLIC ${PROJECT}::common
+  PRIVATE ${PROJECT}::components
   PRIVATE EnTT::EnTT)
 target_include_directories(${PROJECT}_project PUBLIC ${PROJECT_SRC_DIR})
 
+add_subdirectory(component_interface)
 add_subdirectory(components)
-target_link_libraries(${PROJECT}_project PUBLIC ${PROJECT}::components)

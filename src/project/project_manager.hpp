@@ -1,18 +1,21 @@
 #pragma once
 
+#include <entt/fwd.hpp>
 #include <nlohmann/json_fwd.hpp>
 
-#include "project/project_fwd.hpp"
-
 #include "project/uid.hpp"
+
+class component;
+class game_object;
+class object;
 
 class project_manager
 {
 public:
-    project_manager();
     ~project_manager();
 
-    static project_manager& instance();
+    static void initialize();
+    static void shutdown();
 
     static size_t type_id(std::string_view class_name);
 
@@ -47,13 +50,14 @@ public:
     static nlohmann::json serialize();
     static void deserialize(const nlohmann::json& data);
 
-    static void register_component_type(std::string_view type_name);
-
     static void
     for_each_object(std::function<void(std::shared_ptr<object>&)> func);
 
 private:
+    project_manager();
+
+private:
     struct impl;
     std::unique_ptr<impl> _impl;
-    std::unordered_map<uid, std::weak_ptr<object>> _objects;
+    static std::unique_ptr<project_manager> _instance;
 };
