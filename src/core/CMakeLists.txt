@@ -7,6 +7,7 @@ add_library(
   command.hpp
   input_system.hpp
   input_system.cpp
+  library.hpp
   viewport.hpp
   viewport.cpp
   window_events.hpp
@@ -16,8 +17,11 @@ add_library(
   asset_loaders/asset_loader.hpp)
 add_library(${PROJECT}::core ALIAS ${PROJECT}_core)
 
-target_link_libraries(${PROJECT}_core PUBLIC ${PROJECT}::common)
+if(WIN32)
+  target_sources(${PROJECT}_core PRIVATE impl/library_win.cpp)
+endif()
 
+target_link_libraries(${PROJECT}_core PUBLIC ${PROJECT}::common)
 target_precompile_headers(${PROJECT}_core REUSE_FROM ${PROJECT}::common)
 
 macro(enable_asset_type)
