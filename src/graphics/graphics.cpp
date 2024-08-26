@@ -43,4 +43,9 @@ void set_viewport(glm::vec2 top_left, glm::vec2 bottom_right)
                std::abs(bottom_right.x - bottom_left.x),
                std::abs(bottom_right.y - top_left.y));
 }
+
+void set_wireframe(bool value)
+{
+    glPolygonMode(GL_FRONT_AND_BACK, value ? GL_LINE : GL_FILL);
+}
 } // namespace graphics

@@ -1,5 +1,4 @@
 /* clang-format off */
-#include <glad/gl.h>
 #include <GLFW/glfw3.h>
 /* clang-format on */
 
@@ -7,6 +6,7 @@
 
 #include "core/asset_manager.hpp"
 #include "core/window.hpp"
+#include "graphics.hpp"
 #include "graphics/material.hpp"
 #include "graphics/mesh.hpp"
 #include "graphics_buffer.hpp"
@@ -78,13 +78,11 @@ void mesh_viewer::initialize()
         [ this ](auto e) { resize(e.get_new_size().x, e.get_new_size().y); };
     get_events()->mouse_scroll +=
         [ this ](auto e) { _zoom *= std::pow(2.0, e.get_delta().y / 10.0); };
-    glEnable(GL_DEPTH_TEST);
 }
 
 void mesh_viewer::render()
 {
-    glBindBuffer(GL_SHADER_STORAGE_BUFFER, _light_buffer->get_handle());
-    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, _light_buffer->get_handle());
+    _light_buffer->bind(0);
 
     auto mat =
         asset_manager::default_asset_manager()->get_material("mesh_viewer");
@@ -107,10 +105,8 @@ void mesh_viewer::render()
     mat->set_property_value("u_mode", _mode);
 
     mat->set_property_value("u_model_matrix", glm::identity<glm::mat4>());
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    glViewport(0, 0, get_width(), get_height());
-    glClearColor(0.0f, 0.15f, 0.2f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    graphics::set_viewport({ 0, 0 }, { get_size() });
+    graphics::clear({ 0.0f, 0.15f, 0.2f, 1.0f });
 
     if (_mesh == nullptr)
         return;
@@ -118,10 +114,10 @@ void mesh_viewer::render()
     renderer_3d().draw_mesh(_mesh, mat);
     if (_draw_wireframe)
     {
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        graphics::set_wireframe(true);
         mat->set_property_value("u_wireframe", 1.0f);
         renderer_3d().draw_mesh(_mesh, mat);
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        graphics::set_wireframe(false);
         mat->set_property_value("u_wireframe", 0.0f);
     }
 }

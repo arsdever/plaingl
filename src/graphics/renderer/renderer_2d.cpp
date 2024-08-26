@@ -1,13 +1,10 @@
 #include "renderer_2d.hpp"
 
 #include "core/asset_manager.hpp"
-// #include "camera.hpp"
-#include "core/viewport.hpp"
 #include "glad/gl.h"
 #include "graphics/font.hpp"
 #include "graphics/material.hpp"
 #include "graphics/mesh.hpp"
-#include "graphics/shader.hpp"
 #include "graphics/texture.hpp"
 #include "graphics/vaomap.hpp"
 #include "graphics/vertex.hpp"
@@ -155,7 +152,7 @@ void renderer_2d::draw_rect(glm::vec2 top_left,
     auto shader_2d =
         asset_manager::default_asset_manager()->get_material("surface");
 
-    glm::uvec2 usize = core::viewport::current_viewport()->get_size();
+    glm::uvec2 usize = window_size;
     shader_2d->set_property_value("u_color", fill_color);
     shader_2d->activate();
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
