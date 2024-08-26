@@ -70,6 +70,8 @@ void renderer_2d::draw_rect(glm::vec2 top_left,
 
     auto shader_2d =
         asset_manager::default_asset_manager()->get_material("surface");
+    shader_2d->set_property_value("u_vp_matrix", glm::identity<glm::mat4>());
+    shader_2d->set_property_value("u_model_matrix", glm::identity<glm::mat4>());
 
     shader_2d->set_property_value("u_color", glm::vec4(1));
     shader_2d->set_property_value("u_image", &txt);
@@ -151,6 +153,8 @@ void renderer_2d::draw_rect(glm::vec2 top_left,
 
     auto shader_2d =
         asset_manager::default_asset_manager()->get_material("surface");
+    shader_2d->set_property_value("u_vp_matrix", glm::identity<glm::mat4>());
+    shader_2d->set_property_value("u_model_matrix", glm::identity<glm::mat4>());
 
     glm::uvec2 usize = window_size;
     shader_2d->set_property_value("u_color", fill_color);
@@ -258,6 +262,8 @@ void renderer_2d::draw_text(glm::vec2 baseline,
 
     auto surface_shader =
         asset_manager::default_asset_manager()->get_material("surface");
+    surface_shader->set_property_value("u_vp_matrix", glm::identity<glm::mat4>());
+    surface_shader->set_property_value("u_model_matrix", glm::identity<glm::mat4>());
 
     surface_shader->set_property_value("u_color", glm::vec4(1.0f));
     surface_shader->set_property_value("u_image",

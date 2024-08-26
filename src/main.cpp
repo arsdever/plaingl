@@ -27,11 +27,11 @@
 #include "scene.hpp"
 #include "shader.hpp"
 #include "texture.hpp"
-#include "texture_viewer.hpp"
 #include "thread.hpp"
 #include "tools/console/console.hpp"
 #include "tools/mesh_viewer/mesh_viewer.hpp"
 #include "tools/profiler/profiler.hpp"
+#include "tools/texture_viewer/texture_viewer.hpp"
 
 using namespace core;
 
@@ -50,22 +50,6 @@ texture* norm_txt;
 std::vector<std::shared_ptr<core::window>> windows;
 int mesh_preview_texture_index { 0 };
 std::unique_ptr<console> pconsole;
-
-class cmd_show_texture : public core::command<int>
-{
-public:
-    using command::command;
-    void execute() override
-    {
-        int num = get<0>();
-        if (num >= 0 && num < texture::_textures.size())
-        {
-            on_show_texture(texture::_textures[ num ]);
-        }
-    }
-
-    static event<void(texture*)> on_show_texture;
-};
 
 class cmd_show_mesh : public core::command<int>
 {
@@ -92,6 +76,30 @@ public:
     }
 };
 
+class cmd_show_texture : public core::command<int>
+{
+public:
+    using command::command;
+    void execute() override
+    {
+        int num = get<0>();
+        if (num >= 0 &&
+            num < asset_manager::default_asset_manager()->textures().size())
+        {
+            auto tv = std::make_shared<texture_viewer>();
+            tv->init();
+            tv->set_texture(texture::_textures[ num ]);
+            tv->get_events()->close += [](auto e)
+            {
+                windows.erase(std::remove(windows.begin(),
+                                          windows.end(),
+                                          e.get_sender()->shared_from_this()));
+            };
+            windows.push_back(tv);
+        }
+    }
+};
+
 class cmd_list_textures : public core::command<>
 {
 public:
@@ -104,8 +112,6 @@ public:
         }
     }
 };
-
-event<void(texture*)> cmd_show_texture::on_show_texture;
 
 // physics_engine p;
 } // namespace
@@ -237,9 +243,6 @@ int main(int argc, char** argv)
                                   ce.get_sender()->shared_from_this()));
     };
     windows.push_back(profview);
-
-    cmd_show_texture::on_show_texture +=
-        [ &txt_show ](texture* t) { txt_show = t; };
 
     // auto wh = file::watch("./",
     //                       [](auto path, auto change)
@@ -577,7 +580,6 @@ void load_internal_resources()
     am->load_asset("resources/meshes/susane_head_low.fbx");
     am->load_asset("resources/meshes/shader_ball.fbx");
     am->load_asset("resources/meshes/camera.fbx");
-    am->load_asset("resources/standard/text.mat");
     am->load_asset("resources/standard/skybox.mat");
     am->load_asset("resources/standard/surface.mat");
     am->load_asset("resources/standard/canvas.shader");

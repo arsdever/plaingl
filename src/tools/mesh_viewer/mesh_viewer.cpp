@@ -15,6 +15,7 @@
 
 mesh_viewer::mesh_viewer()
 {
+    set_title("Mesh Viewer");
     resize(600, 600);
     on_user_initialize +=
         [ this ](std::shared_ptr<core::window>) { initialize(); };

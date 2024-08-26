@@ -11,6 +11,14 @@
         1
       ]
     },
+{
+      "name": "u_model_matrix",
+      "type": "mat44"
+    },
+    {
+      "name": "u_vp_matrix",
+      "type": "mat44"
+    },
     {
       "name": "u_image",
       "type": "image"

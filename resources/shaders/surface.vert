@@ -5,10 +5,14 @@ layout(location = 0) in vec3 i_vertex_position;
 // expected coordinates from (0,0) to (1,1)
 layout(location = 2) in vec2 i_vertex_uv;
 
+uniform mat4 u_vp_matrix = mat4(1);
+uniform mat4 u_model_matrix = mat4(1);
+
 out vec2 fragment_uv;
 
 void main()
 {
-    gl_Position = vec4(i_vertex_position, 1.0);
+    mat4 mvp = u_vp_matrix * u_model_matrix;
+    gl_Position = mvp * vec4(i_vertex_position, 1.0);
     fragment_uv = i_vertex_uv;
 }

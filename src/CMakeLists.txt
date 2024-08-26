@@ -9,9 +9,6 @@ add_library(
   feature_flags.hpp
   game_clock.hpp
   game_clock.cpp
-  # TODO: move to tools
-  # texture_viewer.hpp
-  # texture_viewer.cpp
   thread.hpp
   thread.cpp
   transform.hpp

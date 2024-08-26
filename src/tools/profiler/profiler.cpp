@@ -127,6 +127,8 @@ void profiler::render()
     static auto txt = texture::from_image(
         asset_manager::default_asset_manager()->get_image("white"));
 
+    mat->set_property_value("u_vp_matrix", glm::identity<glm::mat4>());
+    mat->set_property_value("u_model_matrix", glm::identity<glm::mat4>());
     mat->set_property_value("u_color", glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
     mat->set_property_value("u_image", &txt);
     renderer_3d().draw_mesh(&m, mat);
