@@ -207,9 +207,6 @@ void camera::render_texture_background()
 void camera::render_on_private_texture() const
 {
     _framebuffer->bind();
-    // TODO?: maybe better to clear with the specified background color
-    // instead
-    // of drawing background quad with that color
     graphics::clear(_background_color);
 
     if (scene::get_active_scene())
