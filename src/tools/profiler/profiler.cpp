@@ -1,5 +1,4 @@
 /* clang-format off */
-#include <glad/gl.h>
 #include <GLFW/glfw3.h>
 /* clang-format on */
 
@@ -9,6 +8,7 @@
 
 #include "common/logging.hpp"
 #include "core/asset_manager.hpp"
+#include "graphics.hpp"
 #include "graphics/material.hpp"
 #include "graphics/mesh.hpp"
 #include "graphics/texture.hpp"
@@ -42,17 +42,14 @@ void profiler::initialize()
 {
     _impl = std::make_unique<impl>();
     get_events()->render += [ this ](auto e) { render(); };
-    get_events()->resize += [ this ](auto e)
-    {
-        resize(e.get_new_size().x, e.get_new_size().y);
-        glViewport(0, 0, e.get_new_size().x, e.get_new_size().y);
-    };
-    glEnable(GL_DEPTH_TEST);
+    get_events()->resize +=
+        [ this ](auto e) { resize(e.get_new_size().x, e.get_new_size().y); };
 }
 
 void profiler::render()
 {
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    graphics::set_viewport({ 0, 0 }, { get_size() });
+    graphics::clear({ .1f, .1f, .1f, 1.0f });
     std::stringstream ss;
     ss << std::this_thread::get_id();
 
