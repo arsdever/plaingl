@@ -33,7 +33,6 @@ public:
     void set_size(glm::vec2 size);
     glm::vec2 get_size() const;
 
-    void render();
     void take_screenshot(std::string_view path);
 
     static viewport* current_viewport();

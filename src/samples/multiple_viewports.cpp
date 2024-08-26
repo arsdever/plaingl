@@ -1,5 +1,4 @@
 /* clang-format off */
-#include <glad/gl.h>
 #include <GLFW/glfw3.h>
 /* clang-format on */
 
@@ -46,12 +45,6 @@ int main(int argc, char** argv)
             std::shared_ptr<core::window> wnd)
     {
         // configure gl debug output
-        glEnable(GL_DEBUG_OUTPUT);
-        glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-        glDebugMessageCallback(gl_error_handler, nullptr);
-        glDebugMessageControl(
-            GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
-
         main_camera_object = game_object::create();
         camera2_object = game_object::create();
         current_scene = scene::create();
@@ -92,7 +85,6 @@ int main(int argc, char** argv)
             int i = 0;
             for (auto vp : re.get_sender()->get_viewports())
             {
-                vp->render();
                 vp->take_screenshot(std::format(
                     "screenshots/screenshot_{}_{}.png", i, frame_counter));
                 ++i;

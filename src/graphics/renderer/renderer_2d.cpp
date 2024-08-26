@@ -28,6 +28,62 @@ glm::tvec2<T> map_from_window(const glm::tvec2<T>& p,
 void renderer_2d::draw_rect(glm::vec2 top_left,
                             glm::vec2 bottom_right,
                             glm::vec2 window_size,
+                            texture& txt)
+{
+    glm::vec2 bottom_left { top_left.x, bottom_right.y };
+    glm::vec2 top_right { bottom_right.x, top_left.y };
+    std::array<vertex3d, 4> vertices {};
+    vertices[ 0 ].position() = { map_from_window<float>(top_left, window_size),
+                                 0.0f };
+    vertices[ 1 ].position() = {
+        map_from_window<float>(bottom_left, window_size), 0.0f
+    };
+    vertices[ 2 ].position() = {
+        map_from_window<float>(bottom_right, window_size), 0.0f
+    };
+    vertices[ 3 ].position() = { map_from_window<float>(top_right, window_size),
+                                 0.0f };
+    vertices[ 0 ].uv() = { 0, 1 };
+    vertices[ 1 ].uv() = { 0, 0 };
+    vertices[ 2 ].uv() = { 1, 0 };
+    vertices[ 3 ].uv() = { 1, 1 };
+
+    std::array<unsigned, 6> indices { 0, 1, 2, 0, 2, 3 };
+
+    vao_map vao;
+    graphics_buffer vbo(graphics_buffer::type::vertex);
+    graphics_buffer ebo(graphics_buffer::type::index);
+
+    vbo.set_element_stride(vertex3d::size);
+    vbo.set_element_count(vertices.size());
+    ebo.set_element_stride(sizeof(unsigned));
+    ebo.set_element_count(indices.size());
+    vbo.set_data(vertices.data());
+    ebo.set_data(indices.data());
+
+    if (vao.activate())
+    {
+        glBindBuffer(GL_ARRAY_BUFFER, vbo.get_handle());
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo.get_handle());
+        vertex3d::initialize_attributes();
+    }
+
+    glDisable(GL_DEPTH_TEST);
+    vertex3d::activate_attributes();
+
+    auto shader_2d =
+        asset_manager::default_asset_manager()->get_material("surface");
+
+    shader_2d->set_property_value("u_color", glm::vec4(1));
+    shader_2d->set_property_value("u_image", &txt);
+    shader_2d->activate();
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+    glEnable(GL_DEPTH_TEST);
+}
+
+void renderer_2d::draw_rect(glm::vec2 top_left,
+                            glm::vec2 bottom_right,
+                            glm::vec2 window_size,
                             float border_thickness,
                             glm::vec4 border_color,
                             glm::vec4 fill_color)
@@ -215,7 +271,7 @@ void renderer_2d::draw_text(glm::vec2 baseline,
 #ifdef RENDER_TEXT_CHAR_BORDER
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     surface_shader->set_property_value("u_color", glm::vec4(1.0f));
-    texture white = texture::from_image(
+    static texture white = texture::from_image(
         asset_manager::default_asset_manager()->get_image("white"));
     surface_shader->set_property_value("u_image", &white);
     surface_shader->activate();

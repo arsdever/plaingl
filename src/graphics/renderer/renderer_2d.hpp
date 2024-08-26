@@ -1,12 +1,17 @@
 #pragma once
 
-#include "renderer/renderer.hpp"
+#include "graphics/renderer/renderer.hpp"
 
 class font;
 
 class renderer_2d : public renderer
 {
 public:
+    void draw_rect(glm::vec2 top_left,
+                   glm::vec2 bottom_right,
+                   glm::vec2 window_size,
+                   texture& texture);
+
     void draw_rect(glm::vec2 top_left,
                    glm::vec2 bottom_right,
                    glm::vec2 window_size,

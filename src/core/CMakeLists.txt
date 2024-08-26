@@ -7,6 +7,8 @@ add_library(
   command.hpp
   input_system.hpp
   input_system.cpp
+  settings.hpp
+  settings.cpp
   viewport.hpp
   viewport.cpp
   window_events.hpp

@@ -1,3 +1,5 @@
+#include <glad/gl.h>
+
 #include "graphics/shader.hpp"
 
 #include "common/file.hpp"

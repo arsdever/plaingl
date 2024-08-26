@@ -1,3 +1,5 @@
+#include <glad/gl.h>
+
 #include "graphics/framebuffer.hpp"
 
 #include "common/logging.hpp"
@@ -115,6 +117,23 @@ void framebuffer::copy_texture(texture* txt) const
                       GL_COLOR_BUFFER_BIT,
                       GL_NEAREST);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void framebuffer::blit(unsigned framebuffer_id) const
+{
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, _p->_fbo);
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebuffer_id);
+    glBlitFramebuffer(0,
+                      0,
+                      _p->_size.x,
+                      _p->_size.y,
+                      0,
+                      0,
+                      _p->_size.x,
+                      _p->_size.y,
+                      GL_COLOR_BUFFER_BIT,
+                      GL_NEAREST);
+    glBindFramebuffer(GL_FRAMEBUFFER, framebuffer_id);
 }
 
 void framebuffer::resize(glm::uvec2 size)

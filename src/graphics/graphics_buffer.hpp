@@ -40,6 +40,7 @@ public:
     void set_usage_type(usage_type usage_type);
     usage_type get_usage_type() const;
     unsigned get_handle() const;
+    void bind(int binding_id);
 
     void release();
 

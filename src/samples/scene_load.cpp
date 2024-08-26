@@ -1,5 +1,4 @@
 /* clang-format off */
-#include <glad/gl.h>
 #include <GLFW/glfw3.h>
 /* clang-format on */
 
@@ -34,12 +33,6 @@ int main(int argc, char** argv)
         [ &main_camera ](std::shared_ptr<core::window> wnd)
     {
         // configure gl debug output
-        glEnable(GL_DEBUG_OUTPUT);
-        glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-        glDebugMessageCallback(gl_error_handler, nullptr);
-        glDebugMessageControl(
-            GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
-
         auto* am = asset_manager::default_asset_manager();
         am->load_asset("standard.shader");
         am->load_asset("shader_ball.fbx");

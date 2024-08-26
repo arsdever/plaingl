@@ -1,12 +1,18 @@
+#include <GLFW/glfw3.h>
 #include <glm/gtx/matrix_decompose.hpp>
 #include <nlohmann/json.hpp>
 
 #include "project/components/camera.hpp"
 
 #include "core/asset_manager.hpp"
+#include "core/settings.hpp"
+#include "core/window.hpp"
 #include "graphics/framebuffer.hpp"
+#include "graphics/graphics.hpp"
 #include "graphics/graphics_buffer.hpp"
 #include "graphics/material.hpp"
+#include "graphics/renderer/renderer_3d.hpp"
+#include "graphics/texture.hpp"
 #include "project/components/light.hpp"
 #include "project/components/mesh_filter.hpp"
 #include "project/components/mesh_renderer.hpp"
@@ -16,7 +22,6 @@
 #include "project/serialization_utilities.hpp"
 #include "project/serializer.hpp"
 #include "project/serializer_json.hpp"
-#include "renderer/renderer_3d.hpp"
 
 using namespace serialization::utilities;
 
@@ -104,6 +109,7 @@ glm::dvec4 camera::get_background_color() const
 
 void camera::render()
 {
+    graphics::set_viewport({ 0, 0 }, _render_size);
     setup_lights();
     render_on_private_texture();
 
@@ -120,6 +126,15 @@ void camera::render()
     {
         _framebuffer->copy_texture(urt.get());
     }
+
+    _framebuffer->blit(0);
+    // texture surface;
+    // surface.init(_render_size.x, _render_size.y, texture::format::RGBA);
+    // _framebuffer->copy_texture(&surface);
+    // renderer_2d().draw_rect(glm::vec2(0),
+    //                         glm::vec2(_render_size),
+    //                         glm::vec2(_render_size),
+    //                         surface);
 }
 
 glm::mat4 camera::projection_matrix() const { return _projection_matrix; }
@@ -151,8 +166,11 @@ void camera::on_init()
     _projection_matrix = calculate_projection_matrix();
 
     _framebuffer = std::make_unique<framebuffer>();
-    _framebuffer->set_samples(32);
-    _framebuffer->resize(_render_size);
+    _framebuffer->set_samples(core::settings[ "antialiasing" ].get<unsigned>());
+
+    auto wnd = core::window::get_main_window();
+    set_render_size(wnd->get_size());
+
     _framebuffer->initialize();
     _lights_buffer = std::make_unique<graphics_buffer>(
         graphics_buffer::type::shader_storage);
@@ -192,10 +210,7 @@ void camera::render_on_private_texture() const
     // TODO?: maybe better to clear with the specified background color
     // instead
     // of drawing background quad with that color
-    glClearColor(
-        _background_color.x, _background_color.y, _background_color.z, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glEnable(GL_DEPTH_TEST);
+    graphics::clear(_background_color);
 
     if (scene::get_active_scene())
     {
@@ -266,8 +281,7 @@ void camera::setup_lights()
     _lights_buffer->set_element_count(glsl_lights.size());
     _lights_buffer->set_usage_type(graphics_buffer::usage_type::dynamic_copy);
     _lights_buffer->set_data(glsl_lights.data());
-    glBindBuffer(GL_SHADER_STORAGE_BUFFER, _lights_buffer->get_handle());
-    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, _lights_buffer->get_handle());
+    _lights_buffer->bind(0);
 }
 
 glm::mat4 camera::calculate_projection_matrix() const

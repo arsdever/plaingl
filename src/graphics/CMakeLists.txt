@@ -1,19 +1,21 @@
 add_library(
   ${PROJECT}_graphics STATIC
-  # command_executors.cpp
-  command_executors.hpp
-  command.hpp
   context_aware_object.hpp
   framebuffer.hpp
   framebuffer.cpp
   font.cpp
   font.hpp
+  # TODO: Fix gizmo drawer
+  # gizmo_drawer.hpp
+  # gizmo_drawer.cpp
+  gl_error_handler.cpp
+  gl_error_handler.hpp
   gpu.cpp
   gpu.hpp
   graphics_buffer.cpp
   graphics_buffer.hpp
-  graphics_channel.cpp
-  graphics_channel.hpp
+  graphics.cpp
+  graphics.hpp
   image.cpp
   image.hpp
   mesh.cpp
@@ -29,15 +31,16 @@ add_library(
   utils.hpp
   vaomap.cpp
   vaomap.hpp
-  vertex.hpp
-  commands/command_type_traits.hpp
-  commands/command_types.hpp
-  commands/commands.hpp
-  commands/draw_elements.hpp)
+  vertex.hpp)
 add_library(${PROJECT}::graphics ALIAS ${PROJECT}_graphics)
+
+add_subdirectory(glad)
+add_subdirectory(renderer)
 
 target_precompile_headers(${PROJECT}_graphics REUSE_FROM ${PROJECT}::common)
 target_include_directories(
   ${PROJECT}_graphics PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${PROJECT_SRC_DIR})
-target_link_libraries(${PROJECT}_graphics PRIVATE ${PROJECT}::common
-                                                  ${PROJECT}::glad)
+target_link_libraries(
+  ${PROJECT}_graphics
+  PUBLIC ${PROJECT}::common ${PROJECT}::renderer
+  PRIVATE ${PROJECT}::glad)

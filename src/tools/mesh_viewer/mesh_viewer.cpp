@@ -1,3 +1,8 @@
+/* clang-format off */
+#include <glad/gl.h>
+#include <GLFW/glfw3.h>
+/* clang-format on */
+
 #include "tools/mesh_viewer/mesh_viewer.hpp"
 
 #include "core/asset_manager.hpp"

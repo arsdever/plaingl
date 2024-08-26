@@ -1,3 +1,5 @@
+#include <glad/gl.h>
+
 #include "graphics/mesh.hpp"
 
 void mesh::init()

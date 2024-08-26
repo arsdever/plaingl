@@ -1,3 +1,8 @@
+/* clang-format off */
+#include <glad/gl.h>
+#include <GLFW/glfw3.h>
+/* clang-format on */
+
 #include <prof/profiler.hpp>
 
 #include "tools/profiler/profiler.hpp"
@@ -122,7 +127,7 @@ void profiler::render()
     m.init();
 
     auto mat = asset_manager::default_asset_manager()->get_material("surface");
-    auto txt = texture::from_image(
+    static auto txt = texture::from_image(
         asset_manager::default_asset_manager()->get_image("white"));
 
     mat->set_property_value("u_color", glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));

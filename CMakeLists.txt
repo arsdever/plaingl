@@ -29,8 +29,6 @@ endif()
 
 add_subdirectory(src)
 
-target_link_libraries(profiler_lib PUBLIC ${PROJECT}::glad)
-
 if(BUILD_TESTING)
   message(STATUS "Building tests")
   set(${PROJECT}_TESTING_ENABLED ON)

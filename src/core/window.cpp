@@ -1,5 +1,4 @@
 /* clang-format off */
-#include <glad/gl.h>
 #include <GLFW/glfw3.h>
 /* clang-format on */
 
@@ -8,7 +7,9 @@
 
 #include "core/window.hpp"
 
+#include "core/settings.hpp"
 #include "core/window_events.hpp"
+#include "graphics/graphics.hpp"
 #include "input_system.hpp"
 #include "logging.hpp"
 
@@ -81,8 +82,14 @@ void window::init()
         _p->_is_input_source = true;
     }
 
+    if (!core::settings.contains("antialiasing"))
+    {
+        core::settings[ "antialiasing" ] = 4;
+    }
+
+    glfwWindowHint(GLFW_SAMPLES,
+                   core::settings[ "antialiasing" ].get<unsigned>());
     glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
-    glfwWindowHint(GLFW_SAMPLES, 8);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
@@ -125,9 +132,8 @@ void window::init()
 
     activate();
 
-    if (!gladLoadGL((GLADloadfunc)glfwGetProcAddress))
+    if (!graphics::initialize())
     {
-        log()->error("Failed to initialize GLAD");
         return;
     }
 

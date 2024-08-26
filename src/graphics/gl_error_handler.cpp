@@ -1,4 +1,6 @@
-#include "logging.hpp"
+#include <glad/gl.h>
+
+#include "common/logging.hpp"
 
 namespace
 {

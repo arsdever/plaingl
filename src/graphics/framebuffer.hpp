@@ -20,6 +20,7 @@ public:
     std::shared_ptr<const texture> depth_texture() const;
 
     void copy_texture(texture* txt) const;
+    void blit(unsigned framebuffer_id) const;
 
     void resize(glm::uvec2 size);
 

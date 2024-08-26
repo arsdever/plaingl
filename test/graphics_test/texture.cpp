@@ -138,8 +138,7 @@ int main(int argc, char** argv)
         surface_shader->set_uniform("u_image", 0);
         surface_shader->use();
 
-        txt.set_wrapping_mode(
-            true, true, texture::wrapping_mode::repeat);
+        txt.set_wrapping_mode(true, true, texture::wrapping_mode::repeat);
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
         txt.set_sampling_mode_mag(texture::sampling_mode::nearest);

@@ -1,6 +1,8 @@
 // TODO: investigate PBO and integrate
 // https://www.songho.ca/opengl/gl_pbo.html
 
+#include <glad/gl.h>
+
 #include "graphics/texture.hpp"
 
 #include "common/logging.hpp"
@@ -61,9 +63,6 @@ texture::texture(texture&& other)
     _format = other._format;
     other._texture_id = 0;
     _textures.push_back(this);
-    log()->debug("New texture created {}. Total number of textures {}",
-                 _texture_id,
-                 _textures.size());
 }
 
 texture& texture::operator=(texture&& other)
@@ -78,12 +77,13 @@ texture& texture::operator=(texture&& other)
 
 texture::~texture()
 {
-    int old_id = _texture_id;
-    glDeleteTextures(1, &_texture_id);
-    _textures.erase(std::find(_textures.begin(), _textures.end(), this));
-    log()->debug("Texture deleted {}. Total number of textures {}",
-                old_id,
-                _textures.size());
+    if (_texture_id == 0)
+    {
+        log()->debug("Deleting texture {}.", _texture_id);
+        glDeleteTextures(1, &_texture_id);
+        _textures.erase(std::find(_textures.begin(), _textures.end(), this));
+        log()->debug("Total number of textures left {}", _textures.size());
+    }
 }
 
 void texture::init(size_t width, size_t height, format texture_format)

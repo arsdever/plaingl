@@ -6,20 +6,6 @@ graphics_buffer::graphics_buffer(type type)
     : _type(type)
 {
     glCreateBuffers(1, &_handle);
-    int gl_buffer_type = GL_ARRAY_BUFFER;
-    switch (type)
-    {
-    case type::vertex: break;
-    case type::index:
-    {
-        gl_buffer_type = GL_ELEMENT_ARRAY_BUFFER;
-        break;
-    }
-    case type::shader_storage:
-    {
-        gl_buffer_type = GL_SHADER_STORAGE_BUFFER;
-    }
-    }
 }
 
 graphics_buffer::graphics_buffer(graphics_buffer&& o)
@@ -128,6 +114,27 @@ graphics_buffer::usage_type graphics_buffer::get_usage_type() const
 }
 
 unsigned graphics_buffer::get_handle() const { return _handle; }
+
+void graphics_buffer::bind(int binding_id)
+{
+    int gl_buffer_type = GL_ARRAY_BUFFER;
+    switch (_type)
+    {
+    case type::vertex: break;
+    case type::index:
+    {
+        gl_buffer_type = GL_ELEMENT_ARRAY_BUFFER;
+        break;
+    }
+    case type::shader_storage:
+    {
+        gl_buffer_type = GL_SHADER_STORAGE_BUFFER;
+    }
+    }
+
+    glBindBuffer(gl_buffer_type, _handle);
+    glBindBufferBase(gl_buffer_type, binding_id, _handle);
+}
 
 void graphics_buffer::release()
 {

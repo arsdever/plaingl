@@ -3,21 +3,8 @@
 #include <spdlog/common.h>
 
 #include "core/asset_manager.hpp"
-#include "tools/console/console.hpp"
-// #include "components/box_collider_component.hpp"
-// #include "components/camera_component.hpp"
-// #include "components/fps_show_component.hpp"
-// #include "components/light_component.hpp"
-// #include "components/mesh_component.hpp"
-// #include "components/mesh_renderer_component.hpp"
-// #include "components/plane_collider_component.hpp"
-// #include "components/ray_visualize_component.hpp"
-// #include "components/text_component.hpp"
-// #include "components/text_renderer_component.hpp"
-// #include "components/walking_component.hpp"
 #include "core/command_dispatcher.hpp"
 #include "core/input_system.hpp"
-#include "core/viewport.hpp"
 #include "core/window.hpp"
 #include "core/window_events.hpp"
 #include "feature_flags.hpp"
@@ -42,6 +29,7 @@
 #include "texture.hpp"
 #include "texture_viewer.hpp"
 #include "thread.hpp"
+#include "tools/console/console.hpp"
 #include "tools/mesh_viewer/mesh_viewer.hpp"
 #include "tools/profiler/profiler.hpp"
 
@@ -126,7 +114,6 @@ void load_internal_resources();
 void initScene();
 void initMainWindow();
 void initProfilerView();
-// void initViewports();
 void setupMouseEvents();
 
 void on_error(int error_code, const char* description)
@@ -160,7 +147,6 @@ int main(int argc, char** argv)
 
     initMainWindow();
     // initProfilerView();
-    // initViewports();
     setupMouseEvents();
     initScene();
 
@@ -277,7 +263,7 @@ int main(int argc, char** argv)
 
         if (txt_show != 0)
         {
-            texture_viewer::show_preview(txt_show);
+            // texture_viewer::show_preview(txt_show);
             txt_show = nullptr;
         }
     }
@@ -312,15 +298,11 @@ void initMainWindow()
     wnd->resize(800, 800);
     wnd->get_events()->close += [](auto ce)
     { std::erase(windows, ce.get_sender()->shared_from_this()); };
-    std::shared_ptr<viewport> vp = std::make_shared<viewport>();
-    vp->initialize();
-    wnd->add_viewport(vp);
-    wnd->get_events()->resize +=
-        [ vp ](auto re) { vp->set_size(re.get_new_size()); };
-    wnd->get_events()->render += [ vp ](auto re)
+    wnd->get_events()->resize += [](auto re)
+    { components::camera::get_active()->set_render_size(re.get_new_size()); };
+    wnd->get_events()->render += [](auto re)
     {
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        vp->render();
+        components::camera::get_active()->render();
 
         float scale = 1.0f;
         const auto line_height = 18.0f * scale;
@@ -419,89 +401,8 @@ void initMainWindow()
             }
         }
     };
-    windows.back()->get_events()->resize += [ vp ](auto re)
-    {
-        vp->set_size(
-            { re.get_sender()->get_width(), re.get_sender()->get_height() });
-    };
-
     wnd->set_can_grab(true);
-    vp->set_size({ wnd->get_width(), wnd->get_height() });
 }
-
-// void initViewports()
-// {
-//     windows.push_back(std::make_shared<core::window>());
-//     auto wnd = windows.back();
-//     wnd->init();
-//     wnd->resize(400, 1200);
-//     windows[ 0 ]->set_position(windows[ 1 ]->get_position().x +
-//                                    windows[ 1 ]->get_width(),
-//                                windows[ 1 ]->get_position().y);
-
-//     wnd->get_events()->close += [](auto ce)
-//     { std::erase(windows, ce.get_sender()->shared_from_this()); };
-
-//     for (int i = 0; i < _view_cameras.size(); ++i)
-//     {
-//         _view_cameras[ i ] = std::make_shared<camera>();
-//         auto cam = _view_cameras[ i ];
-//         auto vp = std::make_shared<core::viewport>();
-//         vp->initialize();
-//         vp->set_camera(cam);
-//         cam->set_ortho(true);
-//         wnd->add_viewport(vp);
-//         wnd->get_events()->mouse_scroll += [ cam, vp ](auto we)
-//         {
-//             auto pos = we.get_local_position();
-//             pos.y = we.get_sender()->get_height() - pos.y;
-//             if (!rect_contains(vp->get_position(),
-//                                vp->get_position() + vp->get_size(),
-//                                pos))
-//             {
-//                 return;
-//             }
-
-//             cam->get_transform().set_position(
-//                 cam->get_transform().get_position() *
-//                 std::pow<float>(1.2, we.get_delta().y));
-//         };
-//         windows.back()->get_events()->resize += [ vp, i ](auto re)
-//         {
-//             vp->set_size({ re.get_new_size().x, re.get_new_size().y / 3.0
-//             }); vp->set_position({ 0, re.get_new_size().y / 3.0 * i });
-//         };
-
-//         vp->set_size({ wnd->get_width(), wnd->get_height() / 3.0 });
-//         vp->set_position({ 0, wnd->get_height() / 3.0 * i });
-//     }
-
-//     windows.back()->get_events()->render += [](auto re)
-//     {
-//         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-//         for (auto vp : re.get_sender()->get_viewports())
-//         {
-//             vp->render();
-//         }
-//     };
-//     _view_cameras[ 0 ]->get_transform().set_position({ 100, 0, 0 });
-//     _view_cameras[ 0 ]->get_transform().set_rotation(glm::quatLookAt(
-//         glm::vec3 { -1.0f, 0.0f, 0.0f }, glm::vec3 { 0.0f, 1.0f, 0.0f
-//         }));
-//     _view_cameras[ 0 ]->set_background(glm::vec3 { 0.1f, 0.0f, 0.0f });
-
-//     _view_cameras[ 1 ]->get_transform().set_position({ 0, 100, 0 });
-//     _view_cameras[ 1 ]->get_transform().set_rotation(glm::quatLookAt(
-//         glm::vec3 { 0.0f, -1.0f, 0.0f }, glm::vec3 { 0.0f, 0.0f, 1.0f
-//         }));
-//     _view_cameras[ 1 ]->set_background(glm::vec3 { 0.0f, 0.1f, 0.0f });
-
-//     _view_cameras[ 2 ]->get_transform().set_position({ 0, 0, 100 });
-//     _view_cameras[ 2 ]->get_transform().set_rotation(glm::quatLookAt(
-//         glm::vec3 { 0.0f, 0.0f, -1.0f }, glm::vec3 { 0.0f, 1.0f, 0.0f
-//         }));
-//     _view_cameras[ 2 ]->set_background(glm::vec3 { 0.0f, 0.0f, 0.1f });
-// }
 
 void setupMouseEvents()
 {

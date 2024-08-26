@@ -1,3 +1,4 @@
+#include <GLFW/glfw3.h>
 #include <gtest/gtest.h>
 
 #include "core/command.hpp"

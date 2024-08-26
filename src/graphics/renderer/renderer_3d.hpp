@@ -1,6 +1,6 @@
 #pragma once
 
-#include "renderer/renderer.hpp"
+#include "graphics/renderer/renderer.hpp"
 #include "graphics/vaomap.hpp"
 
 class material;

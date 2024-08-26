@@ -7,10 +7,8 @@ macro(define_asset asset_name)
     message(STATUS "${asset_name_upper} support enabled")
     add_library(${PROJECT}_asset_${asset_name_lower} STATIC
                 ${asset_name_lower}.hpp ${asset_name_lower}.cpp)
-    target_link_libraries(
-      ${PROJECT}_asset_${asset_name_lower}
-      PRIVATE ${PROJECT}_includes
-      PUBLIC ${PROJECT}::common)
+    target_link_libraries(${PROJECT}_asset_${asset_name_lower}
+                          PUBLIC ${PROJECT}::common)
     target_compile_definitions(
       ${PROJECT}_common
       PUBLIC ${project_uppercase}_SUPPORTS_${asset_name_upper})

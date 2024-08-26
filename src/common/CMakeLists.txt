@@ -28,5 +28,4 @@ if(WIN32)
   target_link_libraries(${PROJECT}_common PRIVATE kernel32)
 endif()
 
-target_link_libraries(${PROJECT}_common PUBLIC ${PROJECT}::glad glfw glm
-                                               spdlog::spdlog)
+target_link_libraries(${PROJECT}_common PUBLIC glfw glm spdlog::spdlog)

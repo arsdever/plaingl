@@ -1,5 +1,4 @@
 /* clang-format off */
-#include <glad/gl.h>
 #include <GLFW/glfw3.h>
 /* clang-format on */
 
@@ -85,7 +84,6 @@ int main(int argc, char** argv)
             int i = 0;
             for (auto vp : re.get_sender()->get_viewports())
             {
-                vp->render();
                 vp->take_screenshot(std::format(
                     "screenshots/screenshot_{}_{}.png", i, frame_counter));
                 ++i;
