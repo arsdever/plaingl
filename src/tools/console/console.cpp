@@ -5,6 +5,7 @@
 #include "common/logging.hpp"
 #include "common/utils.hpp"
 #include "core/command_dispatcher.hpp"
+#include "core/input_system.hpp"
 
 namespace
 {
@@ -130,6 +131,30 @@ bool console::is_active() const { return _impl->is_active; }
 void console::activate() { _impl->is_active = true; }
 
 void console::deactivate() { _impl->is_active = false; }
+
+void console::enable_autoactivation()
+{
+    core::input_system::on_keypress += [ this ](int keycode)
+    {
+        if (keycode == GLFW_KEY_GRAVE_ACCENT)
+        {
+            if (is_active())
+            {
+                deactivate();
+                log()->debug("Console deactivated");
+            }
+            else
+            {
+                activate();
+                log()->debug("Console activated");
+            }
+        }
+        else if (is_active())
+        {
+            input(keycode);
+        }
+    };
+}
 
 core::command_dispatcher& console::processor() { return _impl->dispatcher; }
 

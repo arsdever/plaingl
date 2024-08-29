@@ -15,6 +15,8 @@ public:
     int run();
 
 private:
+    void setup_console();
+
     void update_windows();
     void process_console_commands();
 

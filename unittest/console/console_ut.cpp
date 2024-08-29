@@ -81,3 +81,6 @@ TEST(Console, register_command)
 
     EXPECT_EQ(my_variable, 4);
 }
+
+// TODO: missing tests
+// TEST(Console, incorrect_arguments)

@@ -51,67 +51,6 @@ std::vector<std::shared_ptr<core::window>> windows;
 int mesh_preview_texture_index { 0 };
 std::unique_ptr<console> pconsole;
 
-class cmd_show_mesh : public core::command<int>
-{
-public:
-    using command::command;
-    void execute() override
-    {
-        int num = get<0>();
-        if (num >= 0 &&
-            num < asset_manager::default_asset_manager()->meshes().size())
-        {
-            auto mv = std::make_shared<mesh_viewer>();
-            mv->init();
-            mv->set_mesh(
-                asset_manager::default_asset_manager()->meshes()[ num ]);
-            mv->get_events()->close += [](auto e)
-            {
-                windows.erase(std::remove(windows.begin(),
-                                          windows.end(),
-                                          e.get_sender()->shared_from_this()));
-            };
-            windows.push_back(mv);
-        }
-    }
-};
-
-class cmd_show_texture : public core::command<int>
-{
-public:
-    using command::command;
-    void execute() override
-    {
-        int num = get<0>();
-        if (num >= 0 &&
-            num < asset_manager::default_asset_manager()->textures().size())
-        {
-            auto tv = std::make_shared<texture_viewer>();
-            tv->init();
-            tv->set_texture(texture::_textures[ num ]);
-            tv->get_events()->close += [](auto e)
-            {
-                windows.erase(std::remove(windows.begin(),
-                                          windows.end(),
-                                          e.get_sender()->shared_from_this()));
-            };
-            windows.push_back(tv);
-        }
-    }
-};
-
-class cmd_list_textures : public core::command<>
-{
-public:
-    void execute() override
-    {
-        for (int i = 0; i < texture::_textures.size(); ++i)
-        {
-            log()->info(
-                "Texture {}: id {}", i, texture::_textures[ i ]->native_id());
-        }
-    }
-};
 
 // physics_engine p;
 } // namespace

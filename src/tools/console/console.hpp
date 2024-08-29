@@ -18,6 +18,7 @@ public:
     bool is_active() const;
     void activate();
     void deactivate();
+    void enable_autoactivation();
 
     core::command_dispatcher& processor();
 
