@@ -8,8 +8,8 @@ public:
     static std::chrono::duration<double> delta();
     static std::chrono::duration<double> physics_delta();
 
-    void frame();
-    void physics_frame();
+    static void frame();
+    static void physics_frame();
 
 private:
     static game_clock* _instance;

@@ -5,6 +5,8 @@ add_library(
   command_dispatcher.cpp
   command_dispatcher.hpp
   command.hpp
+  game_clock.hpp
+  game_clock.cpp
   input_system.hpp
   input_system.cpp
   settings.hpp

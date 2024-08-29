@@ -132,7 +132,6 @@ static std::atomic_int counter = 0;
 int main(int argc, char** argv)
 {
     // register components
-    component_registry::register_components();
     // components::box_collider::register_component();
     // components::plane_collider::register_component();
     // components::walking::register_component();
@@ -143,6 +142,7 @@ int main(int argc, char** argv)
     // components::fps_show::register_component();
     // components::ray_visualize::register_component();
 
+    component_registry::register_components();
     configure_logging(argc, argv);
     game_clock* clock = game_clock::init();
     glfwInit();

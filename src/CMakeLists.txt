@@ -7,8 +7,6 @@ add_library(
   component.cpp
   color.hpp
   feature_flags.hpp
-  game_clock.hpp
-  game_clock.cpp
   thread.hpp
   thread.cpp
   transform.hpp
@@ -27,10 +25,4 @@ target_link_libraries(
   ${PROJECT}_lib PUBLIC ${PROJECT}::common ${PROJECT}::core
                         ${PROJECT}::graphics ${PROJECT}::project freetype Winmm)
 
-add_executable(${PROJECT} main.cpp)
-target_link_libraries(
-  ${PROJECT}
-  PUBLIC ${PROJECT}::lib
-  PRIVATE ${PROJECT}::tools)
-
-# add_subdirectory(samples)
+add_subdirectory(application)
