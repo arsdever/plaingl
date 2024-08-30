@@ -1,4 +1,3 @@
-message(STATUS "- project tests")
 enable_testing()
 
 add_executable(${PROJECT}_project_ut game_object.cpp component_management.cpp)

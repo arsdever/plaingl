@@ -13,6 +13,16 @@ FetchContent_MakeAvailable(googletest)
 enable_testing()
 
 message(STATUS "Configuring unittests")
-add_subdirectory(common_ut)
-add_subdirectory(console)
-add_subdirectory(project)
+
+add_custom_target(${PROJECT}_unittests)
+
+set(unit_test_index 0)
+macro(add_test_subdirectory test_folder_name)
+  message(STATUS "${unit_test_index}. ${test_folder_name}")
+  add_subdirectory(${test_folder_name}_ut)
+  math(EXPR unit_test_index "${unit_test_index}+1")
+endmacro()
+
+add_test_subdirectory(common)
+add_test_subdirectory(console)
+add_test_subdirectory(project)
