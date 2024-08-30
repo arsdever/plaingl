@@ -13,7 +13,9 @@ class application
 public:
     application();
     ~application();
+
     int run();
+    void shutdown();
 
 private:
     void setup_console();
@@ -31,4 +33,5 @@ private:
 private:
     std::vector<std::shared_ptr<core::window>> _windows;
     std::shared_ptr<console> _console { nullptr };
+    bool _is_running;
 };

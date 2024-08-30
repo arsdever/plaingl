@@ -9,5 +9,6 @@ int main(int argc, char** argv)
 
     application app;
     auto result = app.run();
+
     return result;
 }

@@ -4,12 +4,20 @@
 #include "core/asset_manager.hpp"
 #include "graphics/texture.hpp"
 #include "tools/mesh_viewer/mesh_viewer.hpp"
+#include "tools/profiler/profiler.hpp"
 #include "tools/texture_viewer/texture_viewer.hpp"
 
 namespace
 {
 logger log() { return get_logger("console"); }
 } // namespace
+
+void cmd_show_profiler::execute()
+{
+    auto pv = std::make_shared<profiler>();
+    pv->init();
+    open_window_requested(pv);
+}
 
 void cmd_show_mesh::execute()
 {
@@ -55,5 +63,7 @@ void cmd_list_textures::execute()
 }
 
 event<void(std::shared_ptr<core::window>)> cmd_show_mesh::open_window_requested;
+event<void(std::shared_ptr<core::window>)>
+    cmd_show_profiler::open_window_requested;
 event<void(std::shared_ptr<core::window>)>
     cmd_show_texture::open_window_requested;

@@ -8,6 +8,14 @@ namespace core
 class window;
 }
 
+class cmd_show_profiler : public core::command<>
+{
+public:
+    void execute() override;
+
+    static event<void(std::shared_ptr<core::window>)> open_window_requested;
+};
+
 class cmd_show_mesh : public core::command<int>
 {
 public:

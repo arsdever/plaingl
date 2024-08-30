@@ -30,7 +30,10 @@ application::application()
     main_window->set_title("Gamify");
     main_window->init();
     main_window->get_events()->close += [ this ](auto ce)
-    { std::erase(_windows, ce.get_sender()->shared_from_this()); };
+    {
+        shutdown();
+        std::erase(_windows, ce.get_sender()->shared_from_this());
+    };
     _windows.push_back(main_window);
     main_window->get_events()->render += [ this ](auto re) { render_game(); };
     main_window->get_events()->resize += [ this ](auto re)
@@ -51,7 +54,7 @@ application::~application() { glfwTerminate(); }
 
 int application::run()
 {
-    while (!_windows.empty())
+    while (_is_running)
     {
         update_windows();
         process_console_commands();
@@ -59,6 +62,8 @@ int application::run()
     }
     return 0;
 }
+
+void application::shutdown() { _is_running = false; }
 
 void application::setup_console()
 {
@@ -77,10 +82,19 @@ void application::setup_console()
         { std::erase(_windows, ce.get_sender()->shared_from_this()); };
     };
 
+    cmd_show_profiler::open_window_requested +=
+        [ this ](std::shared_ptr<core::window> w)
+    {
+        _windows.push_back(w);
+        w->get_events()->close += [ this ](auto ce)
+        { std::erase(_windows, ce.get_sender()->shared_from_this()); };
+    };
+
     _console = std::make_unique<console>();
     _console->register_for_logs();
     _console->register_command<cmd_show_texture, int>("show.texture");
     _console->register_command<cmd_show_mesh, int>("show.mesh");
+    _console->register_command<cmd_show_profiler>("show.profiler");
     _console->register_command<cmd_list_textures>("list.textures");
     _console->register_command<project::cmd_create_game_object>(
         "create.gameobject");
