@@ -1,4 +1,3 @@
-message(STATUS "- console tests")
 enable_testing()
 
 add_executable(${PROJECT}_console_ut console_ut.cpp)

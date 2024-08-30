@@ -1,4 +1,3 @@
-message(STATUS "- \"common\" unit tests")
 enable_testing()
 
 add_executable(${PROJECT}_common_ut file_ut.cpp)
