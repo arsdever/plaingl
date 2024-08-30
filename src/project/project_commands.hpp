@@ -1,10 +1,11 @@
 #pragma once
 
+#include "common/event.hpp"
 #include "core/command.hpp"
-#include "project/uid.hpp"
 
 class game_object;
 class object;
+class scene;
 
 namespace project
 {
@@ -17,6 +18,24 @@ public:
 
 private:
     std::shared_ptr<game_object> _obj;
+};
+
+class cmd_load_scene : public core::command<std::string>
+{
+public:
+    using command::command;
+    void execute() override;
+
+    std::shared_ptr<scene> default_scene();
+
+    static event<void(std::shared_ptr<scene>)> scene_loaded;
+};
+
+class cmd_save_scene : public core::command<std::string>
+{
+public:
+    using command::command;
+    void execute() override;
 };
 
 // class cmd_destroy_game_object : public core::command

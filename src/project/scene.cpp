@@ -1,9 +1,16 @@
-#include <iostream>
+#include <nlohmann/json.hpp>
 
 #include "project/scene.hpp"
 
+#include "common/file.hpp"
+#include "common/logging.hpp"
 #include "project/game_object.hpp"
 #include "project/memory_manager.hpp"
+
+namespace
+{
+logger log() { return get_logger("project"); }
+} // namespace
 
 scene::scene() = default;
 
@@ -45,11 +52,24 @@ void scene::save(std::string_view path)
 
 std::shared_ptr<scene> scene::load(std::string_view path)
 {
-    std::ifstream file { std::string(path) };
-    nlohmann::json data;
-    file >> data;
-    _active_scene = std::shared_ptr<scene>(new scene());
-    memory_manager::deserialize(data);
+    if (!common::file::exists(path))
+    {
+        log()->error("Failed to load scene: {} does not exist", path);
+        return nullptr;
+    }
+
+    try
+    {
+        nlohmann::json data =
+            nlohmann::json::parse(common::file::read_all(path));
+        _active_scene = std::shared_ptr<scene>(new scene());
+        memory_manager::deserialize(data);
+    }
+    catch (nlohmann::json::exception& ex)
+    {
+        log()->error("Failed to load scene: {}", ex.what());
+        return nullptr;
+    }
     return _active_scene;
 }
 

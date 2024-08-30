@@ -1,19 +1,6 @@
-link_libraries(profiler::lib)
 set(PROJECT_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
-add_library(
-  ${PROJECT}_lib STATIC
-  component.hpp
-  component.cpp
-  color.hpp
-  feature_flags.hpp
-  game_clock.hpp
-  game_clock.cpp
-  thread.hpp
-  thread.cpp
-  transform.hpp
-  transform.cpp)
-add_library(${PROJECT}::lib ALIAS ${PROJECT}_lib)
+link_libraries(profiler::lib)
 
 add_subdirectory(common)
 add_subdirectory(core)
@@ -21,16 +8,12 @@ add_subdirectory(graphics)
 add_subdirectory(project)
 add_subdirectory(tools)
 
+add_library(${PROJECT}_lib INTERFACE)
+add_library(${PROJECT}::lib ALIAS ${PROJECT}_lib)
+
 target_precompile_headers(${PROJECT}_lib REUSE_FROM ${PROJECT}::common)
-
 target_link_libraries(
-  ${PROJECT}_lib PUBLIC ${PROJECT}::common ${PROJECT}::core
-                        ${PROJECT}::graphics ${PROJECT}::project freetype Winmm)
+  ${PROJECT}_lib INTERFACE ${PROJECT}::common ${PROJECT}::core
+                           ${PROJECT}::graphics ${PROJECT}::project)
 
-add_executable(${PROJECT} main.cpp)
-target_link_libraries(
-  ${PROJECT}
-  PUBLIC ${PROJECT}::lib
-  PRIVATE ${PROJECT}::tools)
-
-# add_subdirectory(samples)
+add_subdirectory(application)
