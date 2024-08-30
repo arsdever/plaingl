@@ -115,7 +115,9 @@
 		"*.ipp": "cpp",
 		"numbers": "cpp",
 		"expected": "cpp",
-		"*.mat": "json"
+		"*.mat": "json",
+		"*.tcc": "cpp",
+		"semaphore": "cpp"
 	},
 	"dotnet.defaultSolution": "disable"
 }
