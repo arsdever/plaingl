@@ -1,6 +1,10 @@
 #include "common/filesystem.hpp"
 
-#include "common/impl/file_win.hpp"
+#if defined(WIN32)
+#    include "common/impl/file_win.hpp"
+#elif defined(__linux__)
+#    include "common/impl/file_linux.hpp"
+#endif
 
 namespace common::filesystem
 {
@@ -68,7 +72,7 @@ void path::resolve()
     if (auto pos = _filename.find_last_of('.'); pos != std::string::npos)
     {
         _stem = _filename.substr(0, pos);
-        _extension = _filename.substr(pos + 1);
+        _extension = _filename.substr(pos);
     }
     _directory = _full_path_without_filename.substr(
         _full_path_without_filename.find_last_of('/') + 1);

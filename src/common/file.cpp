@@ -4,21 +4,23 @@
 #include "common/logging.hpp"
 #include "file_watcher.hpp"
 
-#ifdef WIN32
+#if defined(WIN32)
 #    include "common/impl/file_win.hpp"
+#elif defined(__linux__)
+#    include "common/impl/file_linux.hpp"
 #endif
 
 namespace common
 {
 file::file(std::string path)
-    : _impl(std::make_unique<impl>(std::move(path), nullptr))
+    : _impl(std::make_unique<impl>(std::move(path)))
 {
     try
     {
         _watcher =
             file_watcher(_impl->path,
                          [ this ](std::string_view path, file_change_type type)
-        { changed(type); });
+                         { changed(type); });
     }
     catch (...)
     {
@@ -29,7 +31,7 @@ file::file(std::string path)
 file::file(file&& o)
 {
     _impl = std::move(o._impl);
-    o._impl = std::make_unique<impl>("", nullptr);
+    o._impl = std::make_unique<impl>("");
     _watcher = o._watcher;
 }
 
@@ -48,7 +50,7 @@ void file::open(open_mode mode)
         _watcher =
             file_watcher(_impl->path,
                          [ this ](std::string_view path, file_change_type type)
-        { changed(type); });
+                         { changed(type); });
         changed(file_change_type::created);
     }
 }
