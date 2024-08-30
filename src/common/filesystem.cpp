@@ -68,7 +68,7 @@ void path::resolve()
     if (auto pos = _filename.find_last_of('.'); pos != std::string::npos)
     {
         _stem = _filename.substr(0, pos);
-        _extension = _filename.substr(pos + 1);
+        _extension = _filename.substr(pos);
     }
     _directory = _full_path_without_filename.substr(
         _full_path_without_filename.find_last_of('/') + 1);
