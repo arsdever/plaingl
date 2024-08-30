@@ -63,7 +63,7 @@ void asset_loader_FBX::load(std::string_view path)
             dfs_queue.push(node->mChildren[ i ]);
         }
 
-        log()->info(
+        log()->debug(
             "Node: {} meshes: {}", node->mName.C_Str(), node->mNumMeshes);
         if (node->mNumMeshes > 0)
         {

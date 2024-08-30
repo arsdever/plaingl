@@ -4,6 +4,8 @@
 #include "application.hpp"
 
 #include "application/application_commands.hpp"
+#include "components/component_registry.hpp"
+#include "core/asset_manager.hpp"
 #include "core/command_dispatcher.hpp"
 #include "core/game_clock.hpp"
 #include "core/window.hpp"
@@ -30,6 +32,8 @@ application::application()
     { std::erase(_windows, ce.get_sender()->shared_from_this()); };
     _windows.push_back(main_window);
 
+    load_assets();
+    register_components();
     setup_console();
 }
 
@@ -102,4 +106,35 @@ void application::update_windows()
 void application::process_console_commands()
 {
     _console->processor().execute_all();
+}
+
+void application::load_assets()
+{
+    auto* am = asset_manager::default_asset_manager();
+    am->load_asset("resources/internal/camera_background.shader");
+    am->load_asset("resources/meshes/cube.fbx");
+    am->load_asset("resources/meshes/sphere.fbx");
+    am->load_asset("resources/meshes/env_sphere.fbx");
+    am->load_asset("resources/meshes/susane_head.fbx");
+    am->load_asset("resources/meshes/susane_head_low.fbx");
+    am->load_asset("resources/meshes/shader_ball.fbx");
+    am->load_asset("resources/meshes/camera.fbx");
+    am->load_asset("resources/standard/skybox.mat");
+    am->load_asset("resources/standard/surface.mat");
+    am->load_asset("resources/standard/canvas.shader");
+    am->load_asset("resources/standard/standard.mat");
+    am->load_asset("resources/standard/mesh_viewer.mat");
+    am->load_asset("resources/images/sample.png");
+    am->load_asset("resources/images/brick.png");
+    am->load_asset("resources/images/diffuse.png");
+    am->load_asset("resources/images/albedo.jpg");
+    am->load_asset("resources/images/metallic.jpg");
+    am->load_asset("resources/images/roughness.jpg");
+    am->load_asset("resources/images/env.jpg");
+    am->load_asset("resources/images/white.png");
+}
+
+void application::register_components()
+{
+    component_registry::register_components();
 }

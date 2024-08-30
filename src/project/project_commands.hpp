@@ -1,10 +1,11 @@
 #pragma once
 
+#include "common/event.hpp"
 #include "core/command.hpp"
-#include "project/uid.hpp"
 
 class game_object;
 class object;
+class scene;
 
 namespace project
 {
@@ -24,6 +25,8 @@ class cmd_load_scene : public core::command<std::string>
 public:
     using command::command;
     void execute() override;
+
+    std::shared_ptr<scene> default_scene();
 
     static event<void(std::shared_ptr<scene>)> scene_loaded;
 };
