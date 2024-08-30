@@ -19,6 +19,22 @@ private:
     std::shared_ptr<game_object> _obj;
 };
 
+class cmd_load_scene : public core::command<std::string>
+{
+public:
+    using command::command;
+    void execute() override;
+
+    static event<void(std::shared_ptr<scene>)> scene_loaded;
+};
+
+class cmd_save_scene : public core::command<std::string>
+{
+public:
+    using command::command;
+    void execute() override;
+};
+
 // class cmd_destroy_game_object : public core::command
 // {
 // public:

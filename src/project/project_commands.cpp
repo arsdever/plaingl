@@ -29,6 +29,33 @@ std::shared_ptr<game_object> cmd_create_game_object::get_object() const
     return _obj;
 }
 
+void cmd_load_scene::execute()
+{
+    auto s = scene::load(get<0>());
+    if (s != nullptr)
+    {
+        log()->info("Scene {} ({}) loaded", s->get_name(), s->id().id);
+        scene_loaded(s);
+    }
+    else
+    {
+        log()->error("Failed to load scene {}", get<0>());
+    }
+}
+
+void cmd_save_scene::execute()
+{
+    if (auto s = scene::get_active_scene(); s != nullptr)
+    {
+        s->save(get<0>());
+        log()->info("Scene {} ({}) saved", s->get_name(), s->id().id);
+    }
+    else
+    {
+        log()->error("No active scene");
+    }
+}
+
 // cmd_destroy_game_object::cmd_destroy_game_object(
 //     std::shared_ptr<game_object> obj)
 //     : _obj(obj)
@@ -91,4 +118,5 @@ void cmd_list_objects::execute()
 }
 
 std::shared_ptr<object> selected_object() { return _selected_object.lock(); }
+event<void(std::shared_ptr<scene>)> cmd_load_scene::scene_loaded;
 } // namespace project

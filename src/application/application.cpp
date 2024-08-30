@@ -70,6 +70,10 @@ void application::setup_console()
     _console->register_command<cmd_list_textures>("list.textures");
     _console->register_command<project::cmd_create_game_object>(
         "create.gameobject");
+    _console->register_command<project::cmd_save_scene, std::string>(
+        "save.scene");
+    _console->register_command<project::cmd_load_scene, std::string>(
+        "load.scene");
     _console->register_command<project::cmd_print_selected_object>(
         "show.selected");
     _console->register_command<project::cmd_rename_object, std::string>(
