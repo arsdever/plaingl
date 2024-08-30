@@ -6,6 +6,7 @@ class window;
 }
 
 class console;
+class scene;
 
 class application
 {
@@ -22,6 +23,10 @@ private:
 
     void register_components();
     void load_assets();
+
+    void render_game();
+
+    void scene_loaded(std::shared_ptr<scene> sc);
 
 private:
     std::vector<std::shared_ptr<core::window>> _windows;

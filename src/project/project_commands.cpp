@@ -71,16 +71,24 @@ std::shared_ptr<scene> cmd_load_scene::default_scene()
     s->add_root_object(go);
 
     go = game_object::create();
-    go->add<components::light>();
+    auto& l = go->add<components::light>();
+    l.set_intensity(10.0);
     go->get_transform().set_position({ 3, 5, 3 });
     go->set_name("light_1");
     s->add_root_object(go);
 
     go = game_object::create();
     auto& camera = go->add<components::camera>();
-    go->get_transform().set_position({ 0, 0, 10 });
+    go->get_transform().set_position({ 10, 4, 8 });
+    go->get_transform().set_rotation(
+        glm::quatLookAt(glm::normalize(-go->get_transform().get_position()),
+                        glm::dvec3 {
+                            0.0,
+                            1.0,
+                            0.0,
+                        }));
     camera.set_active();
-    camera.set_fov(60.0);
+    camera.set_fov(.6);
     camera.set_orthogonal(false);
     camera.set_background_color({ 0.1, 0.1, 0.1, 1.0 });
     go->set_name("camera");

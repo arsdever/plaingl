@@ -4,6 +4,7 @@
 #include "application.hpp"
 
 #include "application/application_commands.hpp"
+#include "components/camera.hpp"
 #include "components/component_registry.hpp"
 #include "core/asset_manager.hpp"
 #include "core/command_dispatcher.hpp"
@@ -31,6 +32,15 @@ application::application()
     main_window->get_events()->close += [ this ](auto ce)
     { std::erase(_windows, ce.get_sender()->shared_from_this()); };
     _windows.push_back(main_window);
+    main_window->get_events()->render += [ this ](auto re) { render_game(); };
+    main_window->get_events()->resize += [ this ](auto re)
+    {
+        auto cam = components::camera::get_active();
+        if (!cam)
+            return;
+
+        cam->set_render_size(re.get_new_size());
+    };
 
     load_assets();
     register_components();
@@ -85,6 +95,9 @@ void application::setup_console()
     _console->register_command<project::cmd_select_object, size_t>("select");
     _console->register_command<project::cmd_list_objects>("list.objects");
     _console->enable_autoactivation();
+
+    project::cmd_load_scene::scene_loaded +=
+        [ this ](auto sc) { scene_loaded(sc); };
 }
 
 void application::update_windows()
@@ -137,4 +150,18 @@ void application::load_assets()
 void application::register_components()
 {
     component_registry::register_components();
+}
+
+void application::render_game()
+{
+    auto cam = components::camera::get_active();
+    if (!cam)
+        return;
+
+    cam->render();
+}
+
+void application::scene_loaded(std::shared_ptr<scene> sc)
+{
+    sc->visit_root_objects([](auto obj) { obj->init(); });
 }
