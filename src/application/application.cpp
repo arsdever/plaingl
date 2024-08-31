@@ -50,7 +50,11 @@ application::application()
     setup_console();
 }
 
-application::~application() { glfwTerminate(); }
+application::~application()
+{
+    shutdown();
+    glfwTerminate();
+}
 
 int application::run()
 {
@@ -63,7 +67,11 @@ int application::run()
     return 0;
 }
 
-void application::shutdown() { _is_running = false; }
+void application::shutdown()
+{
+    _is_running = false;
+    scene::get_active_scene()->unload();
+}
 
 void application::setup_console()
 {
