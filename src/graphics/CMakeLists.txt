@@ -20,16 +20,15 @@ add_library(
   image.hpp
   mesh.cpp
   mesh.hpp
-  material_property.hpp
   material.cpp
   material.hpp
+  shader_property.hpp
   shader_script.cpp
   shader_script.hpp
   shader.cpp
   shader.hpp
   texture.cpp
   texture.hpp
-  uniform_info.hpp
   utils.hpp
   vaomap.cpp
   vaomap.hpp

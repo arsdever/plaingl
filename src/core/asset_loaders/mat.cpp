@@ -68,31 +68,14 @@ void asset_loader_MAT::load(std::string_view path)
 
     for (auto& prop : mat_struct[ "properties" ])
     {
-        auto prop_type = material_property::data_type::unknown;
         auto prop_name = prop[ "name" ].get<std::string>();
-
-        if (prop.contains("type"))
-        {
-            if (prop[ "type" ].get<std::string>() == "image")
-            {
-                prop_type = material_property::data_type::type_image;
-            }
-            else if (prop[ "type" ].get<std::string>() == "float")
-            {
-                prop_type = material_property::data_type::type_float;
-            }
-            else if (prop[ "type" ].get<std::string>() == "vec4")
-            {
-                prop_type = material_property::data_type::type_float_vector_4;
-            }
-        }
-
-        _material->declare_property(prop_name, prop_type);
         if (prop.contains("value"))
         {
-            switch (prop_type)
+            // TODO: rework needed here as the type was erased from material
+            // properties
+            switch (prop[ "value" ].size())
             {
-            case material_property::data_type::type_float:
+            case 1:
             {
                 _material->set_property_value(
                     prop_name,
@@ -100,7 +83,7 @@ void asset_loader_MAT::load(std::string_view path)
                                               std::make_index_sequence<1>()));
                 break;
             }
-            case material_property::data_type::type_float_vector_4:
+            case 4:
             {
                 _material->set_property_value(
                     prop_name,
@@ -110,9 +93,6 @@ void asset_loader_MAT::load(std::string_view path)
             }
             default:
             {
-                // TODO: prop_type enum can be stringified
-                log()->warn("Parsing of data type \"{}\" is not supported",
-                            static_cast<int>(prop_type));
                 break;
             }
             }

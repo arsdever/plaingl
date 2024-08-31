@@ -83,17 +83,6 @@ void asset_loader_FBX::load(std::string_view path)
             material* mat = new material;
             mat->set_shader_program(
                 asset_manager::default_asset_manager()->get_shader("standard"));
-            mat->declare_property("u_albedo_texture_strength",
-                                  material_property::data_type::type_float);
-            mat->declare_property(
-                "u_albedo_color",
-                material_property::data_type::type_float_vector_4);
-            mat->declare_property("u_normal_texture_strength",
-                                  material_property::data_type::type_float);
-            mat->declare_property("u_model_matrix",
-                                  material_property::data_type::unknown);
-            mat->declare_property("u_vp_matrix",
-                                  material_property::data_type::unknown);
             mat->set_property_value("u_albedo_texture_strength", 0.0f);
             mat->set_property_value(
                 "u_albedo_color", 0.8f, 0.353f, 0.088f, 1.0f);

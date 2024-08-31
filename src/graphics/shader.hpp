@@ -1,7 +1,7 @@
 #pragma once
 
 #include "common/utils.hpp"
-#include "graphics/uniform_info.hpp"
+#include "graphics/shader_property.hpp"
 
 namespace graphics
 {
@@ -32,8 +32,9 @@ public:
     void set_property(const char* name, std::any value);
     void set_property(std::string_view name, std::any value);
     void set_property(std::string name, std::any value);
-    void visit_properties(
-        std::function<void(std::string_view, const std::any&)> visitor) const;
+    void visit_properties(std::function<void(shader_property&)> visitor);
+    void
+    visit_properties(std::function<void(const shader_property&)> visitor) const;
 
     static shader from_file(std::string_view path);
 
@@ -45,6 +46,12 @@ private:
     int _id { 0 };
     std::vector<std::shared_ptr<shader_script>> _shaders;
     std::string _name;
-    std::unordered_map<std::string, std::any> _properties;
+
+    std::vector<shader_property> _properties;
+    std::unordered_map<std::string,
+                       shader_property&,
+                       string_hash,
+                       std::equal_to<>>
+        _name_property_map;
 };
 } // namespace graphics
