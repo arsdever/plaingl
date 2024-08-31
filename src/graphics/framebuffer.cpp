@@ -36,7 +36,7 @@ void framebuffer::initialize()
     _p->_color_texture->init(_p->_size.x, _p->_size.y, texture::format::RGBA);
     _p->_depth_texture->init(_p->_size.x, _p->_size.y, texture::format::DEPTH);
 
-    log()->info("Framebuffer {}:\n\ttextures::color {}\n\ttextures::depth{}",
+    log()->info("Framebuffer {}:\n\ttextures::color {}\n\ttextures::depth {}",
                 _p->_fbo,
                 _p->_color_texture->native_id(),
                 _p->_depth_texture->native_id());
@@ -65,7 +65,13 @@ void framebuffer::initialize()
     glDrawBuffers(buffers.size(), buffers.data());
 }
 
-void framebuffer::destroy() { glDeleteFramebuffers(1, &_p->_fbo); }
+void framebuffer::destroy()
+{
+    glDeleteFramebuffers(1, &_p->_fbo);
+    glDeleteFramebuffers(1, &_p->_copy_fbo);
+    _p->_fbo = 0;
+    _p->_copy_fbo = 0;
+}
 
 void framebuffer::set_samples(unsigned sample_count)
 {
