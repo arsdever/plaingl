@@ -73,4 +73,6 @@ std::shared_ptr<scene> scene::load(std::string_view path)
     return _active_scene;
 }
 
+void scene::unload() { _active_scene = nullptr; }
+
 std::shared_ptr<scene> scene::_active_scene { nullptr };
