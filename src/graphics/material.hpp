@@ -1,7 +1,6 @@
 #pragma once
 
 #include "common/utils.hpp"
-#include "material_property.hpp"
 
 namespace graphics
 {
@@ -11,10 +10,8 @@ class shader;
 class material
 {
 private:
-    using property_map_t = std::unordered_map<std::string,
-                                              material_property,
-                                              string_hash,
-                                              std::equal_to<>>;
+    using property_map_t =
+        std::unordered_map<std::string, std::any, string_hash, std::equal_to<>>;
 
 public:
     material();
@@ -26,11 +23,6 @@ public:
 
     graphics::shader* program() const;
     void set_shader_program(graphics::shader* prog);
-
-    void declare_property(std::string_view name,
-                          material_property::data_type type);
-
-    bool has_property(std::string_view name) const;
 
     template <typename... T>
     void set_property_value(std::string_view name, T... args)
@@ -46,6 +38,8 @@ public:
 
     void activate() const;
     void deactivate() const;
+
+    static material from_shader(graphics::shader* s);
 
 private:
     void set_property_value(std::string_view name, std::any value);
