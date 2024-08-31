@@ -53,7 +53,7 @@ bool rect_contains(glm::vec<2, T, glm::defaultp> top_left,
 }
 
 template <typename R, typename... ARGS>
-R gl_convert(ARGS&&... args);
+R gl_convert(ARGS... args);
 
 template <typename... T>
 struct deduce_function_type;

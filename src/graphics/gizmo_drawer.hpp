@@ -30,7 +30,7 @@ public:
     void draw_line(glm::vec3 p1, glm::vec3 p2, glm::vec4 color);
     void draw_line_2d(glm::vec2 p1, glm::vec2 p2, glm::vec4 color);
 
-    shader_program& get_shader();
+    shader& get_shader();
 
     static gizmo_drawer* instance();
 
@@ -42,7 +42,7 @@ private:
                        unsigned& ebo);
 
 private:
-    shader_program _gizmo_shader;
+    shader _gizmo_shader;
     static gizmo_drawer* _instance;
     std::vector<glm::vec3> _grid_vertices_cache;
     std::vector<int> _grid_indices_cache;

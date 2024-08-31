@@ -34,7 +34,7 @@ camera::camera(game_object& obj)
 
 camera& camera::operator=(camera&& obj) = default;
 
-camera::~camera() { std::cout << "~camera" << std::endl; }
+camera::~camera() { }
 
 void camera::set_fov(double fov)
 {

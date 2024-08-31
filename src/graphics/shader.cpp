@@ -3,294 +3,121 @@
 #include "graphics/shader.hpp"
 
 #include "common/file.hpp"
+#include "common/filesystem.hpp"
 #include "common/logging.hpp"
+#include "graphics/shader_script.hpp"
 
+namespace graphics
+{
 namespace
 {
 static inline logger log() { return get_logger("shader"); }
 } // namespace
 
-shader::shader(shader_type type)
-    : _type(type)
+shader::shader() { _id = glCreateProgram(); }
+
+shader::shader(shader&& other)
 {
-}
-
-void shader::init()
-{
-    if (_status != status::uninitialized)
-    {
-        log()->warn("Trying to initialize an already initialized shader {}",
-                    _id);
-        deinit();
-    }
-
-    int gl_shader_type = 0;
-    switch (_type)
-    {
-    case shader_type::VERTEX:
-    {
-        gl_shader_type = GL_VERTEX_SHADER;
-        break;
-    }
-    case shader_type::FRAGMENT:
-    {
-        gl_shader_type = GL_FRAGMENT_SHADER;
-        break;
-    }
-    case shader_type::COMPUTE:
-    {
-        gl_shader_type = GL_COMPUTE_SHADER;
-        break;
-    }
-    default:
-    {
-        break;
-    }
-    }
-
-    _id = glCreateShader(gl_shader_type);
-    _status = status::initialized;
-}
-
-void shader::compile()
-{
-    if (_status == status::uninitialized)
-    {
-        log()->warn("The shader is not ready for compiling");
-        return;
-    }
-
-    glCompileShader(_id);
-
-    int error_code;
-    glGetShaderiv(_id, GL_COMPILE_STATUS, &error_code);
-    if (error_code == GL_FALSE)
-    {
-        int log_length = 0;
-        char msg[ 1024 ];
-        glGetShaderInfoLog(_id, 1024, &log_length, msg);
-        log()->error("Failed to compile shader {}({}): {}", _id, _path, msg);
-        return;
-    }
-
-    _status = status::compiled;
-}
-
-void shader::deinit()
-{
-    if (_status == status::uninitialized)
-    {
-        return;
-    }
-
-    glDeleteShader(_id);
-    _id = 0;
-    _status = status::uninitialized;
-}
-
-void shader::set_source(std::string_view source_code)
-{
-    const char* data = source_code.data();
-    int size = source_code.size();
-    glShaderSource(_id, 1, &data, &size);
-    _status = status::updated;
-}
-
-void shader::set_path(std::string_view path) { _path = path; }
-
-int shader::id() const { return _id; }
-
-shader shader::from_file(std::string_view path)
-{
-    std::string_view extension = path.substr(path.find_last_of("."));
-    shader_type type = shader_type::VERTEX;
-    if (extension == ".frag")
-    {
-        type = shader_type::FRAGMENT;
-    }
-    else if (extension == ".compute" || extension == ".shader")
-    {
-        type = shader_type::COMPUTE;
-    }
-    shader result(type);
-
-    std::string data = common::file::read_all(path);
-    result.set_path(path);
-    result.init();
-    result.set_source(data);
-    result.compile();
-    return result;
-}
-
-shader_program::shader_program() = default;
-
-shader_program::shader_program(shader_program&& other)
-{
-    _status = other._status;
     _id = other._id;
     _shaders = std::move(other._shaders);
     _properties = std::move(other._properties);
-    _name_property_map = std::move(other._name_property_map);
-    other._id = 0;
-    other._status = status::uninitialized;
+    other._id = -1;
 }
 
-shader_program& shader_program::operator=(shader_program&& other)
+shader& shader::operator=(shader&& other)
 {
-    _status = other._status;
     _id = other._id;
     _shaders = std::move(other._shaders);
     _properties = std::move(other._properties);
-    _name_property_map = std::move(other._name_property_map);
-    other._id = 0;
-    other._status = status::uninitialized;
+    other._id = -1;
     return *this;
 }
 
-shader_program::~shader_program()
-{
-    // no need to manually deinit shaders
-    // they will automatically deinit when the vector gets deleted
+shader::~shader() = default;
 
-    deinit();
-}
-
-void shader_program::init()
+void shader::compile()
 {
-    if (_status != status::uninitialized)
+    for (auto& ss : _shaders)
     {
-        log()->warn(
-            "Trying to initialize an already initialized shader program {}",
-            _id);
-        deinit();
-    }
-
-    _id = glCreateProgram();
-    _status = status::initialized;
-}
-
-void shader_program::link()
-{
-    if (_status == status::uninitialized)
-    {
-        log()->warn("The shader program is not ready for linking");
-        return;
+        ss->compile();
+        glAttachShader(_id, ss->id());
     }
 
     glLinkProgram(_id);
 
     int error_code;
     glGetProgramiv(_id, GL_LINK_STATUS, &error_code);
+
     if (error_code == GL_FALSE)
     {
         int log_length = 0;
         char msg[ 1024 ];
         glGetProgramInfoLog(_id, 1024, &log_length, msg);
-        log()->error("Failed to link program {}: {}", _id, msg);
+        log()->error("Failed to compile shader {}({}): {}", _id, _name, msg);
         return;
     }
-
-    _status = status::linked;
-    resolve_uniforms();
 }
 
-void shader_program::use() const
+void shader::activate()
 {
-    if (_status != status::linked)
-    {
-        log()->warn("The shader program is not linked");
-        return;
-    }
-
     glUseProgram(_id);
     setup_property_values();
 }
 
-void shader_program::deinit()
+void shader::add_shader(std::shared_ptr<shader_script> shader)
 {
-    // don't deinit shaders, we only deinit the program
-    // the shaders may be reused after
-
-    if (_status == status::uninitialized)
-    {
-        return;
-    }
-
-    glDeleteProgram(_id);
-    _id = 0;
-    _status = status::uninitialized;
+    _shaders.push_back(shader);
 }
 
-void shader_program::add_shader(std::string_view path)
+void shader::add_shader(std::string_view shader_script_path)
 {
-    _shaders.push_back(shader::from_file(path));
-    glAttachShader(_id, _shaders.back().id());
+    auto ss = std::make_shared<shader_script>(
+        std::move(shader_script::from_file(shader_script_path)));
+    add_shader(ss);
 }
 
-void shader_program::release_shaders() { _shaders.clear(); }
+void shader::release_shaders() { _shaders.clear(); }
 
-int shader_program::id() const { return _id; }
+int shader::id() const { return _id; }
 
-bool shader_program::linked() const { return _status == status::linked; }
+void shader::set_name(std::string name) { _name = std::move(name); }
 
-void shader_program::set_name(std::string name) { _name = std::move(name); }
+std::string shader::get_name() const { return _name; }
 
-std::string shader_program::get_name() const { return _name; }
-
-void shader_program::unuse() { glUseProgram(0); }
-
-void shader_program::set_uniform(std::string_view name, std::any value)
+void shader::set_property(const char* name, std::any value)
 {
-    auto iterator = _name_property_map.find(name);
-    if (iterator != _name_property_map.end())
+    set_property(std::string(name), std::move(value));
+}
+
+void shader::set_property(std::string_view name, std::any value)
+{
+    set_property(std::string(name), std::move(value));
+}
+
+void shader::set_property(std::string name, std::any value)
+{
+    _properties[ name ] = std::move(value);
+}
+
+void shader::visit_properties(
+    std::function<void(std::string_view, const std::any&)> visitor) const
+{
+    for (const auto& [ name, value ] : _properties)
     {
-        iterator->second._value = std::move(value);
+        visitor(name, value);
     }
 }
 
-void shader_program::resolve_uniforms()
+void shader::setup_property_values() const
 {
-    use();
-    _properties.clear();
-    _name_property_map.clear();
-    int uniform_count = 0;
-    glGetProgramiv(id(), GL_ACTIVE_UNIFORMS, &uniform_count);
-    if (uniform_count == 0)
+    for (auto& [ name, v ] : _properties)
     {
-        return;
-    }
-
-    std::string buffer;
-    int length;
-    int size;
-    unsigned type;
-    buffer.resize(512);
-    _properties.resize(uniform_count);
-    for (int i = 0; i < uniform_count; ++i)
-    {
-        glGetActiveUniform(id(), i, 512, &length, &size, &type, buffer.data());
-        _properties[ i ]._name = buffer;
-        _properties[ i ]._name.resize(length);
-        _properties[ i ]._index = i;
-        _properties[ i ]._size = size;
-        // TODO: verify emplace did add element
-        _name_property_map.try_emplace(_properties[ i ]._name,
-                                       _properties[ i ]);
-    }
-    shader_program::unuse();
-}
-
-void shader_program::setup_property_values() const
-{
-    for (auto& property : _properties)
-    {
-        if (!property._value.has_value())
+        if (!v.has_value())
         {
             continue;
         }
 
-        int id = property._index;
-        const auto& v = property._value;
+        int id = glGetUniformLocation(_id, name.c_str());
         if (v.type() == typeid(float))
         {
             glUniform1f(id, std::any_cast<float>(v));
@@ -478,10 +305,46 @@ void shader_program::setup_property_values() const
         {
             log()->warn("Unknown uniform type '{}' specified for property {}",
                         v.type().name(),
-                        property._name);
+                        name);
         }
     }
 }
 
-glm::mat4 shader_program::_view_matrix;
-glm::mat4 shader_program::_projection_matrix;
+shader shader::from_file(std::string_view path)
+{
+    if (!common::file::exists(path))
+    {
+        log()->error("Shader script {} does not exist", path);
+        return shader();
+    }
+
+    std::string content = common::file::read_all(path);
+    std::vector<std::string> shader_script_paths;
+
+    // tokenize content by newline characters
+    std::string::size_type start = 0;
+    auto new_start = content.find('\n', start);
+    while (new_start != std::string::npos)
+    {
+        auto line = content.substr(start, new_start - start);
+        shader_script_paths.push_back(line);
+        start = new_start + 1;
+        new_start = content.find('\n', start);
+    }
+
+    auto spath = common::filesystem::path(path);
+    shader prog;
+    for (const auto& sspath : shader_script_paths)
+    {
+        prog.add_shader(
+            (common::filesystem::path(spath.full_path_without_filename()) /
+             sspath)
+                .full_path());
+    }
+    prog._name = spath.stem();
+    prog._id = glCreateProgram();
+    prog.compile();
+
+    return prog;
+}
+} // namespace graphics

@@ -5,7 +5,10 @@
 class mesh;
 class material;
 class image;
-class shader_program;
+namespace graphics
+{
+class shader;
+}
 
 class asset_manager
 {
@@ -23,10 +26,10 @@ public:
     const std::vector<mesh*> meshes() const;
     const std::vector<material*> materials() const;
     const std::vector<image*> textures() const;
-    const std::vector<shader_program*> shaders() const;
+    const std::vector<graphics::shader*> shaders() const;
 
     mesh* get_mesh(std::string_view name) const;
-    shader_program* get_shader(std::string_view name) const;
+    graphics::shader* get_shader(std::string_view name) const;
     material* get_material(std::string_view name) const;
     image* get_image(std::string_view name) const;
 
@@ -49,6 +52,6 @@ private:
     asset_map<mesh*> _meshs;
     asset_map<material*> _materials;
     asset_map<image*> _images;
-    asset_map<shader_program*> _shader_programs;
+    asset_map<graphics::shader*> _shaders;
     static asset_manager* _instance;
 };
