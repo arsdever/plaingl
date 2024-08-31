@@ -23,6 +23,8 @@ add_library(
   material_property.hpp
   material.cpp
   material.hpp
+  shader_script.cpp
+  shader_script.hpp
   shader.cpp
   shader.hpp
   texture.cpp

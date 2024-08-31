@@ -3,7 +3,10 @@
 #include "common/utils.hpp"
 #include "material_property.hpp"
 
-class shader_program;
+namespace graphics
+{
+class shader;
+}
 
 class material
 {
@@ -21,8 +24,8 @@ public:
     material& operator=(const material& mat) = delete;
     ~material();
 
-    shader_program* program() const;
-    void set_shader_program(shader_program* prog);
+    graphics::shader* program() const;
+    void set_shader_program(graphics::shader* prog);
 
     void declare_property(std::string_view name,
                           material_property::data_type type);
@@ -48,7 +51,7 @@ private:
     void set_property_value(std::string_view name, std::any value);
 
 private:
-    shader_program* _shader_program;
+    graphics::shader* _shader;
     property_map_t _property_map;
     unsigned _textures_count = 0;
 };

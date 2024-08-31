@@ -13,27 +13,24 @@ material::material() = default;
 
 material::material(material&& mat)
 {
-    _shader_program = mat._shader_program;
+    _shader = mat._shader;
     _property_map = std::move(mat._property_map);
-    mat._shader_program = 0;
+    mat._shader = 0;
 }
 
 material& material::operator=(material&& mat)
 {
-    _shader_program = mat._shader_program;
+    _shader = mat._shader;
     _property_map = std::move(mat._property_map);
-    mat._shader_program = 0;
+    mat._shader = 0;
     return *this;
 }
 
 material::~material() = default;
 
-shader_program* material::program() const { return _shader_program; }
+graphics::shader* material::program() const { return _shader; }
 
-void material::set_shader_program(shader_program* prog)
-{
-    _shader_program = prog;
-}
+void material::set_shader_program(graphics::shader* prog) { _shader = prog; }
 
 void material::declare_property(std::string_view name,
                                 material_property::data_type type)
@@ -91,14 +88,14 @@ void material::activate() const
         {
             auto* t = std::any_cast<texture*>(property._value);
             t->set_active_texture(property._special);
-            _shader_program->set_uniform(name, property._special);
+            _shader->set_property(name, property._special);
         }
         else
         {
-            _shader_program->set_uniform(name, property._value);
+            _shader->set_property(name, property._value);
         }
     }
-    _shader_program->use();
+    _shader->activate();
 }
 
-void material::deactivate() const { shader_program::unuse(); }
+void material::deactivate() const { }

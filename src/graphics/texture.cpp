@@ -16,7 +16,7 @@ logger log() { return get_logger("texture"); }
 
 template <>
 texture::sampling_mode
-gl_convert<texture::sampling_mode, int>(int&& gl_sampling_mode)
+gl_convert<texture::sampling_mode, int>(int gl_sampling_mode)
 {
     using sampling_mode = texture::sampling_mode;
     switch (gl_sampling_mode)
@@ -33,7 +33,7 @@ gl_convert<texture::sampling_mode, int>(int&& gl_sampling_mode)
 
 template <>
 texture::wrapping_mode
-gl_convert<texture::wrapping_mode, int>(int&& gl_wrapping_mode)
+gl_convert<texture::wrapping_mode, int>(int gl_wrapping_mode)
 {
     using wrapping_mode = texture::wrapping_mode;
     switch (gl_wrapping_mode)
@@ -135,6 +135,8 @@ void texture::set_samples(int sample_count)
     _samples = sample_count;
     init(_width, _height, _format);
 }
+
+int texture::get_samples() { return _samples; }
 
 glm::uvec2 texture::get_size() const { return { _width, _height }; }
 

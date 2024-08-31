@@ -43,6 +43,7 @@ public:
     void init(size_t width, size_t height, format texture_format = format::RGB);
 
     void set_samples(int sample_count);
+    int get_samples();
 
     glm::uvec2 get_size() const;
     size_t get_width() const;

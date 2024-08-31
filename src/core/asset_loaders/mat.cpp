@@ -42,7 +42,7 @@ void asset_loader_MAT::load(std::string_view path)
     std::string shader_exclusive_name =
         mat_struct[ "shader" ].get<std::string>();
     auto* am = asset_manager::default_asset_manager();
-    shader_program* sh;
+    graphics::shader* sh;
     std::string shader_path(
         (fs::path(fs::path(path).full_path_without_filename()) /
              shader_exclusive_name +

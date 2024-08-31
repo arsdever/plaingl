@@ -22,7 +22,7 @@ void asset_manager::load_asset(std::string_view path)
     auto filepath = common::filesystem::path(path);
     std::string name_string = std::string(filepath.stem());
 #ifdef GAMIFY_SUPPORTS_FBX
-    if (filepath.extension() == "fbx")
+    if (filepath.extension() == ".fbx")
     {
         asset_loader_FBX fbx_loader;
         fbx_loader.load(path);
@@ -30,18 +30,18 @@ void asset_manager::load_asset(std::string_view path)
     }
 #endif
 #ifdef GAMIFY_SUPPORTS_SHADER
-    if (filepath.extension() == "shader")
+    if (filepath.extension() == ".shader")
     {
         asset_loader_SHADER shader_loader;
         shader_loader.load(path);
-        shader_loader.get_shader_program()->set_name(name_string);
-        auto [ it, success ] = _shader_programs.try_emplace(
-            name_string, shader_loader.get_shader_program());
+        shader_loader.get_shader()->set_name(name_string);
+        auto [ it, success ] =
+            _shaders.try_emplace(name_string, shader_loader.get_shader());
         return;
     }
 #endif
 #ifdef GAMIFY_SUPPORTS_MAT
-    if (filepath.extension() == "mat")
+    if (filepath.extension() == ".mat")
     {
         asset_loader_MAT mat_loader;
         mat_loader.load(path);
@@ -51,7 +51,7 @@ void asset_manager::load_asset(std::string_view path)
     }
 #endif
 #ifdef GAMIFY_SUPPORTS_JPG
-    if (filepath.extension() == "jpg" || filepath.extension() == "jpeg")
+    if (filepath.extension() == ".jpg" || filepath.extension() == ".jpeg")
     {
         asset_loader_JPG jpg_loader;
         jpg_loader.load(path);
@@ -61,7 +61,7 @@ void asset_manager::load_asset(std::string_view path)
     }
 #endif
 #ifdef GAMIFY_SUPPORTS_PNG
-    if (filepath.extension() == "png")
+    if (filepath.extension() == ".png")
     {
         asset_loader_PNG png_loader;
         png_loader.load(path);
@@ -80,7 +80,7 @@ void asset_manager::save_asset<image>(std::string_view path, const image* img)
 {
     auto filepath = common::filesystem::path(path);
 #ifdef GAMIFY_SUPPORTS_PNG
-    if (filepath.extension() == "png")
+    if (filepath.extension() == ".png")
     {
         asset_loader_PNG png_loader;
         png_loader.set_image(const_cast<image*>(img));
@@ -126,20 +126,19 @@ const std::vector<image*> asset_manager::textures() const
     return result;
 }
 
-const std::vector<shader_program*> asset_manager::shaders() const
+const std::vector<graphics::shader*> asset_manager::shaders() const
 {
-    std::vector<shader_program*> result;
-    for (auto& [ _, value ] : _shader_programs)
+    std::vector<graphics::shader*> result;
+    for (auto& [ _, value ] : _shaders)
     {
         result.push_back(value);
     }
     return result;
 }
 
-shader_program* asset_manager::get_shader(std::string_view name) const
+graphics::shader* asset_manager::get_shader(std::string_view name) const
 {
-    return _shader_programs.contains(name) ? _shader_programs.find(name)->second
-                                           : nullptr;
+    return _shaders.contains(name) ? _shaders.find(name)->second : nullptr;
 }
 
 material* asset_manager::get_material(std::string_view name) const
@@ -156,6 +155,22 @@ mesh* asset_manager::get_mesh(std::string_view name) const
 {
     return _meshs.contains(name) ? _meshs.find(name)->second : nullptr;
 }
+
+#define DEFINE_ITERATOR_NAMESPACE(ns, type)                                 \
+    template <>                                                             \
+    bool asset_manager::for_each<ns::type>(                                 \
+        std::function<bool(std::string_view, const ns::type* const&)> func) \
+        const                                                               \
+    {                                                                       \
+        for (const auto& [ name, value ] : _##type##s)                      \
+        {                                                                   \
+            if (func(name, value))                                          \
+            {                                                               \
+                continue;                                                   \
+            }                                                               \
+        }                                                                   \
+        return true;                                                        \
+    }
 
 #define DEFINE_ITERATOR(type)                                                 \
     template <>                                                               \
@@ -175,7 +190,7 @@ mesh* asset_manager::get_mesh(std::string_view name) const
 DEFINE_ITERATOR(mesh);
 DEFINE_ITERATOR(image);
 DEFINE_ITERATOR(material);
-DEFINE_ITERATOR(shader_program);
+DEFINE_ITERATOR_NAMESPACE(graphics, shader);
 
 asset_manager* asset_manager::default_asset_manager()
 {
