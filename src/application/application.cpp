@@ -71,6 +71,7 @@ void application::shutdown()
 {
     _is_running = false;
     scene::get_active_scene()->unload();
+    core::asset_manager::shutdown();
 }
 
 void application::setup_console()
@@ -145,29 +146,30 @@ void application::process_console_commands()
 
 void application::load_assets()
 {
-    auto* am = asset_manager::default_asset_manager();
-    am->load_asset("resources/internal/camera_background.shader");
-    am->load_asset("resources/meshes/cube.fbx");
-    am->load_asset("resources/meshes/sphere.fbx");
-    am->load_asset("resources/meshes/env_sphere.fbx");
-    am->load_asset("resources/meshes/susane_head.fbx");
-    am->load_asset("resources/meshes/susane_head_low.fbx");
-    am->load_asset("resources/meshes/shader_ball.fbx");
-    am->load_asset("resources/meshes/camera.fbx");
-    am->load_asset("resources/standard/fallback.shader");
-    am->load_asset("resources/standard/skybox.mat");
-    am->load_asset("resources/standard/surface.mat");
-    am->load_asset("resources/standard/canvas.shader");
-    am->load_asset("resources/standard/standard.mat");
-    am->load_asset("resources/standard/mesh_viewer.mat");
-    am->load_asset("resources/images/sample.png");
-    am->load_asset("resources/images/brick.png");
-    am->load_asset("resources/images/diffuse.png");
-    am->load_asset("resources/images/albedo.jpg");
-    am->load_asset("resources/images/metallic.jpg");
-    am->load_asset("resources/images/roughness.jpg");
-    am->load_asset("resources/images/env.jpg");
-    am->load_asset("resources/images/white.png");
+    core::asset_manager::initialize();
+    core::asset_manager::load_asset(
+        "resources/internal/camera_background.shader");
+    core::asset_manager::load_asset("resources/meshes/cube.fbx");
+    core::asset_manager::load_asset("resources/meshes/sphere.fbx");
+    core::asset_manager::load_asset("resources/meshes/env_sphere.fbx");
+    core::asset_manager::load_asset("resources/meshes/susane_head.fbx");
+    core::asset_manager::load_asset("resources/meshes/susane_head_low.fbx");
+    core::asset_manager::load_asset("resources/meshes/shader_ball.fbx");
+    core::asset_manager::load_asset("resources/meshes/camera.fbx");
+    core::asset_manager::load_asset("resources/standard/fallback.shader");
+    core::asset_manager::load_asset("resources/standard/skybox.mat");
+    core::asset_manager::load_asset("resources/standard/surface.mat");
+    core::asset_manager::load_asset("resources/standard/canvas.shader");
+    core::asset_manager::load_asset("resources/standard/standard.mat");
+    core::asset_manager::load_asset("resources/standard/mesh_viewer.mat");
+    core::asset_manager::load_asset("resources/images/sample.png");
+    core::asset_manager::load_asset("resources/images/brick.png");
+    core::asset_manager::load_asset("resources/images/diffuse.png");
+    core::asset_manager::load_asset("resources/images/albedo.jpg");
+    core::asset_manager::load_asset("resources/images/metallic.jpg");
+    core::asset_manager::load_asset("resources/images/roughness.jpg");
+    core::asset_manager::load_asset("resources/images/env.jpg");
+    core::asset_manager::load_asset("resources/images/white.png");
 }
 
 void application::register_components()

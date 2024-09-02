@@ -51,8 +51,7 @@ void material::activate() const
     auto s = program();
     if (!s)
     {
-        auto fallback_shader =
-            asset_manager::default_asset_manager()->get_shader("fallback");
+        auto fallback_shader = core::asset_manager::get_shader("fallback");
         if (fallback_shader)
         {
             fallback_shader->activate();

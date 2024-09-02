@@ -86,7 +86,7 @@ void mesh_viewer::render()
     _light_buffer->bind(0);
 
     auto mat =
-        asset_manager::default_asset_manager()->get_material("mesh_viewer");
+        core::asset_manager::get_material("mesh_viewer");
     auto camera_position = glm::vec3(0, 0, _zoom * 8);
 
     glm::mat4 camera_matrix =

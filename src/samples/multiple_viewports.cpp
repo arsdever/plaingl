@@ -109,7 +109,7 @@ int main(int argc, char** argv)
 
 void init_scene()
 {
-    auto* am = asset_manager::default_asset_manager();
+    auto* am = core::asset_manager::default_asset_manager();
     am->load_asset("susane_head.fbx");
     am->load_asset("standard.mat");
     am->load_asset("brick.png");

@@ -61,8 +61,8 @@ std::shared_ptr<scene> cmd_load_scene::default_scene()
     auto s = scene::create();
     s->set_name("default");
 
-    auto m = asset_manager::default_asset_manager()->get_mesh("cube_mesh");
-    auto mat = asset_manager::default_asset_manager()->get_material("standard");
+    auto m = core::asset_manager::get_mesh("cube_mesh");
+    auto mat = core::asset_manager::get_material("standard");
 
     auto go = game_object::create();
     go->add<components::mesh_filter>().set_mesh(m);

@@ -52,13 +52,11 @@ int main(int argc, char** argv)
     wnd_repeat->resize(400, 400);
     wnd_repeat->init();
 
-    asset_manager::default_asset_manager()->load_asset(
-        "resources/standard/surface.shader");
-    asset_manager::default_asset_manager()->load_asset(
-        "test/graphics_test/data/parrot_pixel.png");
+    core::asset_manager::load_asset("resources/standard/surface.shader");
+    core::asset_manager::load_asset("test/graphics_test/data/parrot_pixel.png");
 
-    auto txt = texture::from_image(
-        asset_manager::default_asset_manager()->get_image("parrot_pixel"));
+    auto txt =
+        texture::from_image(core::asset_manager::get_image("parrot_pixel"));
 
     auto [ vbo, ebo ] = init_quad_mesh();
 
@@ -74,8 +72,7 @@ int main(int argc, char** argv)
 
         vertex3d::activate_attributes();
 
-        auto* surface_shader =
-            asset_manager::default_asset_manager()->get_shader("surface");
+        auto* surface_shader = core::asset_manager::get_shader("surface");
 
         txt.bind();
         txt.set_active_texture(0);
@@ -129,8 +126,7 @@ int main(int argc, char** argv)
 
         vertex3d::activate_attributes();
 
-        auto* surface_shader =
-            asset_manager::default_asset_manager()->get_shader("surface");
+        auto* surface_shader = core::asset_manager::get_shader("surface");
 
         txt.bind();
         txt.set_active_texture(0);

@@ -12,10 +12,47 @@
 #include "graphics/mesh.hpp"
 #include "graphics/shader.hpp"
 
+namespace core
+{
+struct asset_manager::impl
+{
+    template <typename T>
+    using asset_map =
+        std::unordered_map<std::string, T, string_hash, std::equal_to<>>;
+
+    asset_map<mesh*> _meshs;
+    asset_map<std::shared_ptr<graphics::material>> _materials;
+    asset_map<image*> _images;
+    asset_map<std::shared_ptr<graphics::shader>> _shaders;
+};
+
 namespace
 {
 static logger log() { return get_logger("asset_manager"); }
 } // namespace
+
+void asset_manager::initialize(asset_manager* existing_instance)
+{
+    if (_impl)
+        return;
+
+    if (existing_instance)
+        _impl = existing_instance->_impl;
+    else
+    {
+        _impl = std::make_shared<impl>();
+        initialize_quad_mesh();
+        initialize_surface_shader();
+    }
+}
+
+void asset_manager::shutdown()
+{
+    if (!_impl)
+        return;
+
+    _impl = nullptr;
+}
 
 void asset_manager::load_asset(std::string_view path)
 {
@@ -35,8 +72,8 @@ void asset_manager::load_asset(std::string_view path)
         asset_loader_SHADER shader_loader;
         shader_loader.load(path);
         shader_loader.get_shader()->set_name(name_string);
-        auto [ it, success ] =
-            _shaders.try_emplace(name_string, shader_loader.get_shader());
+        auto [ it, success ] = _impl->_shaders.try_emplace(
+            name_string, shader_loader.get_shader());
         return;
     }
 #endif
@@ -45,8 +82,8 @@ void asset_manager::load_asset(std::string_view path)
     {
         asset_loader_MAT mat_loader;
         mat_loader.load(path);
-        auto [ it, success ] =
-            _materials.try_emplace(name_string, mat_loader.get_material());
+        auto [ it, success ] = _impl->_materials.try_emplace(
+            name_string, mat_loader.get_material());
         return;
     }
 #endif
@@ -56,7 +93,7 @@ void asset_manager::load_asset(std::string_view path)
         asset_loader_JPG jpg_loader;
         jpg_loader.load(path);
         auto [ it, success ] =
-            _images.try_emplace(name_string, jpg_loader.get_image());
+            _impl->_images.try_emplace(name_string, jpg_loader.get_image());
         return;
     }
 #endif
@@ -66,7 +103,7 @@ void asset_manager::load_asset(std::string_view path)
         asset_loader_PNG png_loader;
         png_loader.load(path);
         auto [ it, success ] =
-            _images.try_emplace(name_string, png_loader.get_image());
+            _impl->_images.try_emplace(name_string, png_loader.get_image());
         return;
     }
 #endif
@@ -93,13 +130,13 @@ void asset_manager::save_asset<image>(std::string_view path, const image* img)
 template <>
 void asset_manager::register_asset<mesh>(std::string_view name, mesh* asset)
 {
-    _meshs.emplace(std::string(name), asset);
+    _impl->_meshs.emplace(std::string(name), asset);
 }
 
-const std::vector<mesh*> asset_manager::meshes() const
+const std::vector<mesh*> asset_manager::meshes()
 {
     std::vector<mesh*> result;
-    for (auto& [ _, value ] : _meshs)
+    for (auto& [ _, value ] : _impl->_meshs)
     {
         result.push_back(value);
     }
@@ -107,31 +144,30 @@ const std::vector<mesh*> asset_manager::meshes() const
 }
 
 const std::vector<std::shared_ptr<graphics::material>>
-asset_manager::materials() const
+asset_manager::materials()
 {
     std::vector<std::shared_ptr<graphics::material>> result;
-    for (auto& [ _, value ] : _materials)
+    for (auto& [ _, value ] : _impl->_materials)
     {
         result.push_back(value);
     }
     return result;
 }
 
-const std::vector<image*> asset_manager::textures() const
+const std::vector<image*> asset_manager::textures()
 {
     std::vector<image*> result;
-    for (auto& [ _, value ] : _images)
+    for (auto& [ _, value ] : _impl->_images)
     {
         result.push_back(value);
     }
     return result;
 }
 
-const std::vector<std::shared_ptr<graphics::shader>>
-asset_manager::shaders() const
+const std::vector<std::shared_ptr<graphics::shader>> asset_manager::shaders()
 {
     std::vector<std::shared_ptr<graphics::shader>> result;
-    for (auto& [ _, value ] : _shaders)
+    for (auto& [ _, value ] : _impl->_shaders)
     {
         result.push_back(value);
     }
@@ -139,42 +175,30 @@ asset_manager::shaders() const
 }
 
 std::shared_ptr<graphics::shader>
-asset_manager::get_shader(std::string_view name) const
+asset_manager::get_shader(std::string_view name)
 {
-    return _shaders.contains(name) ? _shaders.find(name)->second : nullptr;
+    return _impl->_shaders.contains(name) ? _impl->_shaders.find(name)->second
+                                          : nullptr;
 }
 
 std::shared_ptr<graphics::material>
-asset_manager::get_material(std::string_view name) const
+asset_manager::get_material(std::string_view name)
 {
-    return _materials.contains(name) ? _materials.find(name)->second : nullptr;
+    return _impl->_materials.contains(name)
+               ? _impl->_materials.find(name)->second
+               : nullptr;
 }
 
-image* asset_manager::get_image(std::string_view name) const
+image* asset_manager::get_image(std::string_view name)
 {
-    return _images.contains(name) ? _images.find(name)->second : nullptr;
+    return _impl->_images.contains(name) ? _impl->_images.find(name)->second
+                                         : nullptr;
 }
 
-mesh* asset_manager::get_mesh(std::string_view name) const
+mesh* asset_manager::get_mesh(std::string_view name)
 {
-    return _meshs.contains(name) ? _meshs.find(name)->second : nullptr;
-}
-
-asset_manager* asset_manager::default_asset_manager()
-{
-    if (_instance == nullptr)
-    {
-        initialize();
-    }
-
-    return _instance;
-}
-
-void asset_manager::initialize()
-{
-    _instance = new asset_manager;
-    initialize_quad_mesh();
-    initialize_surface_shader();
+    return _impl->_meshs.contains(name) ? _impl->_meshs.find(name)->second
+                                        : nullptr;
 }
 
 void asset_manager::initialize_quad_mesh()
@@ -195,15 +219,16 @@ void asset_manager::initialize_quad_mesh()
     quad_mesh->set_vertices(std::move(vertices));
     quad_mesh->set_indices({ 0, 1, 2, 0, 2, 3 });
     quad_mesh->init();
-    _instance->_meshs.try_emplace("quad", quad_mesh);
+    _impl->_meshs.try_emplace("quad", quad_mesh);
 }
 
 void asset_manager::initialize_surface_shader()
 {
-    _instance->load_asset("resources/standard/surface.shader");
-    _instance->load_asset("resources/standard/standard.mat");
+    load_asset("resources/standard/surface.shader");
+    load_asset("resources/standard/standard.mat");
 }
 
 std::string_view asset_manager::internal_resource_path() { return ""; }
 
-asset_manager* asset_manager::_instance = nullptr;
+std::shared_ptr<asset_manager::impl> asset_manager::_impl = nullptr;
+} // namespace core

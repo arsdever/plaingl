@@ -41,7 +41,6 @@ void asset_loader_MAT::load(std::string_view path)
 
     std::string shader_exclusive_name =
         mat_struct[ "shader" ].get<std::string>();
-    auto* am = asset_manager::default_asset_manager();
     std::shared_ptr<graphics::shader> sh;
     std::string shader_path(
         (fs::path(fs::path(path).full_path_without_filename()) /
@@ -49,12 +48,12 @@ void asset_loader_MAT::load(std::string_view path)
          ".shader")
             .full_path());
 
-    if (sh = am->get_shader(shader_exclusive_name); !sh)
+    if (sh = core::asset_manager::get_shader(shader_exclusive_name); !sh)
     {
-        am->load_asset(shader_path);
+        core::asset_manager::load_asset(shader_path);
     }
 
-    if (sh = am->get_shader(shader_exclusive_name); !sh)
+    if (sh = core::asset_manager::get_shader(shader_exclusive_name); !sh)
     {
         log()->error(
             "(Shader file '{}' required by material '{}' could not be found) ",
