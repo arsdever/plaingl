@@ -7,7 +7,7 @@ namespace graphics
 {
 class shader_script;
 
-class shader
+class shader : public std::enable_shared_from_this<shader>
 {
 public:
     shader();
@@ -36,7 +36,7 @@ public:
     void
     visit_properties(std::function<void(const shader_property&)> visitor) const;
 
-    static shader from_file(std::string_view path);
+    static std::shared_ptr<shader> from_file(std::string_view path);
 
 private:
     void resolve_uniforms();

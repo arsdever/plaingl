@@ -360,12 +360,12 @@ void shader::setup_property_values() const
     }
 }
 
-shader shader::from_file(std::string_view path)
+std::shared_ptr<shader> shader::from_file(std::string_view path)
 {
     if (!common::file::exists(path))
     {
         log()->error("Shader script {} does not exist", path);
-        return shader();
+        return nullptr;
     }
 
     std::string content = common::file::read_all(path);
@@ -383,18 +383,18 @@ shader shader::from_file(std::string_view path)
     }
 
     auto spath = common::filesystem::path(path);
-    shader prog;
+    std::shared_ptr<shader> prog;
     for (const auto& sspath : shader_script_paths)
     {
-        prog.add_shader(
+        prog->add_shader(
             (common::filesystem::path(spath.full_path_without_filename()) /
              sspath)
                 .full_path());
     }
-    prog._name = spath.stem();
-    prog._id = glCreateProgram();
-    prog.compile();
-    prog.resolve_uniforms();
+    prog->_name = spath.stem();
+    prog->_id = glCreateProgram();
+    prog->compile();
+    prog->resolve_uniforms();
 
     return prog;
 }

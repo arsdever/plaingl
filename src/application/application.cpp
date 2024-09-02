@@ -154,6 +154,7 @@ void application::load_assets()
     am->load_asset("resources/meshes/susane_head_low.fbx");
     am->load_asset("resources/meshes/shader_ball.fbx");
     am->load_asset("resources/meshes/camera.fbx");
+    am->load_asset("resources/standard/fallback.shader");
     am->load_asset("resources/standard/skybox.mat");
     am->load_asset("resources/standard/surface.mat");
     am->load_asset("resources/standard/canvas.shader");

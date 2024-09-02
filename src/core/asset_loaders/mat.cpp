@@ -42,7 +42,7 @@ void asset_loader_MAT::load(std::string_view path)
     std::string shader_exclusive_name =
         mat_struct[ "shader" ].get<std::string>();
     auto* am = asset_manager::default_asset_manager();
-    graphics::shader* sh;
+    std::shared_ptr<graphics::shader> sh;
     std::string shader_path(
         (fs::path(fs::path(path).full_path_without_filename()) /
              shader_exclusive_name +
@@ -63,7 +63,7 @@ void asset_loader_MAT::load(std::string_view path)
         return;
     }
 
-    _material = new material;
+    _material = std::make_shared<graphics::material>();
     _material->set_shader_program(sh);
 
     for (auto& prop : mat_struct[ "properties" ])
@@ -100,4 +100,7 @@ void asset_loader_MAT::load(std::string_view path)
     }
 }
 
-material* asset_loader_MAT::get_material() { return _material; }
+std::shared_ptr<graphics::material> asset_loader_MAT::get_material()
+{
+    return _material;
+}
