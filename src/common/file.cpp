@@ -18,9 +18,9 @@ file::file(std::string path)
     try
     {
         _watcher =
-            file_watcher(_impl->path,
+            file_watcher(_impl->path(),
                          [ this ](std::string_view path, file_change_type type)
-                         { changed(type); });
+        { changed(type); });
     }
     catch (...)
     {
@@ -41,6 +41,8 @@ file::~file() { close(); }
 
 bool file::is_open() const { return _impl->is_open(); }
 
+bool file::is_directory() const { return _impl->is_directory(); }
+
 void file::open(open_mode mode)
 {
     _impl->open(mode);
@@ -48,9 +50,9 @@ void file::open(open_mode mode)
     if (is_open() && !_watcher.is_valid())
     {
         _watcher =
-            file_watcher(_impl->path,
+            file_watcher(_impl->path(),
                          [ this ](std::string_view path, file_change_type type)
-                         { changed(type); });
+        { changed(type); });
         changed(file_change_type::created);
     }
 }
@@ -77,7 +79,7 @@ size_t file::write(const char* buffer, size_t size)
     if (!is_open())
     {
         log()->warn("Failed to write to file {}: file is not open",
-                    _impl->path);
+                    _impl->path());
         return 0;
     }
 
@@ -89,7 +91,7 @@ size_t file::write(const char* buffer, size_t size)
 
 size_t file::get_size() const { return _impl->get_content_size(); }
 
-std::string_view file::get_filepath() const { return _impl->path; }
+std::string_view file::get_filepath() const { return _impl->path(); }
 
 size_t file::read_data(char* buffer, size_t length)
 {
@@ -109,7 +111,7 @@ file file::create(std::string_view path, std::string_view contents)
 
 void file::remove(std::string_view path) { impl::remove(path); }
 
-bool file::exists() const { return impl::exists(_impl->path); }
+bool file::exists() const { return impl::exists(_impl->path()); }
 
 bool file::exists(std::string_view path) { return impl::exists(path); }
 } // namespace common

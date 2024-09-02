@@ -2,7 +2,9 @@
 
 #include <Windows.h>
 
+#include "common/directory.hpp"
 #include "common/file.hpp"
+#include "common/filesystem.hpp"
 #include "common/logging.hpp"
 
 namespace common
@@ -12,14 +14,25 @@ namespace
 inline logger log() { return get_logger("file"); }
 } // namespace
 
-struct file::impl
+struct windows_file
 {
     std::string path {};
     HANDLE file { nullptr };
 
+    windows_file(std::string path)
+        : path(std::move(path))
+    {
+    }
+
     bool is_open() { return file != nullptr; }
 
-    void open(file::open_mode mode)
+    bool is_directory()
+    {
+        DWORD attrib = GetFileAttributes(path.data());
+        return (attrib & FILE_ATTRIBUTE_DIRECTORY) != 0;
+    }
+
+    void open(file::open_mode mode, uint32_t share_flag, uint32_t flags)
     {
         size_t win_mode = 0;
         size_t create_mode = OPEN_ALWAYS;
@@ -39,10 +52,10 @@ struct file::impl
 
         file = CreateFile(path.data(),
                           win_mode,
-                          0,
+                          share_flag,
                           nullptr,
                           create_mode,
-                          FILE_ATTRIBUTE_NORMAL,
+                          flags,
                           nullptr);
 
         if (file == INVALID_HANDLE_VALUE || file == nullptr)
@@ -134,6 +147,41 @@ struct file::impl
         pos.QuadPart = position;
         SetFilePointer(file, pos.LowPart, &pos.HighPart, FILE_BEGIN);
     }
+};
+
+struct file::impl
+{
+    windows_file f;
+
+    impl(std::string path)
+        : f(std::move(path))
+    {
+    }
+
+    std::string_view path() { return f.path; }
+
+    void open(file::open_mode mode) { f.open(mode, 0, FILE_ATTRIBUTE_NORMAL); }
+
+    bool is_open() { return f.is_open(); }
+
+    bool is_directory() { return f.is_directory(); }
+
+    size_t get_content_size() { return f.get_content_size(); }
+
+    size_t read(void* buffer, size_t size) { return f.read(buffer, size); }
+
+    size_t write(const void* buffer, size_t size)
+    {
+        return f.write(buffer, size);
+    }
+
+    void remove() { f.remove(); }
+
+    static void remove(std::string_view path) { windows_file::remove(path); }
+
+    void close() { f.close(); }
+
+    void seek(size_t position) { f.seek(position); }
 
     static impl create(std::string_view path, std::string_view contents)
     {
@@ -147,7 +195,7 @@ struct file::impl
 
         if (file == INVALID_HANDLE_VALUE)
         {
-            return {};
+            return { "" };
         }
 
         if (contents.size() > 0)
@@ -160,16 +208,7 @@ struct file::impl
                       nullptr);
         }
 
-        return { std::string(path), file };
-    }
-
-    static std::string current_dir()
-    {
-        std::string path;
-        path.resize(MAX_PATH);
-        auto sz = GetCurrentDirectory(MAX_PATH, path.data());
-        path.resize(sz);
-        return path;
+        return { std::string(path) };
     }
 
     static bool exists(std::string_view path)
@@ -181,11 +220,70 @@ struct file::impl
 
         if (!result)
         {
-            log()->trace(
-                "No file {} exists in directory {}", path, current_dir());
+            log()->trace("No file {} exists in directory {}",
+                         path,
+                         filesystem::path::current_dir().full_path());
         }
 
         return result;
+    }
+};
+
+struct directory::impl
+{
+    windows_file f;
+
+    impl(std::string path)
+        : f(std::move(path))
+    {
+    }
+
+    ~impl() { close(); }
+
+    void open(file::open_mode mode, uint32_t flags = FILE_FLAG_BACKUP_SEMANTICS)
+    {
+        f.open(mode, FILE_SHARE_DELETE, flags);
+    }
+
+    void close() { f.close(); }
+
+    template <typename T = void>
+    T traverse(std::function<T(std::string, bool)> callback)
+    {
+        log()->debug("Traversing {}", f.path);
+
+        log()->trace("Looking for the first file in the directory {}", f.path);
+        std::string lookup = f.path + "\\*";
+        WIN32_FIND_DATAA data;
+        HANDLE find_handle = FindFirstFile(lookup.c_str(), &data);
+
+        if (find_handle == INVALID_HANDLE_VALUE)
+        {
+            log()->error("Failed to traverse the directory {}", f.path);
+            return;
+        }
+
+        do
+        {
+            bool is_dir = data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY;
+            if constexpr (std::is_same_v<T, void>)
+            {
+                callback(std::string(data.cFileName), is_dir);
+            }
+            else if constexpr (std::is_same_v<T, bool>)
+            {
+                if (!callback(std::string(data.cFileName), is_dir))
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                static_assert(false && "T must be void or bool");
+            }
+        } while (FindNextFile(find_handle, &data));
+
+        FindClose(find_handle);
     }
 };
 

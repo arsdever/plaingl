@@ -29,6 +29,7 @@ public:
     }
 
     static path current_dir();
+    static std::string current_path();
 
     path operator/(const path& p);
     path& operator/=(const path& p);
