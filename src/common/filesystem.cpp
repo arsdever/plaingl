@@ -27,7 +27,7 @@ path& path::operator=(const path& path)
     return *this;
 }
 
-path path::operator/(const path& p)
+path path::operator/(const path& p) const
 {
     return path(this->_path + "/") += p.relative_path();
 }
@@ -38,7 +38,7 @@ path& path::operator/=(const path& p)
     return operator+=(p.relative_path());
 }
 
-path path::operator/(std::string_view s)
+path path::operator/(std::string_view s) const
 {
     return path(this->_path + "/") += s;
 }
@@ -49,11 +49,11 @@ path& path::operator/=(std::string_view s)
     return operator+=(s);
 }
 
-path path::operator+(const path& p) { return path(*this) += p; }
+path path::operator+(const path& p) const { return path(*this) += p; }
 
 path& path::operator+=(const path& p) { return *this += p.relative_path(); }
 
-path path::operator+(std::string_view s) { return path(*this) += s; }
+path path::operator+(std::string_view s) const { return path(*this) += s; }
 
 path& path::operator+=(std::string_view s)
 {

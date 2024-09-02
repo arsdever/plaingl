@@ -31,13 +31,13 @@ public:
     static path current_dir();
     static std::string current_path();
 
-    path operator/(const path& p);
+    path operator/(const path& p) const;
     path& operator/=(const path& p);
-    path operator/(std::string_view s);
+    path operator/(std::string_view s) const;
     path& operator/=(std::string_view s);
-    path operator+(const path& p);
+    path operator+(const path& p) const;
     path& operator+=(const path& p);
-    path operator+(std::string_view s);
+    path operator+(std::string_view s) const;
     path& operator+=(std::string_view s);
 
 private:
