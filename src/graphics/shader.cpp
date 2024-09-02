@@ -383,7 +383,7 @@ std::shared_ptr<shader> shader::from_file(std::string_view path)
     }
 
     auto spath = common::filesystem::path(path);
-    std::shared_ptr<shader> prog;
+    std::shared_ptr<shader> prog = std::make_shared<shader>();
     for (const auto& sspath : shader_script_paths)
     {
         prog->add_shader(
