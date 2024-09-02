@@ -1,5 +1,7 @@
 add_library(
   ${PROJECT}_common STATIC
+  directory.cpp
+  directory.hpp
   event.hpp
   file_watcher.cpp
   file_watcher.hpp

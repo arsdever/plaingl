@@ -64,6 +64,12 @@ public:
     bool is_open() const;
 
     /**
+     * @brief Check if the file is a directory
+     * @return true if the file is a directory
+     */
+    bool is_directory() const;
+
+    /**
      * @brief Check if the file exists
      * @return true if the file exists
      */

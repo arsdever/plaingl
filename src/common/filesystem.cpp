@@ -79,4 +79,9 @@ void path::resolve()
 }
 
 path path::current_dir() { return path { filesystem_impl::current_dir() }; }
+std::string path::current_path()
+{
+    path p { filesystem_impl::current_dir() };
+    return std::string(p.full_path());
+}
 } // namespace common::filesystem
