@@ -16,6 +16,9 @@ namespace core
 {
 struct asset_manager::impl
 {
+    std::string project_path;
+    common::file_watcher directory_watcher;
+
     template <typename T>
     using asset_map =
         std::unordered_map<std::string, T, string_hash, std::equal_to<>>;
@@ -36,14 +39,17 @@ void asset_manager::initialize(asset_manager* existing_instance)
     if (_impl)
         return;
 
-    if (existing_instance)
-        _impl = existing_instance->_impl;
-    else
-    {
-        _impl = std::make_shared<impl>();
-        initialize_quad_mesh();
-        initialize_surface_shader();
-    }
+    _impl = existing_instance->_impl;
+}
+
+void asset_manager::initialize(std::string_view resource_path)
+{
+    _impl = std::make_shared<impl>();
+    _impl->project_path = common::filesystem::path(resource_path).full_path();
+
+    scan_directory();
+    initialize_quad_mesh();
+    initialize_surface_shader();
 }
 
 void asset_manager::shutdown()
@@ -229,6 +235,27 @@ void asset_manager::initialize_surface_shader()
 }
 
 std::string_view asset_manager::internal_resource_path() { return ""; }
+
+void asset_manager::scan_directory()
+{
+    // TODO: Requires directory walker to be implemented
+}
+
+void asset_manager::setup_directory_watch()
+{
+    _impl->directory_watcher = common::file_watcher(
+        _impl->project_path,
+        [](std::string_view path, common::file_change_type change)
+    {
+        switch (change)
+        {
+        case common::file_change_type::created: load_asset(path); break;
+        // case common::file_change_type::modified: reload_asset(path); break;
+        // case common::file_change_type::removed: unload_asset(path); break;
+        default: break;
+        }
+    });
+}
 
 std::shared_ptr<asset_manager::impl> asset_manager::_impl = nullptr;
 } // namespace core
