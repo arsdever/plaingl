@@ -1,9 +1,12 @@
 #include "graphics/material.hpp"
 
 #include "common/logging.hpp"
+#include "core/asset_manager.hpp"
 #include "graphics/shader.hpp"
 #include "graphics/texture.hpp"
 
+namespace graphics
+{
 namespace
 {
 static inline logger log() { return get_logger("material"); }
@@ -15,22 +18,28 @@ material::material(material&& mat)
 {
     _shader = mat._shader;
     _property_map = std::move(mat._property_map);
-    mat._shader = 0;
+    mat._shader = {};
 }
 
 material& material::operator=(material&& mat)
 {
     _shader = mat._shader;
     _property_map = std::move(mat._property_map);
-    mat._shader = 0;
+    mat._shader = {};
     return *this;
 }
 
 material::~material() = default;
 
-graphics::shader* material::program() const { return _shader; }
+std::shared_ptr<graphics::shader> material::program() const
+{
+    return _shader.lock();
+}
 
-void material::set_shader_program(graphics::shader* prog) { _shader = prog; }
+void material::set_shader_program(std::shared_ptr<graphics::shader> prog)
+{
+    _shader = prog;
+}
 
 void material::set_property_value(std::string_view name, std::any value)
 {
@@ -39,6 +48,18 @@ void material::set_property_value(std::string_view name, std::any value)
 
 void material::activate() const
 {
+    auto s = program();
+    if (!s)
+    {
+        auto fallback_shader =
+            asset_manager::default_asset_manager()->get_shader("fallback");
+        if (fallback_shader)
+        {
+            fallback_shader->activate();
+        }
+        return;
+    }
+
     int texture_binding_index = 0;
     for (const auto& [ name, value ] : _property_map)
     {
@@ -46,22 +67,16 @@ void material::activate() const
         {
             const auto* t = std::any_cast<texture*>(value);
             t->set_active_texture(texture_binding_index);
-            _shader->set_property(name, texture_binding_index);
+            s->set_property(name, texture_binding_index);
         }
         else
         {
-            _shader->set_property(name, value);
+            s->set_property(name, value);
         }
     }
 
-    _shader->activate();
+    s->activate();
 }
 
 void material::deactivate() const { }
-
-material material::from_shader(graphics::shader* s)
-{
-    auto mat = material();
-    mat._shader = s;
-    return mat;
-}
+} // namespace graphics

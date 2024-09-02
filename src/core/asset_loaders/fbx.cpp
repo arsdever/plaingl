@@ -80,7 +80,8 @@ void asset_loader_FBX::load(std::string_view path)
                 asset_manager::default_asset_manager()->register_asset(
                     std::format("{}_mesh", node->mName.C_Str()), m);
             }
-            material* mat = new material;
+            std::shared_ptr<graphics::material> mat =
+                std::make_shared<graphics::material>();
             mat->set_shader_program(
                 asset_manager::default_asset_manager()->get_shader("standard"));
             mat->set_property_value("u_albedo_texture_strength", 0.0f);

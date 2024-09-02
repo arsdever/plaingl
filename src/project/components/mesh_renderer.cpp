@@ -16,9 +16,15 @@ mesh_renderer::mesh_renderer(game_object& obj)
 {
 }
 
-material* mesh_renderer::get_material() const { return _material; }
+std::shared_ptr<graphics::material> mesh_renderer::get_material() const
+{
+    return _material;
+}
 
-void mesh_renderer::set_material(material* m) { _material = m; }
+void mesh_renderer::set_material(std::shared_ptr<graphics::material> m)
+{
+    _material = m;
+}
 
 template <>
 void mesh_renderer::serialize<json_serializer>(json_serializer& s)

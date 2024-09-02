@@ -5,7 +5,10 @@
 #include "project/component.hpp"
 
 class game_object;
+namespace graphics
+{
 class material;
+}
 
 namespace components
 {
@@ -16,14 +19,14 @@ public:
 
     static constexpr std::string_view type_name = "mesh_renderer";
 
-    material* get_material() const;
-    void set_material(material* m);
+    std::shared_ptr<graphics::material> get_material() const;
+    void set_material(std::shared_ptr<graphics::material> m);
 
     template <typename ST>
     void serialize(ST& s);
     void deserialize(const nlohmann::json& j);
 
 private:
-    material* _material;
+    std::shared_ptr<graphics::material> _material;
 };
 } // namespace components

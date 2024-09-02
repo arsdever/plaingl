@@ -5,9 +5,8 @@
 namespace graphics
 {
 class shader;
-}
 
-class material
+class material : public std::enable_shared_from_this<material>
 {
 private:
     using property_map_t =
@@ -21,8 +20,10 @@ public:
     material& operator=(const material& mat) = delete;
     ~material();
 
-    graphics::shader* program() const;
-    void set_shader_program(graphics::shader* prog);
+    std::shared_ptr<graphics::shader> program() const;
+    void set_shader_program(std::shared_ptr<graphics::shader> prog);
+
+    void set_property_value(std::string_view name, std::any value);
 
     template <typename... T>
     void set_property_value(std::string_view name, T... args)
@@ -39,13 +40,9 @@ public:
     void activate() const;
     void deactivate() const;
 
-    static material from_shader(graphics::shader* s);
-
 private:
-    void set_property_value(std::string_view name, std::any value);
-
-private:
-    graphics::shader* _shader;
+    std::weak_ptr<graphics::shader> _shader;
     property_map_t _property_map;
-    unsigned _textures_count = 0;
+    unsigned _textures_count { 0 };
 };
+} // namespace graphics

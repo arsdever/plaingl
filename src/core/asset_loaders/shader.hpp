@@ -13,8 +13,8 @@ public:
     ~asset_loader_SHADER() = default;
     void load(std::string_view path) override;
 
-    graphics::shader* get_shader();
+    std::shared_ptr<graphics::shader> get_shader();
 
 private:
-    graphics::shader* _shader = nullptr;
+    std::shared_ptr<graphics::shader> _shader = nullptr;
 };

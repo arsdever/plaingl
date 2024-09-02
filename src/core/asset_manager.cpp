@@ -106,9 +106,10 @@ const std::vector<mesh*> asset_manager::meshes() const
     return result;
 }
 
-const std::vector<material*> asset_manager::materials() const
+const std::vector<std::shared_ptr<graphics::material>>
+asset_manager::materials() const
 {
-    std::vector<material*> result;
+    std::vector<std::shared_ptr<graphics::material>> result;
     for (auto& [ _, value ] : _materials)
     {
         result.push_back(value);
@@ -126,9 +127,10 @@ const std::vector<image*> asset_manager::textures() const
     return result;
 }
 
-const std::vector<graphics::shader*> asset_manager::shaders() const
+const std::vector<std::shared_ptr<graphics::shader>>
+asset_manager::shaders() const
 {
-    std::vector<graphics::shader*> result;
+    std::vector<std::shared_ptr<graphics::shader>> result;
     for (auto& [ _, value ] : _shaders)
     {
         result.push_back(value);
@@ -136,12 +138,14 @@ const std::vector<graphics::shader*> asset_manager::shaders() const
     return result;
 }
 
-graphics::shader* asset_manager::get_shader(std::string_view name) const
+std::shared_ptr<graphics::shader>
+asset_manager::get_shader(std::string_view name) const
 {
     return _shaders.contains(name) ? _shaders.find(name)->second : nullptr;
 }
 
-material* asset_manager::get_material(std::string_view name) const
+std::shared_ptr<graphics::material>
+asset_manager::get_material(std::string_view name) const
 {
     return _materials.contains(name) ? _materials.find(name)->second : nullptr;
 }
@@ -155,42 +159,6 @@ mesh* asset_manager::get_mesh(std::string_view name) const
 {
     return _meshs.contains(name) ? _meshs.find(name)->second : nullptr;
 }
-
-#define DEFINE_ITERATOR_NAMESPACE(ns, type)                                 \
-    template <>                                                             \
-    bool asset_manager::for_each<ns::type>(                                 \
-        std::function<bool(std::string_view, const ns::type* const&)> func) \
-        const                                                               \
-    {                                                                       \
-        for (const auto& [ name, value ] : _##type##s)                      \
-        {                                                                   \
-            if (func(name, value))                                          \
-            {                                                               \
-                continue;                                                   \
-            }                                                               \
-        }                                                                   \
-        return true;                                                        \
-    }
-
-#define DEFINE_ITERATOR(type)                                                 \
-    template <>                                                               \
-    bool asset_manager::for_each<type>(                                       \
-        std::function<bool(std::string_view, const type* const&)> func) const \
-    {                                                                         \
-        for (const auto& [ name, value ] : _##type##s)                        \
-        {                                                                     \
-            if (func(name, value))                                            \
-            {                                                                 \
-                continue;                                                     \
-            }                                                                 \
-        }                                                                     \
-        return true;                                                          \
-    }
-
-DEFINE_ITERATOR(mesh);
-DEFINE_ITERATOR(image);
-DEFINE_ITERATOR(material);
-DEFINE_ITERATOR_NAMESPACE(graphics, shader);
 
 asset_manager* asset_manager::default_asset_manager()
 {

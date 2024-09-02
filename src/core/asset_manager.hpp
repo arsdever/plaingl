@@ -3,12 +3,12 @@
 #include "common/utils.hpp"
 
 class mesh;
-class material;
 class image;
 namespace graphics
 {
+class material;
 class shader;
-}
+} // namespace graphics
 
 class asset_manager
 {
@@ -24,17 +24,15 @@ public:
     void register_asset(std::string_view name, T* asset);
 
     const std::vector<mesh*> meshes() const;
-    const std::vector<material*> materials() const;
+    const std::vector<std::shared_ptr<graphics::material>> materials() const;
     const std::vector<image*> textures() const;
-    const std::vector<graphics::shader*> shaders() const;
+    const std::vector<std::shared_ptr<graphics::shader>> shaders() const;
 
     mesh* get_mesh(std::string_view name) const;
-    graphics::shader* get_shader(std::string_view name) const;
-    material* get_material(std::string_view name) const;
+    std::shared_ptr<graphics::shader> get_shader(std::string_view name) const;
+    std::shared_ptr<graphics::material>
+    get_material(std::string_view name) const;
     image* get_image(std::string_view name) const;
-
-    template <typename T>
-    bool for_each(std::function<bool(std::string_view, const T* const&)>) const;
 
     static asset_manager* default_asset_manager();
     static void initialize();
@@ -50,8 +48,8 @@ private:
         std::unordered_map<std::string, T, string_hash, std::equal_to<>>;
 
     asset_map<mesh*> _meshs;
-    asset_map<material*> _materials;
+    asset_map<std::shared_ptr<graphics::material>> _materials;
     asset_map<image*> _images;
-    asset_map<graphics::shader*> _shaders;
+    asset_map<std::shared_ptr<graphics::shader>> _shaders;
     static asset_manager* _instance;
 };
