@@ -22,8 +22,7 @@ void cmd_show_profiler::execute()
 void cmd_show_mesh::execute()
 {
     int num = get<0>();
-    if (num < 0 ||
-        num >= asset_manager::default_asset_manager()->meshes().size())
+    if (num < 0 || num >= core::asset_manager::meshes().size())
     {
         log()->error("Mesh {} not found", num);
         return;
@@ -32,15 +31,14 @@ void cmd_show_mesh::execute()
     auto mv = std::make_shared<mesh_viewer>();
     mv->init();
     log()->debug("Showing mesh {}", num);
-    mv->set_mesh(asset_manager::default_asset_manager()->meshes()[ num ]);
+    mv->set_mesh(core::asset_manager::meshes()[ num ]);
     open_window_requested(mv);
 }
 
 void cmd_show_texture::execute()
 {
     int num = get<0>();
-    if (num < 0 ||
-        num >= asset_manager::default_asset_manager()->textures().size())
+    if (num < 0 || num >= core::asset_manager::textures().size())
     {
         log()->error("Texture {} not found", num);
         return;

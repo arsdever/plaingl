@@ -77,13 +77,13 @@ void asset_loader_FBX::load(std::string_view path)
                 }
 
                 m = load_mesh(std::move(ai_submeshes));
-                asset_manager::default_asset_manager()->register_asset(
+                core::asset_manager::register_asset(
                     std::format("{}_mesh", node->mName.C_Str()), m);
             }
             std::shared_ptr<graphics::material> mat =
                 std::make_shared<graphics::material>();
             mat->set_shader_program(
-                asset_manager::default_asset_manager()->get_shader("standard"));
+                core::asset_manager::get_shader("standard"));
             mat->set_property_value("u_albedo_texture_strength", 0.0f);
             mat->set_property_value(
                 "u_albedo_color", 0.8f, 0.353f, 0.088f, 1.0f);

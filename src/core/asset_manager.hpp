@@ -10,32 +10,35 @@ class material;
 class shader;
 } // namespace graphics
 
+namespace core
+{
 class asset_manager
 {
 private:
     asset_manager() = default;
 
 public:
-    void load_asset(std::string_view path);
+    static void initialize(asset_manager* existing_instance = nullptr);
+    static void shutdown();
+    static void load_asset(std::string_view path);
     template <typename T>
-    void save_asset(std::string_view path, const T* asset);
+    static void save_asset(std::string_view path, const T* asset);
 
     template <typename T>
-    void register_asset(std::string_view name, T* asset);
+    static void register_asset(std::string_view name, T* asset);
 
-    const std::vector<mesh*> meshes() const;
-    const std::vector<std::shared_ptr<graphics::material>> materials() const;
-    const std::vector<image*> textures() const;
-    const std::vector<std::shared_ptr<graphics::shader>> shaders() const;
+    static const std::vector<mesh*> meshes();
+    static const std::vector<std::shared_ptr<graphics::material>> materials();
+    static const std::vector<image*> textures();
+    static const std::vector<std::shared_ptr<graphics::shader>> shaders();
 
-    mesh* get_mesh(std::string_view name) const;
-    std::shared_ptr<graphics::shader> get_shader(std::string_view name) const;
-    std::shared_ptr<graphics::material>
-    get_material(std::string_view name) const;
-    image* get_image(std::string_view name) const;
+    static mesh* get_mesh(std::string_view name);
+    static std::shared_ptr<graphics::shader> get_shader(std::string_view name);
+    static std::shared_ptr<graphics::material>
+    get_material(std::string_view name);
+    static image* get_image(std::string_view name);
 
     static asset_manager* default_asset_manager();
-    static void initialize();
 
 private:
     static void initialize_quad_mesh();
@@ -43,13 +46,7 @@ private:
     static std::string_view internal_resource_path();
 
 private:
-    template <typename T>
-    using asset_map =
-        std::unordered_map<std::string, T, string_hash, std::equal_to<>>;
-
-    asset_map<mesh*> _meshs;
-    asset_map<std::shared_ptr<graphics::material>> _materials;
-    asset_map<image*> _images;
-    asset_map<std::shared_ptr<graphics::shader>> _shaders;
-    static asset_manager* _instance;
+    struct impl;
+    static std::shared_ptr<impl> _impl;
 };
+} // namespace core

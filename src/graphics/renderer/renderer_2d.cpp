@@ -68,8 +68,7 @@ void renderer_2d::draw_rect(glm::vec2 top_left,
     glDisable(GL_DEPTH_TEST);
     vertex3d::activate_attributes();
 
-    auto shader_2d =
-        asset_manager::default_asset_manager()->get_material("surface");
+    auto shader_2d = core::asset_manager::get_material("surface");
     shader_2d->set_property_value("u_vp_matrix", glm::identity<glm::mat4>());
     shader_2d->set_property_value("u_model_matrix", glm::identity<glm::mat4>());
 
@@ -151,8 +150,7 @@ void renderer_2d::draw_rect(glm::vec2 top_left,
     glDisable(GL_DEPTH_TEST);
     vertex3d::activate_attributes();
 
-    auto shader_2d =
-        asset_manager::default_asset_manager()->get_material("surface");
+    auto shader_2d = core::asset_manager::get_material("surface");
     shader_2d->set_property_value("u_vp_matrix", glm::identity<glm::mat4>());
     shader_2d->set_property_value("u_model_matrix", glm::identity<glm::mat4>());
 
@@ -260,8 +258,7 @@ void renderer_2d::draw_text(glm::vec2 baseline,
     text_mesh.set_indices(std::move(indices));
     text_mesh.init();
 
-    auto surface_shader =
-        asset_manager::default_asset_manager()->get_material("surface");
+    auto surface_shader = core::asset_manager::get_material("surface");
     surface_shader->set_property_value("u_vp_matrix", glm::identity<glm::mat4>());
     surface_shader->set_property_value("u_model_matrix", glm::identity<glm::mat4>());
 
@@ -274,8 +271,8 @@ void renderer_2d::draw_text(glm::vec2 baseline,
 #ifdef RENDER_TEXT_CHAR_BORDER
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     surface_shader->set_property_value("u_color", glm::vec4(1.0f));
-    static texture white = texture::from_image(
-        asset_manager::default_asset_manager()->get_image("white"));
+    static texture white =
+        texture::from_image(core::asset_manager::get_image("white"));
     surface_shader->set_property_value("u_image", &white);
     surface_shader->activate();
     text_mesh.render();

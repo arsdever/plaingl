@@ -33,7 +33,7 @@ int main(int argc, char** argv)
         [ &main_camera ](std::shared_ptr<core::window> wnd)
     {
         // configure gl debug output
-        auto* am = asset_manager::default_asset_manager();
+        auto* am = core::asset_manager::default_asset_manager();
         am->load_asset("standard.shader");
         am->load_asset("shader_ball.fbx");
 
