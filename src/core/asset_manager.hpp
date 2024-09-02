@@ -18,7 +18,8 @@ private:
     asset_manager() = default;
 
 public:
-    static void initialize(asset_manager* existing_instance = nullptr);
+    static void initialize(asset_manager* existing_instance);
+    static void initialize(std::string_view resource_path);
     static void shutdown();
     static void load_asset(std::string_view path);
     template <typename T>
@@ -44,6 +45,9 @@ private:
     static void initialize_quad_mesh();
     static void initialize_surface_shader();
     static std::string_view internal_resource_path();
+
+    static void scan_directory();
+    static void setup_directory_watch();
 
 private:
     struct impl;

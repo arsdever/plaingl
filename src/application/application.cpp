@@ -4,13 +4,14 @@
 #include "application.hpp"
 
 #include "application/application_commands.hpp"
+#include "common/filesystem.hpp"
+#include "common/logging.hpp"
 #include "components/camera.hpp"
 #include "components/component_registry.hpp"
 #include "core/asset_manager.hpp"
 #include "core/command_dispatcher.hpp"
 #include "core/game_clock.hpp"
 #include "core/window.hpp"
-#include "logging.hpp"
 #include "project/game_object.hpp"
 #include "project/project_commands.hpp"
 #include "project/scene.hpp"
@@ -146,7 +147,8 @@ void application::process_console_commands()
 
 void application::load_assets()
 {
-    core::asset_manager::initialize();
+    core::asset_manager::initialize(
+        common::filesystem::path::current_dir().full_path());
     core::asset_manager::load_asset(
         "resources/internal/camera_background.shader");
     core::asset_manager::load_asset("resources/meshes/cube.fbx");
