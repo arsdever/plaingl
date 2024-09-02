@@ -147,31 +147,8 @@ void application::process_console_commands()
 
 void application::load_assets()
 {
-    core::asset_manager::initialize(
-        common::filesystem::path::current_dir().full_path());
-    core::asset_manager::load_asset(
-        "resources/internal/camera_background.shader");
-    core::asset_manager::load_asset("resources/meshes/cube.fbx");
-    core::asset_manager::load_asset("resources/meshes/sphere.fbx");
-    core::asset_manager::load_asset("resources/meshes/env_sphere.fbx");
-    core::asset_manager::load_asset("resources/meshes/susane_head.fbx");
-    core::asset_manager::load_asset("resources/meshes/susane_head_low.fbx");
-    core::asset_manager::load_asset("resources/meshes/shader_ball.fbx");
-    core::asset_manager::load_asset("resources/meshes/camera.fbx");
-    core::asset_manager::load_asset("resources/standard/fallback.shader");
-    core::asset_manager::load_asset("resources/standard/skybox.mat");
-    core::asset_manager::load_asset("resources/standard/surface.mat");
-    core::asset_manager::load_asset("resources/standard/canvas.shader");
-    core::asset_manager::load_asset("resources/standard/standard.mat");
-    core::asset_manager::load_asset("resources/standard/mesh_viewer.mat");
-    core::asset_manager::load_asset("resources/images/sample.png");
-    core::asset_manager::load_asset("resources/images/brick.png");
-    core::asset_manager::load_asset("resources/images/diffuse.png");
-    core::asset_manager::load_asset("resources/images/albedo.jpg");
-    core::asset_manager::load_asset("resources/images/metallic.jpg");
-    core::asset_manager::load_asset("resources/images/roughness.jpg");
-    core::asset_manager::load_asset("resources/images/env.jpg");
-    core::asset_manager::load_asset("resources/images/white.png");
+    auto project_path = common::filesystem::path::current_dir() / "resources";
+    core::asset_manager::initialize(project_path.full_path());
 }
 
 void application::register_components()

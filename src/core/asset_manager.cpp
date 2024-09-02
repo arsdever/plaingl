@@ -8,6 +8,7 @@
 #include "common/file.hpp"
 #include "common/filesystem.hpp"
 #include "common/logging.hpp"
+#include "directory.hpp"
 #include "graphics/image.hpp"
 #include "graphics/mesh.hpp"
 #include "graphics/shader.hpp"
@@ -48,6 +49,7 @@ void asset_manager::initialize(std::string_view resource_path)
     _impl->project_path = common::filesystem::path(resource_path).full_path();
 
     scan_directory();
+    setup_directory_watch();
     initialize_quad_mesh();
     initialize_surface_shader();
 }
@@ -238,7 +240,31 @@ std::string_view asset_manager::internal_resource_path() { return ""; }
 
 void asset_manager::scan_directory()
 {
-    // TODO: Requires directory walker to be implemented
+    auto project_path = common::filesystem::path(_impl->project_path);
+    std::function<void(common::filesystem::path)> scan_dir;
+    scan_dir = [ & ](common::filesystem::path path)
+    {
+        common::directory dir(std::string(path.full_path()));
+        dir.visit_files(
+            [ scan_dir, path ](std::string file_path, bool is_dir)
+        {
+            if (is_dir)
+            {
+                if (file_path == "." || file_path == "..")
+                {
+                    return;
+                }
+
+                scan_dir(path / file_path);
+            }
+            else
+            {
+                auto asset_path = path / file_path;
+                load_asset(asset_path.full_path());
+            }
+        });
+    };
+    scan_dir(project_path);
 }
 
 void asset_manager::setup_directory_watch()
