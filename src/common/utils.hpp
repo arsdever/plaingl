@@ -65,3 +65,31 @@ struct deduce_function_type<R(ARGS...)>
     using return_type = R;
     static constexpr bool is_function = true;
 };
+
+template <typename T, int I, typename... ARGS>
+struct variant_index_helper;
+
+template <typename T, int I, typename... ARGS>
+struct variant_index_helper<T, I, std::variant<ARGS...>>
+{
+    static constexpr int value =
+        std::is_same_v<T, std::variant_alternative_t<I, std::variant<ARGS...>>>
+            ? I
+            : variant_index_helper<T, I - 1, std::variant<ARGS...>>::value;
+};
+
+template <typename T, typename... ARGS>
+struct variant_index_helper<T, -1, std::variant<ARGS...>>
+{
+    static constexpr int value = -1;
+};
+
+template <typename V, typename T>
+struct variant_index
+{
+    static constexpr int value =
+        variant_index_helper<T, std::variant_size_v<V> - 1, V>::value;
+};
+
+template <typename V, typename T>
+constexpr int variant_index_v = variant_index<V, T>::value;
