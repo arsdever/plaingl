@@ -2,7 +2,7 @@
 
 #include "project/game_object.hpp"
 
-#include "mesh.hpp"
+#include "graphics/mesh.hpp"
 #include "project/components/component_registry.hpp"
 #include "project/components/mesh_filter.hpp"
 #include "project/components/transform.hpp"
