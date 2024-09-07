@@ -40,9 +40,12 @@ public:
     void activate() const;
     void deactivate() const;
 
+    static void set_fallback_shader(std::shared_ptr<graphics::shader> shader);
+
 private:
     std::weak_ptr<graphics::shader> _shader;
     property_map_t _property_map;
     unsigned _textures_count { 0 };
+    static std::shared_ptr<graphics::shader> _fallback_shader;
 };
 } // namespace graphics

@@ -2,8 +2,6 @@
 
 #include "graphics/shader.hpp"
 
-#include "common/file.hpp"
-#include "common/filesystem.hpp"
 #include "common/logging.hpp"
 #include "graphics/shader_script.hpp"
 
@@ -58,6 +56,8 @@ void shader::compile()
         log()->error("Failed to compile shader {}({}): {}", _id, _name, msg);
         return;
     }
+
+    resolve_uniforms();
 }
 
 void shader::activate()
@@ -358,44 +358,5 @@ void shader::setup_property_values() const
                         prop.name);
         }
     }
-}
-
-std::shared_ptr<shader> shader::from_file(std::string_view path)
-{
-    if (!common::file::exists(path))
-    {
-        log()->error("Shader script {} does not exist", path);
-        return nullptr;
-    }
-
-    std::string content = common::file::read_all(path);
-    std::vector<std::string> shader_script_paths;
-
-    // tokenize content by newline characters
-    std::string::size_type start = 0;
-    auto new_start = content.find('\n', start);
-    while (new_start != std::string::npos)
-    {
-        auto line = content.substr(start, new_start - start);
-        shader_script_paths.push_back(line);
-        start = new_start + 1;
-        new_start = content.find('\n', start);
-    }
-
-    auto spath = common::filesystem::path(path);
-    std::shared_ptr<shader> prog = std::make_shared<shader>();
-    for (const auto& sspath : shader_script_paths)
-    {
-        prog->add_shader(
-            (common::filesystem::path(spath.full_path_without_filename()) /
-             sspath)
-                .full_path());
-    }
-    prog->_name = spath.stem();
-    prog->_id = glCreateProgram();
-    prog->compile();
-    prog->resolve_uniforms();
-
-    return prog;
 }
 } // namespace graphics

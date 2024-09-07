@@ -1,7 +1,5 @@
 add_library(
   ${PROJECT}_core STATIC
-  asset_manager.hpp
-  asset_manager.cpp
   command_dispatcher.cpp
   command_dispatcher.hpp
   command.hpp
@@ -17,8 +15,7 @@ add_library(
   window_events.hpp
   window_events.cpp
   window.hpp
-  window.cpp
-  asset_loaders/asset_loader.hpp)
+  window.cpp)
 add_library(${PROJECT}::core ALIAS ${PROJECT}_core)
 
 if(WIN32)
@@ -45,6 +42,6 @@ macro(enable_asset_type)
   endforeach()
 endmacro()
 
-enable_asset_type(fbx jpg png mat shader)
+# enable_asset_type(fbx jpg png mat shader)
 
-add_subdirectory(asset_loaders)
+# add_subdirectory(asset_loaders)

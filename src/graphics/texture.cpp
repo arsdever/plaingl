@@ -5,8 +5,12 @@
 
 #include "graphics/texture.hpp"
 
+#include "asset_management/type_importer.hpp"
+#include "common/file.hpp"
+#include "common/filesystem.hpp"
 #include "common/logging.hpp"
 #include "common/utils.hpp"
+#include "graphics/formats/png.hpp"
 #include "graphics/image.hpp"
 
 namespace
@@ -95,6 +99,7 @@ void texture::init(size_t width, size_t height, format texture_format)
         return;
     }
     _format = texture_format;
+    _data_buffer.resize(_width * _height * pixel_component_count(_format));
     glBindTexture(target(), _texture_id);
     if (_samples > 1)
     {
@@ -115,7 +120,7 @@ void texture::init(size_t width, size_t height, format texture_format)
                      0,
                      convert_to_gl_format(texture_format),
                      GL_UNSIGNED_BYTE,
-                     nullptr);
+                     _data_buffer.data());
     }
 
     auto error = glGetError();
@@ -315,38 +320,6 @@ void texture::clone(const texture* other_texture)
 
 unsigned texture::native_id() const { return _texture_id; }
 
-texture texture::from_image(image* img)
-{
-    auto md = img->get_metadata();
-    texture result;
-    format tformat = format::UNSPECIFIED;
-    switch (md._color_type)
-    {
-    case image::color_type::GRAYSCALE:
-    {
-        tformat = format::GRAYSCALE;
-        break;
-    }
-    case image::color_type::RGB:
-    {
-        tformat = format::RGB;
-        break;
-    }
-    case image::color_type::RGBA:
-    {
-        tformat = format::RGBA;
-        break;
-    }
-    default:
-    {
-        break;
-    }
-    }
-    result.init(img->get_width(), img->get_height(), tformat);
-    result.set_data(img->get_data());
-    return result;
-}
-
 void texture::static_bind(size_t id, bool ms)
 {
     glBindTexture(ms ? GL_TEXTURE_2D_MULTISAMPLE : GL_TEXTURE_2D, id);
@@ -381,9 +354,59 @@ int texture::convert_to_gl_format(format f)
     }
 }
 
+size_t texture::pixel_component_count(format f)
+{
+    switch (f)
+    {
+    case format::DEPTH: return 1;
+    case format::GRAYSCALE: return 1;
+    case format::RGB: return 3;
+    case format::RGBA: return 4;
+    default: return 0;
+    }
+}
+
 unsigned texture::target() const
 {
     return _samples > 1 ? GL_TEXTURE_2D_MULTISAMPLE : GL_TEXTURE_2D;
+}
+
+std::shared_ptr<texture> texture::from_file(std::string_view path)
+{
+    common::file texture_file { std::string(path) };
+    return from_file(texture_file);
+}
+
+std::shared_ptr<texture> texture::from_file(common::file& file)
+{
+    auto path = common::filesystem::path(file.get_filepath());
+    if (path.extension() == ".png")
+    {
+        return from_png_file(file);
+    }
+    else if (path.extension() == ".jpg" || path.extension() == ".jpeg")
+    {
+        return from_jpg_file(file);
+    }
+    else
+    {
+        return nullptr;
+    }
+}
+
+std::shared_ptr<texture> texture::from_png_file(common::file& file)
+{
+    graphics::png img = graphics::png::load(file);
+    auto tex = std::make_shared<texture>();
+    tex->init(img.get_width(), img.get_height(), img.get_format());
+    img.read_pixels(tex->_data_buffer.data());
+    return tex;
+}
+
+std::shared_ptr<texture> texture::from_jpg_file(common::file& file)
+{
+    // TODO: implement
+    return nullptr;
 }
 
 std::vector<texture*> texture::_textures;

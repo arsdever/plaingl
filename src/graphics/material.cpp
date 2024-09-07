@@ -1,7 +1,7 @@
 #include "graphics/material.hpp"
 
+#include "asset_management/asset_manager.hpp"
 #include "common/logging.hpp"
-#include "core/asset_manager.hpp"
 #include "graphics/shader.hpp"
 #include "graphics/texture.hpp"
 
@@ -51,10 +51,9 @@ void material::activate() const
     auto s = program();
     if (!s)
     {
-        auto fallback_shader = core::asset_manager::get_shader("fallback");
-        if (fallback_shader)
+        if (_fallback_shader)
         {
-            fallback_shader->activate();
+            _fallback_shader->activate();
         }
         return;
     }
@@ -78,4 +77,11 @@ void material::activate() const
 }
 
 void material::deactivate() const { }
+
+void material::set_fallback_shader(std::shared_ptr<graphics::shader> shader)
+{
+    _fallback_shader = std::move(shader);
+}
+
+std::shared_ptr<graphics::shader> material::_fallback_shader = {};
 } // namespace graphics

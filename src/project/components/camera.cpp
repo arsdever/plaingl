@@ -4,7 +4,7 @@
 
 #include "project/components/camera.hpp"
 
-#include "core/asset_manager.hpp"
+#include "asset_management/asset_manager.hpp"
 #include "core/settings.hpp"
 #include "core/window.hpp"
 #include "graphics/framebuffer.hpp"
@@ -196,11 +196,11 @@ void camera::set_view_matrix(glm::mat4 mat) { _view_matrix = std::move(mat); }
 
 void camera::render_texture_background()
 {
-    auto mat = core::asset_manager::get_material("skybox");
+    auto mat = core::asset_manager::get<graphics::material>("skybox");
     mat->set_property_value("u_model_matrix", glm::identity<glm::mat4>());
     mat->set_property_value("u_vp_matrix", glm::mat4(vp_matrix()));
-    renderer_3d().draw_mesh(core::asset_manager::get_mesh("env_sphere_mesh"),
-                            mat);
+    renderer_3d().draw_mesh(
+        core::asset_manager::get<mesh>("env_sphere_mesh").get(), mat);
 }
 
 void camera::render_on_private_texture() const
