@@ -5,7 +5,7 @@ namespace common
 class file;
 }
 
-class texture
+class texture : public std::enable_shared_from_this<texture>
 {
 public:
     enum class format : char
@@ -53,6 +53,7 @@ public:
     size_t get_height() const;
     size_t get_channel_count() const;
     void get_data(char* data_ptr);
+    void set_data(std::vector<char> data);
     void set_data(const char* data_ptr);
     void set_rect_data(glm::vec<2, size_t> pos,
                        glm::vec<2, size_t> size,
@@ -83,6 +84,8 @@ private:
     static int convert_to_gl_format(format f);
     static size_t pixel_component_count(format f);
     unsigned target() const;
+
+    void fetch_from_gpu();
 
     static std::shared_ptr<texture> from_png_file(common::file& file);
     static std::shared_ptr<texture> from_jpg_file(common::file& file);

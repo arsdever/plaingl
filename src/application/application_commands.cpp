@@ -37,7 +37,7 @@ void cmd_show_mesh::execute()
 
 void cmd_show_texture::execute()
 {
-    auto texture_asset = core::asset_manager::try_get(get<0>());
+    auto texture_asset = core::asset_manager::try_get<texture>(get<0>());
     if (!texture_asset)
     {
         log()->error("Texture '{}' not found", get<0>());
@@ -47,7 +47,7 @@ void cmd_show_texture::execute()
     auto tv = std::make_shared<texture_viewer>();
     tv->init();
     log()->debug("Showing texture '{}'", get<0>());
-    tv->set_texture(texture_asset->as<texture>().get());
+    tv->set_texture(texture_asset);
     open_window_requested(tv);
 }
 

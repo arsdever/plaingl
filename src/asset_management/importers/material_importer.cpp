@@ -68,7 +68,7 @@ void material_importer::internal_load(common::file& asset_file)
         return;
     }
 
-    _data->set_shader_program(sh->as<graphics::shader>());
+    _data->set_shader_program(sh);
 
     for (auto& prop : mat_struct[ "properties" ])
     {
