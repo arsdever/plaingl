@@ -3,6 +3,7 @@ set(PROJECT_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 link_libraries(profiler::lib)
 
 add_subdirectory(common)
+add_subdirectory(asset_management)
 add_subdirectory(core)
 add_subdirectory(graphics)
 add_subdirectory(project)

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "common/file.hpp"
 #include "common/utils.hpp"
 #include "graphics/shader_property.hpp"
 
@@ -35,8 +36,6 @@ public:
     void visit_properties(std::function<void(shader_property&)> visitor);
     void
     visit_properties(std::function<void(const shader_property&)> visitor) const;
-
-    static std::shared_ptr<shader> from_file(std::string_view path);
 
 private:
     void resolve_uniforms();

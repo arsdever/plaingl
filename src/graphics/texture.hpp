@@ -1,6 +1,9 @@
 #pragma once
 
-class image;
+namespace common
+{
+class file;
+}
 
 class texture
 {
@@ -69,15 +72,20 @@ public:
 
     unsigned native_id() const;
 
-    static texture from_image(image* img);
-
     static void static_bind(size_t id, bool ms);
     static void static_unbind(bool ms);
+
+    static std::shared_ptr<texture> from_file(std::string_view path);
+    static std::shared_ptr<texture> from_file(common::file& file);
 
 private:
     static int convert_to_gl_internal_format(format f);
     static int convert_to_gl_format(format f);
+    static size_t pixel_component_count(format f);
     unsigned target() const;
+
+    static std::shared_ptr<texture> from_png_file(common::file& file);
+    static std::shared_ptr<texture> from_jpg_file(common::file& file);
 
 private:
     size_t _width { 0 };
@@ -85,6 +93,7 @@ private:
     unsigned _texture_id { 0 };
     format _format { format::UNSPECIFIED };
     int _samples { 1 };
+    std::vector<char> _data_buffer;
 
 public:
     // TODO: may not be the best place for this object

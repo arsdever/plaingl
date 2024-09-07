@@ -4,11 +4,11 @@
 #include "application.hpp"
 
 #include "application/application_commands.hpp"
+#include "asset_management/asset_manager.hpp"
 #include "common/filesystem.hpp"
 #include "common/logging.hpp"
 #include "components/camera.hpp"
 #include "components/component_registry.hpp"
-#include "core/asset_manager.hpp"
 #include "core/command_dispatcher.hpp"
 #include "core/game_clock.hpp"
 #include "core/window.hpp"
@@ -102,8 +102,8 @@ void application::setup_console()
 
     _console = std::make_unique<console>();
     _console->register_for_logs();
-    _console->register_command<cmd_show_texture, int>("show.texture");
-    _console->register_command<cmd_show_mesh, int>("show.mesh");
+    _console->register_command<cmd_show_texture, std::string>("show.texture");
+    _console->register_command<cmd_show_mesh, std::string>("show.mesh");
     _console->register_command<cmd_show_profiler>("show.profiler");
     _console->register_command<cmd_list_textures>("list.textures");
     _console->register_command<project::cmd_create_game_object>(

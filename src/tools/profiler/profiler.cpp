@@ -6,8 +6,8 @@
 
 #include "tools/profiler/profiler.hpp"
 
+#include "asset_management/asset_manager.hpp"
 #include "common/logging.hpp"
-#include "core/asset_manager.hpp"
 #include "graphics.hpp"
 #include "graphics/material.hpp"
 #include "graphics/mesh.hpp"
@@ -123,13 +123,12 @@ void profiler::render()
     m.set_indices(std::move(indices));
     m.init();
 
-    auto mat = core::asset_manager::get_material("surface");
-    static auto txt =
-        texture::from_image(core::asset_manager::get_image("white"));
+    auto mat = core::asset_manager::get<graphics::material>("surface");
+    auto txt = core::asset_manager::get<texture>("white");
 
     mat->set_property_value("u_vp_matrix", glm::identity<glm::mat4>());
     mat->set_property_value("u_model_matrix", glm::identity<glm::mat4>());
     mat->set_property_value("u_color", glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
-    mat->set_property_value("u_image", &txt);
+    mat->set_property_value("u_image", txt.get());
     renderer_3d().draw_mesh(&m, mat);
 }

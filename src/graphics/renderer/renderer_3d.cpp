@@ -3,7 +3,6 @@
 
 #include "renderer/renderer_3d.hpp"
 
-#include "core/asset_manager.hpp"
 #include "glad/gl.h"
 #include "graphics/graphics_buffer.hpp"
 #include "graphics/material.hpp"

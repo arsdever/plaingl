@@ -1,6 +1,6 @@
 #include "renderer_2d.hpp"
 
-#include "core/asset_manager.hpp"
+#include "asset_management/asset_manager.hpp"
 #include "glad/gl.h"
 #include "graphics/font.hpp"
 #include "graphics/material.hpp"
@@ -68,7 +68,8 @@ void renderer_2d::draw_rect(glm::vec2 top_left,
     glDisable(GL_DEPTH_TEST);
     vertex3d::activate_attributes();
 
-    auto shader_2d = core::asset_manager::get_material("surface");
+    auto shader_2d =
+        core::asset_manager::get("surface").as<graphics::material>();
     shader_2d->set_property_value("u_vp_matrix", glm::identity<glm::mat4>());
     shader_2d->set_property_value("u_model_matrix", glm::identity<glm::mat4>());
 
@@ -150,7 +151,8 @@ void renderer_2d::draw_rect(glm::vec2 top_left,
     glDisable(GL_DEPTH_TEST);
     vertex3d::activate_attributes();
 
-    auto shader_2d = core::asset_manager::get_material("surface");
+    auto shader_2d =
+        core::asset_manager::get("surface").as<graphics::material>();
     shader_2d->set_property_value("u_vp_matrix", glm::identity<glm::mat4>());
     shader_2d->set_property_value("u_model_matrix", glm::identity<glm::mat4>());
 
@@ -258,9 +260,12 @@ void renderer_2d::draw_text(glm::vec2 baseline,
     text_mesh.set_indices(std::move(indices));
     text_mesh.init();
 
-    auto surface_shader = core::asset_manager::get_material("surface");
-    surface_shader->set_property_value("u_vp_matrix", glm::identity<glm::mat4>());
-    surface_shader->set_property_value("u_model_matrix", glm::identity<glm::mat4>());
+    auto surface_shader =
+        core::asset_manager::get("surface").as<graphics::material>();
+    surface_shader->set_property_value("u_vp_matrix",
+                                       glm::identity<glm::mat4>());
+    surface_shader->set_property_value("u_model_matrix",
+                                       glm::identity<glm::mat4>());
 
     surface_shader->set_property_value("u_color", glm::vec4(1.0f));
     surface_shader->set_property_value("u_image",

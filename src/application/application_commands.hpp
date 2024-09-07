@@ -16,7 +16,7 @@ public:
     static event<void(std::shared_ptr<core::window>)> open_window_requested;
 };
 
-class cmd_show_mesh : public core::command<int>
+class cmd_show_mesh : public core::command<std::string>
 {
 public:
     using command::command;
@@ -25,7 +25,7 @@ public:
     static event<void(std::shared_ptr<core::window>)> open_window_requested;
 };
 
-class cmd_show_texture : public core::command<int>
+class cmd_show_texture : public core::command<std::string>
 {
 public:
     using command::command;

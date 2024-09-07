@@ -4,7 +4,7 @@
 
 #include "tools/texture_viewer/texture_viewer.hpp"
 
-#include "core/asset_manager.hpp"
+#include "asset_management/asset_manager.hpp"
 #include "core/window.hpp"
 #include "graphics.hpp"
 #include "graphics/material.hpp"
@@ -62,8 +62,8 @@ void texture_viewer::render()
     if (_texture == nullptr)
         return;
 
-    auto mat = core::asset_manager::get_material("surface");
-    auto quad = core::asset_manager::get_mesh("quad");
+    auto mat = core::asset_manager::get<graphics::material>("surface");
+    auto quad = core::asset_manager::get<mesh>("quad");
     glm::mat4 camera_matrix = glm::ortho(
         -1.0 / _zoom, 1.0 / _zoom, -1.0 / _zoom, 1.0 / _zoom, .001, 100.0);
     glm::mat4 camera_transform = glm::identity<glm::mat4>();
@@ -81,5 +81,5 @@ void texture_viewer::render()
     graphics::set_viewport({ 0, 0 }, { get_size() });
     graphics::clear({ glm::vec3(0.1f), 1.0f });
 
-    renderer_3d().draw_mesh(quad, mat);
+    renderer_3d().draw_mesh(quad.get(), mat);
 }

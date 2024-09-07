@@ -32,7 +32,8 @@ add_library(
   utils.hpp
   vaomap.cpp
   vaomap.hpp
-  vertex.hpp)
+  vertex.hpp
+  formats/png.hpp)
 add_library(${PROJECT}::graphics ALIAS ${PROJECT}_graphics)
 
 add_subdirectory(glad)
@@ -44,4 +45,4 @@ target_include_directories(
 target_link_libraries(
   ${PROJECT}_graphics
   PUBLIC ${PROJECT}::common ${PROJECT}::renderer
-  PRIVATE ${PROJECT}::glad)
+  PRIVATE ${PROJECT}::glad PNG::PNG)

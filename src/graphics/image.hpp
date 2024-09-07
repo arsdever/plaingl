@@ -1,5 +1,10 @@
 #pragma once
 
+namespace common
+{
+class file;
+}
+
 class texture;
 
 class image
@@ -54,6 +59,7 @@ public:
     size_t get_height() const;
 
     static image* from_texture(texture*);
+    static std::shared_ptr<image> from_file(common::file file);
 
 private:
     metadata _metadata;
