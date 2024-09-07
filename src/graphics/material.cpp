@@ -61,7 +61,13 @@ void material::activate() const
     int texture_binding_index = 0;
     for (const auto& [ name, value ] : _property_map)
     {
-        if (value.type() == typeid(texture*))
+        if (value.type() == typeid(std::shared_ptr<texture>))
+        {
+            auto t = std::any_cast<std::shared_ptr<texture>>(value);
+            t->set_active_texture(texture_binding_index);
+            s->set_property(name, texture_binding_index);
+        }
+        else if (value.type() == typeid(texture*))
         {
             const auto* t = std::any_cast<texture*>(value);
             t->set_active_texture(texture_binding_index);

@@ -23,7 +23,7 @@ texture_viewer::texture_viewer()
 
 texture_viewer::~texture_viewer() = default;
 
-void texture_viewer::set_texture(texture* m) { _texture = m; }
+void texture_viewer::set_texture(std::shared_ptr<texture> m) { _texture = m; }
 
 void texture_viewer::initialize()
 {
@@ -72,9 +72,11 @@ void texture_viewer::render()
                        glm::vec3(-_offset.x / _zoom * 2 / get_width(),
                                  _offset.y / _zoom * 2 / get_height(),
                                  1));
+    glm::mat4 model_matrix = glm::rotate(
+        glm::identity<glm::mat4>(), glm::radians(90.0f), glm::vec3(1, 0, 0));
     mat->set_property_value("u_vp_matrix",
                             camera_matrix * glm::inverse(camera_transform));
-    mat->set_property_value("u_model_matrix", glm::identity<glm::mat4>());
+    mat->set_property_value("u_model_matrix", model_matrix);
     mat->set_property_value("u_color", glm::vec4 { 1.0f });
     mat->set_property_value("u_image", _texture);
 

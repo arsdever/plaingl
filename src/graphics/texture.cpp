@@ -163,14 +163,19 @@ size_t texture::get_channel_count() const
 
 void texture::get_data(char* data_ptr)
 {
-    glBindTexture(target(), _texture_id);
-    glGetTexImage(target(), 0, GL_RGBA, GL_UNSIGNED_BYTE, data_ptr);
-    glBindTexture(target(), 0);
+    std::copy(_data_buffer.begin(), _data_buffer.end(), data_ptr);
+}
+
+void texture::set_data(std::vector<char> data)
+{
+    _data_buffer = std::move(data);
+    set_rect_data({ 0, 0 }, { _width, _height }, _data_buffer.data());
 }
 
 void texture::set_data(const char* data_ptr)
 {
     set_rect_data({ 0, 0 }, { _width, _height }, data_ptr);
+    fetch_from_gpu();
 }
 
 void texture::set_rect_data(glm::vec<2, size_t> pos,
@@ -394,12 +399,27 @@ std::shared_ptr<texture> texture::from_file(common::file& file)
     }
 }
 
+void texture::fetch_from_gpu()
+{
+    glBindTexture(target(), _texture_id);
+    glGetTexImage(target(),
+                  0,
+                  convert_to_gl_format(_format),
+                  GL_UNSIGNED_BYTE,
+                  _data_buffer.data());
+    glBindTexture(target(), 0);
+}
+
 std::shared_ptr<texture> texture::from_png_file(common::file& file)
 {
     graphics::png img = graphics::png::load(file);
     auto tex = std::make_shared<texture>();
     tex->init(img.get_width(), img.get_height(), img.get_format());
-    img.read_pixels(tex->_data_buffer.data());
+    size_t size = img.read_pixels(static_cast<char*>(nullptr));
+    std::vector<char> data(size);
+    img.read_pixels(data.data());
+    file.close();
+    tex->set_data(data);
     return tex;
 }
 

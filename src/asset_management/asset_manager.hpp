@@ -34,19 +34,23 @@ public:
 
     static asset& get(std::string_view name);
     template <typename T>
-    static std::shared_ptr<T> get(std::string_view name)
+    static auto get(std::string_view name)
     {
-        return try_get<T>(name)->template as<T>();
+        return try_get<T>(name);
     }
-    static std::shared_ptr<asset> try_get(std::string_view name)
+    static auto try_get(std::string_view name)
     {
         return try_get_internal(name, -1);
     }
     template <typename T>
-    static std::shared_ptr<asset> try_get(std::string_view name)
+    static std::shared_ptr<T> try_get(std::string_view name)
     {
         auto type_index = variant_index_v<asset::data_type, std::shared_ptr<T>>;
-        return try_get_internal(name, type_index);
+        auto ast = try_get_internal(name, type_index);
+        if (!ast)
+            return nullptr;
+
+        return ast->template as<T>();
     }
 
     static void register_importer(std::string_view key,
