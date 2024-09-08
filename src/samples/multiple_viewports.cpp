@@ -2,26 +2,22 @@
 #include <GLFW/glfw3.h>
 /* clang-format on */
 
-#include <any>
-#include <array>
-#include <functional>
-#include <memory>
-#include <vector>
-
-#include "core/asset_manager.hpp"
+#include "asset_management/asset_manager.hpp"
+#include "common/logging.hpp"
 #include "core/viewport.hpp"
 #include "core/window.hpp"
-#include "gl_error_handler.hpp"
-#include "logging.hpp"
-#include "material.hpp"
+#include "filesystem.hpp"
+#include "graphics/graphics.hpp"
+#include "graphics/material.hpp"
+#include "graphics/texture.hpp"
 #include "project/components/camera.hpp"
+#include "project/components/component_registry.hpp"
 #include "project/components/light.hpp"
 #include "project/components/mesh_filter.hpp"
 #include "project/components/mesh_renderer.hpp"
 #include "project/components/transform.hpp"
 #include "project/game_object.hpp"
-#include "scene.hpp"
-#include "texture.hpp"
+#include "project/scene.hpp"
 
 namespace
 {
@@ -32,6 +28,7 @@ void init_scene();
 
 int main(int argc, char** argv)
 {
+    component_registry::register_components();
     glfwInit();
     std::vector<std::shared_ptr<core::window>> windows;
     auto exp_window = std::make_shared<core::window>();
@@ -45,8 +42,14 @@ int main(int argc, char** argv)
             std::shared_ptr<core::window> wnd)
     {
         // configure gl debug output
+        graphics::initialize();
+        assets::asset_manager::initialize(
+            (common::filesystem::path::current_dir() / "resources")
+                .full_path());
         main_camera_object = game_object::create();
         camera2_object = game_object::create();
+        main_camera_object->add<components::camera>();
+        camera2_object ->add<components::camera>();
         current_scene = scene::create();
         main_camera_object->get<components::camera>().set_active();
         init_scene();
@@ -81,7 +84,7 @@ int main(int argc, char** argv)
     {
         if (frame_counter % 30 == 0)
         {
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            graphics::clear(glm::dvec4 { 0, 0, 0, 1 });
             int i = 0;
             for (auto vp : re.get_sender()->get_viewports())
             {
@@ -109,19 +112,9 @@ int main(int argc, char** argv)
 
 void init_scene()
 {
-    auto* am = assets::asset_manager::default_asset_manager();
-    am->load_asset("susane_head.fbx");
-    am->load_asset("standard.mat");
-    am->load_asset("brick.png");
-    am->load_asset("diffuse.png");
-
-    material* basic_mat = am->get_material("standard");
-    auto txt = new texture();
-    image* img = am->get_image("diffuse");
-    *txt = std::move(texture::from_image(img));
-    auto norm_txt = new texture();
-    img = am->get_image("brick");
-    *norm_txt = std::move(texture::from_image(img));
+    auto basic_mat = assets::asset_manager::get<graphics::material>("standard");
+    auto txt = assets::asset_manager::get<texture>("diffuse");
+    auto norm_txt = assets::asset_manager::get<texture>("brick");
     basic_mat->set_property_value("albedo_texture_strength", 0.0f);
     basic_mat->set_property_value("albedo_color", 1.0f, 0.8f, 0.2f);
     basic_mat->set_property_value("normal_texture_strength", 0.0f);
@@ -152,7 +145,8 @@ void init_scene()
         glm::dvec4(0.7, 0.6, 0.1, 1.0));
 
     auto obj = game_object::create();
-    obj->add<components::mesh_filter>().set_mesh(am->get_mesh("susane_head"));
+    auto m = assets::asset_manager::get<mesh>("susane_head");
+    obj->add<components::mesh_filter>().set_mesh(m.get());
     obj->add<components::mesh_renderer>().set_material(basic_mat);
     obj->set_name("susane");
     scene::get_active_scene()->add_root_object(obj);
