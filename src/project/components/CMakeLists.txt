@@ -38,3 +38,5 @@ define_component(light)
 define_component(mesh_filter)
 define_component(mesh_renderer)
 define_component(transform)
+
+target_link_libraries(${PROJECT}_components PRIVATE ${PROJECT}::assets)
