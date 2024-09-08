@@ -3,7 +3,6 @@
 #include "core/viewport.hpp"
 
 #include "core/window.hpp"
-#include "graphics/image.hpp"
 #include "graphics/texture.hpp"
 #include "project/components/camera.hpp"
 
@@ -37,9 +36,7 @@ glm::vec2 viewport::get_size() const { return _p->_size; }
 
 void viewport::take_screenshot(std::string_view path)
 {
-    auto screenshot = image::from_texture(_p->_surface_texture.get());
     // assets::asset_manager::save_asset(path, screenshot);
-    delete screenshot;
 }
 
 viewport* viewport::current_viewport() { return _current_viewport; }

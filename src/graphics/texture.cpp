@@ -12,7 +12,6 @@
 #include "common/utils.hpp"
 #include "graphics/formats/jpg.hpp"
 #include "graphics/formats/png.hpp"
-#include "graphics/image.hpp"
 
 namespace
 {

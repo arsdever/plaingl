@@ -16,8 +16,6 @@ add_library(
   graphics_buffer.hpp
   graphics.cpp
   graphics.hpp
-  image.cpp
-  image.hpp
   mesh.cpp
   mesh.hpp
   material.cpp
