@@ -4,11 +4,6 @@
 #include "common/filesystem.hpp"
 #include "common/logging.hpp"
 
-namespace common
-{
-class file;
-}
-
 namespace assets
 {
 namespace

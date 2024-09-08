@@ -1,9 +1,6 @@
 #pragma once
 
-namespace common
-{
-class file;
-}
+#include "common/common_fwd.hpp"
 
 class texture : public std::enable_shared_from_this<texture>
 {

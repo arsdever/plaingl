@@ -1,15 +1,14 @@
 #pragma once
 
+#include "asset_management/assets_fwd.hpp"
+#include "graphics/graphics_fwd.hpp"
+
 #include "asset_management/asset.hpp"
 #include "asset_management/asset_importer.hpp"
 #include "common/utils.hpp"
-#include "graphics/graphics_fwd.hpp"
 
 namespace assets
 {
-class asset_importer;
-class asset;
-
 class asset_manager
 {
 private:
