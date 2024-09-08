@@ -3,13 +3,13 @@
 #include "asset_management/asset_manager.hpp"
 #include "glad/gl.h"
 #include "graphics/font.hpp"
+#include "graphics/graphics_buffer.hpp"
 #include "graphics/material.hpp"
 #include "graphics/mesh.hpp"
+#include "graphics/renderer/algorithms/polygon_to_mesh.hpp"
 #include "graphics/texture.hpp"
 #include "graphics/vaomap.hpp"
 #include "graphics/vertex.hpp"
-#include "graphics_buffer.hpp"
-#include "renderer/algorithms/polygon_to_mesh.hpp"
 
 template <typename T>
 glm::tvec2<T> map_from_window(const glm::tvec2<T>& p,

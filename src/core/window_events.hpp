@@ -4,7 +4,7 @@
 
 #include "core/core_fwd.hpp"
 
-#include "event.hpp"
+#include "common/event.hpp"
 
 namespace core
 {

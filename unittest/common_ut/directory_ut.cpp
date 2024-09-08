@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
 #include "common/directory.hpp"
-#include "filesystem.hpp"
+#include "common/filesystem.hpp"
 
 TEST(Directory, traversing)
 {

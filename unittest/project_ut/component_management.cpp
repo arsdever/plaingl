@@ -1,6 +1,5 @@
 #include <gtest/gtest.h>
 
-#include "components/mesh_renderer.hpp"
 #include "project/components/component_registry.hpp"
 #include "project/components/mesh_filter.hpp"
 #include "project/components/mesh_renderer.hpp"

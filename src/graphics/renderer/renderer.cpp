@@ -1,3 +1,3 @@
 #include <glm/fwd.hpp>
 
-#include "renderer/renderer.hpp"
+#include "graphics/renderer/renderer.hpp"

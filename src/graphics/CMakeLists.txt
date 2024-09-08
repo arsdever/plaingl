@@ -39,8 +39,7 @@ add_subdirectory(glad)
 add_subdirectory(renderer)
 
 target_precompile_headers(${PROJECT}_graphics REUSE_FROM ${PROJECT}::common)
-target_include_directories(
-  ${PROJECT}_graphics PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${PROJECT_SRC_DIR})
+target_include_directories(${PROJECT}_graphics PUBLIC ${PROJECT_SRC_DIR})
 target_link_libraries(
   ${PROJECT}_graphics
   PUBLIC ${PROJECT}::common ${PROJECT}::renderer
