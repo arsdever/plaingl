@@ -3,7 +3,7 @@ add_library(${PROJECT}_components STATIC component_registry.cpp
 add_library(${PROJECT}::components ALIAS ${PROJECT}_components)
 target_include_directories(
   ${PROJECT}_components
-  PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/.. ${PROJECT_SRC_DIR}
+  PUBLIC ${PROJECT_SRC_DIR}
   PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 target_link_libraries(
   ${PROJECT}_components PUBLIC ${PROJECT}::common ${PROJECT}::core

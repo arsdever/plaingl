@@ -10,8 +10,7 @@
 
 #include "core/window.hpp"
 
-#include "gl_error_handler.hpp"
-#include "logging.hpp"
+#include "common/logging.hpp"
 
 namespace
 {

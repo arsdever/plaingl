@@ -15,9 +15,8 @@ add_library(
   utils.hpp)
 add_library(${PROJECT}::common ALIAS ${PROJECT}_common)
 target_precompile_headers(${PROJECT}_common PUBLIC
-                          "$<$<COMPILE_LANGUAGE:CXX>:stdafx.hpp>")
-target_include_directories(${PROJECT}_common PUBLIC ${PROJECT_SRC_DIR}
-                                                    ${CMAKE_CURRENT_SOURCE_DIR})
+                          "$<$<COMPILE_LANGUAGE:CXX>:common/stdafx.hpp>")
+target_include_directories(${PROJECT}_common PUBLIC ${PROJECT_SRC_DIR})
 if(${USE_FILEWATCH})
   message(STATUS "Using \"filewatch\" library for file watcher")
   target_compile_definitions(${PROJECT}_common PRIVATE "-DUSE_FILEWATCH=1")

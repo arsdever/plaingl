@@ -6,12 +6,12 @@
 
 #include "asset_management/asset_manager.hpp"
 #include "core/window.hpp"
-#include "graphics.hpp"
+#include "graphics/graphics.hpp"
+#include "graphics/graphics_buffer.hpp"
 #include "graphics/material.hpp"
 #include "graphics/mesh.hpp"
-#include "graphics_buffer.hpp"
+#include "graphics/renderer/renderer_3d.hpp"
 #include "project/game_object.hpp"
-#include "renderer/renderer_3d.hpp"
 
 mesh_viewer::mesh_viewer()
 {

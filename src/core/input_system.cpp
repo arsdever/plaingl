@@ -2,7 +2,7 @@
 
 #include "core/input_system.hpp"
 
-#include "logging.hpp"
+#include "common/logging.hpp"
 
 namespace
 {

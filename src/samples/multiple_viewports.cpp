@@ -3,10 +3,10 @@
 /* clang-format on */
 
 #include "asset_management/asset_manager.hpp"
+#include "common/filesystem.hpp"
 #include "common/logging.hpp"
 #include "core/viewport.hpp"
 #include "core/window.hpp"
-#include "filesystem.hpp"
 #include "graphics/graphics.hpp"
 #include "graphics/material.hpp"
 #include "graphics/texture.hpp"
@@ -49,7 +49,7 @@ int main(int argc, char** argv)
         main_camera_object = game_object::create();
         camera2_object = game_object::create();
         main_camera_object->add<components::camera>();
-        camera2_object ->add<components::camera>();
+        camera2_object->add<components::camera>();
         current_scene = scene::create();
         main_camera_object->get<components::camera>().set_active();
         init_scene();

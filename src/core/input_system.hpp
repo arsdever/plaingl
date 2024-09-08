@@ -1,11 +1,8 @@
 #pragma once
 
-#include <unordered_map>
-#include <unordered_set>
-
 #include <glm/fwd.hpp>
 
-#include "event.hpp"
+#include "common/event.hpp"
 
 namespace core
 {

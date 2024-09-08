@@ -7,11 +7,11 @@
 
 #include "core/window.hpp"
 
+#include "common/logging.hpp"
+#include "core//input_system.hpp"
 #include "core/settings.hpp"
 #include "core/window_events.hpp"
 #include "graphics/graphics.hpp"
-#include "input_system.hpp"
-#include "logging.hpp"
 
 namespace
 {

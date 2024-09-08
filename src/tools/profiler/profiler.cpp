@@ -8,12 +8,12 @@
 
 #include "asset_management/asset_manager.hpp"
 #include "common/logging.hpp"
-#include "graphics.hpp"
+#include "graphics/graphics.hpp"
 #include "graphics/material.hpp"
 #include "graphics/mesh.hpp"
+#include "graphics/renderer/renderer_3d.hpp"
 #include "graphics/texture.hpp"
 #include "graphics/vertex.hpp"
-#include "renderer_3d.hpp"
 
 namespace
 {

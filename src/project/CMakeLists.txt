@@ -34,10 +34,7 @@ target_link_libraries(
   ${PROJECT}_project
   PUBLIC ${PROJECT}::common
   PRIVATE EnTT::EnTT)
-target_include_directories(
-  ${PROJECT}_project
-  # PUBLIC ${CMAKE_CURRENT_INSTALL_DIR}/include
-  PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../)
+target_include_directories(${PROJECT}_project PUBLIC ${PROJECT_SRC_DIR})
 
 add_subdirectory(components)
 target_link_libraries(${PROJECT}_project PUBLIC ${PROJECT}::components)
