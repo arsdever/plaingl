@@ -3,14 +3,7 @@
 #include "asset_management/asset.hpp"
 #include "asset_management/asset_importer.hpp"
 #include "common/utils.hpp"
-
-class mesh;
-class image;
-namespace graphics
-{
-class material;
-class shader;
-} // namespace graphics
+#include "graphics/graphics_fwd.hpp"
 
 namespace assets
 {
