@@ -10,7 +10,7 @@ public:
     void draw_rect(glm::vec2 top_left,
                    glm::vec2 bottom_right,
                    glm::vec2 window_size,
-                   texture& texture);
+                   std::shared_ptr<texture> texture);
 
     void draw_rect(glm::vec2 top_left,
                    glm::vec2 bottom_right,

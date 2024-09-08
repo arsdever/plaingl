@@ -198,9 +198,9 @@ void camera::render_texture_background()
 {
     auto mat = core::asset_manager::get<graphics::material>("skybox");
     mat->set_property_value("u_model_matrix", glm::identity<glm::mat4>());
-    mat->set_property_value("u_vp_matrix", glm::mat4(vp_matrix()));
-    renderer_3d().draw_mesh(
-        core::asset_manager::get<mesh>("env_sphere_mesh").get(), mat);
+    mat->set_property_value("u_vp_matrix", vp_matrix());
+    renderer_3d().draw_mesh(core::asset_manager::get<mesh>("env_sphere").get(),
+                            mat);
 }
 
 void camera::render_on_private_texture() const
@@ -227,8 +227,7 @@ void camera::render_on_private_texture() const
                     material->set_property_value(
                         "u_model_matrix",
                         glm::mat4(obj->get_transform().get_matrix()));
-                    material->set_property_value("u_vp_matrix",
-                                                 glm::mat4(vp_matrix()));
+                    material->set_property_value("u_vp_matrix", vp_matrix());
                     material->set_property_value(
                         "u_camera_position",
                         glm::vec3(get_transform().get_position()));
