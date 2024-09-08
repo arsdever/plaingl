@@ -1,10 +1,9 @@
 #pragma once
 
-#include <queue>
+#include "core/core_fwd.hpp"
 
 namespace core
 {
-class command_base;
 
 class command_dispatcher
 {

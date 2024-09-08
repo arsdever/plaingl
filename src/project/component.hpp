@@ -1,12 +1,9 @@
 #pragma once
 
+#include "project/project_fwd.hpp"
+
 #include "project/game_object.hpp"
 #include "project/object.hpp"
-
-namespace components
-{
-class transform;
-} // namespace components
 
 class component : public object
 {

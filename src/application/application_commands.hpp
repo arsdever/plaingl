@@ -1,12 +1,9 @@
 #pragma once
 
+#include "core/core_fwd.hpp"
+
 #include "common/event.hpp"
 #include "core/command.hpp"
-
-namespace core
-{
-class window;
-}
 
 class cmd_show_profiler : public core::command<>
 {

@@ -1,10 +1,6 @@
 #pragma once
 
-namespace core
-{
-class command_dispatcher;
-class command_base;
-} // namespace core
+#include "core/core_fwd.hpp"
 
 class console
 {

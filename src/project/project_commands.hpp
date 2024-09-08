@@ -1,11 +1,9 @@
 #pragma once
 
+#include "project/project_fwd.hpp"
+
 #include "common/event.hpp"
 #include "core/command.hpp"
-
-class game_object;
-class object;
-class scene;
 
 namespace project
 {
