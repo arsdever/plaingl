@@ -1,6 +1,6 @@
 #include "project/project_commands.hpp"
 
-// #include "asset_management/asset_manager.hpp"
+#include "asset_management/asset_manager.hpp"
 #include "common/logging.hpp"
 #include "components/camera.hpp"
 #include "components/light.hpp"
@@ -61,12 +61,12 @@ std::shared_ptr<scene> cmd_load_scene::default_scene()
     auto s = scene::create();
     s->set_name("default");
 
-    // auto m = core::asset_manager::get("cube_mesh").as<mesh>();
-    // auto mat = core::asset_manager::get("standard").as<graphics::material>();
+    auto m = core::asset_manager::get<mesh>("cube");
+    auto mat = core::asset_manager::get<graphics::material>("standard");
 
     auto go = game_object::create();
-    // go->add<components::mesh_filter>().set_mesh(m.get());
-    // go->add<components::mesh_renderer>().set_material(mat);
+    go->add<components::mesh_filter>().set_mesh(m.get());
+    go->add<components::mesh_renderer>().set_material(mat);
     go->set_name("suzanne");
     s->add_root_object(go);
 

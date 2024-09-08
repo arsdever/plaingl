@@ -25,7 +25,7 @@ glm::tvec2<T> map_from_window(const glm::tvec2<T>& p,
 void renderer_2d::draw_rect(glm::vec2 top_left,
                             glm::vec2 bottom_right,
                             glm::vec2 window_size,
-                            texture& txt)
+                            std::shared_ptr<texture> txt)
 {
     glm::vec2 bottom_left { top_left.x, bottom_right.y };
     glm::vec2 top_right { bottom_right.x, top_left.y };
@@ -74,7 +74,7 @@ void renderer_2d::draw_rect(glm::vec2 top_left,
     shader_2d->set_property_value("u_model_matrix", glm::identity<glm::mat4>());
 
     shader_2d->set_property_value("u_color", glm::vec4(1));
-    shader_2d->set_property_value("u_image", &txt);
+    shader_2d->set_property_value("u_image", txt);
     shader_2d->activate();
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
     glEnable(GL_DEPTH_TEST);
