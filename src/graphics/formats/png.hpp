@@ -5,8 +5,6 @@
 #include "common/file.hpp"
 #include "graphics/texture.hpp"
 
-class texture;
-
 namespace graphics
 {
 class png
