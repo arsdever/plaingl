@@ -41,7 +41,3 @@ macro(enable_asset_type)
                      ${PROJECT}::asset::${asset_type_lower})
   endforeach()
 endmacro()
-
-# enable_asset_type(fbx jpg png mat shader)
-
-# add_subdirectory(asset_loaders)
