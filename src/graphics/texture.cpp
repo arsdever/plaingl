@@ -10,6 +10,7 @@
 #include "common/filesystem.hpp"
 #include "common/logging.hpp"
 #include "common/utils.hpp"
+#include "graphics/formats/jpg.hpp"
 #include "graphics/formats/png.hpp"
 #include "graphics/image.hpp"
 
@@ -425,8 +426,15 @@ std::shared_ptr<texture> texture::from_png_file(common::file& file)
 
 std::shared_ptr<texture> texture::from_jpg_file(common::file& file)
 {
-    // TODO: implement
-    return nullptr;
+    graphics::jpg img = graphics::jpg::load(file);
+    auto tex = std::make_shared<texture>();
+    tex->init(img.get_width(), img.get_height(), img.get_format());
+    size_t size = img.read_pixels(static_cast<unsigned char*>(nullptr));
+    std::vector<char> data(size);
+    img.read_pixels(reinterpret_cast<unsigned char*>(data.data()));
+    file.close();
+    tex->set_data(data);
+    return tex;
 }
 
 std::vector<texture*> texture::_textures;
