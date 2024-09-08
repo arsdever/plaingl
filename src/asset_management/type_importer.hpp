@@ -11,7 +11,7 @@ namespace common
 class file;
 }
 
-namespace core
+namespace assets
 {
 namespace
 {

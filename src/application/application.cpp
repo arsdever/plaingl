@@ -72,7 +72,7 @@ void application::shutdown()
 {
     _is_running = false;
     scene::get_active_scene()->unload();
-    core::asset_manager::shutdown();
+    assets::asset_manager::shutdown();
 }
 
 void application::setup_console()
@@ -148,7 +148,7 @@ void application::process_console_commands()
 void application::load_assets()
 {
     auto project_path = common::filesystem::path::current_dir() / "resources";
-    core::asset_manager::initialize(project_path.full_path());
+    assets::asset_manager::initialize(project_path.full_path());
 }
 
 void application::register_components()

@@ -1,6 +1,6 @@
 #include "asset_management/asset_cache.hpp"
 
-namespace core
+namespace assets
 {
 std::shared_ptr<asset> asset_cache::find(std::string_view name, int type_index)
 {
@@ -44,4 +44,4 @@ void asset_cache::register_asset(std::string_view name,
 {
     _assets.emplace(name, ast);
 }
-} // namespace core
+} // namespace assets

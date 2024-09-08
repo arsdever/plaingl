@@ -62,8 +62,8 @@ void texture_viewer::render()
     if (_texture == nullptr)
         return;
 
-    auto mat = core::asset_manager::get<graphics::material>("surface");
-    auto quad = core::asset_manager::get<mesh>("quad");
+    auto mat = assets::asset_manager::get<graphics::material>("surface");
+    auto quad = assets::asset_manager::get<mesh>("quad");
     glm::mat4 camera_matrix = glm::ortho(
         -1.0 / _zoom, 1.0 / _zoom, -1.0 / _zoom, 1.0 / _zoom, .001, 100.0);
     glm::mat4 camera_transform = glm::identity<glm::mat4>();

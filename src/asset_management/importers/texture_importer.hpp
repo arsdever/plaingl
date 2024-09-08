@@ -2,7 +2,7 @@
 
 #include "asset_management/type_importer.hpp"
 
-class texture_importer : public core::type_importer<texture>
+class texture_importer : public assets::type_importer<texture>
 {
 public:
     static constexpr std::string_view extensions { ".png,.jpg,.jpeg" };

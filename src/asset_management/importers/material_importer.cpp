@@ -49,15 +49,15 @@ void material_importer::internal_load(common::file& asset_file)
             .full_path());
 
     auto sh =
-        core::asset_manager::try_get<graphics::shader>(shader_exclusive_name);
+        assets::asset_manager::try_get<graphics::shader>(shader_exclusive_name);
 
     if (!sh)
     {
-        core::asset_manager::get_importer().import(
-            shader_path, core::asset_manager::get_cache());
+        assets::asset_manager::get_importer().import(
+            shader_path, assets::asset_manager::get_cache());
     }
 
-    if (sh = core::asset_manager::try_get<graphics::shader>(
+    if (sh = assets::asset_manager::try_get<graphics::shader>(
             shader_exclusive_name);
         !sh)
     {

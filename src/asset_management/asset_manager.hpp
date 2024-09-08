@@ -12,7 +12,7 @@ class material;
 class shader;
 } // namespace graphics
 
-namespace core
+namespace assets
 {
 class asset_importer;
 class asset;
@@ -72,4 +72,4 @@ private:
     struct impl;
     static std::shared_ptr<impl> _impl;
 };
-} // namespace core
+} // namespace assets

@@ -11,7 +11,7 @@ class material;
 class mesh;
 class texture;
 
-namespace core
+namespace assets
 {
 struct asset
 {
@@ -42,4 +42,4 @@ struct asset
         return std::holds_alternative<std::shared_ptr<T>>(_data);
     }
 };
-} // namespace core
+} // namespace assets
