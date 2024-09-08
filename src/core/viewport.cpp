@@ -38,7 +38,7 @@ glm::vec2 viewport::get_size() const { return _p->_size; }
 void viewport::take_screenshot(std::string_view path)
 {
     auto screenshot = image::from_texture(_p->_surface_texture.get());
-    // core::asset_manager::save_asset(path, screenshot);
+    // assets::asset_manager::save_asset(path, screenshot);
     delete screenshot;
 }
 

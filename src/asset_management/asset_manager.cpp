@@ -11,7 +11,7 @@
 #include "common/filesystem.hpp"
 #include "common/logging.hpp"
 
-namespace core
+namespace assets
 {
 struct asset_manager::impl
 {
@@ -130,4 +130,4 @@ asset_importer& asset_manager::get_importer() { return _impl->_importer; }
 asset_cache& asset_manager::get_cache() { return _impl->_cache; }
 
 std::shared_ptr<asset_manager::impl> asset_manager::_impl = nullptr;
-} // namespace core
+} // namespace assets

@@ -2,7 +2,7 @@
 
 #include "asset_management/type_importer.hpp"
 
-class shader_importer : public core::type_importer<graphics::shader>
+class shader_importer : public assets::type_importer<graphics::shader>
 {
 public:
     static constexpr std::string_view extensions { ".shader" };

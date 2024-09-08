@@ -48,12 +48,12 @@ void asset_loader_MAT::load(std::string_view path)
          ".shader")
             .full_path());
 
-    if (sh = core::asset_manager::get_shader(shader_exclusive_name); !sh)
+    if (sh = assets::asset_manager::get_shader(shader_exclusive_name); !sh)
     {
-        core::asset_manager::load_asset(shader_path);
+        assets::asset_manager::load_asset(shader_path);
     }
 
-    if (sh = core::asset_manager::get_shader(shader_exclusive_name); !sh)
+    if (sh = assets::asset_manager::get_shader(shader_exclusive_name); !sh)
     {
         log()->error(
             "(Shader file '{}' required by material '{}' could not be found) ",

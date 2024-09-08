@@ -2,7 +2,7 @@
 
 #include "common/utils.hpp"
 
-namespace core
+namespace assets
 {
 class type_importer_base;
 template <typename T>
@@ -24,4 +24,4 @@ private:
                        std::equal_to<>>
         _importers;
 };
-} // namespace core
+} // namespace assets

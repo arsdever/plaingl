@@ -3,7 +3,7 @@
 #include "asset_management/type_importer.hpp"
 #include "common/logging.hpp"
 
-namespace core
+namespace assets
 {
 void asset_importer::import(std::string_view path, asset_cache& cache)
 {
@@ -33,4 +33,4 @@ void asset_importer::register_importer(
         ext_begin = pos + 1;
     } while (pos != std::string_view::npos);
 }
-} // namespace core
+} // namespace assets

@@ -1,6 +1,6 @@
 #pragma once
 
-namespace core
+namespace assets
 {
 class object;
 
@@ -10,4 +10,4 @@ public:
     std::string _path;
     std::vector<std::shared_ptr<object>> _objects;
 };
-} // namespace core
+} // namespace assets

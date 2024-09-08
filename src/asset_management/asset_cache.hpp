@@ -3,7 +3,7 @@
 #include "asset_management/asset.hpp"
 #include "common/utils.hpp"
 
-namespace core
+namespace assets
 {
 class asset;
 
@@ -34,4 +34,4 @@ private:
                             std::equal_to<>>
         _assets;
 };
-} // namespace core
+} // namespace assets
