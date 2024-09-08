@@ -1,9 +1,7 @@
 #pragma once
 
 #include "core/window.hpp"
-
-class graphics_buffer;
-class mesh;
+#include "graphics/graphics_fwd.hpp"
 
 class mesh_viewer : public core::window
 {

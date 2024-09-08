@@ -1,17 +1,14 @@
 #pragma once
 
-#include <memory>
-#include <string_view>
-
 #include <glm/fwd.hpp>
 
+#include "core/core_fwd.hpp"
+
+#include "common/event.hpp"
 #include "core/window_events.hpp"
-#include "event.hpp"
 
 namespace core
 {
-
-class viewport;
 
 /**
  * @brief Class representing each window in the engine.

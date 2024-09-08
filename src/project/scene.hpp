@@ -1,9 +1,9 @@
 #pragma once
 
+#include "project/project_fwd.hpp"
+
 #include "common/event.hpp"
 #include "project/object.hpp"
-
-class game_object;
 
 class scene : public object
 {

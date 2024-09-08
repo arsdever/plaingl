@@ -1,8 +1,7 @@
 #pragma once
 
+#include "graphics/graphics_fwd.hpp"
 #include "graphics/renderer/renderer.hpp"
-
-class font;
 
 class renderer_2d : public renderer
 {

@@ -1,14 +1,11 @@
 #pragma once
 
+#include "asset_management/assets_fwd.hpp"
+
 #include "common/utils.hpp"
 
 namespace assets
 {
-class type_importer_base;
-template <typename T>
-class type_importer;
-class asset_cache;
-
 class asset_importer
 {
 public:

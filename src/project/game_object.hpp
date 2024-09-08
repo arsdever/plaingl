@@ -1,14 +1,10 @@
 #pragma once
 
-#include <nlohmann/json.hpp>
+#include <nlohmann/json_fwd.hpp>
+
+#include "project/project_fwd.hpp"
 
 #include "project/object.hpp"
-
-class component;
-namespace components
-{
-class transform;
-} // namespace components
 
 class game_object
     : public object

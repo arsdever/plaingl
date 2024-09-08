@@ -2,13 +2,10 @@
 
 #include <nlohmann/json_fwd.hpp>
 
-#include "project/component.hpp"
+#include "graphics/graphics_fwd.hpp"
+#include "project/project_fwd.hpp"
 
-class game_object;
-namespace graphics
-{
-class material;
-}
+#include "project/component.hpp"
 
 namespace components
 {

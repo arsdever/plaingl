@@ -4,13 +4,6 @@
 #include "common/filesystem.hpp"
 #include "common/logging.hpp"
 
-class texture;
-
-namespace common
-{
-class file;
-}
-
 namespace assets
 {
 namespace
@@ -50,4 +43,4 @@ protected:
 protected:
     std::shared_ptr<T> _data;
 };
-} // namespace core
+} // namespace assets

@@ -1,12 +1,9 @@
 #pragma once
 
-namespace core
-{
-class window;
-}
+#include "core/core_fwd.hpp"
+#include "project/project_fwd.hpp"
 
 class console;
-class scene;
 
 class application
 {

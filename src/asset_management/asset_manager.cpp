@@ -56,12 +56,6 @@ void asset_manager::shutdown()
     _impl = nullptr;
 }
 
-template <>
-void asset_manager::save_asset<image>(std::string_view path, const image* img)
-{
-    // TODO: implement or remove
-}
-
 asset& asset_manager::get(std::string_view name) { return *try_get(name); }
 
 std::shared_ptr<asset> asset_manager::try_get_internal(std::string_view name,

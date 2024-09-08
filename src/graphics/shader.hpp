@@ -1,13 +1,12 @@
 #pragma once
 
-#include "common/file.hpp"
+#include "graphics/graphics_fwd.hpp"
+
 #include "common/utils.hpp"
 #include "graphics/shader_property.hpp"
 
 namespace graphics
 {
-class shader_script;
-
 class shader : public std::enable_shared_from_this<shader>
 {
 public:

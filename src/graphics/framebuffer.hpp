@@ -1,6 +1,6 @@
 #pragma once
 
-class texture;
+#include "graphics/graphics_fwd.hpp"
 
 class framebuffer
 {

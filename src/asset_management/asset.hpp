@@ -1,15 +1,7 @@
 #pragma once
 
 #include "common/file.hpp"
-
-namespace graphics
-{
-class shader;
-class shader_script;
-class material;
-} // namespace graphics
-class mesh;
-class texture;
+#include "graphics/graphics_fwd.hpp"
 
 namespace assets
 {

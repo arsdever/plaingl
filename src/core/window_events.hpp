@@ -1,16 +1,13 @@
 #pragma once
 
-#include <memory>
-#include <optional>
-
 #include <glm/vec2.hpp>
+
+#include "core/core_fwd.hpp"
 
 #include "event.hpp"
 
 namespace core
 {
-
-class window;
 
 class window_event
 {

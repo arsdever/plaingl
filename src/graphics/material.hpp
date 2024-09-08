@@ -1,11 +1,10 @@
 #pragma once
 
 #include "common/utils.hpp"
+#include "graphics/graphics_fwd.hpp"
 
 namespace graphics
 {
-class shader;
-
 class material : public std::enable_shared_from_this<material>
 {
 private:

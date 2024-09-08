@@ -7,8 +7,6 @@
 
 #include "graphics/vertex.hpp"
 
-class GLFWwindow;
-
 vao_map::~vao_map()
 {
     auto ctx = glfwGetCurrentContext();

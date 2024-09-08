@@ -1,14 +1,11 @@
 #pragma once
 
-#include <memory>
-#include <string_view>
-
 #include <glm/fwd.hpp>
+
+#include "core/core_fwd.hpp"
 
 namespace core
 {
-
-class window;
 
 /**
  * @brief Class representing a viewport inside the window.

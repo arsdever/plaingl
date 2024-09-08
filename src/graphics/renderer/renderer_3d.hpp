@@ -1,13 +1,8 @@
 #pragma once
 
+#include "graphics/graphics_fwd.hpp"
 #include "graphics/renderer/renderer.hpp"
 #include "graphics/vaomap.hpp"
-
-namespace graphics
-{
-class material;
-}
-class mesh;
 
 class renderer_3d : public renderer
 {
