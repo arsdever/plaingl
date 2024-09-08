@@ -18,3 +18,4 @@ target_link_libraries(
                            ${PROJECT}::graphics ${PROJECT}::project)
 
 add_subdirectory(application)
+add_subdirectory(samples)

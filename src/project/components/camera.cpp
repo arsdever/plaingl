@@ -30,6 +30,7 @@ namespace components
 camera::camera(game_object& obj)
     : component("camera", obj)
 {
+    _cameras.push_back(this);
 }
 
 camera& camera::operator=(camera&& obj) = default;
