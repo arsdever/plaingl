@@ -5,6 +5,7 @@
 #include "asset_management/asset_importer.hpp"
 #include "asset_management/importers/material_importer.hpp"
 #include "asset_management/importers/model_importer.hpp"
+#include "asset_management/importers/script_importer.hpp"
 #include "asset_management/importers/shader_importer.hpp"
 #include "asset_management/importers/texture_importer.hpp"
 #include "common/directory.hpp"
@@ -39,6 +40,8 @@ void asset_manager::initialize(std::string_view resource_path)
                       std::make_shared<texture_importer>());
     register_importer(material_importer::extensions,
                       std::make_shared<material_importer>());
+    register_importer(script_importer::extensions,
+                      std::make_shared<script_importer>());
     register_importer(shader_importer::extensions,
                       std::make_shared<shader_importer>());
     register_importer(model_importer::extensions,

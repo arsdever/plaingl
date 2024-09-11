@@ -4,6 +4,8 @@ add_library(
   material_importer.cpp
   model_importer.hpp
   model_importer.cpp
+  script_importer.hpp
+  script_importer.cpp
   shader_importer.hpp
   shader_importer.cpp
   texture_importer.hpp
@@ -15,4 +17,5 @@ target_precompile_headers(${PROJECT}_assets_importers REUSE_FROM
 target_link_libraries(
   ${PROJECT}_assets_importers
   PUBLIC ${PROJECT}::common ${PROJECT}::core
-  PRIVATE assimp::assimp ${PROJECT}::graphics nlohmann_json::nlohmann_json)
+  PRIVATE assimp::assimp ${PROJECT}::graphics ${PROJECT}::scripting
+          nlohmann_json::nlohmann_json)

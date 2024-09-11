@@ -27,6 +27,8 @@ class component_registry
 {
 public:
     static void register_components();
+    static void register_component(std::string_view name,
+                                   std::function<size_t()> func);
 
 private:
     static std::unordered_map<std::string_view, std::function<size_t()>>

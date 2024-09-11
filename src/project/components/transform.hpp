@@ -39,6 +39,8 @@ public:
 
     bool is_updated() const;
 
+    void rotate(const glm::dvec3& axis, double angle);
+
     // static size_t register_component();
     // TODO: this is a temporary solution for resolving the type_name
     static constexpr std::string_view type_name = "transform";

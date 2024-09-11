@@ -16,6 +16,7 @@
 #include "project/game_object.hpp"
 #include "project/project_commands.hpp"
 #include "project/scene.hpp"
+#include "scripting/backend.hpp"
 #include "tools/console/console.hpp"
 
 namespace
@@ -47,6 +48,8 @@ application::application()
         cam->set_render_size(re.get_new_size());
     };
 
+    scripting::backend::initialize();
+
     load_assets();
     register_components();
     setup_console();
@@ -56,6 +59,7 @@ application::~application()
 {
     shutdown();
     glfwTerminate();
+    scripting::backend::shutdown();
 }
 
 int application::run()
