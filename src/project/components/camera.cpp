@@ -151,7 +151,7 @@ template <>
 void camera::serialize<json_serializer>(json_serializer& s)
 {
     s.add_component(nlohmann::json {
-        { "type", type_id<camera>() },
+        { "type", camera::type_name },
         { "is_enabled", is_enabled() },
     });
 }
@@ -163,7 +163,7 @@ void camera::deserialize(const nlohmann::json& j)
 
 void camera::on_init()
 {
-    _view_matrix = glm::inverse(get_transform().get_matrix());
+    _view_matrix = glm::inverse(get_transform()->get_matrix());
     _projection_matrix = calculate_projection_matrix();
 
     _framebuffer = std::make_unique<framebuffer>();
@@ -179,7 +179,7 @@ void camera::on_init()
 
 void camera::on_update()
 {
-    _view_matrix = glm::inverse(get_transform().get_matrix());
+    _view_matrix = glm::inverse(get_transform()->get_matrix());
 
     if (_projection_matrix_dirty)
     {
@@ -217,10 +217,10 @@ void camera::render_on_private_texture() const
             if (!obj->is_active())
                 return;
 
-            if (auto* renderer =
+            if (auto renderer =
                     obj->template try_get<components::mesh_renderer>())
             {
-                auto* mesh =
+                auto mesh =
                     obj->template get<components::mesh_filter>().get_mesh();
                 auto material = renderer->get_material();
                 if (material)
@@ -231,7 +231,7 @@ void camera::render_on_private_texture() const
                     material->set_property_value("u_vp_matrix", vp_matrix());
                     material->set_property_value(
                         "u_camera_position",
-                        glm::vec3(get_transform().get_position()));
+                        glm::vec3(get_transform()->get_position()));
                     renderer_3d().draw_mesh(mesh, material);
                 }
             }
@@ -256,15 +256,16 @@ void camera::setup_lights()
     size_t i = 0;
 
     scene::get_active_scene()->visit_root_objects(
-        [ &i, &glsl_lights ](auto& obj)
+        [ &i, &glsl_lights ](auto obj)
     {
-        if (auto* light = obj->template try_get<components::light>())
+        if (auto light = obj->template try_get<components::light>())
         {
             glsl_lights.push_back({});
             auto& glight = glsl_lights.back();
-            glight.position = light->get_transform().get_position();
-            glight.direction = glm::normalize(
-                light->get_transform().get_rotation() * glm::dvec3 { 0, 0, 1 });
+            glight.position = light->get_transform()->get_position();
+            glight.direction =
+                glm::normalize(light->get_transform()->get_rotation() *
+                               glm::dvec3 { 0, 0, 1 });
             glight.color = light->get_color();
             glight.intensity = light->get_intensity();
             glight.radius = light->get_radius();
@@ -287,10 +288,10 @@ glm::mat4 camera::calculate_projection_matrix() const
     glm::dvec2 size = _render_size;
     if (_is_orthogonal)
     {
-        glm::dquat rotation = get_transform().get_rotation();
+        glm::dquat rotation = get_transform()->get_rotation();
         glm::dvec3 direction = rotation * glm::dvec3 { 0, 0, 1 };
         float dist =
-            std::abs(glm::dot(direction, get_transform().get_position()));
+            std::abs(glm::dot(direction, get_transform()->get_position()));
 
         return glm::ortho(-size.x / dist,
                           size.x / dist,

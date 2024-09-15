@@ -19,7 +19,8 @@ component& game_object::get(std::string_view class_name) const
     return project_manager::get_component(*this, class_name);
 }
 
-component* game_object::try_get(std::string_view class_name) const
+std::shared_ptr<component>
+game_object::try_get(std::string_view class_name) const
 {
     return project_manager::try_get_component(*this, class_name);
 }
@@ -69,7 +70,7 @@ void game_object::add_child(std::shared_ptr<game_object> child)
 {
     _children.push_back(child);
     if (child->get_parent() != child)
-        child->set_parent(shared_from_this());
+        child->set_parent(shared_from_this<game_object>());
 }
 
 void game_object::remove_child(std::shared_ptr<game_object> child)
@@ -95,9 +96,9 @@ void game_object::visit_components(
     std::function<bool(component&)> visitor) const
 {
     project_manager::visit_components(*this,
-                                      [ & ](auto& c)
+                                      [ & ](auto c)
     {
-        if (visitor(c))
+        if (visitor(*c))
             return true;
         return false;
     });

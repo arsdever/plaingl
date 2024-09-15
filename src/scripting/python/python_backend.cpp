@@ -1,4 +1,3 @@
-#include <entt/entt.hpp>
 #include <pybind11/detail/common.h>
 #include <pybind11/embed.h>
 
@@ -22,14 +21,16 @@ class python_component : public component
 public:
     using base = component;
 
-    python_component(game_object& obj)
-        : component("python_component", obj)
+    python_component(std::string_view name, game_object& obj)
+        : component(name, obj)
     {
     }
 
     void on_init() override { }
     void on_update() override { }
     void on_deinit() override { }
+
+    pybind11::object _instance;
 };
 
 class python_component_trampoline : public python_component
@@ -69,55 +70,31 @@ PYBIND11_EMBEDDED_MODULE(gamify, m)
     pybind11::class_<glm::dvec3>(m, "vec3");
     pybind11::class_<game_object, std::shared_ptr<game_object>>(m,
                                                                 "game_object");
-    pybind11::class_<component>(m, "component")
+    pybind11::class_<component, std::shared_ptr<component>>(m, "component")
         .def("transform", &component::get_transform);
-    pybind11::class_<python_component, python_component_trampoline>(
-        m, "python_component")
-        .def(pybind11::init<game_object&>())
+    pybind11::class_<python_component,
+                     python_component_trampoline,
+                     std::shared_ptr<python_component>>(m, "python_component")
+        .def(pybind11::init<std::string_view, game_object&>())
         .def("on_init", &python_component::on_init)
         .def("on_update", &python_component::on_update)
         .def("on_deinit", &python_component::on_deinit)
         .def("transform", &python_component::get_transform);
-    pybind11::class_<components::transform>(m, "transform")
+    pybind11::class_<components::transform,
+                     std::shared_ptr<components::transform>>(m, "transform")
         .def("rotate", &components::transform::rotate)
         .def("get_right", &components::transform::get_right);
 }
 
 namespace scripting
 {
-struct backend::impl::module_wrapper
-{
-    static python_component instantiate(std::string_view class_name,
-                                        game_object& gobj)
-    {
-        auto& modules = backend::_instance->_impl->_modules;
-
-        for (auto m : modules)
-        {
-            if (!m.attr("module_exports"))
-            {
-                continue;
-            }
-
-            for (auto c : m.attr("module_exports"))
-            {
-                auto type = c.cast<pybind11::class_<python_component>>();
-                auto cn = type.attr("name").cast<std::string>();
-                if (cn == class_name)
-                {
-                    return type(gobj).cast<python_component>();
-                }
-            }
-        }
-
-        throw std::runtime_error("class not found");
-    }
-};
-
 backend::impl::impl()
     : _interpreter(std::make_unique<pybind11::scoped_interpreter>())
 {
     initialize_project_module();
+    component_registry::register_component("python_component",
+                                           [](game_object& obj)
+    { return std::make_shared<python_component>("python_component", obj); });
 }
 
 backend::impl::~impl() = default;
@@ -136,9 +113,25 @@ std::shared_ptr<script> backend::impl::load(common::file& f)
         _modules.emplace_back(module);
         for (auto& it : module.attr("module_exports"))
         {
-            component_registry::register_component<python_component,
-                                                   module_wrapper::instantiate>(
-                it.attr("name").cast<std::string>());
+            auto cls = it.cast<pybind11::class_<python_component>>();
+            component_registry::register_component(
+                cls.attr("name").cast<std::string>(),
+                [ cls ](game_object& obj) -> std::shared_ptr<component>
+            {
+                try
+                {
+                    auto pyobj = cls(obj.shared_from_this());
+                    auto result =
+                        pyobj.cast<std::shared_ptr<python_component>>();
+                    result->_instance = pyobj;
+                    return result;
+                }
+                catch (std::exception& e)
+                {
+                    log()->error("Failed to create component: {}", e.what());
+                    return nullptr;
+                }
+            });
         }
         // if (auto cclass =
         // class_obj.cast<pybind11::class_<python_component>>();

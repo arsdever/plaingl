@@ -5,7 +5,6 @@
 #include "graphics/mesh.hpp"
 #include "project/components/mesh_filter.hpp"
 #include "project/components/transform.hpp"
-
 #include "project/project_manager.hpp"
 
 TEST(ProjectGameObject, add_and_get_componennt)
@@ -16,11 +15,11 @@ TEST(ProjectGameObject, add_and_get_componennt)
     obj->set_name("test");
 
     auto tr = obj->try_get<components::transform>();
-    EXPECT_EQ(tr, &obj->get_transform());
+    EXPECT_EQ(tr, obj->get_transform().shared_from_this());
 
     auto& mf = obj->add<components::mesh_filter>();
 
-    EXPECT_EQ(obj->try_get<components::mesh_filter>(), &mf);
+    EXPECT_EQ(obj->try_get<components::mesh_filter>(), mf.shared_from_this());
     mesh* m = (mesh*)(5000);
     mf.set_mesh(m);
 

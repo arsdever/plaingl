@@ -24,7 +24,7 @@ template <>
 void mesh_filter::serialize<json_serializer>(json_serializer& s)
 {
     s.add_component(nlohmann::json {
-        { "type", type_id<mesh_filter>() },
+        { "type", mesh_filter::type_name },
         { "is_enabled", is_enabled() },
     });
 }

@@ -23,7 +23,7 @@ TEST(ProjectComponentManagement, add_component_same_as_get_component)
     auto& mf = obj->add("mesh_filter");
     auto mfptr = obj->try_get("mesh_filter");
 
-    EXPECT_EQ(&mf, mfptr);
+    EXPECT_EQ(mf.shared_from_this(), mfptr);
 }
 
 TEST(ProjectComponentManagement, add_component_same_as_get_component_2)

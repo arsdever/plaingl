@@ -120,7 +120,7 @@ void transform::rotate(const glm::dvec3& axis, double angle)
 template <>
 void transform::serialize<json_serializer>(json_serializer& s)
 {
-    s.add_component(nlohmann::json { { "type", type_id<transform>() },
+    s.add_component(nlohmann::json { { "type", transform::type_name },
                                      { "is_enabled", is_enabled() },
                                      { "transform",
                                        {

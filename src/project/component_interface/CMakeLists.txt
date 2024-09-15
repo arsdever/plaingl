@@ -15,10 +15,7 @@ target_include_directories(
   PRIVATE
     $<TARGET_PROPERTY:${PROJECT}::components,INTERFACE_INCLUDE_DIRECTORIES>)
 
-target_link_libraries(
-  ${PROJECT}_component_interface
-  PUBLIC ${PROJECT}::common
-  PUBLIC EnTT::EnTT)
+target_link_libraries(${PROJECT}_component_interface PUBLIC ${PROJECT}::common)
 
 target_precompile_headers(${PROJECT}_component_interface REUSE_FROM
                           ${PROJECT}::common)

@@ -1,6 +1,5 @@
 #include <string>
 
-#include <entt/entt.hpp>
 
 #include "object.hpp"
 

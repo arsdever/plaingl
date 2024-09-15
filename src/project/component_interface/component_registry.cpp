@@ -1,12 +1,9 @@
 #include "project/component_interface/component_registry.hpp"
 
-#include "project/project_manager.hpp"
-#include "project/serializer_json.hpp"
+std::unordered_map<std::string,
+                   std::function<std::shared_ptr<component>(game_object&)>,
+                   string_hash,
+                   std::equal_to<>>
+    component_registry::_type_map;
 
-// void component_registry::register_components()
-// {
-//     for (auto& [ name, func ] : _declaration_table)
-//         func();
-// }
-
-entt::meta_ctx component_registry::ctx;
+std::unordered_map<size_t, metatype> component_registry::_types;

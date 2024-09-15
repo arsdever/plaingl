@@ -1,11 +1,12 @@
 #pragma once
 
+#include "common/utils.hpp"
 #include "project/uid.hpp"
 
 /**
  * @brief Generic high level object representation
  */
-class object
+class object : public enable_shared_from_base<object>
 {
 public:
     virtual ~object();

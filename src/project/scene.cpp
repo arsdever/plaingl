@@ -4,6 +4,7 @@
 
 #include "common/file.hpp"
 #include "common/logging.hpp"
+#include "project/component_interface/component.hpp"
 #include "project/game_object.hpp"
 #include "project/project_manager.hpp"
 

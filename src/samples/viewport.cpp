@@ -111,8 +111,9 @@ void init_scene()
     basic_mat->set_property_value("albedo_color", 1.0f, 0.8f, 0.2f);
     basic_mat->set_property_value("normal_texture_strength", 0.0f);
 
-    components::camera::get_active()->get_transform().set_position({ 0, 0, 3 });
-    components::camera::get_active()->get_transform().set_rotation(
+    components::camera::get_active()->get_transform()->set_position(
+        { 0, 0, 3 });
+    components::camera::get_active()->get_transform()->set_rotation(
         glm::quatLookAt(glm::vec3 { 0.0f, 0.0f, 1.0f },
                         glm::vec3 {
                             0.0f,

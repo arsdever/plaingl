@@ -30,7 +30,7 @@ template <>
 void mesh_renderer::serialize<json_serializer>(json_serializer& s)
 {
     s.add_component(nlohmann::json {
-        { "type", type_id<mesh_renderer>() },
+        { "type", mesh_renderer::type_name },
         { "is_enabled", is_enabled() },
     });
 }

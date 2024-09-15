@@ -31,8 +31,7 @@ add_library(${PROJECT}::project ALIAS ${PROJECT}_project)
 target_link_libraries(
   ${PROJECT}_project
   PUBLIC ${PROJECT}::common
-  PRIVATE ${PROJECT}::components
-  PRIVATE EnTT::EnTT)
+  PRIVATE ${PROJECT}::components)
 target_include_directories(${PROJECT}_project PUBLIC ${PROJECT_SRC_DIR})
 
 add_subdirectory(component_interface)
