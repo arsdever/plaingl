@@ -93,3 +93,18 @@ struct variant_index
 
 template <typename V, typename T>
 constexpr int variant_index_v = variant_index<V, T>::value;
+
+template <class Base>
+class enable_shared_from_base : public std::enable_shared_from_this<Base>
+{
+public:
+    template <class T = Base>
+    std::shared_ptr<T> shared_from_this()
+    {
+        if constexpr (std::is_same_v<T, Base>)
+        {
+            return std::enable_shared_from_this<Base>::shared_from_this();
+        }
+        return std::static_pointer_cast<T>(shared_from_this<Base>());
+    }
+};

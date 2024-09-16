@@ -2,7 +2,7 @@
 
 #include "project/components/mesh_renderer.hpp"
 
-#include "project/memory_manager.hpp"
+#include "project/project_manager.hpp"
 #include "project/serialization_utilities.hpp"
 #include "project/serializer.hpp"
 #include "project/serializer_json.hpp"
@@ -30,7 +30,7 @@ template <>
 void mesh_renderer::serialize<json_serializer>(json_serializer& s)
 {
     s.add_component(nlohmann::json {
-        { "type", type_id<mesh_renderer>() },
+        { "type", mesh_renderer::type_name },
         { "is_enabled", is_enabled() },
     });
 }

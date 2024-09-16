@@ -2,7 +2,7 @@
 
 #include "project/components/transform.hpp"
 
-#include "project/memory_manager.hpp"
+#include "project/project_manager.hpp"
 #include "project/serialization_utilities.hpp"
 #include "project/serializer.hpp"
 #include "project/serializer_json.hpp"
@@ -110,10 +110,17 @@ glm::dvec3 transform::get_up() const
 
 bool transform::is_updated() const { return _updated; }
 
+void transform::rotate(const glm::dvec3& axis, double angle)
+{
+    _rotation = glm::angleAxis(angle, axis) * _rotation;
+    _dirty = true;
+    _updated = true;
+}
+
 template <>
 void transform::serialize<json_serializer>(json_serializer& s)
 {
-    s.add_component(nlohmann::json { { "type", type_id<transform>() },
+    s.add_component(nlohmann::json { { "type", transform::type_name },
                                      { "is_enabled", is_enabled() },
                                      { "transform",
                                        {

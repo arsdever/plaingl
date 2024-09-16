@@ -8,6 +8,7 @@ add_subdirectory(core)
 add_subdirectory(graphics)
 add_subdirectory(project)
 add_subdirectory(tools)
+add_subdirectory(scripting)
 
 add_library(${PROJECT}_lib INTERFACE)
 add_library(${PROJECT}::lib ALIAS ${PROJECT}_lib)

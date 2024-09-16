@@ -11,10 +11,15 @@ inline logger log() { return get_logger("input_system"); }
 
 namespace core
 {
-
-void input_system::set_mouse_position(glm::ivec2 pos) { _mouse_position = pos; }
+void input_system::set_mouse_position(glm::ivec2 pos)
+{
+    _mouse_delta = pos - _mouse_position;
+    _mouse_position = pos;
+}
 
 glm::ivec2 input_system::get_mouse_position() { return _mouse_position; }
+
+glm::ivec2 input_system::get_mouse_delta() { return _mouse_delta; }
 
 input_system::button_state
 input_system::get_mouse_button(mouse_button button_code)
@@ -55,5 +60,5 @@ std::unordered_map<input_system::mouse_button, input_system::button_state>
     input_system::_mouse_buttons_state;
 event<void(int)> input_system::on_keypress;
 glm::ivec2 input_system::_mouse_position;
-
+glm::ivec2 input_system::_mouse_delta;
 } // namespace core

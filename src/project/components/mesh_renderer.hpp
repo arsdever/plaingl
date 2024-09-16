@@ -5,13 +5,15 @@
 #include "graphics/graphics_fwd.hpp"
 #include "project/project_fwd.hpp"
 
-#include "project/component.hpp"
+#include "project/component_interface/component.hpp"
 
 namespace components
 {
 class mesh_renderer : public component
 {
 public:
+    using base = component;
+
     mesh_renderer(game_object& obj);
 
     static constexpr std::string_view type_name = "mesh_renderer";

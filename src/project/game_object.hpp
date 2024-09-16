@@ -6,9 +6,7 @@
 
 #include "project/object.hpp"
 
-class game_object
-    : public object
-    , public std::enable_shared_from_this<game_object>
+class game_object : public object
 {
 public:
     static std::shared_ptr<game_object> create();
@@ -35,7 +33,7 @@ public:
     }
 
     component& get(std::string_view class_name) const;
-    component* try_get(std::string_view class_name) const;
+    std::shared_ptr<component> try_get(std::string_view class_name) const;
 
     template <typename T>
         requires(std::is_base_of<component, T>::value)
@@ -46,9 +44,9 @@ public:
 
     template <typename T>
         requires(std::is_base_of<component, T>::value)
-    T* try_get() const
+    std::shared_ptr<T> try_get() const
     {
-        return static_cast<T*>(try_get(T::type_name));
+        return std::static_pointer_cast<T>(try_get(T::type_name));
     }
 
     void visit_components(std::function<bool(component&)> visitor) const;
@@ -65,7 +63,7 @@ protected:
     void set_parent(std::shared_ptr<game_object> parent);
 
 private:
-    friend class memory_manager;
+    friend class project_manager;
     game_object();
 
 private:

@@ -2,7 +2,6 @@
 
 #include <format>
 
-#include <entt/entt.hpp>
 #include <nlohmann/json.hpp>
 
 #include "project/serializer.hpp"

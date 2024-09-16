@@ -5,6 +5,7 @@
 #include "asset_management/asset_importer.hpp"
 #include "asset_management/importers/material_importer.hpp"
 #include "asset_management/importers/model_importer.hpp"
+#include "asset_management/importers/script_importer.hpp"
 #include "asset_management/importers/shader_importer.hpp"
 #include "asset_management/importers/texture_importer.hpp"
 #include "common/directory.hpp"
@@ -39,6 +40,8 @@ void asset_manager::initialize(std::string_view resource_path)
                       std::make_shared<texture_importer>());
     register_importer(material_importer::extensions,
                       std::make_shared<material_importer>());
+    register_importer(script_importer::extensions,
+                      std::make_shared<script_importer>());
     register_importer(shader_importer::extensions,
                       std::make_shared<shader_importer>());
     register_importer(model_importer::extensions,
@@ -97,20 +100,29 @@ void asset_manager::scan_directory()
 
 void asset_manager::setup_directory_watch()
 {
-    _impl->directory_watcher = common::file_watcher(
-        _impl->project_path,
-        [](std::string_view path, common::file_change_type change)
+    try
     {
-        switch (change)
+        _impl->directory_watcher = common::file_watcher(
+            _impl->project_path,
+            [](std::string_view path, common::file_change_type change)
         {
-        case common::file_change_type::created:
-            _impl->_importer.import(path, _impl->_cache);
-            break;
-        // case common::file_change_type::modified: reload_asset(path); break;
-        // case common::file_change_type::removed: unload_asset(path); break;
-        default: break;
-        }
-    });
+            switch (change)
+            {
+            case common::file_change_type::created:
+                _impl->_importer.import(path, _impl->_cache);
+                break;
+            // case common::file_change_type::modified: reload_asset(path);
+            // break; case common::file_change_type::removed:
+            // unload_asset(path); break;
+            default: break;
+            }
+        });
+    }
+    catch (std::exception& e)
+    {
+        log()->error("Failed to setup directory watcher: {}", e.what());
+        return;
+    }
 }
 
 void asset_manager::register_importer(

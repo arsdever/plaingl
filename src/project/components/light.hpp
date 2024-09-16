@@ -2,7 +2,7 @@
 
 #include <nlohmann/json_fwd.hpp>
 
-#include "project/component.hpp"
+#include "project/component_interface/component.hpp"
 
 namespace components
 {
@@ -18,6 +18,8 @@ public:
     };
 
 public:
+    using base = component;
+
     light(game_object& obj);
     ~light();
 

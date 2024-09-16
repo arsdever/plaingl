@@ -1,13 +1,16 @@
 #pragma once
 
-#include "common/file.hpp"
 #include "graphics/graphics_fwd.hpp"
+#include "scripting/scripting_fwd.hpp"
+
+#include "common/file.hpp"
 
 namespace assets
 {
 struct asset
 {
-    using data_type = std::variant<std::shared_ptr<mesh>,
+    using data_type = std::variant<std::shared_ptr<scripting::script>,
+                                   std::shared_ptr<mesh>,
                                    std::shared_ptr<graphics::shader>,
                                    std::shared_ptr<graphics::material>,
                                    std::shared_ptr<texture>>;

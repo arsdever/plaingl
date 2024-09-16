@@ -12,12 +12,12 @@
 #include "graphics/material.hpp"
 #include "graphics/texture.hpp"
 #include "project/components/camera.hpp"
-#include "project/components/component_registry.hpp"
 #include "project/components/light.hpp"
 #include "project/components/mesh_filter.hpp"
 #include "project/components/mesh_renderer.hpp"
 #include "project/components/transform.hpp"
 #include "project/game_object.hpp"
+#include "project/project_manager.hpp"
 #include "project/scene.hpp"
 
 namespace
@@ -29,7 +29,7 @@ void init_scene();
 
 int main(int argc, char** argv)
 {
-    component_registry::register_components();
+    project_manager::initialize();
     glfwInit();
     std::vector<std::shared_ptr<core::window>> windows;
     auto exp_window = std::make_shared<core::window>();
@@ -111,8 +111,9 @@ void init_scene()
     basic_mat->set_property_value("albedo_color", 1.0f, 0.8f, 0.2f);
     basic_mat->set_property_value("normal_texture_strength", 0.0f);
 
-    components::camera::get_active()->get_transform().set_position({ 0, 0, 3 });
-    components::camera::get_active()->get_transform().set_rotation(
+    components::camera::get_active()->get_transform()->set_position(
+        { 0, 0, 3 });
+    components::camera::get_active()->get_transform()->set_rotation(
         glm::quatLookAt(glm::vec3 { 0.0f, 0.0f, 1.0f },
                         glm::vec3 {
                             0.0f,

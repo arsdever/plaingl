@@ -20,7 +20,6 @@ private:
     void update_windows();
     void process_console_commands();
 
-    void register_components();
     void load_assets();
 
     void render_game();

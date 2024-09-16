@@ -4,8 +4,9 @@
 
 #include "common/file.hpp"
 #include "common/logging.hpp"
+#include "project/component_interface/component.hpp"
 #include "project/game_object.hpp"
-#include "project/memory_manager.hpp"
+#include "project/project_manager.hpp"
 
 namespace
 {
@@ -47,7 +48,7 @@ std::shared_ptr<scene> scene::create()
 void scene::save(std::string_view path)
 {
     std::ofstream file { std::string(path) };
-    file << memory_manager::serialize().dump() << std::endl;
+    file << project_manager::serialize().dump() << std::endl;
 }
 
 std::shared_ptr<scene> scene::load(std::string_view path)
@@ -63,7 +64,7 @@ std::shared_ptr<scene> scene::load(std::string_view path)
         nlohmann::json data =
             nlohmann::json::parse(common::file::read_all(path));
         _active_scene = std::shared_ptr<scene>(new scene());
-        memory_manager::deserialize(data);
+        project_manager::deserialize(data);
     }
     catch (nlohmann::json::exception& ex)
     {

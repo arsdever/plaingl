@@ -39,7 +39,7 @@ template <>
 void light::serialize(json_serializer& j)
 {
     j.add_component(nlohmann::json {
-        { "type", type_id<light>() },
+        { "type", light::type_name },
         { "is_enabled", is_enabled() },
     });
 }
