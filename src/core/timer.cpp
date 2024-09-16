@@ -60,6 +60,7 @@ void timer::single_shot(std::chrono::duration<double> delay,
     timer t;
     t.tick += callback;
     t.start(delay);
+    t.wait();
 }
 
 bool timer::run_and_wait(std::chrono::duration<double> sleep_time)

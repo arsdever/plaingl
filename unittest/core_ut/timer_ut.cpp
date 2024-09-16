@@ -39,3 +39,16 @@ TEST(Timer, start_and_execute_iterations)
     EXPECT_LT(std::abs((duration - std::chrono::milliseconds(305)).count()),
               10);
 }
+
+TEST(Timer, single_shot)
+{
+    std::chrono::time_point now = std::chrono::steady_clock::now();
+    std::atomic_int value = 0;
+    core::timer::single_shot(std::chrono::milliseconds(100),
+                             [ &value ]() { ++value; });
+    EXPECT_EQ(1, value.load());
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(
+        std::chrono::steady_clock::now() - now);
+    EXPECT_LT(std::abs((duration - std::chrono::milliseconds(100)).count()),
+              10);
+}
