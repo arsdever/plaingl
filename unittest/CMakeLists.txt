@@ -24,5 +24,6 @@ macro(add_test_subdirectory test_folder_name)
 endmacro()
 
 add_test_subdirectory(common)
+add_test_subdirectory(core)
 add_test_subdirectory(console)
 add_test_subdirectory(project)
