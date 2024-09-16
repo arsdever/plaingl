@@ -15,6 +15,9 @@ public:
     void set_not_repeating();
     void wait();
     void cancel();
+    void reset();
+    bool is_running();
+    bool is_cancelled();
 
     static void single_shot(std::chrono::duration<double> delay,
                             std::function<void()> callback);
@@ -33,5 +36,6 @@ private:
     std::condition_variable _timer_stopper;
     std::mutex _mutex;
     std::atomic_bool _cancelled { false };
+    std::atomic_bool _is_running { false };
 };
 } // namespace core

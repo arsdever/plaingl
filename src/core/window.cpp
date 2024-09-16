@@ -10,6 +10,7 @@
 #include "common/logging.hpp"
 #include "core//input_system.hpp"
 #include "core/settings.hpp"
+#include "core/timer.hpp"
 #include "core/window_events.hpp"
 #include "graphics/graphics.hpp"
 
@@ -52,8 +53,7 @@ struct window::window_private_data
         mouse_event::modifiers _mods;
         glm::vec2 _position;
         glm::vec2 _press_started_position;
-        std::chrono::steady_clock::time_point _last_click_time;
-        std::chrono::steady_clock::time_point _last_double_click_time;
+        core::timer _double_click_timer;
         bool _is_drag;
     } _mouse_state;
 };
@@ -357,6 +357,20 @@ void window::setup_mouse_button_callback()
                             _this->_p->_mouse_state._mods,
                             _this));
 
+            auto& dct = _this->_p->_mouse_state._double_click_timer;
+            if (dct.is_running())
+            {
+                events->mouse_double_click(
+                    mouse_event(window_event::type::MouseButtonDoubleClick,
+                                _this->_p->_mouse_state._position,
+                                _this->_p->_mouse_state._position,
+                                _this->_p->_mouse_state._position,
+                                button,
+                                _this->_p->_mouse_state._buttons,
+                                _this->_p->_mouse_state._mods,
+                                _this));
+            }
+
             if (_this->get_can_grab())
             {
                 _this->grab_mouse();
@@ -383,77 +397,29 @@ void window::setup_mouse_button_callback()
                 return;
             }
 
-            auto double_dur = std::chrono::steady_clock::now() -
-                              _this->_p->_mouse_state._last_click_time;
-            auto triple_dur = std::chrono::steady_clock::now() -
-                              _this->_p->_mouse_state._last_double_click_time;
+            events->mouse_click(
+                mouse_event(window_event::type::MouseButtonClick,
+                            _this->_p->_mouse_state._position,
+                            _this->_p->_mouse_state._position,
+                            _this->_p->_mouse_state._position,
+                            button,
+                            _this->_p->_mouse_state._buttons,
+                            _this->_p->_mouse_state._mods,
+                            _this));
+            auto& dct = _this->_p->_mouse_state._double_click_timer;
 
-            int clicks = 0;
-
-            if (!_this->_p->_mouse_state._is_drag)
+            if (!dct.is_running())
             {
-                clicks = 1;
-                _this->_p->_mouse_state._last_click_time =
-                    std::chrono::steady_clock::now();
+                dct.wait();
+                dct.reset();
+                dct.start(MAX_CLICK_REACTION_TIME);
             }
-
-            if (double_dur < MAX_CLICK_REACTION_TIME)
-            {
-                clicks = 2;
-                _this->_p->_mouse_state._last_double_click_time =
-                    std::chrono::steady_clock::now();
-            }
-
-            if (triple_dur < MAX_CLICK_REACTION_TIME)
-            {
-                clicks = 3;
-            }
-
-            event<void(mouse_event)>* f = nullptr;
-
-            window_event::type event_type =
-                window_event::type::MouseButtonClick;
-
-            switch (clicks)
-            {
-            case 1:
-            {
-                event_type = window_event::type::MouseButtonClick;
-                f = &events->mouse_click;
-                break;
-            }
-            case 2:
-            {
-                event_type = window_event::type::MouseButtonDoubleClick;
-                f = &events->mouse_double_click;
-                break;
-            }
-            case 3:
-            {
-                event_type = window_event::type::MouseButtonTripleClick;
-                f = &events->mouse_triple_click;
-                break;
-            }
-            default:
-            {
-                break;
-            }
-            }
-
-            (*f)(mouse_event(event_type,
-                             _this->_p->_mouse_state._position,
-                             _this->_p->_mouse_state._position,
-                             _this->_p->_mouse_state._position,
-                             button,
-                             _this->_p->_mouse_state._buttons,
-                             _this->_p->_mouse_state._mods,
-                             _this));
 
             if (_this->get_is_input_source())
             {
                 input_system::set_mouse_button(
                     input_system::mouse_button::MouseButton0,
-                    (_this->_p->_mouse_state._buttons ^= (1 << 0))
+                    (_this->_p->_mouse_state._buttons & (1 << 0))
                         ? input_system::button_state::Press
                         : input_system::button_state::Release);
             }

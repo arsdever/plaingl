@@ -19,6 +19,7 @@ void timer::start(std::chrono::duration<double> delay)
     _thread = std::thread(
         [ this ]()
     {
+        _is_running.store(true);
         if (run_and_wait(_delay))
         {
             tick();
@@ -30,6 +31,7 @@ void timer::start(std::chrono::duration<double> delay)
                 }
             }
         }
+        _is_running.store(false);
     });
 }
 
@@ -54,6 +56,18 @@ void timer::cancel()
     _timer_stopper.notify_all();
 }
 
+void timer::reset()
+{
+    if (is_running())
+        return;
+
+    _cancelled.store(false);
+}
+
+bool timer::is_running() { return _is_running.load(); }
+
+bool timer::is_cancelled() { return _cancelled.load(); }
+
 void timer::single_shot(std::chrono::duration<double> delay,
                         std::function<void()> callback)
 {
@@ -71,7 +85,7 @@ bool timer::run_and_wait(std::chrono::duration<double> sleep_time)
                                           sleep_time,
                                           [ this, sleep_time ]()
     {
-        return _cancelled.load() ||
+        return is_cancelled() ||
                std::chrono::steady_clock::now() - _start_time >= sleep_time;
     });
     return !_cancelled.load();
