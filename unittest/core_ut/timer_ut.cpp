@@ -52,3 +52,8 @@ TEST(Timer, single_shot)
     EXPECT_LT(std::abs((duration - std::chrono::milliseconds(100)).count()),
               10);
 }
+
+TEST(Timer, multiple_starts)
+{
+    // TODO
+}
