@@ -6,7 +6,6 @@
 
 namespace core
 {
-
 class input_system
 {
 public:
@@ -37,6 +36,7 @@ public:
 
     static void set_mouse_position(glm::ivec2 pos);
     static glm::ivec2 get_mouse_position();
+    static glm::ivec2 get_mouse_delta();
     static button_state get_mouse_button(mouse_button button_code);
     static void set_mouse_button(mouse_button button_code, button_state state);
 
@@ -49,6 +49,6 @@ private:
     static std::unordered_set<int> _pressed_keys;
     static std::unordered_map<mouse_button, button_state> _mouse_buttons_state;
     static glm::ivec2 _mouse_position;
+    static glm::ivec2 _mouse_delta;
 };
-
 } // namespace core

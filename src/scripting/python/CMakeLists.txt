@@ -1,6 +1,8 @@
 find_package(pybind11 CONFIG REQUIRED)
 
-add_library(${PROJECT}_scripting_python python_backend.hpp python_backend.cpp)
+add_library(
+  ${PROJECT}_scripting_python STATIC python_backend.hpp python_backend.cpp
+                                     python_component.cpp python_component.hpp)
 add_library(${PROJECT}::scripting::python ALIAS ${PROJECT}_scripting_python)
 
 target_link_libraries(${PROJECT}_scripting_python PUBLIC ${PROJECT}::project
