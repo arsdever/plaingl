@@ -7,9 +7,11 @@ add_library(
   game_clock.cpp
   input_system.hpp
   input_system.cpp
+  library.hpp
   settings.hpp
   settings.cpp
-  library.hpp
+  timer.hpp
+  timer.cpp
   viewport.hpp
   viewport.cpp
   window_events.hpp
