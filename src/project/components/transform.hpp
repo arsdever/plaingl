@@ -23,6 +23,7 @@ public:
     transform(game_object& obj);
 
     void set_position(const glm::dvec3& position);
+    void set_rotation(const glm::dvec3& euler);
     void set_rotation(const glm::dquat& rotation);
     void set_scale(const glm::dvec3& scale);
 

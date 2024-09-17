@@ -30,6 +30,13 @@ void transform::set_rotation(const glm::dquat& rotation)
     _updated = true;
 }
 
+void transform::set_rotation(const glm::dvec3& rotation)
+{
+    _rotation = glm::dquat(rotation);
+    _dirty = true;
+    _updated = true;
+}
+
 void transform::set_scale(const glm::dvec3& scale)
 {
     _scale = scale;

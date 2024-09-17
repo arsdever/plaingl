@@ -1,4 +1,5 @@
 #include <pybind11/embed.h>
+#include <pybind11/operators.h>
 
 #include "core/input_system.hpp"
 #include "project/components/transform.hpp"
@@ -6,16 +7,26 @@
 
 PYBIND11_EMBEDDED_MODULE(gamify, m)
 {
-    pybind11::class_<glm::ivec2>(m, "vec2")
+    pybind11::class_<glm::ivec2>(m, "ivec2")
         .def(pybind11::init<int, int>())
+        .def(pybind11::init<const glm::dvec2&>())
+        .def(pybind11::init<const glm::vec2&>())
         .def_readwrite("x", &glm::ivec2::x)
         .def_readwrite("y", &glm::ivec2::y);
+
+    pybind11::class_<glm::dvec2>(m, "vec2")
+        .def(pybind11::init<double, double>())
+        .def(pybind11::init<const glm::ivec2&>())
+        .def(pybind11::init<const glm::vec2&>())
+        .def_readwrite("x", &glm::dvec2::x)
+        .def_readwrite("y", &glm::dvec2::y);
 
     pybind11::class_<glm::dvec3>(m, "vec3")
         .def(pybind11::init<double, double, double>())
         .def_readwrite("x", &glm::dvec3::x)
         .def_readwrite("y", &glm::dvec3::y)
-        .def_readwrite("z", &glm::dvec3::z);
+        .def_readwrite("z", &glm::dvec3::z)
+        .def(pybind11::self * double());
 
     pybind11::class_<glm::dquat>(m, "quat")
         .def(pybind11::init<double, double, double, double>())
@@ -38,8 +49,17 @@ PYBIND11_EMBEDDED_MODULE(gamify, m)
 
     pybind11::class_<components::transform,
                      std::shared_ptr<components::transform>>(m, "transform")
+        .def("set_rotation",
+             pybind11::overload_cast<const glm::dquat&>(
+                 &components::transform::set_rotation))
+        .def("set_rotation",
+             pybind11::overload_cast<const glm::dvec3&>(
+                 &components::transform::set_rotation))
+        .def("set_position", &components::transform::set_position)
         .def("rotate", &components::transform::rotate)
-        .def("get_right", &components::transform::get_right);
+        .def("right", &components::transform::get_right)
+        .def("forward", &components::transform::get_forward)
+        .def("up", &components::transform::get_up);
 
     auto is =
         pybind11::class_<core::input_system>(m, "input_system")
