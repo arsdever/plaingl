@@ -217,6 +217,11 @@ void window::update()
 
     get_events()->render(render_event(window_event::type::Render, this));
 
+    if (get_is_input_source())
+    {
+        // reset the mouse delta
+        input_system::set_mouse_position(input_system::get_mouse_position());
+    }
     glfwSwapBuffers(_p->_glfw_window_handle);
     glfwPollEvents();
 }
@@ -341,6 +346,25 @@ void window::setup_mouse_button_callback()
         [](GLFWwindow* wnd, int button, int action, int mods)
     {
         auto _this = static_cast<window*>(glfwGetWindowUserPointer(wnd));
+        struct mouse_button_state_updater
+        {
+            ~mouse_button_state_updater()
+            {
+                if (wnd->get_is_input_source())
+                {
+                    for (auto btn = 0; btn < 9; ++btn)
+                    {
+                        input_system::set_mouse_button(
+                            static_cast<input_system::mouse_button>(
+                                input_system::mouse_button::MouseButton0 + btn),
+                            (wnd->_p->_mouse_state._buttons & (1 << btn))
+                                ? input_system::button_state::Press
+                                : input_system::button_state::Release);
+                    }
+                }
+            }
+            window* wnd;
+        } update_mouse_state { _this };
         std::shared_ptr<window_events> events = _this->get_events();
         if (action == GLFW_PRESS)
         {
@@ -413,15 +437,6 @@ void window::setup_mouse_button_callback()
                 dct.wait();
                 dct.reset();
                 dct.start(MAX_CLICK_REACTION_TIME);
-            }
-
-            if (_this->get_is_input_source())
-            {
-                input_system::set_mouse_button(
-                    input_system::mouse_button::MouseButton0,
-                    (_this->_p->_mouse_state._buttons & (1 << 0))
-                        ? input_system::button_state::Press
-                        : input_system::button_state::Release);
             }
         }
     });
