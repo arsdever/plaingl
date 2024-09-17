@@ -346,31 +346,26 @@ void window::setup_mouse_button_callback()
         [](GLFWwindow* wnd, int button, int action, int mods)
     {
         auto _this = static_cast<window*>(glfwGetWindowUserPointer(wnd));
-        struct mouse_button_state_updater
+        _this->_p->_mouse_state._buttons ^= (1 << button);
+        if (_this->get_is_input_source())
         {
-            ~mouse_button_state_updater()
+            for (auto btn = 0; btn < 9; ++btn)
             {
-                if (wnd->get_is_input_source())
-                {
-                    for (auto btn = 0; btn < 9; ++btn)
-                    {
-                        input_system::set_mouse_button(
-                            static_cast<input_system::mouse_button>(
-                                input_system::mouse_button::MouseButton0 + btn),
-                            (wnd->_p->_mouse_state._buttons & (1 << btn))
-                                ? input_system::button_state::Press
-                                : input_system::button_state::Release);
-                    }
-                }
+                input_system::set_modifiers(
+                    static_cast<input_system::modifiers>(mods));
+                input_system::set_mouse_button(
+                    static_cast<input_system::mouse_button>(
+                        input_system::mouse_button::MouseButton0 + btn),
+                    (_this->_p->_mouse_state._buttons & (1 << btn))
+                        ? input_system::button_state::Press
+                        : input_system::button_state::Release);
             }
-            window* wnd;
-        } update_mouse_state { _this };
+        }
         std::shared_ptr<window_events> events = _this->get_events();
         if (action == GLFW_PRESS)
         {
             _this->_p->_mouse_state._press_started_position =
                 _this->_p->_mouse_state._position;
-            _this->_p->_mouse_state._buttons |= (1 << button);
             events->mouse_press(
                 mouse_event(window_event::type::MouseButtonPress,
                             _this->_p->_mouse_state._position,
@@ -400,10 +395,8 @@ void window::setup_mouse_button_callback()
                 _this->grab_mouse();
             }
         }
-        else if (_this->_p->_mouse_state._buttons & (1 << button))
+        else if (!(_this->_p->_mouse_state._buttons & (1 << button)))
         {
-            _this->_p->_mouse_state._buttons ^= (1 << button);
-
             events->mouse_release(
                 mouse_event(window_event::type::MouseButtonRelease,
                             _this->_p->_mouse_state._position,
@@ -514,6 +507,7 @@ void window::configure_input_system()
         if (_this->get_is_input_source())
         {
             input_system::set_key_down(key, action != GLFW_RELEASE);
+            input_system::set_modifiers(input_system::modifiers(mods));
         }
     });
 }

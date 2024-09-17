@@ -108,11 +108,36 @@ void console::input(int ch)
             if (_impl->input.size() > 0)
                 _impl->input.pop_back();
         }
-        else if (ch < 256 && (std::isalnum(ch) || std::isspace(ch)))
+        else if (ch < 256)
         {
-            _impl->input += std::tolower(ch);
+            auto mods = core::input_system::get_modifiers();
+            bool upper = (mods & core::input_system::modifiers::Shift) ^
+                         (mods & core::input_system::modifiers::CapsLock);
+            if (isalpha(ch))
+            {
+                ch = upper ? std::toupper(ch) : std::tolower(ch);
+            }
+            else if (upper)
+            {
+                static const std::unordered_map<int, int> symbol_alter {
+                    { '-', '_' },  { '=', '+' }, { '[', '{' },  { ']', '}' },
+                    { '\\', '|' }, { ';', ':' }, { '\'', '"' }, { '`', '~' },
+                    { ',', '<' },  { '.', '>' }, { '/', '?' },  { ' ', ' ' },
+                    { '1', '!' },  { '2', '@' }, { '3', '#' },  { '4', '$' },
+                    { '5', '%' },  { '6', '^' }, { '7', '&' },  { '8', '*' },
+                    { '9', '(' },  { '0', ')' },
+                };
+
+                if (auto it = symbol_alter.find(ch); it != symbol_alter.end())
+                {
+                    ch = it->second;
+                }
+            }
+            _impl->input += ch;
         }
     }
+
+    log()->trace("Input: \"{}\"", _impl->input);
 }
 
 void console::input(std::string in)

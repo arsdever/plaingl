@@ -55,10 +55,15 @@ void input_system::set_key_down(int keycode, bool state)
     }
 }
 
+void input_system::set_modifiers(modifiers modifiers) { _modifiers = modifiers; }
+
+input_system::modifiers input_system::get_modifiers() { return _modifiers; }
+
 std::unordered_set<int> input_system::_pressed_keys;
 std::unordered_map<input_system::mouse_button, input_system::button_state>
     input_system::_mouse_buttons_state;
 event<void(int)> input_system::on_keypress;
 glm::ivec2 input_system::_mouse_position;
 glm::ivec2 input_system::_mouse_delta;
+input_system::modifiers input_system::_modifiers;
 } // namespace core

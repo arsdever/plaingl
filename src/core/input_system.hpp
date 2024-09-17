@@ -34,6 +34,17 @@ public:
         Release,
     };
 
+    enum modifiers
+    {
+        None = 0,
+        Shift = 1,
+        Control = 2,
+        Alt = 4,
+        Super = 8,
+        CapsLock = 16,
+        NumLock = 32,
+    };
+
     static void set_mouse_position(glm::ivec2 pos);
     static glm::ivec2 get_mouse_position();
     static glm::ivec2 get_mouse_delta();
@@ -43,6 +54,9 @@ public:
     static bool is_key_down(int keycode);
     static void set_key_down(int keycode, bool state = true);
 
+    static void set_modifiers(modifiers modifiers);
+    static modifiers get_modifiers();
+
     static event<void(int)> on_keypress;
 
 private:
@@ -50,5 +64,6 @@ private:
     static std::unordered_map<mouse_button, button_state> _mouse_buttons_state;
     static glm::ivec2 _mouse_position;
     static glm::ivec2 _mouse_delta;
+    static modifiers _modifiers;
 };
 } // namespace core
