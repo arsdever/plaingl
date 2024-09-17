@@ -68,7 +68,6 @@ std::shared_ptr<scene> cmd_load_scene::default_scene()
     go->add<components::mesh_filter>().set_mesh(m.get());
     go->add<components::mesh_renderer>().set_material(mat);
     go->set_name("suzanne");
-    go->add("camera_movement");
     s->add_root_object(go);
 
     go = game_object::create();
@@ -92,6 +91,7 @@ std::shared_ptr<scene> cmd_load_scene::default_scene()
     camera.set_fov(.6);
     camera.set_orthogonal(false);
     camera.set_background_color({ 0.1, 0.1, 0.1, 1.0 });
+    go->add("orbit_camera_movement");
     go->set_name("camera");
     s->add_root_object(go);
     return s;
