@@ -3,9 +3,12 @@
 #include <glm/fwd.hpp>
 
 #include "common/event.hpp"
+#include "core/inputs/gamepad.hpp"
 
 namespace core
 {
+class binding;
+
 class input_system
 {
 public:
@@ -45,6 +48,36 @@ public:
         NumLock = 32,
     };
 
+    enum joystick_input
+    {
+        l1,
+        l2,
+        r1,
+        r2,
+        arrow_up,
+        arrow_down,
+        arrow_left,
+        arrow_right,
+        left_analog_up,
+        left_analog_down,
+        left_analog_left,
+        left_analog_right,
+        right_analog_up,
+        right_analog_down,
+        right_analog_left,
+        right_analog_right,
+        share,
+        options,
+        home,
+        trackpad,
+        x,
+        circle,
+        square,
+        triangle
+    };
+
+    static void update_device_list();
+
     static void set_mouse_position(glm::ivec2 pos);
     static glm::ivec2 get_mouse_position();
     static glm::ivec2 get_mouse_delta();
@@ -57,6 +90,9 @@ public:
     static void set_modifiers(modifiers modifiers);
     static modifiers get_modifiers();
 
+    static std::shared_ptr<binding> setup_binding(std::string path,
+                                                  std::string name);
+
     static event<void(int)> on_keypress;
 
 private:
@@ -65,5 +101,7 @@ private:
     static glm::ivec2 _mouse_position;
     static glm::ivec2 _mouse_delta;
     static modifiers _modifiers;
+    static std::vector<inputs::gamepad> _gamepads;
+    static std::unordered_map<std::string, std::weak_ptr<binding>> _mapping;
 };
 } // namespace core
