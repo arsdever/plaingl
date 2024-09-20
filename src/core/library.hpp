@@ -18,10 +18,10 @@ public:
     void release();
 
     template <typename T>
-    deduce_function_type<T>::type resolve(std::string_view name)
+    function_info<T>::type resolve(std::string_view name)
     {
         auto* const proc_address = resolve(name);
-        return reinterpret_cast<deduce_function_type<T>::type>(proc_address);
+        return reinterpret_cast<function_info<T>::type>(proc_address);
     }
 
 private:
