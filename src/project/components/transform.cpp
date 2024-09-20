@@ -117,6 +117,13 @@ glm::dvec3 transform::get_up() const
 
 bool transform::is_updated() const { return _updated; }
 
+void transform::move(glm::dvec3 offset)
+{
+    _position += offset;
+    _dirty = true;
+    _updated = true;
+}
+
 void transform::rotate(const glm::dvec3& axis, double angle)
 {
     _rotation = glm::angleAxis(angle, axis) * _rotation;

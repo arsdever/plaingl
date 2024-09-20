@@ -19,14 +19,14 @@ float gamepad::get_left_trigger()
 {
     update_state();
     auto state = reinterpret_cast<GLFWgamepadstate*>(_state.data());
-    return state->axes[ 3 ];
+    return state->axes[ 4 ];
 }
 
 float gamepad::get_right_trigger()
 {
     update_state();
     auto state = reinterpret_cast<GLFWgamepadstate*>(_state.data());
-    return state->axes[ 4 ];
+    return state->axes[ 5 ];
 }
 
 glm::vec2 gamepad::get_left_axis()
@@ -40,7 +40,7 @@ glm::vec2 gamepad::get_right_axis()
 {
     update_state();
     auto state = reinterpret_cast<GLFWgamepadstate*>(_state.data());
-    return { state->axes[ 2 ], state->axes[ 5 ] };
+    return { state->axes[ 2 ], state->axes[ 3 ] };
 }
 
 void gamepad::update_state()
