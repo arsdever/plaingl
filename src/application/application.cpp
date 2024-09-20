@@ -9,6 +9,8 @@
 #include "common/logging.hpp"
 #include "core/command_dispatcher.hpp"
 #include "core/game_clock.hpp"
+#include "core/input_system.hpp"
+#include "core/inputs/binding.hpp"
 #include "core/window.hpp"
 #include "graphics/texture.hpp"
 #include "project/components/camera.hpp"
@@ -51,6 +53,7 @@ application::application()
     };
 
     scripting::backend::initialize();
+    core::input_system::update_device_list();
 
     load_assets();
     setup_console();

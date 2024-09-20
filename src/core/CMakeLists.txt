@@ -17,7 +17,10 @@ add_library(
   window_events.hpp
   window_events.cpp
   window.hpp
-  window.cpp)
+  window.cpp
+  inputs/binding.hpp
+  inputs/gamepad.hpp
+  inputs/gamepad.cpp)
 add_library(${PROJECT}::core ALIAS ${PROJECT}_core)
 
 if(WIN32)

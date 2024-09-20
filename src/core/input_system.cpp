@@ -1,16 +1,34 @@
+#include <GLFW/glfw3.h>
 #include <glm/vec2.hpp>
 
 #include "core/input_system.hpp"
 
 #include "common/logging.hpp"
+#include "common/utils.hpp"
+#include "core/inputs/binding.hpp"
+#include "core/window.hpp"
 
+namespace core
+{
 namespace
 {
 inline logger log() { return get_logger("input_system"); }
 } // namespace
 
-namespace core
+void input_system::update_device_list()
 {
+    for (int i = 0; i < GLFW_JOYSTICK_LAST; i++)
+    {
+        if (glfwJoystickIsGamepad(i))
+        {
+            std::string uid = glfwGetJoystickGUID(i);
+            std::string name = glfwGetJoystickName(i);
+            log()->info("Joystick {} present: {}: {}", i, uid, name);
+            _gamepads.push_back({ i });
+        }
+    }
+}
+
 void input_system::set_mouse_position(glm::ivec2 pos)
 {
     _mouse_delta = pos - _mouse_position;
@@ -55,9 +73,36 @@ void input_system::set_key_down(int keycode, bool state)
     }
 }
 
-void input_system::set_modifiers(modifiers modifiers) { _modifiers = modifiers; }
+void input_system::set_modifiers(modifiers modifiers)
+{
+    _modifiers = modifiers;
+}
 
 input_system::modifiers input_system::get_modifiers() { return _modifiers; }
+
+std::shared_ptr<binding> input_system::setup_binding(std::string path,
+                                                     std::string name)
+{
+    size_t pos = path.find_first_of(".");
+    std::string device = path.substr(0, pos);
+    std::shared_ptr<binding> result;
+    if (device == "mouse") { }
+    else if (device == "keyboard") { }
+    else if (device == "gamepad")
+    {
+        std::string device_input = path.substr(pos + 1);
+        if (device_input == "left_joystick")
+        {
+            result = std::make_shared<binding>([]() -> glm::vec2
+            { return _gamepads[ 0 ].get_left_axis(); });
+            auto [ _1, _2 ] = _mapping.emplace(name, result);
+        }
+    }
+
+    return result;
+}
+
+// void input_system::get_value(std::string property) { }
 
 std::unordered_set<int> input_system::_pressed_keys;
 std::unordered_map<input_system::mouse_button, input_system::button_state>
@@ -66,4 +111,6 @@ event<void(int)> input_system::on_keypress;
 glm::ivec2 input_system::_mouse_position;
 glm::ivec2 input_system::_mouse_delta;
 input_system::modifiers input_system::_modifiers;
+std::vector<inputs::gamepad> input_system::_gamepads;
+std::unordered_map<std::string, std::weak_ptr<binding>> input_system::_mapping;
 } // namespace core
