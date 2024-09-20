@@ -68,6 +68,12 @@ application::~application()
 
 int application::run()
 {
+    if (scene::get_active_scene())
+    {
+        scene::get_active_scene()->visit_root_objects([](auto obj)
+        { obj->init(); });
+    }
+
     while (_is_running)
     {
         update_windows();

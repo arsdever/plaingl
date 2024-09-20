@@ -18,8 +18,17 @@ public:
     T get()
     {
         _updater();
-        return std::any_cast<T>(_parameter);
+        if constexpr (is_glm_type_v<T>)
+        {
+            return T(std::any_cast<glm_typecast_t<T, float>>(_parameter));
+        }
+        else
+        {
+            return std::any_cast<T>(_parameter);
+        }
     }
+
+    std::any get_any() { return _parameter; }
 
     std::function<void()> _updater;
     std::any _parameter;

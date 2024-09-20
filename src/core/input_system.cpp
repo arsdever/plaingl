@@ -93,8 +93,50 @@ std::shared_ptr<binding> input_system::setup_binding(std::string path,
         std::string device_input = path.substr(pos + 1);
         if (device_input == "left_joystick")
         {
-            result = std::make_shared<binding>([]() -> glm::vec2
-            { return _gamepads[ 0 ].get_left_axis(); });
+            result = std::make_shared<binding>(
+                []() -> glm::vec2
+            {
+                if (_gamepads.empty())
+                    return {};
+
+                return _gamepads[ 0 ].get_left_axis();
+            });
+            auto [ _1, _2 ] = _mapping.emplace(name, result);
+        }
+        else if (device_input == "right_joystick")
+        {
+            result = std::make_shared<binding>(
+                []() -> glm::vec2
+            {
+                if (_gamepads.empty())
+                    return {};
+
+                return _gamepads[ 0 ].get_right_axis();
+            });
+            auto [ _1, _2 ] = _mapping.emplace(name, result);
+        }
+        else if (device_input == "left_trigger")
+        {
+            result = std::make_shared<binding>(
+                []() -> float
+            {
+                if (_gamepads.empty())
+                    return {};
+
+                return _gamepads[ 0 ].get_left_trigger();
+            });
+            auto [ _1, _2 ] = _mapping.emplace(name, result);
+        }
+        else if (device_input == "right_trigger")
+        {
+            result = std::make_shared<binding>(
+                []() -> float
+            {
+                if (_gamepads.empty())
+                    return {};
+
+                return _gamepads[ 0 ].get_right_trigger();
+            });
             auto [ _1, _2 ] = _mapping.emplace(name, result);
         }
     }

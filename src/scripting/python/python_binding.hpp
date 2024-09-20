@@ -2,6 +2,7 @@
 #include <pybind11/operators.h>
 
 #include "core/input_system.hpp"
+#include "core/inputs/binding.hpp"
 #include "project/components/transform.hpp"
 #include "scripting/python/python_component.hpp"
 
@@ -19,14 +20,17 @@ PYBIND11_EMBEDDED_MODULE(gamify, m)
         .def(pybind11::init<const glm::ivec2&>())
         .def(pybind11::init<const glm::vec2&>())
         .def_readwrite("x", &glm::dvec2::x)
-        .def_readwrite("y", &glm::dvec2::y);
+        .def_readwrite("y", &glm::dvec2::y)
+        .def(pybind11::self * double())
+        .def(pybind11::self + glm::dvec2());
 
     pybind11::class_<glm::dvec3>(m, "vec3")
         .def(pybind11::init<double, double, double>())
         .def_readwrite("x", &glm::dvec3::x)
         .def_readwrite("y", &glm::dvec3::y)
         .def_readwrite("z", &glm::dvec3::z)
-        .def(pybind11::self * double());
+        .def(pybind11::self * double())
+        .def(pybind11::self + glm::dvec3());
 
     pybind11::class_<glm::dquat>(m, "quat")
         .def(pybind11::init<double, double, double, double>())
@@ -61,6 +65,7 @@ PYBIND11_EMBEDDED_MODULE(gamify, m)
              pybind11::overload_cast<const glm::dvec3&>(
                  &components::transform::set_rotation))
         .def("set_position", &components::transform::set_position)
+        .def("move", &components::transform::move)
         .def("rotate", &components::transform::rotate)
         .def("right", &components::transform::get_right)
         .def("forward", &components::transform::get_forward)
@@ -70,7 +75,8 @@ PYBIND11_EMBEDDED_MODULE(gamify, m)
         pybind11::class_<core::input_system>(m, "input_system")
             .def("mouse_position", &core::input_system::get_mouse_position)
             .def("mouse_delta", &core::input_system::get_mouse_delta)
-            .def("mouse_button", &core::input_system::get_mouse_button);
+            .def("mouse_button", &core::input_system::get_mouse_button)
+            .def("bind", &core::input_system::setup_binding);
 
     pybind11::enum_<core::input_system::mouse_button>(is, "mouse_button_code")
         .value("MouseButton0", core::input_system::mouse_button::MouseButton0)
@@ -95,4 +101,13 @@ PYBIND11_EMBEDDED_MODULE(gamify, m)
         .value("Press", core::input_system::button_state::Press)
         .value("Hold", core::input_system::button_state::Hold)
         .value("Release", core::input_system::button_state::Release);
+
+    pybind11::class_<core::binding, std::shared_ptr<core::binding>>(
+        m, "input_binding")
+        .def("get_int", &core::binding::get<int>)
+        .def("get_uint", &core::binding::get<unsigned>)
+        .def("get_float", &core::binding::get<float>)
+        .def("get_vec2", &core::binding::get<glm::dvec2>)
+        .def("get_vec3", &core::binding::get<glm::dvec3>)
+        .def("get_vec4", &core::binding::get<glm::dvec4>);
 }

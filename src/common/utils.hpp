@@ -120,6 +120,53 @@ struct variant_index
 template <typename V, typename T>
 constexpr int variant_index_v = variant_index<V, T>::value;
 
+template <typename T>
+struct is_glm_type : std::false_type
+{
+};
+
+template <size_t N, typename T, glm::qualifier Q>
+struct is_glm_type<glm::vec<N, T, Q>> : std::true_type
+{
+};
+
+template <typename T, glm::qualifier Q>
+struct is_glm_type<glm::qua<T, Q>> : std::true_type
+{
+};
+
+template <size_t N, size_t M, typename T, glm::qualifier Q>
+struct is_glm_type<glm::mat<N, M, T, Q>> : std::true_type
+{
+};
+
+template <typename T>
+static constexpr bool is_glm_type_v = is_glm_type<T>::value;
+
+template <typename T, typename U>
+struct glm_typecast;
+
+template <size_t N, typename T, typename U, glm::qualifier Q>
+struct glm_typecast<glm::vec<N, T, Q>, U>
+{
+    using type = glm::vec<N, U, Q>;
+};
+
+template <typename T, typename U, glm::qualifier Q>
+struct glm_typecast<glm::qua<T, Q>, U>
+{
+    using type = glm::qua<U, Q>;
+};
+
+template <size_t N, size_t M, typename T, typename U, glm::qualifier Q>
+struct glm_typecast<glm::mat<N, M, T, Q>, U>
+{
+    using type = glm::mat<N, M, U, Q>;
+};
+
+template <typename T, typename U>
+using glm_typecast_t = typename glm_typecast<T, U>::type;
+
 template <class Base>
 class enable_shared_from_base : public std::enable_shared_from_this<Base>
 {

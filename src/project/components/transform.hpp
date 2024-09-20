@@ -42,6 +42,7 @@ public:
 
     bool is_updated() const;
 
+    void move(glm::dvec3 offset);
     void rotate(const glm::dvec3& axis, double angle);
 
     // static size_t register_component();
