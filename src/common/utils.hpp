@@ -58,6 +58,32 @@ R gl_convert(ARGS... args);
 template <typename... T>
 struct deduce_function_type;
 
+template <typename R, typename C, typename... ARGS>
+struct deduce_function_type<R (C::*)(ARGS...) const>
+{
+    using type = R (*)(ARGS...);
+    using return_type = R;
+    static constexpr bool is_function = true;
+};
+
+template <typename R, typename... ARGS>
+struct deduce_function_type<std::function<R(ARGS...)>>
+{
+    using type = R (*)(ARGS...);
+    using return_type = R;
+    static constexpr bool is_function = true;
+};
+
+template <typename T>
+struct function_info
+{
+    using resolver = std::conditional_t<requires {
+        &T::operator();
+    }, deduce_function_type<decltype(&T::operator())>, deduce_function_type<T>>;
+    using type = resolver::type;
+    using return_type = resolver::return_type;
+};
+
 template <typename R, typename... ARGS>
 struct deduce_function_type<R(ARGS...)>
 {
