@@ -21,6 +21,16 @@ std::shared_ptr<components::transform> component::get_transform() const
         .shared_from_this<components::transform>();
 }
 
+std::shared_ptr<component> component::get(std::string_view type_name)
+{
+    if (type_name == components::transform::type_name)
+    {
+        return get_transform();
+    }
+
+    return _game_object.get().try_get(type_name);
+}
+
 void component::set_enabled(bool active) { _is_enabled = active; }
 
 bool component::is_enabled() const { return _is_enabled; }

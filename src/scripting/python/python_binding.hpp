@@ -38,6 +38,8 @@ PYBIND11_EMBEDDED_MODULE(gamify, m)
     pybind11::class_<game_object, std::shared_ptr<game_object>>(m,
                                                                 "game_object");
 
+    pybind11::class_<component, std::shared_ptr<component>>(m, "component");
+
     pybind11::class_<python_component,
                      internal::python_component_trampoline,
                      std::shared_ptr<python_component>>(m, "python_component")
@@ -45,7 +47,10 @@ PYBIND11_EMBEDDED_MODULE(gamify, m)
         .def("on_init", &python_component::on_init)
         .def("on_update", &python_component::on_update)
         .def("on_deinit", &python_component::on_deinit)
-        .def("transform", &python_component::get_transform);
+        .def("transform", &python_component::get_transform)
+        .def("get",
+             static_cast<std::shared_ptr<component> (python_component::*)(
+                 std::string_view)>(&python_component::get));
 
     pybind11::class_<components::transform,
                      std::shared_ptr<components::transform>>(m, "transform")
