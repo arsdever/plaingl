@@ -3,6 +3,7 @@
 #include <glm/fwd.hpp>
 
 #include "common/event.hpp"
+#include "common/utils.hpp"
 #include "core/inputs/gamepad.hpp"
 
 namespace core
@@ -90,8 +91,12 @@ public:
     static void set_modifiers(modifiers modifiers);
     static modifiers get_modifiers();
 
-    static std::shared_ptr<binding> setup_binding(std::string path,
-                                                  std::string name);
+    static std::shared_ptr<binding> declare_input(std::string_view name);
+    static std::shared_ptr<binding> get_input(std::string_view name);
+    static std::shared_ptr<binding> bind_input(std::shared_ptr<binding> bond,
+                                               std::string_view path);
+    static std::shared_ptr<binding> bind_input(std::string_view name,
+                                               std::string_view path);
 
     static event<void(int)> on_keypress;
 
@@ -102,6 +107,10 @@ private:
     static glm::ivec2 _mouse_delta;
     static modifiers _modifiers;
     static std::vector<inputs::gamepad> _gamepads;
-    static std::unordered_map<std::string, std::weak_ptr<binding>> _mapping;
+    static std::unordered_map<std::string,
+                              std::shared_ptr<binding>,
+                              string_hash,
+                              std::equal_to<>>
+        _mapping;
 };
 } // namespace core

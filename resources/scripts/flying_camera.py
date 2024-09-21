@@ -19,10 +19,10 @@ class flying_camera(pycomponent):
         pycomponent.__init__(self, self.name, gobj)
 
     def on_init(self):
-        self.up = input.bind("gamepad.left_trigger", "up")
-        self.down = input.bind("gamepad.right_trigger", "down")
-        self.move = input.bind("gamepad.left_joystick", "move")
-        self.rotate = input.bind("gamepad.right_joystick", "rotate")
+        self.up = input.get("up")
+        self.down = input.get("down")
+        self.move = input.get("move")
+        self.rotate = input.get("rotate")
 
     def on_update(self):
         tr = self.transform()

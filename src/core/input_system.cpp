@@ -80,20 +80,50 @@ void input_system::set_modifiers(modifiers modifiers)
 
 input_system::modifiers input_system::get_modifiers() { return _modifiers; }
 
-std::shared_ptr<binding> input_system::setup_binding(std::string path,
-                                                     std::string name)
+std::shared_ptr<binding> input_system::declare_input(std::string_view name)
+{
+    auto it = _mapping.find(name);
+    if (it != _mapping.end())
+        return it->second;
+
+    auto b = std::make_shared<binding>();
+    _mapping.emplace(name, b);
+    return b;
+}
+
+std::shared_ptr<binding> input_system::get_input(std::string_view name)
+{
+    auto it = _mapping.find(name);
+    if (it == _mapping.end())
+        return nullptr;
+
+    return it->second;
+}
+
+std::shared_ptr<binding> input_system::bind_input(std::shared_ptr<binding> bond,
+                                                  std::string_view path)
 {
     size_t pos = path.find_first_of(".");
-    std::string device = path.substr(0, pos);
+    std::string_view device = path.substr(0, pos);
     std::shared_ptr<binding> result;
     if (device == "mouse") { }
-    else if (device == "keyboard") { }
+    else if (device == "keyboard")
+    {
+        std::string_view device_input = path.substr(pos + 1);
+        if (device_input == "spacebar")
+        {
+            bond->set_updater(
+                [] {
+                return 2 * static_cast<float>(is_key_down(GLFW_KEY_SPACE)) - 1;
+            });
+        }
+    }
     else if (device == "gamepad")
     {
-        std::string device_input = path.substr(pos + 1);
+        std::string_view device_input = path.substr(pos + 1);
         if (device_input == "left_joystick")
         {
-            result = std::make_shared<binding>(
+            bond->set_updater(
                 []() -> glm::vec2
             {
                 if (_gamepads.empty())
@@ -101,11 +131,10 @@ std::shared_ptr<binding> input_system::setup_binding(std::string path,
 
                 return _gamepads[ 0 ].get_left_axis();
             });
-            auto [ _1, _2 ] = _mapping.emplace(name, result);
         }
         else if (device_input == "right_joystick")
         {
-            result = std::make_shared<binding>(
+            bond->set_updater(
                 []() -> glm::vec2
             {
                 if (_gamepads.empty())
@@ -113,11 +142,10 @@ std::shared_ptr<binding> input_system::setup_binding(std::string path,
 
                 return _gamepads[ 0 ].get_right_axis();
             });
-            auto [ _1, _2 ] = _mapping.emplace(name, result);
         }
         else if (device_input == "left_trigger")
         {
-            result = std::make_shared<binding>(
+            bond->set_updater(
                 []() -> float
             {
                 if (_gamepads.empty())
@@ -125,11 +153,10 @@ std::shared_ptr<binding> input_system::setup_binding(std::string path,
 
                 return _gamepads[ 0 ].get_left_trigger();
             });
-            auto [ _1, _2 ] = _mapping.emplace(name, result);
         }
         else if (device_input == "right_trigger")
         {
-            result = std::make_shared<binding>(
+            bond->set_updater(
                 []() -> float
             {
                 if (_gamepads.empty())
@@ -137,14 +164,17 @@ std::shared_ptr<binding> input_system::setup_binding(std::string path,
 
                 return _gamepads[ 0 ].get_right_trigger();
             });
-            auto [ _1, _2 ] = _mapping.emplace(name, result);
         }
     }
 
     return result;
 }
 
-// void input_system::get_value(std::string property) { }
+std::shared_ptr<binding> input_system::bind_input(std::string_view name,
+                                                  std::string_view path)
+{
+    return bind_input(declare_input(name), path);
+}
 
 std::unordered_set<int> input_system::_pressed_keys;
 std::unordered_map<input_system::mouse_button, input_system::button_state>
@@ -154,5 +184,9 @@ glm::ivec2 input_system::_mouse_position;
 glm::ivec2 input_system::_mouse_delta;
 input_system::modifiers input_system::_modifiers;
 std::vector<inputs::gamepad> input_system::_gamepads;
-std::unordered_map<std::string, std::weak_ptr<binding>> input_system::_mapping;
+std::unordered_map<std::string,
+                   std::shared_ptr<binding>,
+                   string_hash,
+                   std::equal_to<>>
+    input_system::_mapping;
 } // namespace core
