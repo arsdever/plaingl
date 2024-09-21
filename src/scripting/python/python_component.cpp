@@ -4,6 +4,8 @@
 
 #include "common/logging.hpp"
 
+namespace scripting::python
+{
 namespace
 {
 inline logger log() { return get_logger("python"); }
@@ -70,3 +72,4 @@ void python_component_trampoline::on_deinit()
     }
 }
 } // namespace internal
+} // namespace scripting::python

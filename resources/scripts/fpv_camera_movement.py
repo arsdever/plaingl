@@ -5,7 +5,7 @@ from gamify import input_system as input
 
 class fpv_camera_movement(pycomponent):
     name = "fpv_camera_movement"
-    rotation = gamify.vec2(0, 0)
+    rotation = gamify.vec2(0.0, 0.0)
 
     def __init__(self, gobj):
         pycomponent.__init__(self, self.name, gobj)
