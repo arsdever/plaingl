@@ -19,6 +19,7 @@ struct expose_glm_type<glm::vec<N, T, Q>>
     {
         auto c =
             pybind11::class_<glm::vec<N, T, Q>>(m, python_name.data())
+                .def(pybind11::init())
                 .def(pybind11::init<T>())
                 .def(pybind11::init<const glm::vec<N, char, Q>&>())
                 .def(pybind11::init<const glm::vec<N, short, Q>&>())
@@ -95,6 +96,7 @@ struct expose_glm_type<glm::qua<T, Q>>
     {
         auto c =
             pybind11::class_<glm::qua<T, Q>>(m, python_name.data())
+                .def(pybind11::init())
                 .def(pybind11::init<const glm::qua<char, Q>&>())
                 .def(pybind11::init<const glm::qua<short, Q>&>())
                 .def(pybind11::init<const glm::qua<int, Q>&>())

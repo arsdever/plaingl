@@ -63,6 +63,9 @@ PYBIND11_EMBEDDED_MODULE(gamify, m)
             .def("mouse_position", &core::input_system::get_mouse_position)
             .def("mouse_delta", &core::input_system::get_mouse_delta)
             .def("mouse_button", &core::input_system::get_mouse_button)
+            .def("bind",
+                 pybind11::overload_cast<std::string_view, std::string_view>(
+                     &core::input_system::bind_input))
             .def("get", &core::input_system::get_input);
 
     pybind11::enum_<core::input_system::mouse_button>(is, "mouse_button_code")

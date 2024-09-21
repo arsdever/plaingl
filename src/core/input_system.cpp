@@ -105,7 +105,6 @@ std::shared_ptr<binding> input_system::bind_input(std::shared_ptr<binding> bond,
 {
     size_t pos = path.find_first_of(".");
     std::string_view device = path.substr(0, pos);
-    std::shared_ptr<binding> result;
     if (device == "mouse") { }
     else if (device == "keyboard")
     {
@@ -167,7 +166,7 @@ std::shared_ptr<binding> input_system::bind_input(std::shared_ptr<binding> bond,
         }
     }
 
-    return result;
+    return bond;
 }
 
 std::shared_ptr<binding> input_system::bind_input(std::string_view name,
