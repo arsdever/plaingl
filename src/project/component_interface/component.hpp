@@ -13,6 +13,19 @@ public:
 
     std::shared_ptr<components::transform> get_transform() const;
 
+    std::shared_ptr<component> get(std::string_view type_name);
+
+    template <typename T>
+    std::shared_ptr<T> get()
+    {
+        if constexpr (std::is_same_v<T, components::transform>)
+        {
+            return get_transform();
+        }
+
+        return static_cast<std::shared_ptr<T>>(get(T::type_name));
+    }
+
     inline void enable() { set_enabled(true); }
     inline void disable() { set_enabled(false); }
     void set_enabled(bool active = true);
