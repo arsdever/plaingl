@@ -5,6 +5,8 @@
 #include "common/logging.hpp"
 #include "project/component_interface/component.hpp"
 
+namespace scripting::python
+{
 class python_component : public component
 {
 public:
@@ -33,3 +35,4 @@ public:
     void on_deinit() override;
 };
 } // namespace internal
+} // namespace scripting::python

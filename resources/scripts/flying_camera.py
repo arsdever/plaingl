@@ -1,8 +1,8 @@
 import gamify
 from gamify import python_component as pycomponent
 from gamify import input_system as input
-from gamify import vec2 as vec2
-from gamify import vec3 as vec3
+from gamify import dvec2 as vec2
+from gamify import dvec3 as vec3
 
 
 class flying_camera(pycomponent):

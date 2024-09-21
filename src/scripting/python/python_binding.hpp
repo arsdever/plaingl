@@ -5,39 +5,26 @@
 #include "core/inputs/binding.hpp"
 #include "project/components/transform.hpp"
 #include "scripting/python/python_component.hpp"
+#include "scripting/python/python_glm_binding.hpp"
+
+using namespace scripting::python;
 
 PYBIND11_EMBEDDED_MODULE(gamify, m)
 {
-    pybind11::class_<glm::ivec2>(m, "ivec2")
-        .def(pybind11::init<int, int>())
-        .def(pybind11::init<const glm::dvec2&>())
-        .def(pybind11::init<const glm::vec2&>())
-        .def_readwrite("x", &glm::ivec2::x)
-        .def_readwrite("y", &glm::ivec2::y);
-
-    pybind11::class_<glm::dvec2>(m, "vec2")
-        .def(pybind11::init<double, double>())
-        .def(pybind11::init<const glm::ivec2&>())
-        .def(pybind11::init<const glm::vec2&>())
-        .def_readwrite("x", &glm::dvec2::x)
-        .def_readwrite("y", &glm::dvec2::y)
-        .def(pybind11::self * double())
-        .def(pybind11::self + glm::dvec2());
-
-    pybind11::class_<glm::dvec3>(m, "vec3")
-        .def(pybind11::init<double, double, double>())
-        .def_readwrite("x", &glm::dvec3::x)
-        .def_readwrite("y", &glm::dvec3::y)
-        .def_readwrite("z", &glm::dvec3::z)
-        .def(pybind11::self * double())
-        .def(pybind11::self + glm::dvec3());
-
-    pybind11::class_<glm::dquat>(m, "quat")
-        .def(pybind11::init<double, double, double, double>())
-        .def_readwrite("x", &glm::dquat::x)
-        .def_readwrite("y", &glm::dquat::y)
-        .def_readwrite("z", &glm::dquat::z)
-        .def_readwrite("w", &glm::dquat::w);
+    internal::expose_glm_type<glm::ivec2>::eval(m, "ivec2");
+    internal::expose_glm_type<glm::vec2>::eval(m, "vec2");
+    internal::expose_glm_type<glm::dvec2>::eval(m, "dvec2");
+    internal::expose_glm_type<glm::uvec2>::eval(m, "uvec2");
+    internal::expose_glm_type<glm::ivec3>::eval(m, "ivec3");
+    internal::expose_glm_type<glm::vec3>::eval(m, "vec3");
+    internal::expose_glm_type<glm::dvec3>::eval(m, "dvec3");
+    internal::expose_glm_type<glm::uvec3>::eval(m, "uvec3");
+    internal::expose_glm_type<glm::ivec4>::eval(m, "ivec4");
+    internal::expose_glm_type<glm::vec4>::eval(m, "vec4");
+    internal::expose_glm_type<glm::dvec4>::eval(m, "dvec4");
+    internal::expose_glm_type<glm::uvec4>::eval(m, "uvec4");
+    internal::expose_glm_type<glm::quat>::eval(m, "quat");
+    internal::expose_glm_type<glm::dquat>::eval(m, "dquat");
 
     pybind11::class_<game_object, std::shared_ptr<game_object>>(m,
                                                                 "game_object");

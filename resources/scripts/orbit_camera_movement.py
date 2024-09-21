@@ -5,7 +5,7 @@ from gamify import input_system as input
 
 class orbit_camera_movement(pycomponent):
     name = "orbit_camera_movement"
-    rotation = gamify.vec2(0, 0)
+    rotation = gamify.vec2(0.0, 0.0)
     distance = 10
 
     def __init__(self, gobj):
