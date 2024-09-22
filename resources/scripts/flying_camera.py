@@ -15,7 +15,8 @@ class flying_camera(pycomponent):
         pycomponent.__init__(self, self.name, gobj)
 
     def on_init(self):
-        pass
+        initial_rotation = self.transform().rotation().euler_angles()
+        self.rotation = vec3(initial_rotation.y, initial_rotation.x, 0)
 
     def on_update(self):
         tr = self.transform()

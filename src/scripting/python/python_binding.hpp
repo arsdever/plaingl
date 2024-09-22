@@ -45,13 +45,32 @@ PYBIND11_EMBEDDED_MODULE(gamify, m)
 
     pybind11::class_<components::transform,
                      std::shared_ptr<components::transform>>(m, "transform")
+        .def("set_position", &components::transform::set_position)
         .def("set_rotation",
              pybind11::overload_cast<const glm::dquat&>(
                  &components::transform::set_rotation))
         .def("set_rotation",
              pybind11::overload_cast<const glm::dvec3&>(
                  &components::transform::set_rotation))
-        .def("set_position", &components::transform::set_position)
+        .def("set_scale", &components::transform::set_scale)
+        .def("position",
+             &components::transform::get_position<
+                 components::transform::relation_flag::world>)
+        .def("local_position",
+             &components::transform::get_position<
+                 components::transform::relation_flag::local>)
+        .def("rotation",
+             &components::transform::get_rotation<
+                 components::transform::relation_flag::world>)
+        .def("local_rotation",
+             &components::transform::get_rotation<
+                 components::transform::relation_flag::local>)
+        .def("scale",
+             &components::transform::get_scale<
+                 components::transform::relation_flag::world>)
+        .def("local_scale",
+             &components::transform::get_scale<
+                 components::transform::relation_flag::local>)
         .def("move", &components::transform::move)
         .def("rotate", &components::transform::rotate)
         .def("right", &components::transform::get_right)

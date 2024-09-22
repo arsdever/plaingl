@@ -1,6 +1,7 @@
 #pragma once
 
 #include <glm/detail/qualifier.hpp>
+#include <glm/gtc/quaternion.hpp>
 #include <pybind11/detail/common.h>
 #include <pybind11/embed.h>
 #include <pybind11/operators.h>
@@ -118,6 +119,9 @@ struct expose_glm_type<glm::qua<T, Q>>
                 .def_readwrite("y", &glm::qua<T, Q>::y)
                 .def_readwrite("z", &glm::qua<T, Q>::z)
                 .def_readwrite("w", &glm::qua<T, Q>::w)
+                .def("euler_angles",
+                     [](const glm::qua<T, Q>& q)
+        { return glm::eulerAngles(q); })
                 .def(pybind11::self + glm::qua<T, Q>())
                 .def(pybind11::self - glm::qua<T, Q>())
                 .def(pybind11::self * glm::qua<T, Q>())
