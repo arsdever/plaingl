@@ -2,7 +2,6 @@
 #include "common/file.hpp"
 
 #include "common/logging.hpp"
-#include "file_watcher.hpp"
 
 #if defined(WIN32)
 #    include "common/impl/file_win.hpp"
@@ -15,24 +14,12 @@ namespace common
 file::file(std::string path)
     : _impl(std::make_unique<impl>(std::move(path)))
 {
-    try
-    {
-        _watcher =
-            file_watcher(_impl->path(),
-                         [ this ](std::string_view path, file_change_type type)
-        { changed(type); });
-    }
-    catch (...)
-    {
-        _watcher = file_watcher();
-    }
 }
 
 file::file(file&& o)
 {
     _impl = std::move(o._impl);
     o._impl = std::make_unique<impl>("");
-    _watcher = o._watcher;
 }
 
 file& file::operator=(file&& o) = default;
@@ -43,19 +30,7 @@ bool file::is_open() const { return _impl->is_open(); }
 
 bool file::is_directory() const { return _impl->is_directory(); }
 
-void file::open(open_mode mode)
-{
-    _impl->open(mode);
-
-    if (is_open() && !_watcher.is_valid())
-    {
-        _watcher =
-            file_watcher(_impl->path(),
-                         [ this ](std::string_view path, file_change_type type)
-        { changed(type); });
-        changed(file_change_type::created);
-    }
-}
+void file::open(open_mode mode) { _impl->open(mode); }
 
 void file::seek(size_t pos) { _impl->seek(pos); }
 
@@ -87,6 +62,22 @@ size_t file::write(const char* buffer, size_t size)
         return 0;
 
     return _impl->write(buffer, size);
+}
+
+void file::setup_watcher()
+{
+    try
+    {
+        _watcher =
+            file_watcher(get_filepath(),
+                         [ this ](std::string_view path, file_change_type type)
+        { changed(type); });
+    }
+    catch (std::exception& e)
+    {
+        log()->error("Failed to setup file watcher: {}", e.what());
+        _watcher = file_watcher();
+    }
 }
 
 size_t file::get_size() const { return _impl->get_content_size(); }

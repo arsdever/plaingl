@@ -33,12 +33,27 @@ public:
         }
         common::file asset_file { std::string(path) };
         internal_load(asset_file);
-        cache.register_asset(
-            p.stem(), std::make_shared<asset>(std::move(asset_file), _data));
+        auto a = std::make_shared<asset>(std::move(asset_file), _data);
+        asset_file.changed += [ this, wasset = std::weak_ptr(a) ](auto ct)
+        {
+            if (wasset.expired())
+                return;
+
+            auto a = wasset.lock();
+            if (ct == common::file_change_type::modified)
+            {
+                internal_reload(a);
+            }
+        };
+        cache.register_asset(p.stem(), a);
     }
 
 protected:
     virtual void internal_load(common::file& asset_file) = 0;
+    virtual void internal_reload(std::shared_ptr<asset> asset)
+    {
+        log()->info("Reloading is not implemented");
+    }
 
 protected:
     std::shared_ptr<T> _data;

@@ -7,17 +7,7 @@ namespace assets
 {
 void asset_importer::import(std::string_view path, asset_cache& cache)
 {
-    common::filesystem::path p { path };
-
-    auto it = _importers.find(p.extension());
-
-    if (it == _importers.end())
-    {
-        log()->warn("No importer found for extension {}", p.extension());
-        return;
-    }
-
-    it->second->import(path, cache);
+    get_importer(path)->import(path, cache);
 }
 
 void asset_importer::register_importer(
@@ -32,5 +22,26 @@ void asset_importer::register_importer(
         _importers[ std::string(ext) ] = importer;
         ext_begin = pos + 1;
     } while (pos != std::string_view::npos);
+}
+
+std::shared_ptr<type_importer_base>
+asset_importer::get_importer(std::string_view path)
+{
+    struct empty_importer : public type_importer_base
+    {
+        void import(std::string_view path, asset_cache& cache) override { }
+    };
+
+    common::filesystem::path p { path };
+
+    auto it = _importers.find(p.extension());
+
+    if (it == _importers.end())
+    {
+        log()->warn("No importer found for extension {}", p.extension());
+        return std::make_shared<empty_importer>();
+    }
+
+    return it->second;
 }
 } // namespace assets

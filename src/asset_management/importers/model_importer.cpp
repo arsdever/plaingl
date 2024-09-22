@@ -5,6 +5,7 @@
 
 #include "asset_management/importers/model_importer.hpp"
 
+#include "common/file_lock.hpp"
 #include "common/logging.hpp"
 #include "graphics/mesh.hpp"
 
@@ -18,6 +19,7 @@ void model_importer::internal_load(common::file& asset_file)
     _data = std::make_shared<graphics::mesh>();
 
     auto content = asset_file.read_all<std::vector<char>>();
+    common::file_lock file_lock(asset_file);
     auto path = common::filesystem::path(asset_file.get_filepath());
     Assimp::Importer importer;
     const aiScene* ai_scene = importer.ReadFileFromMemory(
