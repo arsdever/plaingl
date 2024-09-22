@@ -3,6 +3,7 @@
 #include "asset_management/importers/material_importer.hpp"
 
 #include "asset_management/asset.hpp"
+#include "common/file_lock.hpp"
 #include "common/filesystem.hpp"
 #include "common/logging.hpp"
 #include "graphics/material.hpp"
@@ -37,6 +38,7 @@ void material_importer::internal_load(common::file& asset_file)
     _data = std::make_shared<graphics::material>();
 
     std::string content = asset_file.read_all();
+    common::file_lock file_lock(asset_file);
     json mat_struct = json::parse(content);
 
     std::string shader_exclusive_name =

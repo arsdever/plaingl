@@ -211,6 +211,7 @@ TEST(File, watch_for_changes)
     size_t counter = 0;
     size_t check_counter = 0;
     file f { "watch_for_changes.txt" };
+    f.setup_watcher();
     f.changed += [ &counter ](auto type) { ++counter; };
     f.open(file::open_mode::write);
     f.write("Hello world !!!\n");
