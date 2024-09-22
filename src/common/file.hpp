@@ -124,7 +124,8 @@ public:
         return write(std::string_view(data));
     }
 
-    // TODO: implement
+    void setup_watcher();
+
     event<void(file_change_type)> changed;
 
     static file create(std::string_view path, std::string_view contents = "");
@@ -147,7 +148,7 @@ private:
 private:
     struct impl;
     std::unique_ptr<impl> _impl;
-    file_watcher _watcher;
+    std::optional<file_watcher> _watcher;
 };
 
 template <typename T>

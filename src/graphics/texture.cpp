@@ -7,6 +7,7 @@
 
 #include "asset_management/type_importer.hpp"
 #include "common/file.hpp"
+#include "common/file_lock.hpp"
 #include "common/filesystem.hpp"
 #include "common/logging.hpp"
 #include "common/utils.hpp"
@@ -385,6 +386,7 @@ std::shared_ptr<texture> texture::from_file(std::string_view path)
 std::shared_ptr<texture> texture::from_file(common::file& file)
 {
     auto path = common::filesystem::path(file.get_filepath());
+    common::file_lock lock(file);
     if (path.extension() == ".png")
     {
         return from_png_file(file);

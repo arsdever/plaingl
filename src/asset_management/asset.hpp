@@ -16,6 +16,7 @@ struct asset
                                    std::shared_ptr<texture>>;
     common::file _asset_file;
     data_type _data;
+    size_t _checksum;
 
     template <typename T>
     std::shared_ptr<T> as() const

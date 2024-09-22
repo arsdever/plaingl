@@ -15,6 +15,9 @@ public:
                            std::shared_ptr<type_importer_base> importer);
 
 private:
+    std::shared_ptr<type_importer_base> get_importer(std::string_view path);
+
+private:
     std::unordered_map<std::string,
                        std::shared_ptr<type_importer_base>,
                        string_hash,

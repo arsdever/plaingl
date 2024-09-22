@@ -1,6 +1,7 @@
 #include "asset_management/importers/shader_importer.hpp"
 
 #include "asset_management/asset_importer.hpp"
+#include "common/file_lock.hpp"
 #include "common/logging.hpp"
 #include "graphics/shader.hpp"
 #include "graphics/shader_script.hpp"
@@ -26,6 +27,7 @@ void shader_importer::load_shader(common::file& asset_file)
         return;
     }
 
+    common::file_lock file_lock(asset_file);
     std::string content = asset_file.read_all();
     std::vector<std::string> shader_script_paths;
 
