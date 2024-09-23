@@ -10,6 +10,7 @@
 #include "project/component_interface/component_registry.hpp"
 #include "project/game_object.hpp"
 #include "scripting/python/python_component.hpp"
+#include "scripting/script.hpp"
 
 /* clang-format off */
 #include "scripting/python/python_binding.hpp"
@@ -34,18 +35,13 @@ backend::impl::impl()
 
 backend::impl::~impl() = default;
 
-std::shared_ptr<script> backend::impl::load(common::file& f)
+void backend::impl::load(std::string_view script_file_path)
 {
-    common::filesystem::path path { f.get_filepath() };
-    std::string relpath { path.full_path_without_filename().substr(
-        common::filesystem::path::current_path().size() + 1) };
-    std::replace(relpath.begin(), relpath.end(), '/', '.');
-    relpath += ".";
-    relpath += path.stem();
+    auto module_name = path_to_module_name(script_file_path);
     try
     {
-        auto module = pybind11::module_::import(relpath.c_str());
-        _modules.emplace_back(module);
+        auto module = pybind11::module_::import(module_name.c_str());
+        _modules.emplace(module_name, module);
         for (auto& it : module.attr("module_exports"))
         {
             auto cls = it.cast<pybind11::class_<python_component>>();
@@ -72,9 +68,58 @@ std::shared_ptr<script> backend::impl::load(common::file& f)
     catch (std::exception& e)
     {
         log()->error("Failed to load script: {}", e.what());
-        return {};
+    }
+}
+
+void backend::impl::update(std::string_view script_file_path)
+{
+    auto module_name = path_to_module_name(script_file_path);
+    auto it = _modules.find(module_name);
+    bool was_loaded = it != _modules.end();
+    if (!was_loaded)
+    {
+        load(script_file_path);
+        return;
     }
 
-    return {};
+    try
+    {
+        auto& module = it->second;
+        module = pybind11::module_::import(module_name.c_str());
+        for (auto& it : module.attr("module_exports"))
+        {
+            auto cls = it.cast<pybind11::class_<python_component>>();
+            component_registry::register_component(
+                cls.attr("name").cast<std::string>(),
+                [ cls ](game_object& obj) -> std::shared_ptr<component>
+            {
+                try
+                {
+                    auto pyobj = cls(obj.shared_from_this());
+                }
+                catch (std::exception& e)
+                {
+                    log()->error("Failed to create component: {}", e.what());
+                    return nullptr;
+                }
+            });
+        }
+    }
+    catch (std::exception& e)
+    {
+        log()->error("Failed to load script: {}", e.what());
+    }
+}
+
+std::string
+backend::impl::path_to_module_name(std::string_view script_file_path)
+{
+    common::filesystem::path path { script_file_path };
+    std::string relpath { path.full_path_without_filename().substr(
+        common::filesystem::path::current_path().size() + 1) };
+    std::replace(relpath.begin(), relpath.end(), '/', '.');
+    relpath += ".";
+    relpath += path.stem();
+    return relpath;
 }
 } // namespace scripting

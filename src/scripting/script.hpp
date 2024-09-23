@@ -1,15 +1,17 @@
 #pragma once
 
+#include "common/common_fwd.hpp"
+
 namespace scripting
 {
 class script
 {
 public:
-    script(std::function<void(std::string_view)> message_handler);
+    script(std::string_view path);
 
-    void delegate_message(std::string_view message);
+    common::filesystem::path path() const;
 
 private:
-    std::function<void(std::string_view)> _message_handler;
+    common::filesystem::path _file_path;
 };
 } // namespace scripting

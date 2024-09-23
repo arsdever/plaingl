@@ -17,7 +17,12 @@ logger log() { return get_logger("asset_manager"); }
 void model_importer::internal_load(common::file& asset_file)
 {
     _data = std::make_shared<graphics::mesh>();
+    internal_update(_data, asset_file);
+}
 
+void model_importer::internal_update(std::shared_ptr<mesh> msh,
+                                     common::file& asset_file)
+{
     auto content = asset_file.read_all<std::vector<char>>();
     common::file_lock file_lock(asset_file);
     auto path = common::filesystem::path(asset_file.get_filepath());
@@ -115,10 +120,10 @@ void model_importer::internal_load(common::file& asset_file)
 
                     submeshes.push_back(std::move(info));
 
-                    _data->set_vertices(std::move(vertices));
-                    _data->set_indices(std::move(indices));
-                    _data->set_submeshes(std::move(submeshes));
-                    _data->init();
+                    msh->set_vertices(std::move(vertices));
+                    msh->set_indices(std::move(indices));
+                    msh->set_submeshes(std::move(submeshes));
+                    msh->init();
                 }
             }
         }
