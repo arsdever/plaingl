@@ -13,11 +13,15 @@ struct backend::impl
     impl();
     ~impl();
 
-    std::shared_ptr<script> load(common::file& f);
+    void load(std::string_view script_file_path);
+    void update(std::string_view script_file_path);
 
     std::unique_ptr<pybind11::scoped_interpreter> _interpreter;
 
 private:
-    std::vector<pybind11::module_> _modules;
+    std::string path_to_module_name(std::string_view path);
+
+private:
+    std::unordered_map<std::string, pybind11::module_> _modules;
 };
 } // namespace scripting

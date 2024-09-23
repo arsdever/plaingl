@@ -13,13 +13,18 @@ logger log() { return get_logger("asset_manager"); }
 
 void shader_importer::internal_load(common::file& asset_file)
 {
+    _data = std::make_shared<graphics::shader>();
+    load_shader(asset_file);
+}
+
+void shader_importer::internal_update(asset_data_t sh, common::file& asset_file)
+{
+    _data = sh;
     load_shader(asset_file);
 }
 
 void shader_importer::load_shader(common::file& asset_file)
 {
-    _data = std::make_shared<graphics::shader>();
-
     if (!asset_file.exists())
     {
         log()->error("Shader script {} does not exist",

@@ -14,7 +14,7 @@
     {
       "name": "u_albedo_texture_strength",
       "type": "float",
-      "value": 0
+      "value": 0.7
     },
     {
       "name": "u_albedo_texture",
