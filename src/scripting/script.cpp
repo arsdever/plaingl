@@ -1,14 +1,13 @@
 #include "scripting/script.hpp"
 
+#include "common/filesystem.hpp"
+
 namespace scripting
 {
-script::script(std::function<void(std::string_view)> message_handler)
-    : _message_handler(std::move(message_handler))
+script::script(std::string_view path)
+    : _file_path(path)
 {
 }
 
-void script::delegate_message(std::string_view message)
-{
-    _message_handler(message);
-}
+common::filesystem::path script::path() const { return _file_path; }
 } // namespace scripting
