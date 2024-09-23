@@ -130,6 +130,8 @@ void window::init()
             move_event(old_pos, _this->_p->_position, _this));
     });
 
+    glfwSetInputMode(_p->_glfw_window_handle, GLFW_LOCK_KEY_MODS, GLFW_TRUE);
+
     activate();
 
     if (!graphics::initialize())
