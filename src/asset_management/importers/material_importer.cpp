@@ -36,7 +36,12 @@ std::tuple<Args...> from_json(const nlohmann::json& args,
 void material_importer::internal_load(common::file& asset_file)
 {
     _data = std::make_shared<graphics::material>();
+    internal_update(_data, asset_file);
+}
 
+void material_importer::internal_update(asset_data_t mat,
+                                        common::file& asset_file)
+{
     std::string content = asset_file.read_all();
     common::file_lock file_lock(asset_file);
     json mat_struct = json::parse(content);
@@ -70,7 +75,7 @@ void material_importer::internal_load(common::file& asset_file)
         return;
     }
 
-    _data->set_shader_program(sh);
+    mat->set_shader_program(sh);
 
     for (auto& prop : mat_struct[ "properties" ])
     {
@@ -83,7 +88,7 @@ void material_importer::internal_load(common::file& asset_file)
             {
             case 1:
             {
-                _data->set_property_value(
+                mat->set_property_value(
                     prop_name,
                     details::from_json<float>(prop[ "value" ],
                                               std::make_index_sequence<1>()));
@@ -91,7 +96,7 @@ void material_importer::internal_load(common::file& asset_file)
             }
             case 4:
             {
-                _data->set_property_value(
+                mat->set_property_value(
                     prop_name,
                     details::from_json<float, float, float, float>(
                         prop[ "value" ], std::make_index_sequence<4>()));
