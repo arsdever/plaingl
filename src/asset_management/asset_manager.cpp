@@ -114,6 +114,9 @@ void asset_manager::setup_directory_watch()
             case common::file_change_type::created:
                 _impl->_importer.import(path, _impl->_cache);
                 break;
+            case common::file_change_type::modified:
+                _impl->_importer.update(path, _impl->_cache);
+                break;
             // case common::file_change_type::removed: unload_asset(path);
             // break;
             default: break;
