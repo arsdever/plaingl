@@ -17,12 +17,15 @@ public:
     virtual ~type_importer_base() = default;
 
     virtual void import(std::string_view path, asset_cache& cache) = 0;
+    virtual void update(std::string_view path, asset_cache& cache) = 0;
 };
 
 template <typename T>
 class type_importer : public type_importer_base
 {
 public:
+    using asset_data_t = std::shared_ptr<T>;
+
     void import(std::string_view path, asset_cache& cache) override
     {
         common::filesystem::path p { path };
@@ -34,25 +37,28 @@ public:
         common::file asset_file { std::string(path) };
         internal_load(asset_file);
         auto a = std::make_shared<asset>(std::move(asset_file), _data);
-        asset_file.changed += [ this, wasset = std::weak_ptr(a) ](auto ct)
-        {
-            if (wasset.expired())
-                return;
-
-            auto a = wasset.lock();
-            if (ct == common::file_change_type::modified)
-            {
-                internal_reload(a);
-            }
-        };
         cache.register_asset(p.stem(), a);
+    }
+
+    void update(std::string_view path, asset_cache& cache) override
+    {
+        common::filesystem::path p { path };
+        if (!cache.contains<T>(p.stem()))
+        {
+            log()->info("Asset {} was not loaded", path);
+            import(path, cache);
+            return;
+        }
+
+        auto ast = cache.find<std::shared_ptr<T>>(p.stem());
+        internal_update(ast->template as<T>(), ast->_asset_file);
     }
 
 protected:
     virtual void internal_load(common::file& asset_file) = 0;
-    virtual void internal_reload(std::shared_ptr<asset> asset)
+    virtual void internal_update(std::shared_ptr<T>, common::file&)
     {
-        log()->info("Reloading is not implemented");
+        log()->info("Updating is not implemented");
     }
 
 protected:
