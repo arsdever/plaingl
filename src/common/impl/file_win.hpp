@@ -160,7 +160,12 @@ struct file::impl
 
     std::string_view path() { return f.path; }
 
-    void open(file::open_mode mode) { f.open(mode, 0, FILE_ATTRIBUTE_NORMAL); }
+    void open(file::open_mode mode)
+    {
+        f.open(mode,
+               FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
+               FILE_ATTRIBUTE_NORMAL);
+    }
 
     bool is_open() { return f.is_open(); }
 
@@ -242,7 +247,9 @@ struct directory::impl
 
     void open(file::open_mode mode, uint32_t flags = FILE_FLAG_BACKUP_SEMANTICS)
     {
-        f.open(mode, FILE_SHARE_DELETE, flags);
+        f.open(mode,
+               FILE_SHARE_DELETE | FILE_SHARE_READ | FILE_SHARE_WRITE,
+               flags);
     }
 
     void close() { f.close(); }

@@ -10,6 +10,7 @@ class asset_importer
 {
 public:
     void import(std::string_view path, asset_cache& cache);
+    void update(std::string_view path, asset_cache& cache);
 
     void register_importer(std::string_view key,
                            std::shared_ptr<type_importer_base> importer);

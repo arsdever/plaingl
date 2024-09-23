@@ -10,6 +10,11 @@ void asset_importer::import(std::string_view path, asset_cache& cache)
     get_importer(path)->import(path, cache);
 }
 
+void asset_importer::update(std::string_view path, asset_cache& cache)
+{
+    get_importer(path)->update(path, cache);
+}
+
 void asset_importer::register_importer(
     std::string_view key, std::shared_ptr<type_importer_base> importer)
 {
@@ -30,6 +35,7 @@ asset_importer::get_importer(std::string_view path)
     struct empty_importer : public type_importer_base
     {
         void import(std::string_view path, asset_cache& cache) override { }
+        void update(std::string_view path, asset_cache& cache) override { }
     };
 
     common::filesystem::path p { path };
