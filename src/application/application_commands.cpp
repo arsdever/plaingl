@@ -31,7 +31,7 @@ void cmd_show_mesh::execute()
     auto mv = std::make_shared<mesh_viewer>();
     mv->init();
     log()->debug("Showing mesh '{}'", get<0>());
-    mv->set_mesh(mesh_asset->as<mesh>());
+    mv->set_mesh(mesh_asset->as<graphics::mesh>());
     open_window_requested(mv);
 }
 

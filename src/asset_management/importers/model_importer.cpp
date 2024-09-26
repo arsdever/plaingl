@@ -15,7 +15,7 @@ logger log() { return get_logger("asset_manager"); }
 
 void model_importer::internal_load(common::file& asset_file)
 {
-    _data = std::make_shared<mesh>();
+    _data = std::make_shared<graphics::mesh>();
 
     auto content = asset_file.read_all<std::vector<char>>();
     auto path = common::filesystem::path(asset_file.get_filepath());
@@ -59,11 +59,11 @@ void model_importer::internal_load(common::file& asset_file)
 
                 std::vector<vertex3d> vertices;
                 std::vector<int> indices;
-                std::vector<mesh::submesh_info> submeshes;
+                std::vector<graphics::mesh::submesh_info> submeshes;
 
                 for (auto ai_mesh : ai_submeshes)
                 {
-                    mesh::submesh_info info;
+                    graphics::mesh::submesh_info info;
                     info.material_index = ai_mesh->mMaterialIndex;
                     info.vertex_index_offset = indices.size();
 

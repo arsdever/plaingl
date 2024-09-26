@@ -2,12 +2,12 @@
 
 namespace graphics
 {
-class shader;
-class shader_script;
 class material;
+class mesh;
+class shader_script;
+class shader;
 } // namespace graphics
 
-class mesh;
 class texture;
 class graphics_buffer;
 class framebuffer;

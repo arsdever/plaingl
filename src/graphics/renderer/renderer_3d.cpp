@@ -9,7 +9,7 @@
 #include "graphics/vaomap.hpp"
 #include "graphics/vertex.hpp"
 
-void renderer_3d::draw_mesh(std::shared_ptr<mesh> m,
+void renderer_3d::draw_mesh(std::shared_ptr<graphics::mesh> m,
                             std::shared_ptr<graphics::material> mat)
 {
     auto sp = prof::profile(__FUNCTION__);

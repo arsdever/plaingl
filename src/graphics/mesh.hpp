@@ -4,8 +4,8 @@
 #include "graphics/vaomap.hpp"
 #include "graphics/vertex.hpp"
 
-struct GLFWwindow;
-
+namespace graphics
+{
 class mesh
 {
 public:
@@ -40,3 +40,4 @@ private:
     graphics_buffer _vbo { graphics_buffer::type::vertex };
     graphics_buffer _ebo { graphics_buffer::type::index };
 };
+} // namespace graphics

@@ -23,7 +23,7 @@ mesh_viewer::mesh_viewer()
 
 mesh_viewer::~mesh_viewer() = default;
 
-void mesh_viewer::set_mesh(std::shared_ptr<mesh> m) { _mesh = m; }
+void mesh_viewer::set_mesh(std::shared_ptr<graphics::mesh> m) { _mesh = m; }
 
 void mesh_viewer::set_mode(unsigned m) { _mode = m; }
 

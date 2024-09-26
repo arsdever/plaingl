@@ -7,7 +7,7 @@
 class renderer_3d : public renderer
 {
 public:
-    void draw_mesh(std::shared_ptr<mesh> m,
+    void draw_mesh(std::shared_ptr<graphics::mesh> m,
                    std::shared_ptr<graphics::material> mat);
 
 private:
