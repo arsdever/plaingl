@@ -255,7 +255,7 @@ void renderer_2d::draw_text(glm::vec2 baseline,
             scale.x; // bitshift by 6 to get value in pixels (2^6 = 64)
     }
 
-    mesh text_mesh;
+    graphics::mesh text_mesh;
     text_mesh.set_vertices(std::move(vertices));
     text_mesh.set_indices(std::move(indices));
     text_mesh.init();

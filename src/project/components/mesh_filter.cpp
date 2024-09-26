@@ -16,9 +16,9 @@ mesh_filter::mesh_filter(game_object& obj)
 {
 }
 
-std::shared_ptr<mesh> mesh_filter::get_mesh() const { return _mesh; }
+std::shared_ptr<graphics::mesh> mesh_filter::get_mesh() const { return _mesh; }
 
-void mesh_filter::set_mesh(std::shared_ptr<mesh> m) { _mesh = m; }
+void mesh_filter::set_mesh(std::shared_ptr<graphics::mesh> m) { _mesh = m; }
 
 template <>
 void mesh_filter::serialize<json_serializer>(json_serializer& s)

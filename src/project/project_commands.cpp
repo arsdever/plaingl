@@ -61,7 +61,7 @@ std::shared_ptr<scene> cmd_load_scene::default_scene()
     auto s = scene::create();
     s->set_name("default");
 
-    auto m = assets::asset_manager::get<mesh>("cube");
+    auto m = assets::asset_manager::get<graphics::mesh>("cube");
     auto mat = assets::asset_manager::get<graphics::material>("standard");
 
     auto go = game_object::create();

@@ -9,7 +9,7 @@ public:
     mesh_viewer();
     ~mesh_viewer();
 
-    void set_mesh(std::shared_ptr<mesh> m);
+    void set_mesh(std::shared_ptr<graphics::mesh> m);
     void set_mode(unsigned mode);
 
 private:
@@ -17,7 +17,7 @@ private:
     void render();
 
 private:
-    std::shared_ptr<mesh> _mesh { nullptr };
+    std::shared_ptr<graphics::mesh> _mesh { nullptr };
     std::unique_ptr<graphics_buffer> _light_buffer { nullptr };
     glm::vec2 _rotation { 0 };
     glm::vec2 _rotation_start_point { 0 };

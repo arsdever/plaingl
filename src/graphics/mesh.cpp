@@ -2,6 +2,8 @@
 
 #include "graphics/mesh.hpp"
 
+namespace graphics
+{
 void mesh::init()
 {
     _vbo.set_element_stride(vertex3d::size);
@@ -45,3 +47,4 @@ void mesh::render()
 const graphics_buffer& mesh::get_vertex_buffer() const { return _vbo; }
 
 const graphics_buffer& mesh::get_index_buffer() const { return _ebo; }
+} // namespace graphics

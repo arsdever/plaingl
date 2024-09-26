@@ -118,7 +118,7 @@ void profiler::render()
         vertices.insert(vertices.end(), v.begin(), v.end());
     }
 
-    std::shared_ptr<mesh> m = std::make_shared<mesh>();
+    std::shared_ptr<graphics::mesh> m = std::make_shared<graphics::mesh>();
     m->set_vertices(std::move(vertices));
     m->set_indices(std::move(indices));
     m->init();

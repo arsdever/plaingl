@@ -2,7 +2,7 @@
 
 #include "asset_management/type_importer.hpp"
 
-class model_importer : public assets::type_importer<mesh>
+class model_importer : public assets::type_importer<graphics::mesh>
 {
 public:
     static constexpr std::string_view extensions { ".fbx" };
