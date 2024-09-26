@@ -23,6 +23,32 @@ void mesh::set_indices(std::vector<int> indices)
     _indices = std::move(indices);
 }
 
+void mesh::recalculate_normals()
+{
+    for (auto v : _vertices)
+    {
+        v.normal() = glm::vec3(0.0f);
+    }
+
+    for (size_t i = 0; i < _indices.size(); i += 3)
+    {
+        glm::vec3 face_normal =
+            glm::cross(_vertices[ _indices[ i + 1 ] ].position() -
+                           _vertices[ _indices[ i ] ].position(),
+                       _vertices[ _indices[ i + 2 ] ].position() -
+                           _vertices[ _indices[ i ] ].position());
+
+        _vertices[ _indices[ i ] ].normal() += face_normal;
+        _vertices[ _indices[ i + 1 ] ].normal() += face_normal;
+        _vertices[ _indices[ i + 2 ] ].normal() += face_normal;
+    }
+
+    for (auto& v : _vertices)
+    {
+        v.normal() = glm::normalize(v.normal());
+    }
+}
+
 void mesh::set_submeshes(std::vector<submesh_info> submeshes)
 {
     _submeshes = std::move(submeshes);
