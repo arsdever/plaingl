@@ -18,14 +18,14 @@ public:
 
     static constexpr std::string_view type_name = "mesh_filter";
 
-    mesh* get_mesh() const;
-    void set_mesh(mesh* m);
+    std::shared_ptr<mesh> get_mesh() const;
+    void set_mesh(std::shared_ptr<mesh> m);
 
     template <typename ST>
     void serialize(ST& s);
     void deserialize(const nlohmann::json& j);
 
 private:
-    mesh* _mesh;
+    std::shared_ptr<mesh> _mesh { nullptr };
 };
 } // namespace components

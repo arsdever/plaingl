@@ -65,7 +65,7 @@ std::shared_ptr<scene> cmd_load_scene::default_scene()
     auto mat = assets::asset_manager::get<graphics::material>("standard");
 
     auto go = game_object::create();
-    go->add<components::mesh_filter>().set_mesh(m.get());
+    go->add<components::mesh_filter>();
     go->add<components::mesh_renderer>().set_material(mat);
     go->set_name("suzanne");
     s->add_root_object(go);
