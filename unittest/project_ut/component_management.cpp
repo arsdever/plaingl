@@ -34,10 +34,10 @@ TEST(ProjectComponentManagement, add_component_same_as_get_component_2)
     // Checks are done through changing parameter in the component
 
     auto obj = game_object::create();
-    obj->add<components::mesh_filter>().set_mesh(
-        reinterpret_cast<mesh*>(0xff00ff00ff00ff00));
-    auto& mf = obj->get("mesh_filter");
+    std::shared_ptr<mesh> m = std::shared_ptr<mesh>(
+        reinterpret_cast<mesh*>(0xff00ff00ff00ff00), [](auto) {});
+    obj->add<components::mesh_filter>().set_mesh(m);
+    auto& mf = obj->get<components::mesh_filter>();
 
-    EXPECT_EQ(static_cast<components::mesh_filter&>(mf).get_mesh(),
-              reinterpret_cast<mesh*>(0xff00ff00ff00ff00));
+    EXPECT_EQ(mf.get_mesh().get(), reinterpret_cast<mesh*>(0xff00ff00ff00ff00));
 }

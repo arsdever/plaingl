@@ -7,7 +7,8 @@
 class renderer_3d : public renderer
 {
 public:
-    void draw_mesh(mesh* m, std::shared_ptr<graphics::material> mat);
+    void draw_mesh(std::shared_ptr<mesh> m,
+                   std::shared_ptr<graphics::material> mat);
 
 private:
     vao_map _vao;

@@ -20,7 +20,7 @@ TEST(ProjectGameObject, add_and_get_componennt)
     auto& mf = obj->add<components::mesh_filter>();
 
     EXPECT_EQ(obj->try_get<components::mesh_filter>(), mf.shared_from_this());
-    mesh* m = (mesh*)(5000);
+    std::shared_ptr<mesh> m = std::make_shared<mesh>();
     mf.set_mesh(m);
 
     EXPECT_EQ(obj->get<components::mesh_filter>().get_mesh(), m);

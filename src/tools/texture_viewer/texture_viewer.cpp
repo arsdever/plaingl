@@ -83,5 +83,5 @@ void texture_viewer::render()
     graphics::set_viewport({ 0, 0 }, { get_size() });
     graphics::clear({ glm::vec3(0.1f), 1.0f });
 
-    renderer_3d().draw_mesh(quad.get(), mat);
+    renderer_3d().draw_mesh(quad, mat);
 }

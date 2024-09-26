@@ -126,7 +126,7 @@ void init_scene()
 
     auto obj = game_object::create();
     auto m = assets::asset_manager::get<mesh>("susane_head");
-    obj->add<components::mesh_filter>().set_mesh(m.get());
+    obj->add<components::mesh_filter>().set_mesh(m);
     obj->add<components::mesh_renderer>().set_material(basic_mat);
     obj->set_name("susane");
     scene::get_active_scene()->add_root_object(obj);

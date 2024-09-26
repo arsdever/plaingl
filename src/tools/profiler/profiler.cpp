@@ -118,10 +118,10 @@ void profiler::render()
         vertices.insert(vertices.end(), v.begin(), v.end());
     }
 
-    mesh m;
-    m.set_vertices(std::move(vertices));
-    m.set_indices(std::move(indices));
-    m.init();
+    std::shared_ptr<mesh> m = std::make_shared<mesh>();
+    m->set_vertices(std::move(vertices));
+    m->set_indices(std::move(indices));
+    m->init();
 
     auto mat = assets::asset_manager::get<graphics::material>("surface");
     // auto txt = assets::asset_manager::get<texture>("white");
@@ -131,5 +131,5 @@ void profiler::render()
     mat->set_property_value("u_model_matrix", glm::identity<glm::mat4>());
     mat->set_property_value("u_color", glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
     mat->set_property_value("u_image", txt.get());
-    renderer_3d().draw_mesh(&m, mat);
+    renderer_3d().draw_mesh(m, mat);
 }

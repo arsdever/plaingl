@@ -49,7 +49,6 @@ void model_importer::internal_load(common::file& asset_file)
             "Node: {} meshes: {}", node->mName.C_Str(), node->mNumMeshes);
         if (node->mNumMeshes > 0)
         {
-            mesh* m = nullptr;
             {
                 std::vector<const aiMesh*> ai_submeshes;
                 for (int i = 0; i < node->mNumMeshes; ++i)
