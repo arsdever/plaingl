@@ -118,6 +118,20 @@ struct vertex3d
              tangent_attribute,
              bitangent_attribute>
 {
+    vertex3d() = default;
+
+    vertex3d(position_3d_attribute::attribute_data_storage_type pos)
+    {
+        position() = pos;
+    }
+
+    vertex3d(position_3d_attribute::attribute_component_type x,
+             position_3d_attribute::attribute_component_type y,
+             position_3d_attribute::attribute_component_type z)
+    {
+        position() = { x, y, z };
+    }
+
     position_3d_attribute::attribute_data_storage_type& position()
     {
         return get<0>();
@@ -135,6 +149,61 @@ struct vertex3d
     bitangent_attribute::attribute_data_storage_type& bitangent()
     {
         return get<5>();
+    }
+
+    inline void
+    set_position(position_3d_attribute::attribute_data_storage_type pos)
+    {
+        position() = pos;
+    }
+    inline void
+    set_normal(normal_3d_attribute::attribute_data_storage_type norm)
+    {
+        normal() = norm;
+    }
+    inline void set_uv(uv_attribute::attribute_data_storage_type coord)
+    {
+        uv() = coord;
+    }
+    inline void set_color(color_attribute::attribute_data_storage_type col)
+    {
+        color() = col;
+    }
+    inline void set_tangent(tangent_attribute::attribute_data_storage_type tan)
+    {
+        tangent() = tan;
+    }
+    inline void
+    set_bitangent(bitangent_attribute::attribute_data_storage_type bitan)
+    {
+        bitangent() = bitan;
+    }
+
+    inline position_3d_attribute::attribute_data_storage_type get_position()
+    {
+        return position();
+    }
+
+    inline normal_3d_attribute::attribute_data_storage_type get_normal()
+    {
+        return normal();
+    }
+
+    inline uv_attribute::attribute_data_storage_type get_uv() { return uv(); }
+
+    inline color_attribute::attribute_data_storage_type get_color()
+    {
+        return color();
+    }
+
+    inline tangent_attribute::attribute_data_storage_type get_tangent()
+    {
+        return tangent();
+    }
+
+    inline bitangent_attribute::attribute_data_storage_type get_bitangent()
+    {
+        return bitangent();
     }
 };
 

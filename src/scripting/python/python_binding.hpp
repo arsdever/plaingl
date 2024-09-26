@@ -1,8 +1,18 @@
+#include <pybind11/chrono.h>
+#include <pybind11/complex.h>
 #include <pybind11/embed.h>
+#include <pybind11/functional.h>
 #include <pybind11/operators.h>
+#include <pybind11/stl.h>
 
+#include "core/game_clock.hpp"
 #include "core/input_system.hpp"
 #include "core/inputs/binding.hpp"
+#include "graphics/material.hpp"
+#include "graphics/mesh.hpp"
+#include "graphics/vertex.hpp"
+#include "project/components/mesh_filter.hpp"
+#include "project/components/mesh_renderer.hpp"
 #include "project/components/transform.hpp"
 #include "scripting/python/python_component.hpp"
 #include "scripting/python/python_glm_binding.hpp"
@@ -77,6 +87,17 @@ PYBIND11_EMBEDDED_MODULE(gamify, m)
         .def("forward", &components::transform::get_forward)
         .def("up", &components::transform::get_up);
 
+    pybind11::class_<components::mesh_filter,
+                     std::shared_ptr<components::mesh_filter>>(m, "mesh_filter")
+        .def("set_mesh", &components::mesh_filter::set_mesh)
+        .def("mesh", &components::mesh_filter::get_mesh);
+
+    pybind11::class_<components::mesh_renderer,
+                     std::shared_ptr<components::mesh_renderer>>(
+        m, "mesh_renderer")
+        .def("set_material", &components::mesh_renderer::set_material)
+        .def("material", &components::mesh_renderer::get_material);
+
     auto is =
         pybind11::class_<core::input_system>(m, "input_system")
             .def("mouse_position", &core::input_system::get_mouse_position)
@@ -119,4 +140,45 @@ PYBIND11_EMBEDDED_MODULE(gamify, m)
         .def("get_vec2", &core::binding::get<glm::dvec2>)
         .def("get_vec3", &core::binding::get<glm::dvec3>)
         .def("get_vec4", &core::binding::get<glm::dvec4>);
+
+    pybind11::class_<vertex3d>(m, "vertex")
+        .def(pybind11::init<glm::vec3>())
+        .def(pybind11::init<float, float, float>())
+        .def_property(
+            "position", &vertex3d::get_position, &vertex3d::set_position)
+        .def_property("normal", &vertex3d::get_normal, &vertex3d::set_normal)
+        .def_property("uv", &vertex3d::get_uv, &vertex3d::set_uv)
+        .def_property("color", &vertex3d::get_color, &vertex3d::set_color)
+        .def_property(
+            "bitangent", &vertex3d::get_bitangent, &vertex3d::set_bitangent)
+        .def_property(
+            "tangent", &vertex3d::get_tangent, &vertex3d::set_tangent);
+
+    pybind11::class_<graphics::mesh, std::shared_ptr<graphics::mesh>>(m, "mesh")
+        .def(pybind11::init<>())
+        .def("set_vertices", &graphics::mesh::set_vertices)
+        .def("set_indices", &graphics::mesh::set_indices)
+        .def("recalculate_normals", &graphics::mesh::recalculate_normals)
+        .def("init", &graphics::mesh::init);
+
+    pybind11::class_<graphics::material, std::shared_ptr<graphics::material>>(
+        m, "material")
+        .def(pybind11::init<>())
+        .def("set_property",
+             static_cast<void (graphics::material::*)(std::string_view,
+                                                      glm::vec2)>(
+                 &graphics::material::set_property_value<glm::vec2>))
+        .def("set_property",
+             static_cast<void (graphics::material::*)(std::string_view,
+                                                      glm::vec3)>(
+                 &graphics::material::set_property_value<glm::vec3>))
+        .def("set_property",
+             static_cast<void (graphics::material::*)(std::string_view,
+                                                      glm::vec4)>(
+                 &graphics::material::set_property_value<glm::vec4>));
+
+    pybind11::class_<game_clock>(m, "clock")
+        .def_static("delta", &game_clock::delta)
+        .def_static("absolute", &game_clock::absolute)
+        .def_static("physics_delta", &game_clock::physics_delta);
 }
