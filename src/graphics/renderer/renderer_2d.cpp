@@ -175,7 +175,7 @@ void renderer_2d::draw_rect(glm::vec2 top_left,
 }
 
 void renderer_2d::draw_text(glm::vec2 baseline,
-                            const font& f,
+                            std::shared_ptr<font> f,
                             const glm::vec2& window_size,
                             std::string_view text,
                             float fscale)
@@ -198,7 +198,7 @@ void renderer_2d::draw_text(glm::vec2 baseline,
 
     for (const auto& c : text)
     {
-        const font::character& ch = f[ static_cast<size_t>(c) ];
+        const font::character& ch = (*f)[ static_cast<size_t>(c) ];
 
         float xpos = cursor_position.x + ch._bearing.x * scale.x;
         float ypos = cursor_position.y - ch._bearing.y * scale.y;
@@ -224,16 +224,16 @@ void renderer_2d::draw_text(glm::vec2 baseline,
 
         quad_vertices[ 0 ].uv() = glm::vec2 {
             ch._texture_offset.x, ch._texture_offset.y + ch._size.y
-        } / static_cast<glm::vec2>(f.atlas().get_size());
+        } / static_cast<glm::vec2>(f->atlas()->get_size());
         quad_vertices[ 1 ].uv() =
             glm::vec2 { ch._texture_offset.x, ch._texture_offset.y } /
-            static_cast<glm::vec2>(f.atlas().get_size());
+            static_cast<glm::vec2>(f->atlas()->get_size());
         quad_vertices[ 2 ].uv() = glm::vec2 {
             ch._texture_offset.x + ch._size.x, ch._texture_offset.y + ch._size.y
-        } / static_cast<glm::vec2>(f.atlas().get_size());
-        quad_vertices[ 3 ].uv() = glm::vec2 { ch._texture_offset.x + ch._size.x,
-                                              ch._texture_offset.y } /
-                                  static_cast<glm::vec2>(f.atlas().get_size());
+        } / static_cast<glm::vec2>(f->atlas()->get_size());
+        quad_vertices[ 3 ].uv() = glm::vec2 {
+            ch._texture_offset.x + ch._size.x, ch._texture_offset.y
+        } / static_cast<glm::vec2>(f->atlas()->get_size());
 
         const auto n = vertices.size();
 
@@ -268,8 +268,7 @@ void renderer_2d::draw_text(glm::vec2 baseline,
                                        glm::identity<glm::mat4>());
 
     surface_shader->set_property_value("u_color", glm::vec4(1.0f));
-    surface_shader->set_property_value("u_image",
-                                       &(const_cast<font&>(f).atlas()));
+    surface_shader->set_property_value("u_image", f->atlas());
     surface_shader->activate();
     text_mesh.render();
 

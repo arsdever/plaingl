@@ -1,6 +1,7 @@
 #pragma once
 
 #include "graphics/graphics_fwd.hpp"
+#include "common/common_fwd.hpp"
 
 class font
 {
@@ -21,8 +22,10 @@ public:
     font();
 
     void load(std::string path, float size);
-    texture& atlas();
-    const texture& atlas() const;
+    void load(common::file& f, float size);
+    std::shared_ptr<texture> atlas();
+
+    glm::vec2 size(std::string_view msg) const;
 
     const character& operator[](unsigned int ch) const;
 
