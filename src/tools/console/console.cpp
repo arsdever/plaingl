@@ -19,6 +19,7 @@ struct console::impl
     bool is_active { false };
     std::array<std::string, 100> history;
     size_t history_counter { 0 };
+    size_t history_size { 0 };
     struct command_lookup_node
     {
         std::string key;
@@ -272,8 +273,11 @@ void console::register_for_logs()
     sink->set_level(spdlog::level::info);
 }
 
+size_t console::history_size() const { return _impl->history_size; }
+
 void console::add_history(std::string_view text)
 {
+    ++_impl->history_size;
     _impl->history[ _impl->history_counter++ % _impl->history.size() ] =
         std::move(text);
 }
