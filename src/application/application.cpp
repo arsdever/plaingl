@@ -1,6 +1,8 @@
 #include <GLFW/glfw3.h>
 #include <prof/profiler.hpp>
 
+#include "graphics/graphics_fwd.hpp"
+
 #include "application.hpp"
 
 #include "application/application_commands.hpp"
@@ -12,6 +14,9 @@
 #include "core/input_system.hpp"
 #include "core/inputs/binding.hpp"
 #include "core/window.hpp"
+#include "graphics/font.hpp"
+#include "graphics/renderer/renderer_2d.hpp"
+#include "graphics/renderer/renderer_3d.hpp"
 #include "graphics/texture.hpp"
 #include "project/components/camera.hpp"
 #include "project/game_object.hpp"
@@ -171,9 +176,65 @@ void application::render_game()
 {
     auto cam = components::camera::get_active();
     if (!cam)
-        return;
+    {
+        const auto line_height = 14;
+        auto msg_font = assets::asset_manager::get<graphics::font>("default");
+        static constexpr std::string_view msg = "No active camera";
+        renderer_2d().draw_text(
+            (static_cast<glm::vec2>(_windows[ 0 ]->get_size()) -
+             msg_font->size(msg)) /
+                2.0f,
+            msg_font,
+            _windows[ 0 ]->get_size(),
+            msg);
+    }
+    else
+    {
+        cam->render();
+    }
 
-    cam->render();
+    if (_console && _console->is_active())
+    {
+        draw_console();
+    }
+}
+
+void application::draw_console()
+{
+    auto position = glm::vec2(10, _windows[ 0 ]->get_height() - 10);
+    auto fnt = assets::asset_manager::get<graphics::font>("default");
+    auto line_height = fnt->size("X").y + 2;
+    auto last_10 = _console->history<10>();
+    size_t lines = 0;
+
+    renderer_2d().draw_rect(
+        { 0,
+          _windows[ 0 ]->get_height() - 20 -
+              (last_10.size() + 1) * line_height },
+        { _windows[ 0 ]->get_width(), _windows[ 0 ]->get_height() },
+        _windows[ 0 ]->get_size(),
+        0,
+        {},
+        { 0, 0, 0, 0.5f });
+
+    for (int i = 0; i < last_10.size(); ++i)
+    {
+        auto line = last_10[ i ];
+        if (line.empty())
+            continue;
+        ++lines;
+        renderer_2d().draw_text(
+            { 10, _windows[ 0 ]->get_height() - 10 - ((i + 1) * line_height) },
+            assets::asset_manager::get<graphics::font>("default"),
+            _windows[ 0 ]->get_size(),
+            line);
+    }
+
+    renderer_2d().draw_text(
+        { 10, _windows[ 0 ]->get_height() - 10 },
+        assets::asset_manager::get<graphics::font>("default"),
+        _windows[ 0 ]->get_size(),
+        std::format("> {}", _console->get_current_input()));
 }
 
 void application::scene_loaded(std::shared_ptr<scene> sc)

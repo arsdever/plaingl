@@ -23,6 +23,7 @@ private:
     void load_assets();
 
     void render_game();
+    void draw_console();
 
     void scene_loaded(std::shared_ptr<scene> sc);
 
