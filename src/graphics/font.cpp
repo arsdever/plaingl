@@ -9,6 +9,8 @@
 #include "glad/gl.h"
 #include "graphics/texture.hpp"
 
+namespace graphics
+{
 namespace
 {
 static logger log() { return get_logger("font"); }
@@ -291,3 +293,4 @@ const font::character& font::operator[](unsigned int ch) const
 {
     return _character_map.at(ch);
 }
+} // namespace graphics

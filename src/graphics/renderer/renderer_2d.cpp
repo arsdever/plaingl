@@ -177,7 +177,7 @@ void renderer_2d::draw_rect(glm::vec2 top_left,
 }
 
 void renderer_2d::draw_text(glm::vec2 baseline,
-                            std::shared_ptr<font> f,
+                            std::shared_ptr<graphics::font> f,
                             const glm::vec2& window_size,
                             std::string_view text,
                             glm::vec4 color,
@@ -201,7 +201,7 @@ void renderer_2d::draw_text(glm::vec2 baseline,
 
     for (const auto& c : text)
     {
-        const font::character& ch = (*f)[ static_cast<size_t>(c) ];
+        const graphics::font::character& ch = (*f)[ static_cast<size_t>(c) ];
 
         float xpos = cursor_position.x + ch._bearing.x * scale.x;
         float ypos = cursor_position.y - ch._bearing.y * scale.y;

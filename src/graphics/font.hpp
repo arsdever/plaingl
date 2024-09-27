@@ -1,8 +1,10 @@
 #pragma once
 
-#include "graphics/graphics_fwd.hpp"
 #include "common/common_fwd.hpp"
+#include "graphics/graphics_fwd.hpp"
 
+namespace graphics
+{
 class font
 {
 public:
@@ -51,3 +53,4 @@ private:
     std::map<unsigned int, character> _character_map;
     std::shared_ptr<texture> _atlas;
 };
+} // namespace graphics
