@@ -2,7 +2,7 @@
 
 #include "asset_management/type_importer.hpp"
 
-class font_importer : public assets::type_importer<font>
+class font_importer : public assets::type_importer<graphics::font>
 {
 public:
     static constexpr std::string_view extensions { ".ttf" };

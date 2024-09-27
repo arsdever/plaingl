@@ -20,7 +20,7 @@ public:
                    glm::vec4 fill_color);
 
     void draw_text(glm::vec2 baseline,
-                   std::shared_ptr<font> f,
+                   std::shared_ptr<graphics::font> f,
                    const glm::vec2& window_size,
                    std::string_view text,
                    glm::vec4 color = { 1.0f, 1.0f, 1.0f, 1.0f },
