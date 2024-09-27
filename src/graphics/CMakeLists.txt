@@ -43,4 +43,4 @@ target_include_directories(${PROJECT}_graphics PUBLIC ${PROJECT_SRC_DIR})
 target_link_libraries(
   ${PROJECT}_graphics
   PUBLIC ${PROJECT}::common ${PROJECT}::renderer
-  PRIVATE ${PROJECT}::glad PNG::PNG JPEG::JPEG)
+  PRIVATE ${PROJECT}::glad PNG::PNG JPEG::JPEG Freetype::Freetype)

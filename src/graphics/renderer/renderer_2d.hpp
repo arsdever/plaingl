@@ -1,6 +1,7 @@
 #pragma once
 
 #include "graphics/graphics_fwd.hpp"
+
 #include "graphics/renderer/renderer.hpp"
 
 class renderer_2d : public renderer
@@ -19,7 +20,7 @@ public:
                    glm::vec4 fill_color);
 
     void draw_text(glm::vec2 baseline,
-                   const font& f,
+                   std::shared_ptr<font> f,
                    const glm::vec2& window_size,
                    std::string_view text,
                    float scale = 1.0f);
