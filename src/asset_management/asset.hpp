@@ -13,6 +13,7 @@ struct asset
                                    std::shared_ptr<graphics::mesh>,
                                    std::shared_ptr<graphics::shader>,
                                    std::shared_ptr<graphics::material>,
+                                   std::shared_ptr<font>,
                                    std::shared_ptr<texture>>;
     common::file _asset_file;
     data_type _data;
