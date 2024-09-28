@@ -23,7 +23,10 @@ texture_viewer::texture_viewer()
 
 texture_viewer::~texture_viewer() = default;
 
-void texture_viewer::set_texture(std::shared_ptr<texture> m) { _texture = m; }
+void texture_viewer::set_texture(std::shared_ptr<graphics::texture> m)
+{
+    _texture = m;
+}
 
 void texture_viewer::initialize()
 {

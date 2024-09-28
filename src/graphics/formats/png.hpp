@@ -80,37 +80,40 @@ public:
         {
         case 0:
         {
-            result._metadata._color_type = texture::format::GRAYSCALE;
+            result._metadata._color_type = graphics::texture::format::GRAYSCALE;
             result._metadata._channel_count = 1;
             break;
         }
         case 2:
         {
-            result._metadata._color_type = texture::format::RGB;
+            result._metadata._color_type = graphics::texture::format::RGB;
             result._metadata._channel_count = 3;
             break;
         }
         case 3:
         {
-            result._metadata._color_type = texture::format::UNSPECIFIED;
+            result._metadata._color_type =
+                graphics::texture::format::UNSPECIFIED;
             result._metadata._channel_count = 3;
             break;
         }
         case 4:
         {
-            result._metadata._color_type = texture::format::UNSPECIFIED;
+            result._metadata._color_type =
+                graphics::texture::format::UNSPECIFIED;
             result._metadata._channel_count = 2;
             break;
         }
         case 6:
         {
-            result._metadata._color_type = texture::format::RGBA;
+            result._metadata._color_type = graphics::texture::format::RGBA;
             result._metadata._channel_count = 4;
             break;
         }
         default:
         {
-            result._metadata._color_type = texture::format::UNSPECIFIED;
+            result._metadata._color_type =
+                graphics::texture::format::UNSPECIFIED;
             result._metadata._channel_count = 0;
             break;
         }
@@ -165,7 +168,7 @@ private:
         size_t _bits_per_pixel;
         size_t _bytes_per_row;
         unsigned char _channel_count;
-        texture::format _color_type;
+        graphics::texture::format _color_type;
     } _metadata;
 
     common::file& file;

@@ -88,12 +88,12 @@ void camera::get_render_size(size_t& width, size_t& height) const
 
 glm::uvec2 camera::get_render_size() const { return _render_size; }
 
-void camera::set_render_texture(std::weak_ptr<texture> render_texture)
+void camera::set_render_texture(std::weak_ptr<graphics::texture> render_texture)
 {
     _user_render_texture = render_texture;
 }
 
-std::shared_ptr<texture> camera::get_render_texture() const
+std::shared_ptr<graphics::texture> camera::get_render_texture() const
 {
     return _user_render_texture.lock();
 }
@@ -125,12 +125,13 @@ void camera::render()
     _framebuffer->unbind();
     if (auto urt = _user_render_texture.lock())
     {
-        _framebuffer->copy_texture(urt.get());
+        _framebuffer->copy_texture(urt);
     }
 
     _framebuffer->blit(0);
     // texture surface;
-    // surface.init(_render_size.x, _render_size.y, texture::format::RGBA);
+    // surface.init(_render_size.x,
+    // _render_size.y,graphics::texture::format::RGBA);
     // _framebuffer->copy_texture(&surface);
     // renderer_2d().draw_rect(glm::vec2(0),
     //                         glm::vec2(_render_size),

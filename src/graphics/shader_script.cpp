@@ -1,11 +1,20 @@
 #include <glad/gl.h>
 
+#include "graphics/graphics_fwd.hpp"
+
 #include "graphics/shader_script.hpp"
 
 #include "common/file.hpp"
 #include "common/filesystem.hpp"
 #include "common/logging.hpp"
 #include "common/utils.hpp"
+
+namespace graphics
+{
+namespace
+{
+static inline logger log() { return get_logger("shader"); }
+} // namespace
 
 template <>
 int gl_convert<int, graphics::shader_script_type>(
@@ -19,13 +28,6 @@ int gl_convert<int, graphics::shader_script_type>(
     default: return -1;
     }
 }
-
-namespace graphics
-{
-namespace
-{
-static inline logger log() { return get_logger("shader"); }
-} // namespace
 
 shader_script::shader_script(std::string_view path)
     : shader_script(std::string(path), get_type_from_path(path))

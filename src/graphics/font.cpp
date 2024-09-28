@@ -48,10 +48,10 @@ void font::load(common::file& file, float size)
         glm::uvec2 { 0 }, glm::uvec2 { INT_MAX }, -1, nullptr, nullptr
     };
 
-    _atlas = std::make_shared<texture>();
-    _atlas->init(1024, 1024, texture::format::GRAYSCALE);
+    _atlas = std::make_shared<graphics::texture>();
+    _atlas->init(1024, 1024, graphics::texture::format::GRAYSCALE);
     _atlas->set_wrapping_mode(
-        true, true, texture::wrapping_mode::clamp_to_edge);
+        true, true, graphics::texture::wrapping_mode::clamp_to_edge);
     _atlas->set_sampling_mode_mag(texture::sampling_mode::linear);
     _atlas->set_sampling_mode_min(texture::sampling_mode::linear);
     glPixelStorei(GL_UNPACK_ALIGNMENT,
@@ -128,10 +128,10 @@ void font::load(std::string path, float size)
         glm::uvec2 { 0 }, glm::uvec2 { INT_MAX }, -1, nullptr, nullptr
     };
 
-    _atlas = std::make_shared<texture>();
-    _atlas->init(1024, 1024, texture::format::GRAYSCALE);
+    _atlas = std::make_shared<graphics::texture>();
+    _atlas->init(1024, 1024, graphics::texture::format::GRAYSCALE);
     _atlas->set_wrapping_mode(
-        true, true, texture::wrapping_mode::clamp_to_edge);
+        true, true, graphics::texture::wrapping_mode::clamp_to_edge);
     _atlas->set_sampling_mode_mag(texture::sampling_mode::linear);
     _atlas->set_sampling_mode_min(texture::sampling_mode::linear);
     glPixelStorei(GL_UNPACK_ALIGNMENT,
@@ -180,7 +180,7 @@ void font::load(std::string path, float size)
     log()->info("Done packing");
 }
 
-std::shared_ptr<texture> font::atlas() { return _atlas; }
+std::shared_ptr<graphics::texture> font::atlas() { return _atlas; }
 
 glm::vec2 font::size(std::string_view msg) const
 {
