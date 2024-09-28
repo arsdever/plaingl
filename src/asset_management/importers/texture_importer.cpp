@@ -4,5 +4,5 @@
 
 void texture_importer::internal_load(common::file& asset_file)
 {
-    _data = texture::from_file(asset_file);
+    _data = graphics::texture::from_file(asset_file);
 }

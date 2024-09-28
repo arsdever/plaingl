@@ -52,9 +52,6 @@ bool rect_contains(glm::vec<2, T, glm::defaultp> top_left,
     return is_in_range(tl.x, br.x, pos.x) && is_in_range(tl.y, br.y, pos.y);
 }
 
-template <typename R, typename... ARGS>
-R gl_convert(ARGS... args);
-
 template <typename... T>
 struct deduce_function_type;
 

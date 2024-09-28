@@ -35,8 +35,8 @@ public:
     void get_render_size(size_t& width, size_t& height) const;
     glm::uvec2 get_render_size() const;
 
-    void set_render_texture(std::weak_ptr<texture> render_texture);
-    std::shared_ptr<texture> get_render_texture() const;
+    void set_render_texture(std::weak_ptr<graphics::texture> render_texture);
+    std::shared_ptr<graphics::texture> get_render_texture() const;
 
     void set_background_color(glm::dvec4 color);
     glm::dvec4 get_background_color() const;
@@ -71,7 +71,7 @@ private:
     glm::uvec2 _render_size { 1u };
     double _field_of_view { .6 };
     bool _is_orthogonal { false };
-    std::weak_ptr<texture> _user_render_texture {};
+    std::weak_ptr<graphics::texture> _user_render_texture {};
     glm::dvec4 _background_color { 0.0 };
     std::unique_ptr<graphics_buffer> _lights_buffer {};
 

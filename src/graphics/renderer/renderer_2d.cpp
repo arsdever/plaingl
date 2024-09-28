@@ -25,7 +25,7 @@ glm::tvec2<T> map_from_window(const glm::tvec2<T>& p,
 void renderer_2d::draw_rect(glm::vec2 top_left,
                             glm::vec2 bottom_right,
                             glm::vec2 window_size,
-                            std::shared_ptr<texture> txt)
+                            std::shared_ptr<graphics::texture> txt)
 {
     glm::vec2 bottom_left { top_left.x, bottom_right.y };
     glm::vec2 top_right { bottom_right.x, top_left.y };
@@ -263,7 +263,7 @@ void renderer_2d::draw_text(glm::vec2 baseline,
     text_mesh.set_indices(std::move(indices));
     text_mesh.init();
 
-    auto white = assets::asset_manager::get<texture>("white");
+    auto white = assets::asset_manager::get<graphics::texture>("white");
 
     auto text_material =
         assets::asset_manager::get<graphics::material>("surface");

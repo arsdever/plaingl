@@ -105,8 +105,8 @@ int main(int argc, char** argv)
 void init_scene()
 {
     auto basic_mat = assets::asset_manager::get<graphics::material>("standard");
-    auto txt = assets::asset_manager::get<texture>("diffuse");
-    auto norm = assets::asset_manager::get<texture>("brick");
+    auto txt = assets::asset_manager::get<graphics::texture>("diffuse");
+    auto norm = assets::asset_manager::get<graphics::texture>("brick");
     basic_mat->set_property_value("albedo_texture_strength", 0.0f);
     basic_mat->set_property_value("albedo_color", 1.0f, 0.8f, 0.2f);
     basic_mat->set_property_value("normal_texture_strength", 0.0f);

@@ -3,6 +3,8 @@
 
 #include <glad/gl.h>
 
+#include "graphics/graphics_fwd.hpp"
+
 #include "graphics/texture.hpp"
 
 #include "asset_management/type_importer.hpp"
@@ -13,6 +15,8 @@
 #include "graphics/formats/jpg.hpp"
 #include "graphics/formats/png.hpp"
 
+namespace graphics
+{
 namespace
 {
 logger log() { return get_logger("texture"); }
@@ -412,7 +416,7 @@ void texture::fetch_from_gpu()
 
 std::shared_ptr<texture> texture::from_png_file(common::file& file)
 {
-    graphics::png img = graphics::png::load(file);
+    png img = png::load(file);
     auto tex = std::make_shared<texture>();
     tex->init(img.get_width(), img.get_height(), img.get_format());
     size_t size = img.read_pixels(static_cast<char*>(nullptr));
@@ -425,7 +429,7 @@ std::shared_ptr<texture> texture::from_png_file(common::file& file)
 
 std::shared_ptr<texture> texture::from_jpg_file(common::file& file)
 {
-    graphics::jpg img = graphics::jpg::load(file);
+    jpg img = jpg::load(file);
     auto tex = std::make_shared<texture>();
     tex->init(img.get_width(), img.get_height(), img.get_format());
     size_t size = img.read_pixels(static_cast<unsigned char*>(nullptr));
@@ -437,3 +441,4 @@ std::shared_ptr<texture> texture::from_jpg_file(common::file& file)
 }
 
 std::vector<texture*> texture::_textures;
+} // namespace graphics

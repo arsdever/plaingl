@@ -25,7 +25,7 @@ public:
 
     void load(std::string path, float size);
     void load(common::file& f, float size);
-    std::shared_ptr<texture> atlas();
+    std::shared_ptr<graphics::texture> atlas();
 
     glm::vec2 size(std::string_view msg) const;
 
@@ -51,6 +51,6 @@ private:
 private:
     std::string _font_file_path;
     std::map<unsigned int, character> _character_map;
-    std::shared_ptr<texture> _atlas;
+    std::shared_ptr<graphics::texture> _atlas;
 };
 } // namespace graphics
