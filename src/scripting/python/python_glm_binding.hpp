@@ -49,7 +49,10 @@ struct python_binding<glm::vec<N, T, Q>>
                 .def(pybind11::self *= glm::vec<N, T, Q>())
                 .def(pybind11::self *= T())
                 .def(pybind11::self /= glm::vec<N, T, Q>())
-                .def(pybind11::self /= T());
+                .def(pybind11::self /= T())
+                .def("__repr__",
+                     [](const glm::vec<N, T, Q>& v)
+        { return glm::to_string(v); });
 
         if constexpr (N > 1)
         {
@@ -132,7 +135,10 @@ struct python_binding<glm::qua<T, Q>>
                 .def(pybind11::self -= glm::qua<T, Q>())
                 .def(pybind11::self *= glm::qua<T, Q>())
                 .def(pybind11::self *= T())
-                .def(pybind11::self /= T());
+                .def(pybind11::self /= T())
+                .def("__repr__",
+                     [](const glm::qua<T, Q>& v) { return glm::to_string(v); });
+        ;
     }
 };
 
