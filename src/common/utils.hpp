@@ -178,3 +178,9 @@ public:
         return std::static_pointer_cast<T>(shared_from_this<Base>());
     }
 };
+
+template <typename... T>
+struct type_list
+{
+    using variant_t = std::variant<T...>;
+};
