@@ -3,6 +3,7 @@
 #include "project/project_fwd.hpp"
 
 #include "project/component_interface/metatype.hpp"
+#include "project/definitions.hpp"
 #include "project/game_object.hpp"
 #include "project/object.hpp"
 
@@ -30,6 +31,9 @@ public:
     inline void disable() { set_enabled(false); }
     void set_enabled(bool active = true);
     bool is_enabled() const;
+
+    virtual void set_property_value(std::string_view name,
+                                    trivial_types::variant_t value);
 
     void init();
     void update();

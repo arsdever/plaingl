@@ -1,9 +1,15 @@
 #include "project/component_interface/component.hpp"
 
+#include "common/logging.hpp"
 #include "project/component_interface/component_registry.hpp"
 #include "project/components/transform.hpp"
 #include "project/game_object.hpp"
 #include "project/project_manager.hpp"
+
+namespace
+{
+logger log() { return get_logger("component"); }
+} // namespace
 
 component::component(std::string_view type_name, game_object& obj)
     : _game_object(obj)
@@ -34,6 +40,13 @@ std::shared_ptr<component> component::get(std::string_view type_name)
 void component::set_enabled(bool active) { _is_enabled = active; }
 
 bool component::is_enabled() const { return _is_enabled; }
+
+void component::set_property_value(std::string_view name,
+                                   trivial_types::variant_t value)
+{
+    log()->error("{} has no property {}", _type_info.name, name);
+    return;
+}
 
 void component::init()
 {
