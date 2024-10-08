@@ -5,11 +5,10 @@
 #include "common/event.hpp"
 #include "common/utils.hpp"
 #include "core/inputs/gamepad.hpp"
+#include "core/core_fwd.hpp"
 
 namespace core
 {
-class binding;
-
 class input_system
 {
 public:
