@@ -51,6 +51,7 @@ application::application()
 
         cam->set_render_size(re.get_new_size());
     };
+    core::input_system::set_input_source(main_window);
 
     scripting::backend::initialize();
     core::input_system::update_device_list();

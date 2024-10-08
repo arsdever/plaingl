@@ -29,6 +29,73 @@ void input_system::update_device_list()
     }
 }
 
+void input_system::set_input_source(std::shared_ptr<window> input_source)
+{
+    if (input_source == _input_source.lock())
+        return;
+
+    _input_source = input_source;
+    input_source->activate();
+    auto handle = glfwGetCurrentContext();
+
+    glfwSetKeyCallback(
+        handle,
+        [](GLFWwindow* window, int key, int scancode, int action, int mods)
+    {
+        if (key == GLFW_KEY_UNKNOWN)
+            return;
+
+        input_system::set_modifiers(static_cast<modifiers>(mods));
+
+        if (action == GLFW_PRESS)
+            input_system::set_key_down(key, true);
+        else if (action == GLFW_RELEASE)
+            input_system::set_key_down(key, false);
+    });
+
+    glfwSetCursorPosCallback(handle,
+                             [](GLFWwindow* window, double x, double y) {
+        input_system::set_mouse_position({ x, y });
+    });
+
+    glfwSetMouseButtonCallback(
+        handle,
+        [](GLFWwindow* window, int button, int action, int mods)
+    {
+        input_system::set_modifiers(static_cast<modifiers>(mods));
+
+        auto evt =
+            action == GLFW_PRESS ? button_state::press : button_state::release;
+        if (button == GLFW_MOUSE_BUTTON_LEFT)
+            input_system::set_mouse_button(mouse_button::left, evt);
+        else if (button == GLFW_MOUSE_BUTTON_RIGHT)
+            input_system::set_mouse_button(mouse_button::right, evt);
+        else if (button == GLFW_MOUSE_BUTTON_MIDDLE)
+            input_system::set_mouse_button(mouse_button::middle, evt);
+    });
+
+    // glfwSetScrollCallback(handle,
+    //                       [](GLFWwindow* window, double xoffset, double
+    //                       yoffset)
+    // {
+    //     input_system::set_mouse_delta({ xoffset, yoffset });
+    // });
+
+    glfwSetJoystickCallback(
+        [](int jid, int event)
+    {
+        if (event == GLFW_CONNECTED)
+            input_system::update_device_list();
+    });
+
+    update_device_list();
+}
+
+std::shared_ptr<window> input_system::get_input_source()
+{
+    return _input_source.lock();
+}
+
 void input_system::set_mouse_position(glm::ivec2 pos)
 {
     _mouse_delta = pos - _mouse_position;
@@ -188,4 +255,5 @@ std::unordered_map<std::string,
                    string_hash,
                    std::equal_to<>>
     input_system::_mapping;
+std::weak_ptr<window> input_system::_input_source;
 } // namespace core
