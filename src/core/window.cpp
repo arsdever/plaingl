@@ -357,10 +357,10 @@ void window::setup_mouse_button_callback()
                     static_cast<input_system::modifiers>(mods));
                 input_system::set_mouse_button(
                     static_cast<input_system::mouse_button>(
-                        input_system::mouse_button::MouseButton0 + btn),
+                        input_system::mouse_button::button_0 + btn),
                     (_this->_p->_mouse_state._buttons & (1 << btn))
-                        ? input_system::button_state::Press
-                        : input_system::button_state::Release);
+                        ? input_system::button_state::press
+                        : input_system::button_state::release);
             }
         }
         std::shared_ptr<window_events> events = _this->get_events();

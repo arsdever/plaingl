@@ -112,8 +112,8 @@ void console::input(int ch)
         else if (ch < 256)
         {
             auto mods = core::input_system::get_modifiers();
-            bool upper = (mods & core::input_system::modifiers::Shift) ^
-                         (mods & core::input_system::modifiers::CapsLock);
+            bool upper = (mods & core::input_system::modifiers::shift) ^
+                         (mods & core::input_system::modifiers::caps_lock);
             if (isalpha(ch))
             {
                 ch = upper ? std::toupper(ch) : std::tolower(ch);

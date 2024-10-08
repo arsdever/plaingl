@@ -44,7 +44,7 @@ input_system::get_mouse_button(mouse_button button_code)
 {
     auto it = _mouse_buttons_state.find(button_code);
     if (it == _mouse_buttons_state.end())
-        return button_state::Unspecified;
+        return button_state::unspecified;
 
     return it->second;
 }
