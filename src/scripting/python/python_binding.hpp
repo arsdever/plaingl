@@ -69,28 +69,28 @@ PYBIND11_EMBEDDED_MODULE(gamify, m)
             .def("get", &core::input_system::get_input);
 
     pybind11::enum_<core::input_system::mouse_button>(is, "mouse_button_code")
-        .value("MouseButton0", core::input_system::mouse_button::MouseButton0)
-        .value("MouseButton1", core::input_system::mouse_button::MouseButton1)
-        .value("MouseButton2", core::input_system::mouse_button::MouseButton2)
-        .value("MouseButton3", core::input_system::mouse_button::MouseButton3)
-        .value("MouseButton4", core::input_system::mouse_button::MouseButton4)
-        .value("MouseButton5", core::input_system::mouse_button::MouseButton5)
-        .value("MouseButton6", core::input_system::mouse_button::MouseButton6)
-        .value("MouseButton7", core::input_system::mouse_button::MouseButton7)
-        .value("MouseButton8", core::input_system::mouse_button::MouseButton8)
-        .value("MouseButton9", core::input_system::mouse_button::MouseButton9)
+        .value("MouseButton0", core::input_system::mouse_button::button_0)
+        .value("MouseButton1", core::input_system::mouse_button::button_1)
+        .value("MouseButton2", core::input_system::mouse_button::button_2)
+        .value("MouseButton3", core::input_system::mouse_button::button_3)
+        .value("MouseButton4", core::input_system::mouse_button::button_4)
+        .value("MouseButton5", core::input_system::mouse_button::button_5)
+        .value("MouseButton6", core::input_system::mouse_button::button_6)
+        .value("MouseButton7", core::input_system::mouse_button::button_7)
+        .value("MouseButton8", core::input_system::mouse_button::button_8)
+        .value("MouseButton9", core::input_system::mouse_button::button_9)
         .value("MouseButtonLeft",
-               core::input_system::mouse_button::MouseButtonLeft)
+               core::input_system::mouse_button::left)
         .value("MouseButtonRight",
-               core::input_system::mouse_button::MouseButtonRight)
+               core::input_system::mouse_button::right)
         .value("MouseButtonMiddle",
-               core::input_system::mouse_button::MouseButtonMiddle);
+               core::input_system::mouse_button::middle);
 
     pybind11::enum_<core::input_system::button_state>(is, "button_state")
-        .value("Unspecified", core::input_system::button_state::Unspecified)
-        .value("Press", core::input_system::button_state::Press)
-        .value("Hold", core::input_system::button_state::Hold)
-        .value("Release", core::input_system::button_state::Release);
+        .value("Unspecified", core::input_system::button_state::unspecified)
+        .value("Press", core::input_system::button_state::press)
+        .value("Hold", core::input_system::button_state::hold)
+        .value("Release", core::input_system::button_state::release);
 
     pybind11::class_<core::binding, std::shared_ptr<core::binding>>(
         m, "input_binding")
