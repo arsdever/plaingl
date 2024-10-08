@@ -79,6 +79,9 @@ public:
 
     static void update_device_list();
 
+    static void set_input_source(std::shared_ptr<window> input_source);
+    static std::shared_ptr<window> get_input_source();
+
     static void set_mouse_position(glm::ivec2 pos);
     static glm::ivec2 get_mouse_position();
     static glm::ivec2 get_mouse_delta();
@@ -112,5 +115,6 @@ private:
                               string_hash,
                               std::equal_to<>>
         _mapping;
+    static std::weak_ptr<window> _input_source;
 };
 } // namespace core

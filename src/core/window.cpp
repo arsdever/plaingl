@@ -45,7 +45,6 @@ struct window::window_private_data
     bool _is_main_window { false };
     bool _can_grab { false };
     bool _has_grab { false };
-    bool _is_input_source { false };
 
     struct
     {
@@ -79,7 +78,6 @@ void window::init()
     {
         _main_window = shared_from_this();
         _p->_is_main_window = true;
-        _p->_is_input_source = true;
     }
 
     if (!core::settings.contains("antialiasing"))
@@ -228,9 +226,15 @@ void window::update()
     glfwPollEvents();
 }
 
-void window::set_as_input_source(bool flag) { _p->_is_input_source = flag; }
+void window::set_as_input_source(bool flag)
+{
+    input_system::set_input_source(shared_from_this());
+}
 
-bool window::get_is_input_source() const { return _p->_is_input_source; }
+bool window::get_is_input_source() const
+{
+    return input_system::get_input_source() == shared_from_this();
+}
 
 void window::set_can_grab(bool flag)
 {
@@ -349,20 +353,6 @@ void window::setup_mouse_button_callback()
     {
         auto _this = static_cast<window*>(glfwGetWindowUserPointer(wnd));
         _this->_p->_mouse_state._buttons ^= (1 << button);
-        if (_this->get_is_input_source())
-        {
-            for (auto btn = 0; btn < 9; ++btn)
-            {
-                input_system::set_modifiers(
-                    static_cast<input_system::modifiers>(mods));
-                input_system::set_mouse_button(
-                    static_cast<input_system::mouse_button>(
-                        input_system::mouse_button::button_0 + btn),
-                    (_this->_p->_mouse_state._buttons & (1 << btn))
-                        ? input_system::button_state::press
-                        : input_system::button_state::release);
-            }
-        }
         std::shared_ptr<window_events> events = _this->get_events();
         if (action == GLFW_PRESS)
         {
