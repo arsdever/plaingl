@@ -7,6 +7,7 @@
 #include "components/mesh_filter.hpp"
 #include "components/mesh_renderer.hpp"
 #include "components/transform.hpp"
+#include "graphics/material.hpp"
 #include "project/game_object.hpp"
 #include "project/project_manager.hpp"
 #include "project/scene.hpp"
@@ -61,13 +62,37 @@ std::shared_ptr<scene> cmd_load_scene::default_scene()
     auto s = scene::create();
     s->set_name("default");
 
-    auto m = assets::asset_manager::get<graphics::mesh>("cube");
+    auto cube_mesh = assets::asset_manager::get<graphics::mesh>("cube");
+    auto suzanne_mesh =
+        assets::asset_manager::get<graphics::mesh>("susane_head");
+    auto sphere_mesh = assets::asset_manager::get<graphics::mesh>("sphere");
     auto mat = assets::asset_manager::get<graphics::material>("standard");
+    auto shdr = assets::asset_manager::get<graphics::shader>("standard");
+
+    auto green_mat = mat->clone();
+    green_mat->set_property_value("u_albedo_color", glm::vec4 { 0, 1, 0, 1 });
+
+    auto blue_mat = graphics::material::from_shader(shdr);
+    blue_mat->set_property_value("u_albedo_color", glm::vec4 { 0, 0, 1, 1 });
 
     auto go = game_object::create();
-    go->add<components::mesh_filter>();
+    go->add<components::mesh_filter>().set_mesh(cube_mesh);
     go->add<components::mesh_renderer>().set_material(mat);
+    go->set_name("cube");
+    s->add_root_object(go);
+
+    go = game_object::create();
+    go->add<components::mesh_filter>().set_mesh(sphere_mesh);
+    go->add<components::mesh_renderer>().set_material(blue_mat);
+    go->set_name("sphere");
+    go->get_transform().set_position({ 0, 0, 3 });
+    s->add_root_object(go);
+
+    go = game_object::create();
+    go->add<components::mesh_filter>().set_mesh(suzanne_mesh);
+    go->add<components::mesh_renderer>().set_material(green_mat);
     go->set_name("suzanne");
+    go->get_transform().set_position({ 3, 0, 0 });
     s->add_root_object(go);
 
     go = game_object::create();
@@ -168,8 +193,7 @@ void cmd_print_selected_object::execute()
 void cmd_list_objects::execute()
 {
     log()->info("List of objects:");
-    project_manager::visit_objects(
-        [](auto obj)
+    project_manager::visit_objects([](auto obj)
     {
         log()->info("  {} ({})", obj->get_name(), obj->id().id);
         return true;

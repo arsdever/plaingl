@@ -84,6 +84,24 @@ void material::activate() const
 
 void material::deactivate() const { }
 
+std::shared_ptr<material> material::clone() const
+{
+    auto result = std::make_shared<material>();
+    result->_shader = _shader;
+    result->_property_map = _property_map;
+    result->_textures_count = _textures_count;
+
+    return result;
+}
+
+std::shared_ptr<material>
+material::from_shader(std::shared_ptr<graphics::shader> shader)
+{
+    auto mat = std::make_shared<material>();
+    mat->set_shader_program(shader);
+    return mat;
+}
+
 void material::set_fallback_shader(std::shared_ptr<graphics::shader> shader)
 {
     _fallback_shader = std::move(shader);
