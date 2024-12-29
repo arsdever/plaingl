@@ -16,10 +16,10 @@ public:
 
     void set_samples(unsigned sample_count);
 
-    std::shared_ptr<const texture> color_texture() const;
-    std::shared_ptr<const texture> depth_texture() const;
+    std::shared_ptr<const graphics::texture> color_texture() const;
+    std::shared_ptr<const graphics::texture> depth_texture() const;
 
-    void copy_texture(texture* txt) const;
+    void copy_texture(std::shared_ptr<graphics::texture> txt) const;
     void blit(unsigned framebuffer_id) const;
 
     void resize(glm::uvec2 size);

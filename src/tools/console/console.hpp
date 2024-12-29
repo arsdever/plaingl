@@ -44,6 +44,8 @@ public:
         return result;
     }
 
+    size_t history_size() const;
+
 private:
     void add_history(std::string_view text);
     std::string_view history_element(int index) const;

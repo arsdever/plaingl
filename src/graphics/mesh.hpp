@@ -4,8 +4,8 @@
 #include "graphics/vaomap.hpp"
 #include "graphics/vertex.hpp"
 
-struct GLFWwindow;
-
+namespace graphics
+{
 class mesh
 {
 public:
@@ -20,6 +20,7 @@ public:
 
     void set_vertices(std::vector<vertex3d> positions);
     void set_indices(std::vector<int> indices);
+    void recalculate_normals();
     void set_submeshes(std::vector<submesh_info> submeshes);
 
     // TODO: not the best approach
@@ -39,3 +40,4 @@ private:
     graphics_buffer _vbo { graphics_buffer::type::vertex };
     graphics_buffer _ebo { graphics_buffer::type::index };
 };
+} // namespace graphics

@@ -1,0 +1,33 @@
+#pragma once
+
+#include "common/utils.hpp"
+
+using trivial_types = type_list<char,
+                                short,
+                                int,
+                                long,
+                                long long,
+                                unsigned char,
+                                unsigned short,
+                                unsigned int,
+                                unsigned long,
+                                unsigned long long,
+                                float,
+                                double,
+                                long double,
+                                std::string,
+                                std::string_view,
+                                glm::ivec2,
+                                glm::vec2,
+                                glm::dvec2,
+                                glm::uvec2,
+                                glm::ivec3,
+                                glm::vec3,
+                                glm::dvec3,
+                                glm::uvec3,
+                                glm::ivec4,
+                                glm::vec4,
+                                glm::dvec4,
+                                glm::uvec4,
+                                glm::quat,
+                                glm::dquat>;

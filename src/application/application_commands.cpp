@@ -31,13 +31,14 @@ void cmd_show_mesh::execute()
     auto mv = std::make_shared<mesh_viewer>();
     mv->init();
     log()->debug("Showing mesh '{}'", get<0>());
-    mv->set_mesh(mesh_asset->as<mesh>().get());
+    mv->set_mesh(mesh_asset->as<graphics::mesh>());
     open_window_requested(mv);
 }
 
 void cmd_show_texture::execute()
 {
-    auto texture_asset = assets::asset_manager::try_get<texture>(get<0>());
+    auto texture_asset =
+        assets::asset_manager::try_get<graphics::texture>(get<0>());
     if (!texture_asset)
     {
         log()->error("Texture '{}' not found", get<0>());
@@ -53,10 +54,11 @@ void cmd_show_texture::execute()
 
 void cmd_list_textures::execute()
 {
-    for (int i = 0; i < texture::_textures.size(); ++i)
+    for (int i = 0; i < graphics::texture::_textures.size(); ++i)
     {
-        log()->info(
-            "Texture {}: id {}", i, texture::_textures[ i ]->native_id());
+        log()->info("Texture {}: id {}",
+                    i,
+                    graphics::texture::_textures[ i ]->native_id());
     }
 }
 

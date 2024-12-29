@@ -19,6 +19,7 @@ struct console::impl
     bool is_active { false };
     std::array<std::string, 100> history;
     size_t history_counter { 0 };
+    size_t history_size { 0 };
     struct command_lookup_node
     {
         std::string key;
@@ -111,8 +112,8 @@ void console::input(int ch)
         else if (ch < 256)
         {
             auto mods = core::input_system::get_modifiers();
-            bool upper = (mods & core::input_system::modifiers::Shift) ^
-                         (mods & core::input_system::modifiers::CapsLock);
+            bool upper = (mods & core::input_system::modifiers::shift) ^
+                         (mods & core::input_system::modifiers::caps_lock);
             if (isalpha(ch))
             {
                 ch = upper ? std::toupper(ch) : std::tolower(ch);
@@ -272,8 +273,11 @@ void console::register_for_logs()
     sink->set_level(spdlog::level::info);
 }
 
+size_t console::history_size() const { return _impl->history_size; }
+
 void console::add_history(std::string_view text)
 {
+    ++_impl->history_size;
     _impl->history[ _impl->history_counter++ % _impl->history.size() ] =
         std::move(text);
 }

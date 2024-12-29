@@ -60,17 +60,17 @@ public:
         {
         case JCS_GRAYSCALE:
         {
-            md._color_type = texture::format::GRAYSCALE;
+            md._color_type = graphics::texture::format::GRAYSCALE;
             break;
         }
         case JCS_RGB:
         {
-            md._color_type = texture::format::RGB;
+            md._color_type = graphics::texture::format::RGB;
             break;
         }
         default:
         {
-            md._color_type = texture::format::UNSPECIFIED;
+            md._color_type = graphics::texture::format::UNSPECIFIED;
             break;
         }
         }
@@ -139,7 +139,7 @@ private:
         size_t _bits_per_pixel;
         size_t _bytes_per_row;
         unsigned char _channel_count;
-        texture::format _color_type;
+        graphics::texture::format _color_type;
     } _metadata;
 
     std::vector<unsigned char> _data;

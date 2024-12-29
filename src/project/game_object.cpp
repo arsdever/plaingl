@@ -115,6 +115,12 @@ void game_object::init()
         return;
     }
 
+    visit_children([](auto& c) -> bool
+    {
+        c->init();
+        return true;
+    });
+
     visit_components(
         [](auto& c) -> bool
     {
@@ -129,6 +135,12 @@ void game_object::update()
     {
         return;
     }
+
+    visit_children([](auto& c) -> bool
+    {
+        c->update();
+        return true;
+    });
 
     visit_components(
         [](auto& c) -> bool
@@ -145,6 +157,12 @@ void game_object::draw_gizmos()
         return;
     }
 
+    visit_children([](auto& c) -> bool
+    {
+        c->draw_gizmos();
+        return true;
+    });
+
     visit_components(
         [](auto& c) -> bool
     {
@@ -159,6 +177,12 @@ void game_object::deinit()
     {
         return;
     }
+
+    visit_children([](auto& c) -> bool
+    {
+        c->deinit();
+        return true;
+    });
 
     visit_components(
         [](auto& c) -> bool

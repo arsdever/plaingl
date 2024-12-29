@@ -5,6 +5,7 @@
 #include "project/components/camera.hpp"
 
 #include "asset_management/asset_manager.hpp"
+#include "common/logging.hpp"
 #include "core/settings.hpp"
 #include "core/window.hpp"
 #include "graphics/framebuffer.hpp"
@@ -88,12 +89,12 @@ void camera::get_render_size(size_t& width, size_t& height) const
 
 glm::uvec2 camera::get_render_size() const { return _render_size; }
 
-void camera::set_render_texture(std::weak_ptr<texture> render_texture)
+void camera::set_render_texture(std::weak_ptr<graphics::texture> render_texture)
 {
     _user_render_texture = render_texture;
 }
 
-std::shared_ptr<texture> camera::get_render_texture() const
+std::shared_ptr<graphics::texture> camera::get_render_texture() const
 {
     return _user_render_texture.lock();
 }
@@ -125,12 +126,13 @@ void camera::render()
     _framebuffer->unbind();
     if (auto urt = _user_render_texture.lock())
     {
-        _framebuffer->copy_texture(urt.get());
+        _framebuffer->copy_texture(urt);
     }
 
     _framebuffer->blit(0);
     // texture surface;
-    // surface.init(_render_size.x, _render_size.y, texture::format::RGBA);
+    // surface.init(_render_size.x,
+    // _render_size.y,graphics::texture::format::RGBA);
     // _framebuffer->copy_texture(&surface);
     // renderer_2d().draw_rect(glm::vec2(0),
     //                         glm::vec2(_render_size),
@@ -201,7 +203,7 @@ void camera::render_texture_background()
     mat->set_property_value("u_model_matrix", glm::identity<glm::mat4>());
     mat->set_property_value("u_vp_matrix", vp_matrix());
     renderer_3d().draw_mesh(
-        assets::asset_manager::get<mesh>("env_sphere").get(), mat);
+        assets::asset_manager::get<graphics::mesh>("env_sphere"), mat);
 }
 
 void camera::render_on_private_texture() const
@@ -211,30 +213,37 @@ void camera::render_on_private_texture() const
 
     if (scene::get_active_scene())
     {
-        scene::get_active_scene()->visit_root_objects(
-            [ this ](auto& obj)
+        scene::get_active_scene()->visit_root_objects([ this ](auto& obj)
         {
             if (!obj->is_active())
                 return;
 
-            if (auto renderer =
-                    obj->template try_get<components::mesh_renderer>())
+            auto render_action = [ this ](auto& obj)
             {
-                auto mesh =
-                    obj->template get<components::mesh_filter>().get_mesh();
-                auto material = renderer->get_material();
-                if (material)
+                if (auto renderer =
+                        obj->template try_get<components::mesh_renderer>())
                 {
-                    material->set_property_value(
-                        "u_model_matrix",
-                        glm::mat4(obj->get_transform().get_matrix()));
-                    material->set_property_value("u_vp_matrix", vp_matrix());
-                    material->set_property_value(
-                        "u_camera_position",
-                        glm::vec3(get_transform()->get_position()));
-                    renderer_3d().draw_mesh(mesh, material);
+                    auto mesh =
+                        obj->template get<components::mesh_filter>().get_mesh();
+                    auto material = renderer->get_material();
+                    if (material && mesh)
+                    {
+                        material->set_property_value(
+                            "u_model_matrix",
+                            glm::mat4(obj->get_transform().get_matrix()));
+                        material->set_property_value("u_vp_matrix",
+                                                     vp_matrix());
+                        material->set_property_value(
+                            "u_camera_position",
+                            glm::vec3(get_transform()->get_position()));
+                        renderer_3d().draw_mesh(mesh, material);
+                    }
                 }
-            }
+                return true;
+            };
+
+            obj->visit_children(render_action);
+            render_action(obj);
         });
     }
     _framebuffer->unbind();
@@ -255,8 +264,7 @@ void camera::setup_lights()
     std::vector<glsl_lights_t> glsl_lights;
     size_t i = 0;
 
-    scene::get_active_scene()->visit_root_objects(
-        [ &i, &glsl_lights ](auto obj)
+    scene::get_active_scene()->visit_root_objects([ &i, &glsl_lights ](auto obj)
     {
         if (auto light = obj->template try_get<components::light>())
         {

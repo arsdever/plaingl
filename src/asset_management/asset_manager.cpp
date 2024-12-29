@@ -3,6 +3,7 @@
 #include "asset_management/asset.hpp"
 #include "asset_management/asset_cache.hpp"
 #include "asset_management/asset_importer.hpp"
+#include "asset_management/importers/font_importer.hpp"
 #include "asset_management/importers/material_importer.hpp"
 #include "asset_management/importers/model_importer.hpp"
 #include "asset_management/importers/script_importer.hpp"
@@ -36,6 +37,8 @@ void asset_manager::initialize(std::string_view resource_path)
     _impl = std::make_shared<impl>();
     _impl->project_path = common::filesystem::path(resource_path).full_path();
 
+    register_importer(font_importer::extensions,
+                      std::make_shared<font_importer>());
     register_importer(texture_importer::extensions,
                       std::make_shared<texture_importer>());
     register_importer(material_importer::extensions,

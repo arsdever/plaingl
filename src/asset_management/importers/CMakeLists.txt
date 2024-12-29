@@ -1,5 +1,7 @@
 add_library(
   ${PROJECT}_assets_importers STATIC
+  font_importer.hpp
+  font_importer.cpp
   material_importer.hpp
   material_importer.cpp
   model_importer.hpp

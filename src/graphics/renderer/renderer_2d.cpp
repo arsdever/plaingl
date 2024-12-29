@@ -25,7 +25,7 @@ glm::tvec2<T> map_from_window(const glm::tvec2<T>& p,
 void renderer_2d::draw_rect(glm::vec2 top_left,
                             glm::vec2 bottom_right,
                             glm::vec2 window_size,
-                            std::shared_ptr<texture> txt)
+                            std::shared_ptr<graphics::texture> txt)
 {
     glm::vec2 bottom_left { top_left.x, bottom_right.y };
     glm::vec2 top_right { bottom_right.x, top_left.y };
@@ -68,8 +68,7 @@ void renderer_2d::draw_rect(glm::vec2 top_left,
     glDisable(GL_DEPTH_TEST);
     vertex3d::activate_attributes();
 
-    auto shader_2d =
-        assets::asset_manager::get("surface").as<graphics::material>();
+    auto shader_2d = assets::asset_manager::get<graphics::material>("surface");
     shader_2d->set_property_value("u_vp_matrix", glm::identity<glm::mat4>());
     shader_2d->set_property_value("u_model_matrix", glm::identity<glm::mat4>());
 
@@ -149,10 +148,12 @@ void renderer_2d::draw_rect(glm::vec2 top_left,
     }
 
     glDisable(GL_DEPTH_TEST);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
     vertex3d::activate_attributes();
 
-    auto shader_2d =
-        assets::asset_manager::get("surface").as<graphics::material>();
+    auto shader_2d = assets::asset_manager::get<graphics::material>("surface");
     shader_2d->set_property_value("u_vp_matrix", glm::identity<glm::mat4>());
     shader_2d->set_property_value("u_model_matrix", glm::identity<glm::mat4>());
 
@@ -171,13 +172,15 @@ void renderer_2d::draw_rect(glm::vec2 top_left,
                        (void*)(6 * sizeof(unsigned)));
     }
 
+    glDisable(GL_BLEND);
     glEnable(GL_DEPTH_TEST);
 }
 
 void renderer_2d::draw_text(glm::vec2 baseline,
-                            const font& f,
+                            std::shared_ptr<graphics::font> f,
                             const glm::vec2& window_size,
                             std::string_view text,
+                            glm::vec4 color,
                             float fscale)
 {
     glDisable(GL_DEPTH_TEST);
@@ -198,7 +201,7 @@ void renderer_2d::draw_text(glm::vec2 baseline,
 
     for (const auto& c : text)
     {
-        const font::character& ch = f[ static_cast<size_t>(c) ];
+        const graphics::font::character& ch = (*f)[ static_cast<size_t>(c) ];
 
         float xpos = cursor_position.x + ch._bearing.x * scale.x;
         float ypos = cursor_position.y - ch._bearing.y * scale.y;
@@ -224,16 +227,16 @@ void renderer_2d::draw_text(glm::vec2 baseline,
 
         quad_vertices[ 0 ].uv() = glm::vec2 {
             ch._texture_offset.x, ch._texture_offset.y + ch._size.y
-        } / static_cast<glm::vec2>(f.atlas().get_size());
+        } / static_cast<glm::vec2>(f->atlas()->get_size());
         quad_vertices[ 1 ].uv() =
             glm::vec2 { ch._texture_offset.x, ch._texture_offset.y } /
-            static_cast<glm::vec2>(f.atlas().get_size());
+            static_cast<glm::vec2>(f->atlas()->get_size());
         quad_vertices[ 2 ].uv() = glm::vec2 {
             ch._texture_offset.x + ch._size.x, ch._texture_offset.y + ch._size.y
-        } / static_cast<glm::vec2>(f.atlas().get_size());
-        quad_vertices[ 3 ].uv() = glm::vec2 { ch._texture_offset.x + ch._size.x,
-                                              ch._texture_offset.y } /
-                                  static_cast<glm::vec2>(f.atlas().get_size());
+        } / static_cast<glm::vec2>(f->atlas()->get_size());
+        quad_vertices[ 3 ].uv() = glm::vec2 {
+            ch._texture_offset.x + ch._size.x, ch._texture_offset.y
+        } / static_cast<glm::vec2>(f->atlas()->get_size());
 
         const auto n = vertices.size();
 
@@ -255,30 +258,31 @@ void renderer_2d::draw_text(glm::vec2 baseline,
             scale.x; // bitshift by 6 to get value in pixels (2^6 = 64)
     }
 
-    mesh text_mesh;
+    graphics::mesh text_mesh;
     text_mesh.set_vertices(std::move(vertices));
     text_mesh.set_indices(std::move(indices));
     text_mesh.init();
 
-    auto surface_shader =
-        assets::asset_manager::get("surface").as<graphics::material>();
-    surface_shader->set_property_value("u_vp_matrix",
-                                       glm::identity<glm::mat4>());
-    surface_shader->set_property_value("u_model_matrix",
-                                       glm::identity<glm::mat4>());
+    auto white = assets::asset_manager::get<graphics::texture>("white");
 
-    surface_shader->set_property_value("u_color", glm::vec4(1.0f));
-    surface_shader->set_property_value("u_image",
-                                       &(const_cast<font&>(f).atlas()));
-    surface_shader->activate();
+    auto text_material =
+        assets::asset_manager::get<graphics::material>("surface");
+    text_material->set_property_value("u_vp_matrix",
+                                      glm::identity<glm::mat4>());
+    text_material->set_property_value("u_model_matrix",
+                                      glm::identity<glm::mat4>());
+
+    text_material->set_property_value("u_color", color);
+    text_material->set_property_value("u_mask", f->atlas());
+    text_material->set_property_value("u_image", white);
+    text_material->activate();
     text_mesh.render();
+    text_material->set_property_value("u_mask", white);
 
 #ifdef RENDER_TEXT_CHAR_BORDER
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    surface_shader->set_property_value("u_color", glm::vec4(1.0f));
-    static texture white =
-        texture::from_image(assets::asset_manager::get_image("white"));
-    surface_shader->set_property_value("u_image", &white);
+    surface_shader->set_property_value("u_color", color);
+    surface_shader->set_property_value("u_image", white);
     surface_shader->activate();
     text_mesh.render();
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);

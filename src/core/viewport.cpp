@@ -13,7 +13,9 @@ struct viewport::viewport_private
 {
     glm::vec2 _position { 0, 0 };
     glm::vec2 _size { 0, 0 };
-    std::shared_ptr<texture> _surface_texture { std::make_shared<texture>() };
+    std::shared_ptr<graphics::texture> _surface_texture {
+        std::make_shared<graphics::texture>()
+    };
 };
 
 viewport::viewport() { _p = std::make_unique<viewport_private>(); }

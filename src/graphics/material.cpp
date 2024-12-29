@@ -61,17 +61,17 @@ void material::activate() const
     int texture_binding_index = 0;
     for (const auto& [ name, value ] : _property_map)
     {
-        if (value.type() == typeid(std::shared_ptr<texture>))
+        if (value.type() == typeid(std::shared_ptr<graphics::texture>))
         {
-            auto t = std::any_cast<std::shared_ptr<texture>>(value);
+            auto t = std::any_cast<std::shared_ptr<graphics::texture>>(value);
             t->set_active_texture(texture_binding_index);
-            s->set_property(name, texture_binding_index);
+            s->set_property(name, texture_binding_index++);
         }
         else if (value.type() == typeid(texture*))
         {
             const auto* t = std::any_cast<texture*>(value);
             t->set_active_texture(texture_binding_index);
-            s->set_property(name, texture_binding_index);
+            s->set_property(name, texture_binding_index++);
         }
         else
         {
@@ -83,6 +83,24 @@ void material::activate() const
 }
 
 void material::deactivate() const { }
+
+std::shared_ptr<material> material::clone() const
+{
+    auto result = std::make_shared<material>();
+    result->_shader = _shader;
+    result->_property_map = _property_map;
+    result->_textures_count = _textures_count;
+
+    return result;
+}
+
+std::shared_ptr<material>
+material::from_shader(std::shared_ptr<graphics::shader> shader)
+{
+    auto mat = std::make_shared<material>();
+    mat->set_shader_program(shader);
+    return mat;
+}
 
 void material::set_fallback_shader(std::shared_ptr<graphics::shader> shader)
 {

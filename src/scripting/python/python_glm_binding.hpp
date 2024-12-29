@@ -1,24 +1,23 @@
 #pragma once
 
 #include <glm/detail/qualifier.hpp>
+#include <glm/gtc/quaternion.hpp>
 #include <pybind11/detail/common.h>
 #include <pybind11/embed.h>
 #include <pybind11/operators.h>
 
-#include "common/utils.hpp"
+#include "scripting/python/python_binding_interface.hpp"
 
 namespace scripting::python::internal
 {
-template <typename T>
-struct expose_glm_type;
-
 template <size_t N, typename T, glm::qualifier Q>
-struct expose_glm_type<glm::vec<N, T, Q>>
+struct python_binding<glm::vec<N, T, Q>>
 {
-    static void eval(pybind11::module& m, std::string_view python_name)
+    static void eval(pybind11::module& m)
     {
         auto c =
-            pybind11::class_<glm::vec<N, T, Q>>(m, python_name.data())
+            pybind11::class_<glm::vec<N, T, Q>>(
+                m, python_binding_traits<glm::vec<N, T, Q>>::name)
                 .def(pybind11::init())
                 .def(pybind11::init<T>())
                 .def(pybind11::init<const glm::vec<N, char, Q>&>())
@@ -50,7 +49,10 @@ struct expose_glm_type<glm::vec<N, T, Q>>
                 .def(pybind11::self *= glm::vec<N, T, Q>())
                 .def(pybind11::self *= T())
                 .def(pybind11::self /= glm::vec<N, T, Q>())
-                .def(pybind11::self /= T());
+                .def(pybind11::self /= T())
+                .def("__repr__",
+                     [](const glm::vec<N, T, Q>& v)
+        { return glm::to_string(v); });
 
         if constexpr (N > 1)
         {
@@ -90,12 +92,13 @@ struct expose_glm_type<glm::vec<N, T, Q>>
 };
 
 template <typename T, glm::qualifier Q>
-struct expose_glm_type<glm::qua<T, Q>>
+struct python_binding<glm::qua<T, Q>>
 {
-    static void eval(pybind11::module& m, std::string_view python_name)
+    static void eval(pybind11::module& m)
     {
         auto c =
-            pybind11::class_<glm::qua<T, Q>>(m, python_name.data())
+            pybind11::class_<glm::qua<T, Q>>(
+                m, python_binding_traits<glm::qua<T, Q>>::name)
                 .def(pybind11::init())
                 .def(pybind11::init<const glm::qua<char, Q>&>())
                 .def(pybind11::init<const glm::qua<short, Q>&>())
@@ -118,6 +121,9 @@ struct expose_glm_type<glm::qua<T, Q>>
                 .def_readwrite("y", &glm::qua<T, Q>::y)
                 .def_readwrite("z", &glm::qua<T, Q>::z)
                 .def_readwrite("w", &glm::qua<T, Q>::w)
+                .def("euler_angles",
+                     [](const glm::qua<T, Q>& q)
+        { return glm::eulerAngles(q); })
                 .def(pybind11::self + glm::qua<T, Q>())
                 .def(pybind11::self - glm::qua<T, Q>())
                 .def(pybind11::self * glm::qua<T, Q>())
@@ -129,7 +135,95 @@ struct expose_glm_type<glm::qua<T, Q>>
                 .def(pybind11::self -= glm::qua<T, Q>())
                 .def(pybind11::self *= glm::qua<T, Q>())
                 .def(pybind11::self *= T())
-                .def(pybind11::self /= T());
+                .def(pybind11::self /= T())
+                .def("__repr__",
+                     [](const glm::qua<T, Q>& v) { return glm::to_string(v); });
+        ;
     }
 };
+
+template <>
+struct python_binding_traits<glm::ivec2>
+{
+    static constexpr auto name = "ivec2";
+};
+
+template <>
+struct python_binding_traits<glm::vec2>
+{
+    static constexpr auto name = "vec2";
+};
+
+template <>
+struct python_binding_traits<glm::dvec2>
+{
+    static constexpr auto name = "dvec2";
+};
+
+template <>
+struct python_binding_traits<glm::uvec2>
+{
+    static constexpr auto name = "uvec2";
+};
+
+template <>
+struct python_binding_traits<glm::ivec3>
+{
+    static constexpr auto name = "ivec3";
+};
+
+template <>
+struct python_binding_traits<glm::vec3>
+{
+    static constexpr auto name = "vec3";
+};
+
+template <>
+struct python_binding_traits<glm::dvec3>
+{
+    static constexpr auto name = "dvec3";
+};
+
+template <>
+struct python_binding_traits<glm::uvec3>
+{
+    static constexpr auto name = "uvec3";
+};
+
+template <>
+struct python_binding_traits<glm::ivec4>
+{
+    static constexpr auto name = "ivec4";
+};
+
+template <>
+struct python_binding_traits<glm::vec4>
+{
+    static constexpr auto name = "vec4";
+};
+
+template <>
+struct python_binding_traits<glm::dvec4>
+{
+    static constexpr auto name = "dvec4";
+};
+
+template <>
+struct python_binding_traits<glm::uvec4>
+{
+    static constexpr auto name = "uvec4";
+};
+
+template <>
+struct python_binding_traits<glm::quat>
+{
+    static constexpr auto name = "quat";
+};
+
+template <>
+struct python_binding_traits<glm::dquat>
+{
+    static constexpr auto name = "dquat";
+};
+
 } // namespace scripting::python::internal

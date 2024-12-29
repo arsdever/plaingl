@@ -16,7 +16,7 @@ logger log() { return get_logger("asset_manager"); }
 
 void model_importer::internal_load(common::file& asset_file)
 {
-    _data = std::make_shared<mesh>();
+    _data = std::make_shared<graphics::mesh>();
     internal_update(_data, asset_file);
 }
 
@@ -56,7 +56,6 @@ void model_importer::internal_update(std::shared_ptr<mesh> msh,
             "Node: {} meshes: {}", node->mName.C_Str(), node->mNumMeshes);
         if (node->mNumMeshes > 0)
         {
-            mesh* m = nullptr;
             {
                 std::vector<const aiMesh*> ai_submeshes;
                 for (int i = 0; i < node->mNumMeshes; ++i)
@@ -67,11 +66,11 @@ void model_importer::internal_update(std::shared_ptr<mesh> msh,
 
                 std::vector<vertex3d> vertices;
                 std::vector<int> indices;
-                std::vector<mesh::submesh_info> submeshes;
+                std::vector<graphics::mesh::submesh_info> submeshes;
 
                 for (auto ai_mesh : ai_submeshes)
                 {
-                    mesh::submesh_info info;
+                    graphics::mesh::submesh_info info;
                     info.material_index = ai_mesh->mMaterialIndex;
                     info.vertex_index_offset = indices.size();
 

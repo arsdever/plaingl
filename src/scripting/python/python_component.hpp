@@ -17,6 +17,9 @@ public:
     void on_update() override;
     void on_deinit() override;
 
+    void set_property_value(std::string_view name,
+                            trivial_types::variant_t value) override;
+
     pybind11::object _instance;
 };
 
@@ -33,6 +36,9 @@ public:
     void on_update() override;
 
     void on_deinit() override;
+
+    void set_property_value(std::string_view name,
+                            trivial_types::variant_t value) override;
 };
 } // namespace internal
 } // namespace scripting::python

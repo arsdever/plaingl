@@ -16,8 +16,12 @@ struct framebuffer::private_data
     unsigned _fbo { 0 };
     unsigned _copy_fbo { 0 };
     unsigned _sample_count { 1 };
-    std::shared_ptr<texture> _color_texture { std::make_shared<texture>() };
-    std::shared_ptr<texture> _depth_texture { std::make_shared<texture>() };
+    std::shared_ptr<graphics::texture> _color_texture {
+        std::make_shared<graphics::texture>()
+    };
+    std::shared_ptr<graphics::texture> _depth_texture {
+        std::make_shared<graphics::texture>()
+    };
 };
 
 framebuffer::framebuffer() { _p = std::make_unique<private_data>(); }
@@ -33,8 +37,10 @@ void framebuffer::initialize()
 
     bind();
 
-    _p->_color_texture->init(_p->_size.x, _p->_size.y, texture::format::RGBA);
-    _p->_depth_texture->init(_p->_size.x, _p->_size.y, texture::format::DEPTH);
+    _p->_color_texture->init(
+        _p->_size.x, _p->_size.y, graphics::texture::format::RGBA);
+    _p->_depth_texture->init(
+        _p->_size.x, _p->_size.y, graphics::texture::format::DEPTH);
 
     log()->info("Framebuffer {}:\n\ttextures::color {}\n\ttextures::depth {}",
                 _p->_fbo,
@@ -80,17 +86,19 @@ void framebuffer::set_samples(unsigned sample_count)
     _p->_depth_texture->set_samples(sample_count);
 }
 
-std::shared_ptr<const texture> framebuffer::color_texture() const
+std::shared_ptr<const graphics::texture>
+framebuffer::color_texture() const
 {
     return _p->_color_texture;
 }
 
-std::shared_ptr<const texture> framebuffer::depth_texture() const
+std::shared_ptr<const graphics::texture>
+framebuffer::depth_texture() const
 {
     return _p->_depth_texture;
 }
 
-void framebuffer::copy_texture(texture* txt) const
+void framebuffer::copy_texture(std::shared_ptr<graphics::texture> txt) const
 {
     if (_p->_sample_count == 1)
     {
@@ -147,8 +155,10 @@ void framebuffer::resize(glm::uvec2 size)
     if (_p->_size != size)
     {
         _p->_size = size;
-        _p->_color_texture->init(size.x, size.y, texture::format::RGBA);
-        _p->_depth_texture->init(size.x, size.y, texture::format::DEPTH);
+        _p->_color_texture->init(
+            size.x, size.y, graphics::texture::format::RGBA);
+        _p->_depth_texture->init(
+            size.x, size.y, graphics::texture::format::DEPTH);
     }
 }
 

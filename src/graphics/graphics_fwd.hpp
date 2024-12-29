@@ -2,13 +2,16 @@
 
 namespace graphics
 {
-class shader;
-class shader_script;
 class material;
+class mesh;
+class shader_script;
+class shader;
+class font;
+class texture;
+
+template <typename R, typename... ARGS>
+R gl_convert(ARGS... args);
 } // namespace graphics
 
-class mesh;
-class texture;
 class graphics_buffer;
 class framebuffer;
-class font;

@@ -2,7 +2,9 @@
 
 #include "common/common_fwd.hpp"
 
-class texture : public std::enable_shared_from_this<texture>
+namespace graphics
+{
+class texture : public std::enable_shared_from_this<graphics::texture>
 {
 public:
     enum class format : char
@@ -73,8 +75,8 @@ public:
     static void static_bind(size_t id, bool ms);
     static void static_unbind(bool ms);
 
-    static std::shared_ptr<texture> from_file(std::string_view path);
-    static std::shared_ptr<texture> from_file(common::file& file);
+    static std::shared_ptr<graphics::texture> from_file(std::string_view path);
+    static std::shared_ptr<graphics::texture> from_file(common::file& file);
 
 private:
     static int convert_to_gl_internal_format(format f);
@@ -84,8 +86,8 @@ private:
 
     void fetch_from_gpu();
 
-    static std::shared_ptr<texture> from_png_file(common::file& file);
-    static std::shared_ptr<texture> from_jpg_file(common::file& file);
+    static std::shared_ptr<graphics::texture> from_png_file(common::file& file);
+    static std::shared_ptr<graphics::texture> from_jpg_file(common::file& file);
 
 private:
     size_t _width { 0 };
@@ -99,3 +101,4 @@ public:
     // TODO: may not be the best place for this object
     static std::vector<texture*> _textures;
 };
+} // namespace graphics

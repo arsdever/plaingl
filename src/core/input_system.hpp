@@ -2,51 +2,51 @@
 
 #include <glm/fwd.hpp>
 
+#include "core/core_fwd.hpp"
+
 #include "common/event.hpp"
 #include "common/utils.hpp"
 #include "core/inputs/gamepad.hpp"
 
 namespace core
 {
-class binding;
-
 class input_system
 {
 public:
     enum mouse_button
     {
-        MouseButton0,
-        MouseButton1,
-        MouseButton2,
-        MouseButton3,
-        MouseButton4,
-        MouseButton5,
-        MouseButton6,
-        MouseButton7,
-        MouseButton8,
-        MouseButton9,
-        MouseButtonLeft = MouseButton0,
-        MouseButtonRight = MouseButton1,
-        MouseButtonMiddle = MouseButton2,
+        button_0,
+        button_1,
+        button_2,
+        button_3,
+        button_4,
+        button_5,
+        button_6,
+        button_7,
+        button_8,
+        button_9,
+        left = button_0,
+        right = button_1,
+        middle = button_2,
     };
 
     enum button_state
     {
-        Unspecified,
-        Press,
-        Hold,
-        Release,
+        unspecified,
+        press,
+        hold,
+        release,
     };
 
     enum modifiers
     {
-        None = 0,
-        Shift = 1,
-        Control = 2,
-        Alt = 4,
-        Super = 8,
-        CapsLock = 16,
-        NumLock = 32,
+        none = 0,
+        shift = 1,
+        control = 2,
+        alt = 4,
+        super = 8,
+        caps_lock = 16,
+        num_lock = 32,
     };
 
     enum joystick_input
@@ -78,6 +78,9 @@ public:
     };
 
     static void update_device_list();
+
+    static void set_input_source(std::shared_ptr<window> input_source);
+    static std::shared_ptr<window> get_input_source();
 
     static void set_mouse_position(glm::ivec2 pos);
     static glm::ivec2 get_mouse_position();
@@ -112,5 +115,6 @@ private:
                               string_hash,
                               std::equal_to<>>
         _mapping;
+    static std::weak_ptr<window> _input_source;
 };
 } // namespace core

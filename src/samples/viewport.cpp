@@ -105,8 +105,8 @@ int main(int argc, char** argv)
 void init_scene()
 {
     auto basic_mat = assets::asset_manager::get<graphics::material>("standard");
-    auto txt = assets::asset_manager::get<texture>("diffuse");
-    auto norm = assets::asset_manager::get<texture>("brick");
+    auto txt = assets::asset_manager::get<graphics::texture>("diffuse");
+    auto norm = assets::asset_manager::get<graphics::texture>("brick");
     basic_mat->set_property_value("albedo_texture_strength", 0.0f);
     basic_mat->set_property_value("albedo_color", 1.0f, 0.8f, 0.2f);
     basic_mat->set_property_value("normal_texture_strength", 0.0f);
@@ -125,8 +125,8 @@ void init_scene()
         glm::dvec4(0.3, 0.6, 0.7, 1.0));
 
     auto obj = game_object::create();
-    auto m = assets::asset_manager::get<mesh>("susane_head");
-    obj->add<components::mesh_filter>().set_mesh(m.get());
+    auto m = assets::asset_manager::get<graphics::mesh>("susane_head");
+    obj->add<components::mesh_filter>().set_mesh(m);
     obj->add<components::mesh_renderer>().set_material(basic_mat);
     obj->set_name("susane");
     scene::get_active_scene()->add_root_object(obj);

@@ -3,6 +3,7 @@
 namespace core
 {
 class window;
+class binding;
 class command_base;
 class viewport;
 class command_dispatcher;

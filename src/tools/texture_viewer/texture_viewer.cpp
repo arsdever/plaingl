@@ -23,7 +23,10 @@ texture_viewer::texture_viewer()
 
 texture_viewer::~texture_viewer() = default;
 
-void texture_viewer::set_texture(std::shared_ptr<texture> m) { _texture = m; }
+void texture_viewer::set_texture(std::shared_ptr<graphics::texture> m)
+{
+    _texture = m;
+}
 
 void texture_viewer::initialize()
 {
@@ -63,7 +66,7 @@ void texture_viewer::render()
         return;
 
     auto mat = assets::asset_manager::get<graphics::material>("surface");
-    auto quad = assets::asset_manager::get<mesh>("quad");
+    auto quad = assets::asset_manager::get<graphics::mesh>("quad");
     glm::mat4 camera_matrix = glm::ortho(
         -1.0 / _zoom, 1.0 / _zoom, -1.0 / _zoom, 1.0 / _zoom, .001, 100.0);
     glm::mat4 camera_transform = glm::identity<glm::mat4>();
@@ -83,5 +86,5 @@ void texture_viewer::render()
     graphics::set_viewport({ 0, 0 }, { get_size() });
     graphics::clear({ glm::vec3(0.1f), 1.0f });
 
-    renderer_3d().draw_mesh(quad.get(), mat);
+    renderer_3d().draw_mesh(quad, mat);
 }

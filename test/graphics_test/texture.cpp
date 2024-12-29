@@ -56,8 +56,8 @@ int main(int argc, char** argv)
     assets::asset_manager::load_asset(
         "test/graphics_test/data/parrot_pixel.png");
 
-    auto txt =
-        texture::from_image(assets::asset_manager::get_image("parrot_pixel"));
+    auto txt = graphics::texture::from_image(
+        assets::asset_manager::get_image("parrot_pixel"));
 
     auto [ vbo, ebo ] = init_quad_mesh();
 
@@ -85,19 +85,24 @@ int main(int argc, char** argv)
 
         static const std::array<std::function<void()>, 4> modes {
             [ &txt ]()
-        { txt.set_wrapping_mode(true, true, texture::wrapping_mode::repeat); },
+        {
+            txt.set_wrapping_mode(
+                true, true, graphics::texture::wrapping_mode::repeat);
+        },
             [ &txt ]()
         {
             txt.set_wrapping_mode(
-                false, true, texture::wrapping_mode::clamp_to_border);
+                false, true, graphics::texture::wrapping_mode::clamp_to_border);
         },
-            [ &txt ]() {
+            [ &txt ]()
+        {
             txt.set_wrapping_mode(
-                true, true, texture::wrapping_mode::clamp_to_edge);
+                true, true, graphics::texture::wrapping_mode::clamp_to_edge);
         },
-            [ &txt ]() {
+            [ &txt ]()
+        {
             txt.set_wrapping_mode(
-                true, true, texture::wrapping_mode::mirrored_repeat);
+                true, true, graphics::texture::wrapping_mode::mirrored_repeat);
         },
         };
 
@@ -135,7 +140,8 @@ int main(int argc, char** argv)
         surface_shader->set_uniform("u_image", 0);
         surface_shader->use();
 
-        txt.set_wrapping_mode(true, true, texture::wrapping_mode::repeat);
+        txt.set_wrapping_mode(
+            true, true, graphics::texture::wrapping_mode::repeat);
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
         txt.set_sampling_mode_mag(texture::sampling_mode::nearest);

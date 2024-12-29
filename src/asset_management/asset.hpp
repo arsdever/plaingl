@@ -10,10 +10,11 @@ namespace assets
 struct asset
 {
     using data_type = std::variant<std::shared_ptr<scripting::script>,
-                                   std::shared_ptr<mesh>,
+                                   std::shared_ptr<graphics::mesh>,
                                    std::shared_ptr<graphics::shader>,
                                    std::shared_ptr<graphics::material>,
-                                   std::shared_ptr<texture>>;
+                                   std::shared_ptr<graphics::font>,
+                                   std::shared_ptr<graphics::texture>>;
     common::file _asset_file;
     data_type _data;
     size_t _checksum;

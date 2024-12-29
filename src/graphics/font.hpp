@@ -1,7 +1,10 @@
 #pragma once
 
+#include "common/common_fwd.hpp"
 #include "graphics/graphics_fwd.hpp"
 
+namespace graphics
+{
 class font
 {
 public:
@@ -21,8 +24,10 @@ public:
     font();
 
     void load(std::string path, float size);
-    texture& atlas();
-    const texture& atlas() const;
+    void load(common::file& f, float size);
+    std::shared_ptr<graphics::texture> atlas();
+
+    glm::vec2 size(std::string_view msg) const;
 
     const character& operator[](unsigned int ch) const;
 
@@ -46,5 +51,6 @@ private:
 private:
     std::string _font_file_path;
     std::map<unsigned int, character> _character_map;
-    std::shared_ptr<texture> _atlas;
+    std::shared_ptr<graphics::texture> _atlas;
 };
+} // namespace graphics

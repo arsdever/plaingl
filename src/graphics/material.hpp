@@ -1,7 +1,8 @@
 #pragma once
 
-#include "common/utils.hpp"
 #include "graphics/graphics_fwd.hpp"
+
+#include "common/utils.hpp"
 
 namespace graphics
 {
@@ -39,6 +40,10 @@ public:
     void activate() const;
     void deactivate() const;
 
+    std::shared_ptr<material> clone() const;
+
+    static std::shared_ptr<material>
+    from_shader(std::shared_ptr<graphics::shader> shader);
     static void set_fallback_shader(std::shared_ptr<graphics::shader> shader);
 
 private:
