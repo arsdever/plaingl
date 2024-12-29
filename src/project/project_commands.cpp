@@ -88,12 +88,12 @@ std::shared_ptr<scene> cmd_load_scene::default_scene()
     go->get_transform().set_position({ 0, 0, 3 });
     s->add_root_object(go);
 
-    go = game_object::create();
-    go->add<components::mesh_filter>().set_mesh(suzanne_mesh);
-    go->add<components::mesh_renderer>().set_material(green_mat);
-    go->set_name("suzanne");
-    go->get_transform().set_position({ 3, 0, 0 });
-    s->add_root_object(go);
+    auto nested = game_object::create();
+    nested->add<components::mesh_filter>().set_mesh(suzanne_mesh);
+    nested->add<components::mesh_renderer>().set_material(green_mat);
+    nested->set_name("suzanne");
+    nested->get_transform().set_position({ 3, 0, 0 });
+    go->add_child(nested);
 
     go = game_object::create();
     auto& l = go->add<components::light>();
