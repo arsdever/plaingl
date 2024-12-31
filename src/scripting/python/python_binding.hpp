@@ -108,12 +108,9 @@ PYBIND11_EMBEDDED_MODULE(gamify, m)
         .value("MouseButton7", core::input_system::mouse_button::button_7)
         .value("MouseButton8", core::input_system::mouse_button::button_8)
         .value("MouseButton9", core::input_system::mouse_button::button_9)
-        .value("MouseButtonLeft",
-               core::input_system::mouse_button::left)
-        .value("MouseButtonRight",
-               core::input_system::mouse_button::right)
-        .value("MouseButtonMiddle",
-               core::input_system::mouse_button::middle);
+        .value("MouseButtonLeft", core::input_system::mouse_button::left)
+        .value("MouseButtonRight", core::input_system::mouse_button::right)
+        .value("MouseButtonMiddle", core::input_system::mouse_button::middle);
 
     pybind11::enum_<core::input_system::button_state>(is, "button_state")
         .value("Unspecified", core::input_system::button_state::unspecified)

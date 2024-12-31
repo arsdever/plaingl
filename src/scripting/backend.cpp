@@ -1,6 +1,8 @@
 #include "scripting/backend.hpp"
 
+#include "common/file.hpp"
 #include "scripting/python/python_backend.hpp"
+#include "scripting/script.hpp"
 
 namespace scripting
 {
@@ -17,12 +19,12 @@ void backend::shutdown() { _instance = nullptr; }
 
 std::shared_ptr<script> backend::load_script(common::file& f)
 {
-    return _instance->_impl->load(f);
+    return _instance->_impl->load(f.get_filepath());
 }
 
-std::shared_ptr<script> backend::update_script(std::shared_ptr<script> s)
+void backend::update_script(std::shared_ptr<script> s)
 {
-    return _instance->_impl->update(s);
+    return _instance->_impl->update(s->path().full_path());
 }
 
 std::unique_ptr<backend> backend::_instance { nullptr };

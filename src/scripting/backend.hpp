@@ -14,7 +14,7 @@ public:
     static void shutdown();
 
     static std::shared_ptr<script> load_script(common::file& f);
-    static std::shared_ptr<script> load_script(std::shared_ptr<script> s);
+    static void update_script(std::shared_ptr<script> s);
 
 private:
     backend();
