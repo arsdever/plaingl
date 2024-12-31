@@ -20,7 +20,7 @@ void model_importer::internal_load(common::file& asset_file)
     internal_update(_data, asset_file);
 }
 
-void model_importer::internal_update(std::shared_ptr<mesh> msh,
+void model_importer::internal_update(std::shared_ptr<graphics::mesh> msh,
                                      common::file& asset_file)
 {
     auto content = asset_file.read_all<std::vector<char>>();
