@@ -69,6 +69,21 @@ component& project_manager::create_component(game_object& obj,
     return *comp;
 }
 
+void project_manager::remove_component(game_object& obj,
+                                       std::shared_ptr<component> cmp)
+{
+    auto range =
+        _instance->_impl->_game_object_component_mapping.equal_range(obj.id());
+    for (auto it = range.first; it != range.second; ++it)
+    {
+        if (it->second == cmp)
+        {
+            _instance->_impl->_game_object_component_mapping.erase(it);
+            break;
+        }
+    }
+}
+
 component& project_manager::get_component(const game_object& obj,
                                           std::string_view class_name)
 {

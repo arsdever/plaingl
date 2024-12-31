@@ -53,8 +53,7 @@ std::shared_ptr<game_object>
 game_object::get_child_by_name(std::string_view name) const
 {
     std::shared_ptr<game_object> result;
-    visit_children(
-        [ & ](const std::shared_ptr<game_object>& obj)
+    visit_children([ & ](const std::shared_ptr<game_object>& obj)
     {
         if (obj->get_name() == name)
         {
@@ -121,8 +120,7 @@ void game_object::init()
         return true;
     });
 
-    visit_components(
-        [](auto& c) -> bool
+    visit_components([](auto& c) -> bool
     {
         c.init();
         return true;
@@ -142,8 +140,7 @@ void game_object::update()
         return true;
     });
 
-    visit_components(
-        [](auto& c) -> bool
+    visit_components([](auto& c) -> bool
     {
         c.update();
         return true;
@@ -163,8 +160,7 @@ void game_object::draw_gizmos()
         return true;
     });
 
-    visit_components(
-        [](auto& c) -> bool
+    visit_components([](auto& c) -> bool
     {
         // c.draw_gizmos();
         return true;
@@ -184,8 +180,7 @@ void game_object::deinit()
         return true;
     });
 
-    visit_components(
-        [](auto& c) -> bool
+    visit_components([](auto& c) -> bool
     {
         c.deinit();
         return true;
@@ -195,4 +190,9 @@ void game_object::deinit()
 component& game_object::add(std::string_view class_name)
 {
     return project_manager::create_component(*this, class_name);
+}
+
+void game_object::remove(std::shared_ptr<component> cmp)
+{
+    project_manager::remove_component(*this, cmp);
 }

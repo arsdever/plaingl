@@ -1,6 +1,6 @@
 #pragma once
 
-#include "common/common_fwd.hpp"
+#include "common/filesystem.hpp"
 
 namespace scripting
 {
