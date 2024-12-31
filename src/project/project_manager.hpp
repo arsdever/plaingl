@@ -26,6 +26,8 @@ public:
 
     static component& create_component(game_object& obj,
                                        std::string_view class_name);
+    static void remove_component(game_object& obj,
+                                 std::shared_ptr<component> cmp);
     static component& get_component(const game_object& obj,
                                     std::string_view class_name);
     static std::shared_ptr<component>

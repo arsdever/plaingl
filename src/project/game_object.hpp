@@ -24,6 +24,7 @@ public:
         std::function<bool(const std::shared_ptr<game_object>&)> visitor) const;
 
     component& add(std::string_view class_name);
+    void remove(std::shared_ptr<component> cmp);
 
     template <typename T>
         requires(std::is_base_of<component, T>::value)

@@ -6,6 +6,7 @@
 #include "common/file.hpp"
 #include "common/filesystem.hpp"
 #include "common/logging.hpp"
+#include "common/main_thread_dispatcher.hpp"
 #include "project/component_interface/component.hpp"
 #include "project/component_interface/component_registry.hpp"
 #include "project/game_object.hpp"
@@ -35,80 +36,90 @@ backend::impl::impl()
 
 backend::impl::~impl() = default;
 
-void backend::impl::load(std::string_view script_file_path)
+std::shared_ptr<script> backend::impl::load(std::string_view script_file_path)
 {
+    auto result = std::make_shared<script>(script_file_path);
+
     auto module_name = path_to_module_name(script_file_path);
     try
     {
-        auto module = pybind11::module_::import(module_name.c_str());
-        _modules.emplace(module_name, module);
-        for (auto& it : module.attr("module_exports"))
+        _modules[ module_name ] =
+            pybind11::module_::import(module_name.c_str());
+        for (auto& it : _modules[ module_name ].attr("module_exports"))
         {
             auto cls = it.cast<pybind11::class_<python_component>>();
-            component_registry::register_component(
-                cls.attr("name").cast<std::string>(),
-                [ cls ](game_object& obj) -> std::shared_ptr<component>
-            {
-                try
-                {
-                    auto pyobj = cls(obj.shared_from_this());
-                    auto result =
-                        pyobj.cast<std::shared_ptr<python_component>>();
-                    result->_instance = pyobj;
-                    return result;
-                }
-                catch (std::exception& e)
-                {
-                    log()->error("Failed to create component: {}", e.what());
-                    return nullptr;
-                }
-            });
+            register_component(cls);
         }
     }
     catch (std::exception& e)
     {
         log()->error("Failed to load script: {}", e.what());
     }
+
+    return result;
 }
 
 void backend::impl::update(std::string_view script_file_path)
 {
-    auto module_name = path_to_module_name(script_file_path);
-    auto it = _modules.find(module_name);
-    bool was_loaded = it != _modules.end();
-    if (!was_loaded)
+    std::string module_name = path_to_module_name(script_file_path);
+    common::main_thread_dispatcher::dispatch([ this, module_name ]
     {
-        load(script_file_path);
-        return;
-    }
-
-    try
-    {
-        auto& module = it->second;
-        module = pybind11::module_::import(module_name.c_str());
-        for (auto& it : module.attr("module_exports"))
+        try
         {
-            auto cls = it.cast<pybind11::class_<python_component>>();
-            component_registry::register_component(
-                cls.attr("name").cast<std::string>(),
-                [ cls ](game_object& obj) -> std::shared_ptr<component>
+            pybind11::module module;
+            if (auto it = _modules.find(module_name); it != _modules.end())
             {
-                try
+                if (it->second)
                 {
-                    auto pyobj = cls(obj.shared_from_this());
+                    log()->info("Reloading module {}", module_name);
+                    it->second.reload();
+                    module = it->second;
                 }
-                catch (std::exception& e)
+            }
+            else
+            {
+                log()->info("Module {} not loaded", module_name);
+                module = pybind11::module_::import(module_name.c_str());
+            }
+
+            for (auto& it : module.attr("module_exports"))
+            {
+                auto cls = it.cast<pybind11::class_<python_component>>();
+                auto cls_name = cls.attr("name").cast<std::string>();
+                std::vector<std::reference_wrapper<game_object>>
+                    _owning_game_objects {};
+                auto cmp = _bindings.find(cls_name);
+                if (cmp != _bindings.end())
                 {
-                    log()->error("Failed to create component: {}", e.what());
-                    return nullptr;
+                    auto bkt = _bindings.bucket(cmp->first);
+                    for (auto it = _bindings.begin(bkt);
+                         it != _bindings.end(bkt);
+                         ++it)
+                    {
+                        if (it->first == cmp->first)
+                        {
+                            auto& go = cmp->second->get_game_object();
+                            _owning_game_objects.emplace_back(go);
+                            go.remove(it->second);
+                        }
+                    }
                 }
-            });
+
+                component_registry::unregister_component(
+                    cls.attr("name").cast<std::string>());
+                register_component(cls);
+
+                for (auto& go : _owning_game_objects)
+                {
+                    go.get().add(cls_name);
+                }
+            }
         }
-    }
-    catch (std::exception& e)
-    {
-        log()->error("Failed to load script: {}", e.what());
-    }
+        catch (std::exception& e)
+        {
+            log()->error("Failed to load script: {}", e.what());
+        }
+    });
 }
 
 std::string
@@ -121,5 +132,30 @@ backend::impl::path_to_module_name(std::string_view script_file_path)
     relpath += ".";
     relpath += path.stem();
     return relpath;
+}
+
+template <typename T, typename... Extra>
+void backend::impl::register_component(pybind11::class_<T, Extra...> cls)
+{
+    component_registry::register_component(
+        cls.attr("name").template cast<std::string>(),
+        [ this, cls ](game_object& obj) -> std::shared_ptr<component>
+    {
+        try
+        {
+            auto pyobj = cls(obj.shared_from_this());
+            auto result =
+                pyobj.template cast<std::shared_ptr<python_component>>();
+            result->_instance = pyobj;
+            _bindings.emplace(cls.attr("name").template cast<std::string>(),
+                              result);
+            return result;
+        }
+        catch (std::exception& e)
+        {
+            log()->error("Failed to create component: {}", e.what());
+            return nullptr;
+        }
+    });
 }
 } // namespace scripting

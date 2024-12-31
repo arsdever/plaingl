@@ -65,6 +65,11 @@ public:
         _type_map[ std::string(type_name) ] = std::move(ctor);
     }
 
+    static void unregister_component(std::string_view type_name)
+    {
+        _type_map.erase(std::string(type_name));
+    }
+
     template <typename T>
     static metatype get_type()
     {
