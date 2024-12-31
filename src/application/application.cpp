@@ -9,6 +9,7 @@
 #include "asset_management/asset_manager.hpp"
 #include "common/filesystem.hpp"
 #include "common/logging.hpp"
+#include "common/main_thread_dispatcher.hpp"
 #include "core/command_dispatcher.hpp"
 #include "core/game_clock.hpp"
 #include "core/input_system.hpp"
@@ -63,6 +64,7 @@ application::application()
 
     load_assets();
     setup_console();
+    common::main_thread_dispatcher::initialize();
 }
 
 application::~application()
@@ -70,6 +72,7 @@ application::~application()
     shutdown();
     glfwTerminate();
     scripting::backend::shutdown();
+    common::main_thread_dispatcher::shutdown();
 }
 
 int application::run()
@@ -82,6 +85,7 @@ int application::run()
 
     while (_is_running)
     {
+        common::main_thread_dispatcher::run_all();
         update_windows();
         process_console_commands();
         game_clock::frame();

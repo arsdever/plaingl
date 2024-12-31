@@ -10,6 +10,8 @@ add_library(
   filesystem.cpp
   filesystem.hpp
   logging.hpp
+  main_thread_dispatcher.cpp
+  main_thread_dispatcher.hpp
   stdafx.cpp
   stdafx.hpp
   utils.hpp)
