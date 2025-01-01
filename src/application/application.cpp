@@ -62,9 +62,9 @@ application::application()
     scripting::backend::initialize();
     core::input_system::update_device_list();
 
+    common::main_thread_dispatcher::initialize();
     load_assets();
     setup_console();
-    common::main_thread_dispatcher::initialize();
 }
 
 application::~application()
