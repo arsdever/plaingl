@@ -14,6 +14,8 @@ public:
     static void run_one();
     static void run_all();
 
+    static bool is_main_thread();
+
 private:
     struct impl;
     static std::unique_ptr<impl> _instance;
