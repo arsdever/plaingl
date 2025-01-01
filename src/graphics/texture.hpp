@@ -75,6 +75,8 @@ public:
     static void static_bind(size_t id, bool ms);
     static void static_unbind(bool ms);
 
+    void set_contents_from_file(common::file& file);
+    void set_contents_from_file(std::string_view path);
     static std::shared_ptr<graphics::texture> from_file(std::string_view path);
     static std::shared_ptr<graphics::texture> from_file(common::file& file);
 
@@ -86,6 +88,8 @@ private:
 
     void fetch_from_gpu();
 
+    void set_contents_from_png_file(common::file& file);
+    void set_contents_from_jpg_file(common::file& file);
     static std::shared_ptr<graphics::texture> from_png_file(common::file& file);
     static std::shared_ptr<graphics::texture> from_jpg_file(common::file& file);
 
