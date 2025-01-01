@@ -9,6 +9,7 @@ struct main_thread_dispatcher::impl
     std::queue<std::function<void()>> _queue;
     std::mutex _mutex;
     std::condition_variable _cv;
+    std::thread::id _main_thread_id { std::this_thread::get_id() };
     bool _running { true };
 };
 
@@ -58,6 +59,11 @@ void main_thread_dispatcher::run_all()
     {
         f();
     }
+}
+
+bool main_thread_dispatcher::is_main_thread()
+{
+    return std::this_thread::get_id() == _instance->_main_thread_id;
 }
 
 std::unique_ptr<main_thread_dispatcher::impl>
