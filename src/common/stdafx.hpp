@@ -3,6 +3,7 @@
 #include <any>
 #include <array>
 #include <atomic>
+#include <cassert>
 #include <chrono>
 #include <condition_variable>
 #include <cstring>

@@ -12,6 +12,7 @@
 #include "common/file_lock.hpp"
 #include "common/filesystem.hpp"
 #include "common/logging.hpp"
+#include "common/main_thread_dispatcher.hpp"
 #include "common/utils.hpp"
 #include "graphics/formats/jpg.hpp"
 #include "graphics/formats/png.hpp"
@@ -97,6 +98,7 @@ texture::~texture()
 
 void texture::init(size_t width, size_t height, format texture_format)
 {
+    assert(common::main_thread_dispatcher::is_main_thread());
     _width = width;
     _height = height;
     if (_width == 0 || _height == 0)
@@ -381,6 +383,25 @@ unsigned texture::target() const
     return _samples > 1 ? GL_TEXTURE_2D_MULTISAMPLE : GL_TEXTURE_2D;
 }
 
+void texture::set_contents_from_file(common::file& file)
+{
+    auto path = common::filesystem::path(file.get_filepath());
+    if (path.extension() == ".png")
+    {
+        set_contents_from_png_file(file);
+    }
+    else if (path.extension() == ".jpg" || path.extension() == ".jpeg")
+    {
+        set_contents_from_jpg_file(file);
+    }
+}
+
+void texture::set_contents_from_file(std::string_view path)
+{
+    common::file texture_file { std::string(path) };
+    set_contents_from_file(texture_file);
+}
+
 std::shared_ptr<texture> texture::from_file(std::string_view path)
 {
     common::file texture_file { std::string(path) };
@@ -416,29 +437,39 @@ void texture::fetch_from_gpu()
     glBindTexture(target(), 0);
 }
 
-std::shared_ptr<texture> texture::from_png_file(common::file& file)
+void texture::set_contents_from_png_file(common::file& file)
 {
     png img = png::load(file);
-    auto tex = std::make_shared<texture>();
-    tex->init(img.get_width(), img.get_height(), img.get_format());
+    init(img.get_width(), img.get_height(), img.get_format());
     size_t size = img.read_pixels(static_cast<char*>(nullptr));
     std::vector<char> data(size);
     img.read_pixels(data.data());
     file.close();
-    tex->set_data(data);
+    set_data(data);
+}
+
+void texture::set_contents_from_jpg_file(common::file& file)
+{
+    jpg img = jpg::load(file);
+    init(img.get_width(), img.get_height(), img.get_format());
+    size_t size = img.read_pixels(static_cast<unsigned char*>(nullptr));
+    std::vector<char> data(size);
+    img.read_pixels(reinterpret_cast<unsigned char*>(data.data()));
+    file.close();
+    set_data(data);
+}
+
+std::shared_ptr<texture> texture::from_png_file(common::file& file)
+{
+    auto tex = std::make_shared<texture>();
+    tex->set_contents_from_png_file(file);
     return tex;
 }
 
 std::shared_ptr<texture> texture::from_jpg_file(common::file& file)
 {
-    jpg img = jpg::load(file);
     auto tex = std::make_shared<texture>();
-    tex->init(img.get_width(), img.get_height(), img.get_format());
-    size_t size = img.read_pixels(static_cast<unsigned char*>(nullptr));
-    std::vector<char> data(size);
-    img.read_pixels(reinterpret_cast<unsigned char*>(data.data()));
-    file.close();
-    tex->set_data(data);
+    tex->set_contents_from_jpg_file(file);
     return tex;
 }
 
