@@ -12,6 +12,7 @@
 #include "common/directory.hpp"
 #include "common/filesystem.hpp"
 #include "common/logging.hpp"
+#include "common/main_thread_dispatcher.hpp"
 
 namespace assets
 {
@@ -79,8 +80,7 @@ void asset_manager::scan_directory()
     scan_dir = [ & ](common::filesystem::path path)
     {
         common::directory dir(std::string(path.full_path()));
-        dir.visit_files(
-            [ scan_dir, path ](std::string file_path, bool is_dir)
+        dir.visit_files([ scan_dir, path ](std::string file_path, bool is_dir)
         {
             if (is_dir)
             {
@@ -109,18 +109,23 @@ void asset_manager::setup_directory_watch()
             _impl->project_path,
             [](std::string_view path, common::file_change_type change)
         {
-            switch (change)
+            std::string path_str(path);
+            common::main_thread_dispatcher::dispatch(
+                [ path = std::move(path_str), change ]
             {
-            case common::file_change_type::created:
-                _impl->_importer.import(path, _impl->_cache);
-                break;
-            case common::file_change_type::modified:
-                _impl->_importer.update(path, _impl->_cache);
-                break;
-            // case common::file_change_type::removed: unload_asset(path);
-            // break;
-            default: break;
-            }
+                switch (change)
+                {
+                case common::file_change_type::created:
+                    _impl->_importer.import(path, _impl->_cache);
+                    break;
+                case common::file_change_type::modified:
+                    _impl->_importer.update(path, _impl->_cache);
+                    break;
+                // case common::file_change_type::removed: unload_asset(path);
+                // break;
+                default: break;
+                }
+            });
         });
     }
     catch (std::exception& e)
