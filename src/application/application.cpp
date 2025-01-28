@@ -16,6 +16,7 @@
 #include "core/inputs/binding.hpp"
 #include "core/window.hpp"
 #include "graphics/font.hpp"
+#include "graphics/graphics.hpp"
 #include "graphics/renderer/renderer_2d.hpp"
 #include "graphics/renderer/renderer_3d.hpp"
 #include "graphics/texture.hpp"
@@ -183,8 +184,10 @@ void application::render_game()
     if (!cam)
     {
         const auto line_height = 14;
-        auto msg_font = assets::asset_manager::get<graphics::font>("default");
+        auto msg_font =
+            assets::asset_manager::get<graphics::font>("default.ttf");
         static constexpr std::string_view msg = "No active camera";
+        graphics::clear({ 0.0, 0.0, 0.0, 1.0 });
         renderer_2d().draw_text(
             (static_cast<glm::vec2>(_windows[ 0 ]->get_size()) -
              msg_font->size(msg)) /
@@ -207,7 +210,7 @@ void application::render_game()
 void application::draw_console()
 {
     auto position = glm::vec2(10, _windows[ 0 ]->get_height() - 10);
-    auto fnt = assets::asset_manager::get<graphics::font>("default");
+    auto fnt = assets::asset_manager::get<graphics::font>("default.ttf");
     auto line_height = fnt->size("X").y + 2;
     auto last_10 = _console->history<10>();
     size_t lines = 0;
@@ -230,14 +233,14 @@ void application::draw_console()
         ++lines;
         renderer_2d().draw_text(
             { 10, _windows[ 0 ]->get_height() - 10 - ((i + 1) * line_height) },
-            assets::asset_manager::get<graphics::font>("default"),
+            assets::asset_manager::get<graphics::font>("default.ttf"),
             _windows[ 0 ]->get_size(),
             line);
     }
 
     renderer_2d().draw_text(
         { 10, _windows[ 0 ]->get_height() - 10 },
-        assets::asset_manager::get<graphics::font>("default"),
+        assets::asset_manager::get<graphics::font>("default.ttf"),
         _windows[ 0 ]->get_size(),
         std::format("> {}", _console->get_current_input()));
 }

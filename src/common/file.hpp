@@ -2,6 +2,7 @@
 
 #include "common/event.hpp"
 #include "common/file_watcher.hpp"
+#include "common/filesystem.hpp"
 
 namespace common
 {
@@ -141,6 +142,7 @@ public:
     template <typename T = std::string>
     static size_t append(std::string_view path, const T& data);
     static bool exists(std::string_view path);
+    static bool exists(const common::filesystem::path& path);
 
 private:
     size_t read_data(char* buffer, size_t length);

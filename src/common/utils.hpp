@@ -184,3 +184,22 @@ struct type_list
 {
     using variant_t = std::variant<T...>;
 };
+
+template <typename T>
+T generate_random()
+{
+    static std::random_device rd;
+    static std::mt19937 gen(rd());
+    static std::uniform_int_distribution<T> dis(
+        (std::numeric_limits<T>::min)(), (std::numeric_limits<T>::max)());
+    return dis(gen);
+}
+
+template <typename T>
+T generate_random(T min, T max)
+{
+    static std::random_device rd;
+    static std::mt19937 gen(rd());
+    static std::uniform_int_distribution<T> dis(min, max);
+    return dis(gen);
+}

@@ -1,6 +1,9 @@
 #include "asset_management/asset_importer.hpp"
 
+#include "asset_management/asset.hpp"
+#include "asset_management/asset_cache.hpp"
 #include "asset_management/type_importer.hpp"
+#include "common/file.hpp"
 #include "common/logging.hpp"
 
 namespace assets
@@ -13,6 +16,14 @@ void asset_importer::import(std::string_view path, asset_cache& cache)
 void asset_importer::update(std::string_view path, asset_cache& cache)
 {
     get_importer(path)->update(path, cache);
+}
+
+void asset_importer::load_asset(asset& ast)
+{
+    auto format = std::string(
+        common::filesystem::path(ast._asset_file.get_filepath()).extension());
+
+    get_importer(format)->load_asset(ast);
 }
 
 void asset_importer::register_importer(
@@ -34,7 +45,11 @@ asset_importer::get_importer(std::string_view path)
 {
     struct empty_importer : public type_importer_base
     {
-        void import(std::string_view path, asset_cache& cache) override { }
+        void import(std::string_view path, asset_cache& cache) override
+        {
+            auto ast = std::make_shared<asset>(common::file(std::string(path)));
+            cache.register_asset(path, ast);
+        }
         void update(std::string_view path, asset_cache& cache) override { }
     };
 

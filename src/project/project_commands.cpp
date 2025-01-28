@@ -62,12 +62,12 @@ std::shared_ptr<scene> cmd_load_scene::default_scene()
     auto s = scene::create();
     s->set_name("default");
 
-    auto cube_mesh = assets::asset_manager::get<graphics::mesh>("cube");
+    auto cube_mesh = assets::asset_manager::get<graphics::mesh>("meshes.cube.fbx");
     auto suzanne_mesh =
-        assets::asset_manager::get<graphics::mesh>("susane_head");
-    auto sphere_mesh = assets::asset_manager::get<graphics::mesh>("sphere");
-    auto mat = assets::asset_manager::get<graphics::material>("standard");
-    auto shdr = assets::asset_manager::get<graphics::shader>("standard");
+        assets::asset_manager::get<graphics::mesh>("meshes.susane_head.fbx");
+    auto sphere_mesh = assets::asset_manager::get<graphics::mesh>("meshes.sphere.fbx");
+    auto mat = assets::asset_manager::get<graphics::material>("standard.standard.mat");
+    auto shdr = assets::asset_manager::get<graphics::shader>("standard.standard.shader");
 
     auto green_mat = mat->clone();
     green_mat->set_property_value("u_albedo_color", glm::vec4 { 0, 1, 0, 1 });

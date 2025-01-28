@@ -123,9 +123,8 @@ void profiler::render()
     m->set_indices(std::move(indices));
     m->init();
 
-    auto mat = assets::asset_manager::get<graphics::material>("surface");
-    // auto txt = assets::asset_manager::get<graphics::texture>("white");
-    auto txt = assets::asset_manager::get<graphics::texture>("brick");
+    auto mat = assets::asset_manager::get<graphics::material>("standard.surface.mat");
+    auto txt = assets::asset_manager::get<graphics::texture>("images.white.png");
 
     mat->set_property_value("u_vp_matrix", glm::identity<glm::mat4>());
     mat->set_property_value("u_model_matrix", glm::identity<glm::mat4>());

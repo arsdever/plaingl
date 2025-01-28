@@ -22,7 +22,12 @@ file::file(file&& o)
     o._impl = std::make_unique<impl>("");
 }
 
-file& file::operator=(file&& o) = default;
+file& file::operator=(file&& o)
+{
+    _impl = std::move(o._impl);
+    o._impl = std::make_unique<impl>("");
+    return *this;
+}
 
 file::~file() { close(); }
 
@@ -105,4 +110,6 @@ void file::remove(std::string_view path) { impl::remove(path); }
 bool file::exists() const { return impl::exists(_impl->path()); }
 
 bool file::exists(std::string_view path) { return impl::exists(path); }
+
+bool file::exists(const common::filesystem::path& path) { return impl::exists(path.full_path()); }
 } // namespace common

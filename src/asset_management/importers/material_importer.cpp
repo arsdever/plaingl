@@ -3,6 +3,7 @@
 #include "asset_management/importers/material_importer.hpp"
 
 #include "asset_management/asset.hpp"
+#include "asset_management/asset_manager.hpp"
 #include "common/file_lock.hpp"
 #include "common/filesystem.hpp"
 #include "common/logging.hpp"
@@ -54,6 +55,7 @@ void material_importer::internal_update(asset_data_t mat,
              shader_exclusive_name +
          ".shader")
             .full_path());
+    shader_exclusive_name = assets::asset_manager::get_asset_key(shader_path);
 
     auto sh =
         assets::asset_manager::try_get<graphics::shader>(shader_exclusive_name);

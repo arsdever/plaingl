@@ -57,6 +57,12 @@ void shader::compile()
         return;
     }
 
+    for (auto& ss : _shaders)
+    {
+        ss->compile();
+        glDetachShader(_id, ss->id());
+    }
+
     resolve_uniforms();
 }
 
