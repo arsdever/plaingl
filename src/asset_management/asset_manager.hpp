@@ -24,6 +24,8 @@ public:
     static void register_asset(std::string_view name,
                                std::shared_ptr<asset> ast);
 
+    static void load_asset(asset& ast);
+
     static asset& get(std::string_view name);
     template <typename T>
     static auto get(std::string_view name)
@@ -32,13 +34,13 @@ public:
     }
     static auto try_get(std::string_view name)
     {
-        return try_get_internal(name, -1);
+        return try_get_internal(name);
     }
     template <typename T>
     static std::shared_ptr<T> try_get(std::string_view name)
     {
         auto type_index = variant_index_v<asset::data_type, std::shared_ptr<T>>;
-        auto ast = try_get_internal(name, type_index);
+        auto ast = try_get_internal(name);
         if (!ast)
             return nullptr;
 
@@ -51,14 +53,11 @@ public:
     static asset_importer& get_importer();
     static asset_cache& get_cache();
 
+    static size_t get_asset_id(std::string_view path);
+    static std::string get_asset_key(std::string_view path);
+
 private:
-    static std::string_view internal_resource_path();
-
-    static void scan_directory();
-    static void setup_directory_watch();
-
-    static std::shared_ptr<asset> try_get_internal(std::string_view name,
-                                                   int type_index);
+    static std::shared_ptr<asset> try_get_internal(std::string_view name);
 
 private:
     struct impl;

@@ -68,7 +68,7 @@ void renderer_2d::draw_rect(glm::vec2 top_left,
     glDisable(GL_DEPTH_TEST);
     vertex3d::activate_attributes();
 
-    auto shader_2d = assets::asset_manager::get<graphics::material>("surface");
+    auto shader_2d = assets::asset_manager::get<graphics::material>("standard.surface.mat");
     shader_2d->set_property_value("u_vp_matrix", glm::identity<glm::mat4>());
     shader_2d->set_property_value("u_model_matrix", glm::identity<glm::mat4>());
 
@@ -153,7 +153,7 @@ void renderer_2d::draw_rect(glm::vec2 top_left,
 
     vertex3d::activate_attributes();
 
-    auto shader_2d = assets::asset_manager::get<graphics::material>("surface");
+    auto shader_2d = assets::asset_manager::get<graphics::material>("standard.surface.mat");
     shader_2d->set_property_value("u_vp_matrix", glm::identity<glm::mat4>());
     shader_2d->set_property_value("u_model_matrix", glm::identity<glm::mat4>());
 
@@ -263,10 +263,10 @@ void renderer_2d::draw_text(glm::vec2 baseline,
     text_mesh.set_indices(std::move(indices));
     text_mesh.init();
 
-    auto white = assets::asset_manager::get<graphics::texture>("white");
+    auto white = assets::asset_manager::get<graphics::texture>("images.white.png");
 
     auto text_material =
-        assets::asset_manager::get<graphics::material>("surface");
+        assets::asset_manager::get<graphics::material>("standard.surface.mat");
     text_material->set_property_value("u_vp_matrix",
                                       glm::identity<glm::mat4>());
     text_material->set_property_value("u_model_matrix",

@@ -199,11 +199,11 @@ void camera::set_view_matrix(glm::mat4 mat) { _view_matrix = std::move(mat); }
 
 void camera::render_texture_background()
 {
-    auto mat = assets::asset_manager::get<graphics::material>("skybox");
+    auto mat = assets::asset_manager::get<graphics::material>("standard.skybox.mat");
     mat->set_property_value("u_model_matrix", glm::identity<glm::mat4>());
     mat->set_property_value("u_vp_matrix", vp_matrix());
     renderer_3d().draw_mesh(
-        assets::asset_manager::get<graphics::mesh>("env_sphere"), mat);
+        assets::asset_manager::get<graphics::mesh>("meshes.env_sphere.fbx"), mat);
 }
 
 void camera::render_on_private_texture() const

@@ -55,8 +55,15 @@ void main_thread_dispatcher::run_one()
 
 void main_thread_dispatcher::run_all()
 {
-    while (auto f = pull_one())
+    decltype(_instance->_queue) tasks;
     {
+        std::lock_guard<std::mutex> lock(_instance->_mutex);
+        _instance->_queue.swap(tasks);
+    }
+    while (!tasks.empty())
+    {
+        auto f = tasks.front();
+        tasks.pop();
         f();
     }
 }

@@ -11,27 +11,15 @@ class asset_cache
 {
 public:
     void register_asset(std::string_view name, std::shared_ptr<asset> ast);
+    void register_asset(size_t id, std::shared_ptr<asset> ast);
 
-    std::shared_ptr<asset> find(std::string_view name, int type_index = -1);
-    bool contains(std::string_view name, int type_index = -1);
+    bool contains(std::string_view name);
+    bool contains(size_t id);
 
-    template <typename T>
-    bool contains(std::string_view name)
-    {
-        return contains(name, variant_index_v<asset::data_type, T>);
-    }
-
-    template <typename T>
-    std::shared_ptr<asset> find(std::string_view name)
-    {
-        return find(name, variant_index_v<asset::data_type, T>);
-    }
+    std::shared_ptr<asset> find(size_t i);
+    std::shared_ptr<asset> find(std::string_view name);
 
 private:
-    std::unordered_multimap<std::string,
-                            std::shared_ptr<asset>,
-                            string_hash,
-                            std::equal_to<>>
-        _assets;
+    std::unordered_map<size_t, std::shared_ptr<asset>> _assets;
 };
 } // namespace assets
