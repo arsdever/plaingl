@@ -39,7 +39,6 @@ public:
     template <typename T>
     static std::shared_ptr<T> try_get(std::string_view name)
     {
-        auto type_index = variant_index_v<asset::data_type, std::shared_ptr<T>>;
         auto ast = try_get_internal(name);
         if (!ast)
             return nullptr;
