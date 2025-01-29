@@ -11,6 +11,8 @@ namespace
 logger log() { return get_logger("asset_manager"); }
 } // namespace
 
+namespace assets
+{
 void shader_importer::internal_load(common::file& asset_file)
 {
     _data = std::make_shared<graphics::shader>();
@@ -60,3 +62,4 @@ void shader_importer::load_shader(common::file& asset_file)
     _data->set_name(std::string(spath.stem()));
     _data->compile();
 }
+} // namespace assets

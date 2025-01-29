@@ -2,6 +2,8 @@
 
 #include "assets/type_importer.hpp"
 
+namespace assets
+{
 class texture_importer : public assets::type_importer<graphics::texture>
 {
 public:
@@ -11,3 +13,4 @@ public:
     void internal_update(std::shared_ptr<graphics::texture>,
                          common::file&) override;
 };
+} // namespace assets
