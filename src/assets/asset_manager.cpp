@@ -1,16 +1,16 @@
 #include <nlohmann/json.hpp>
 
-#include "asset_management/asset_manager.hpp"
+#include "assets/asset_manager.hpp"
 
-#include "asset_management/asset.hpp"
-#include "asset_management/asset_cache.hpp"
-#include "asset_management/asset_importer.hpp"
-#include "asset_management/importers/font_importer.hpp"
-#include "asset_management/importers/material_importer.hpp"
-#include "asset_management/importers/model_importer.hpp"
-#include "asset_management/importers/script_importer.hpp"
-#include "asset_management/importers/shader_importer.hpp"
-#include "asset_management/importers/texture_importer.hpp"
+#include "assets/asset.hpp"
+#include "assets/asset_cache.hpp"
+#include "assets/asset_importer.hpp"
+#include "assets/importers/font_importer.hpp"
+#include "assets/importers/material_importer.hpp"
+#include "assets/importers/model_importer.hpp"
+#include "assets/importers/script_importer.hpp"
+#include "assets/importers/shader_importer.hpp"
+#include "assets/importers/texture_importer.hpp"
 #include "common/directory.hpp"
 #include "common/filesystem.hpp"
 #include "common/logging.hpp"
@@ -252,7 +252,8 @@ struct asset_manager::impl
 
             for (const auto& dep : deps)
             {
-                auto ast = _impl->_cache.find(std::stoull(dep.get<std::string>()));
+                auto ast =
+                    _impl->_cache.find(std::stoull(dep.get<std::string>()));
                 base_ast->_dependencies.push_back(ast);
                 if (ast)
                 {

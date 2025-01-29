@@ -1,6 +1,5 @@
-#include "asset_management/importers/shader_importer.hpp"
-
-#include "asset_management/asset_importer.hpp"
+#include "assets/asset_importer.hpp"
+#include "assets/importers/shader_importer.hpp"
 #include "common/file_lock.hpp"
 #include "common/logging.hpp"
 #include "graphics/shader.hpp"

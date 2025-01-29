@@ -4,7 +4,7 @@
 
 #include "project/components/camera.hpp"
 
-#include "asset_management/asset_manager.hpp"
+#include "assets/asset_manager.hpp"
 #include "common/logging.hpp"
 #include "core/settings.hpp"
 #include "core/window.hpp"

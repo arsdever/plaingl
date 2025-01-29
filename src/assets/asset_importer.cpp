@@ -1,8 +1,8 @@
-#include "asset_management/asset_importer.hpp"
+#include "assets/asset_importer.hpp"
 
-#include "asset_management/asset.hpp"
-#include "asset_management/asset_cache.hpp"
-#include "asset_management/type_importer.hpp"
+#include "assets/asset.hpp"
+#include "assets/asset_cache.hpp"
+#include "assets/type_importer.hpp"
 #include "common/file.hpp"
 #include "common/logging.hpp"
 

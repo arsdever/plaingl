@@ -1,4 +1,4 @@
-#include "asset_management/importers/texture_importer.hpp"
+#include "assets/importers/texture_importer.hpp"
 
 #include "common/main_thread_dispatcher.hpp"
 #include "graphics/texture.hpp"

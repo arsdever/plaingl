@@ -1,9 +1,9 @@
 #include <nlohmann/json.hpp>
 
-#include "asset_management/importers/material_importer.hpp"
+#include "assets/importers/material_importer.hpp"
 
-#include "asset_management/asset.hpp"
-#include "asset_management/asset_manager.hpp"
+#include "assets/asset.hpp"
+#include "assets/asset_manager.hpp"
 #include "common/file_lock.hpp"
 #include "common/filesystem.hpp"
 #include "common/logging.hpp"

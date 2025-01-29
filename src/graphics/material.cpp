@@ -1,6 +1,6 @@
 #include "graphics/material.hpp"
 
-#include "asset_management/asset_manager.hpp"
+#include "assets/asset_manager.hpp"
 #include "common/logging.hpp"
 #include "graphics/shader.hpp"
 #include "graphics/texture.hpp"

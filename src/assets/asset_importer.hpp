@@ -1,6 +1,6 @@
 #pragma once
 
-#include "asset_management/assets_fwd.hpp"
+#include "assets/assets_fwd.hpp"
 
 #include "common/utils.hpp"
 

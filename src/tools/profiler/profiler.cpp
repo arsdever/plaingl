@@ -6,7 +6,7 @@
 
 #include "tools/profiler/profiler.hpp"
 
-#include "asset_management/asset_manager.hpp"
+#include "assets/asset_manager.hpp"
 #include "common/logging.hpp"
 #include "graphics/graphics.hpp"
 #include "graphics/material.hpp"

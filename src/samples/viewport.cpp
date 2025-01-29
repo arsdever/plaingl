@@ -4,7 +4,7 @@
 
 #include "core/viewport.hpp"
 
-#include "asset_management/asset_manager.hpp"
+#include "assets/asset_manager.hpp"
 #include "common/filesystem.hpp"
 #include "common/logging.hpp"
 #include "core/window.hpp"

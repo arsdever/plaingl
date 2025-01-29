@@ -3,7 +3,7 @@
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
 
-#include "asset_management/importers/model_importer.hpp"
+#include "assets/importers/model_importer.hpp"
 
 #include "common/file_lock.hpp"
 #include "common/logging.hpp"

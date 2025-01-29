@@ -1,10 +1,10 @@
 #pragma once
 
-#include "asset_management/assets_fwd.hpp"
+#include "assets/assets_fwd.hpp"
 #include "graphics/graphics_fwd.hpp"
 
-#include "asset_management/asset.hpp"
-#include "asset_management/asset_importer.hpp"
+#include "assets/asset.hpp"
+#include "assets/asset_importer.hpp"
 #include "common/utils.hpp"
 
 namespace assets

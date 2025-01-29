@@ -7,7 +7,7 @@
 
 #include "graphics/texture.hpp"
 
-#include "asset_management/type_importer.hpp"
+#include "assets/type_importer.hpp"
 #include "common/file.hpp"
 #include "common/file_lock.hpp"
 #include "common/filesystem.hpp"

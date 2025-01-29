@@ -1,6 +1,6 @@
 #include "application/application_commands.hpp"
 
-#include "asset_management/asset_manager.hpp"
+#include "assets/asset_manager.hpp"
 #include "common/logging.hpp"
 #include "graphics/texture.hpp"
 #include "tools/mesh_viewer/mesh_viewer.hpp"
