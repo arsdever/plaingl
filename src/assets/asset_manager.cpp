@@ -33,6 +33,16 @@ struct asset_manager::impl
                             { "requires", nlohmann::json {} },
                             { "no_lazy_load", nlohmann::json {} } };
 
+    void scan_directory()
+    {
+        load_index_file();
+        update_index();
+        save_index();
+
+        resolve_dependencies();
+        resolve_no_lazy_load();
+    }
+
     void load_index_file()
     {
         auto project_path = common::filesystem::path(_impl->project_path);
@@ -180,66 +190,6 @@ struct asset_manager::impl
         }
     }
 
-    void resolve_no_lazy_load()
-    {
-        for (const auto& it : _index[ "no_lazy_load" ])
-        {
-            auto ast = _impl->_cache.find(std::stoull(it.get<std::string>()));
-            if (!ast)
-            {
-                log()->warn("Invalid entry in no_lazy_load list: {}",
-                            it.get<std::string>());
-                continue;
-            }
-
-            load_asset(*ast);
-        }
-    }
-
-    void scan_directory()
-    {
-        load_index_file();
-        update_index();
-        save_index();
-
-        resolve_dependencies();
-        resolve_no_lazy_load();
-    }
-
-    void clear_invalid_dependencies(nlohmann::json& deps)
-    {
-        std::vector<nlohmann::json> delete_marks;
-
-        for (const auto& dep : deps)
-        {
-            if (!_index[ "id_path" ].contains(dep))
-            {
-                log()->error("Asset {} is missing from the index",
-                             dep.get<size_t>());
-                delete_marks.push_back(dep);
-            }
-        }
-
-        deps.get<nlohmann::json::array_t>().resize(
-            std::distance(deps.begin(),
-                          std::stable_partition(deps.begin(),
-                                                deps.end(),
-                                                [ & ](const auto& mark)
-        {
-            return std::find(delete_marks.begin(), delete_marks.end(), mark) ==
-                   delete_marks.end();
-        })));
-    }
-
-    void ensure_dependencies(nlohmann::json& deps)
-    {
-        for (const auto& dep : deps)
-        {
-            auto path = _index[ "id_path" ][ dep ];
-            load_asset(path);
-        }
-    }
-
     void resolve_dependencies()
     {
         for (const auto& [ base, deps ] : _index[ "requires" ].items())
@@ -267,6 +217,22 @@ struct asset_manager::impl
         }
     }
 
+    void resolve_no_lazy_load()
+    {
+        for (const auto& it : _index[ "no_lazy_load" ])
+        {
+            auto ast = _impl->_cache.find(std::stoull(it.get<std::string>()));
+            if (!ast)
+            {
+                log()->warn("Invalid entry in no_lazy_load list: {}",
+                            it.get<std::string>());
+                continue;
+            }
+
+            load_asset(*ast);
+        }
+    }
+
     void load_asset(std::string_view path)
     {
         auto asset_key = get_asset_key(path);
@@ -285,17 +251,6 @@ struct asset_manager::impl
         }
 
         _importer.import(path, _cache);
-    }
-
-    void update()
-    {
-        while (!_loading_queue.empty())
-        {
-            std::string path_to_load;
-            path_to_load.swap(_loading_queue.front());
-            _loading_queue.pop();
-            load_asset(path_to_load);
-        }
     }
 
     void setup_directory_watch()
