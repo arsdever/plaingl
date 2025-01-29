@@ -1,6 +1,6 @@
 #include "project/project_commands.hpp"
 
-#include "asset_management/asset_manager.hpp"
+#include "assets/asset_manager.hpp"
 #include "common/logging.hpp"
 #include "components/camera.hpp"
 #include "components/light.hpp"

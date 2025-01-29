@@ -1,6 +1,6 @@
-#include "asset_management/asset_cache.hpp"
+#include "assets/asset_cache.hpp"
 
-#include "asset_management/asset_manager.hpp"
+#include "assets/asset_manager.hpp"
 
 namespace assets
 {

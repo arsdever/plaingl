@@ -1,6 +1,6 @@
 #pragma once
 
-#include "asset_management/type_importer.hpp"
+#include "assets/type_importer.hpp"
 
 class font_importer : public assets::type_importer<graphics::font>
 {

@@ -1,6 +1,6 @@
 #include "renderer_2d.hpp"
 
-#include "asset_management/asset_manager.hpp"
+#include "assets/asset_manager.hpp"
 #include "glad/gl.h"
 #include "graphics/font.hpp"
 #include "graphics/graphics_buffer.hpp"

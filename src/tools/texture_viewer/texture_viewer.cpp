@@ -4,7 +4,7 @@
 
 #include "tools/texture_viewer/texture_viewer.hpp"
 
-#include "asset_management/asset_manager.hpp"
+#include "assets/asset_manager.hpp"
 #include "core/window.hpp"
 #include "graphics/graphics.hpp"
 #include "graphics/graphics_buffer.hpp"

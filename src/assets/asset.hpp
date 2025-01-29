@@ -3,7 +3,7 @@
 #include "graphics/graphics_fwd.hpp"
 #include "scripting/scripting_fwd.hpp"
 
-#include "asset_management/asset_manager.hpp"
+#include "assets/asset_manager.hpp"
 #include "common/event.hpp"
 #include "common/file.hpp"
 

@@ -1,8 +1,8 @@
 #pragma once
 
-#include "asset_management/assets_fwd.hpp"
+#include "assets/assets_fwd.hpp"
 
-#include "asset_management/asset.hpp"
+#include "assets/asset.hpp"
 #include "common/utils.hpp"
 
 namespace assets

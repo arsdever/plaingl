@@ -3,7 +3,7 @@
 #include "graphics/graphics_fwd.hpp"
 #include "scripting/scripting_fwd.hpp"
 
-#include "asset_management/type_importer.hpp"
+#include "assets/type_importer.hpp"
 
 namespace assets
 {

@@ -1,5 +1,5 @@
 
-#include "asset_management/importers/script_importer.hpp"
+#include "assets/importers/script_importer.hpp"
 
 #include "common/file_lock.hpp"
 #include "scripting/backend.hpp"

@@ -6,7 +6,7 @@
 #include "application.hpp"
 
 #include "application/application_commands.hpp"
-#include "asset_management/asset_manager.hpp"
+#include "assets/asset_manager.hpp"
 #include "common/filesystem.hpp"
 #include "common/logging.hpp"
 #include "common/main_thread_dispatcher.hpp"
