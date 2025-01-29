@@ -4,6 +4,8 @@
 
 #include "assets/type_importer.hpp"
 
+namespace assets
+{
 class material_importer : public assets::type_importer<graphics::material>
 {
 public:
@@ -11,3 +13,4 @@ public:
     void internal_load(common::file& asset_file) override;
     void internal_update(asset_data_t mat, common::file& asset_file) override;
 };
+}

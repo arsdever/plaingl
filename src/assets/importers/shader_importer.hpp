@@ -2,6 +2,8 @@
 
 #include "assets/type_importer.hpp"
 
+namespace assets
+{
 class shader_importer : public assets::type_importer<graphics::shader>
 {
 public:
@@ -13,3 +15,4 @@ private:
     void load_shader(common::file& asset_file);
     void load_shader_script(common::file& asset_file);
 };
+} // namespace assets

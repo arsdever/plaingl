@@ -34,6 +34,8 @@ std::tuple<Args...> from_json(const nlohmann::json& args,
 } // namespace details
 } // namespace
 
+namespace assets
+{
 void material_importer::internal_load(common::file& asset_file)
 {
     _data = std::make_shared<graphics::material>();
@@ -112,3 +114,4 @@ void material_importer::internal_update(asset_data_t mat,
         }
     }
 }
+} // namespace assets

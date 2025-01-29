@@ -3,6 +3,8 @@
 #include "common/main_thread_dispatcher.hpp"
 #include "graphics/texture.hpp"
 
+namespace assets
+{
 void texture_importer::internal_load(common::file& asset_file)
 {
     _data = graphics::texture::from_file(asset_file);
@@ -13,3 +15,4 @@ void texture_importer::internal_update(std::shared_ptr<graphics::texture> txt,
 {
     txt->set_contents_from_file(f);
 }
+} // namespace assets

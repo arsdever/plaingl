@@ -4,6 +4,8 @@
 
 #include "assets/type_importer.hpp"
 
+namespace assets
+{
 class model_importer : public assets::type_importer<graphics::mesh>
 {
 public:
@@ -12,3 +14,4 @@ public:
     void internal_update(std::shared_ptr<graphics::mesh> m,
                          common::file& asset_file) override;
 };
+} // namespace assets

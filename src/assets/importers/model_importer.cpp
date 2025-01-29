@@ -14,6 +14,8 @@ namespace
 logger log() { return get_logger("asset_manager"); }
 } // namespace
 
+namespace assets
+{
 void model_importer::internal_load(common::file& asset_file)
 {
     _data = std::make_shared<graphics::mesh>();
@@ -129,3 +131,4 @@ void model_importer::internal_update(std::shared_ptr<graphics::mesh> msh,
         }
     }
 }
+} // namespace assets
