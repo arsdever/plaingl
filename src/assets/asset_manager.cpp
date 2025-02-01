@@ -26,8 +26,6 @@ struct asset_manager::impl
     asset_cache _cache;
     asset_importer _importer;
     std::queue<std::string> _loading_queue;
-    std::unordered_set<std::string> _visited_list;
-    std::stack<std::string> _visit_list;
     nlohmann::json _index { { "id_path", nlohmann::json {} },
                             { "key_id", nlohmann::json {} },
                             { "requires", nlohmann::json {} },
@@ -120,33 +118,6 @@ struct asset_manager::impl
         //     index_file.open(common::file::open_mode::write);
         //     index_file.write(_index.dump());
         // }
-    }
-
-    void schedule_loading_queue()
-    {
-        while (!_visit_list.empty())
-        {
-            auto id = _visit_list.top();
-            if (_visited_list.contains(id))
-            {
-                _visit_list.pop();
-                _loading_queue.push(id);
-                continue;
-            }
-
-            if (!_index[ "requires" ].contains(id))
-            {
-                _visit_list.pop();
-                _visited_list.emplace(id);
-                continue;
-            }
-
-            for (const auto& deps : _index[ "requires" ][ id ])
-            {
-                _visit_list.push(deps);
-                _visited_list.emplace(id);
-            }
-        }
     }
 
     std::string get_resource_path_by_id(std::string id)
