@@ -176,6 +176,8 @@ void application::load_assets()
 {
     auto project_path = common::filesystem::path::current_dir() / "resources";
     assets::asset_manager::initialize(project_path.full_path());
+    assets::asset_manager::scan_project_directory();
+    assets::asset_manager::setup_project_directory_watch();
 }
 
 void application::render_game()
