@@ -19,6 +19,9 @@ public:
     static void initialize(std::string_view resource_path);
     static void shutdown();
 
+    static void scan_project_directory();
+    static void setup_project_directory_watch();
+
     template <typename T>
     static void save_asset(std::string_view path, const T* asset);
     static void register_asset(std::string_view name,

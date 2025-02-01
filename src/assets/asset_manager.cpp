@@ -303,9 +303,6 @@ void asset_manager::initialize(std::string_view resource_path)
                       std::make_shared<shader_importer>());
     register_importer(model_importer::extensions,
                       std::make_shared<model_importer>());
-
-    _impl->scan_directory();
-    _impl->setup_directory_watch();
 }
 
 void asset_manager::shutdown()
@@ -314,6 +311,13 @@ void asset_manager::shutdown()
         return;
 
     _impl = nullptr;
+}
+
+void asset_manager::scan_project_directory() { _impl->scan_directory(); }
+
+void asset_manager::setup_project_directory_watch()
+{
+    _impl->setup_directory_watch();
 }
 
 void asset_manager::load_asset(asset& ast) { _impl->load_asset(ast); }
