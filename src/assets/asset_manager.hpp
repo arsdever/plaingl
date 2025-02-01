@@ -55,8 +55,10 @@ public:
     static asset_importer& get_importer();
     static asset_cache& get_cache();
 
-    static size_t get_asset_id(std::string_view path);
-    static std::string get_asset_key(std::string_view path);
+    static size_t get_asset_id_by_path(std::string_view path);
+    static size_t get_asset_id_by_key(std::string_view key);
+    static std::string get_asset_key_by_path(std::string_view path);
+    static std::string get_asset_key_by_id(size_t id);
 
 private:
     static std::shared_ptr<asset> try_get_internal(std::string_view name);

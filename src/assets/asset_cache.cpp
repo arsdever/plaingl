@@ -7,7 +7,7 @@ namespace assets
 void asset_cache::register_asset(std::string_view name,
                                  std::shared_ptr<asset> ast)
 {
-    register_asset(asset_manager::get_asset_id(std::string(name)), ast);
+    register_asset(asset_manager::get_asset_id_by_key(name), ast);
 }
 
 void asset_cache::register_asset(size_t id, std::shared_ptr<asset> ast)
@@ -17,7 +17,7 @@ void asset_cache::register_asset(size_t id, std::shared_ptr<asset> ast)
 
 bool asset_cache::contains(std::string_view name)
 {
-    return contains(asset_manager::get_asset_id(name));
+    return contains(asset_manager::get_asset_id_by_key(name));
 }
 
 bool asset_cache::contains(size_t id)
@@ -33,6 +33,6 @@ std::shared_ptr<asset> asset_cache::find(size_t i)
 
 std::shared_ptr<asset> asset_cache::find(std::string_view name)
 {
-    return find(asset_manager::get_asset_id(std::string(name)));
+    return find(asset_manager::get_asset_id_by_key(name));
 }
 } // namespace assets

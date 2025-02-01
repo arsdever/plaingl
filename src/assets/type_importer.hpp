@@ -31,8 +31,7 @@ public:
     void import(std::string_view path, asset_cache& cache) override
     {
         common::filesystem::path p { path };
-        if (cache.contains(asset_manager::get_asset_id(
-                asset_manager::get_asset_key(p.full_path()))))
+        if (cache.contains(asset_manager::get_asset_id_by_path(p.full_path())))
         {
             log()->warn("Asset {} was already loaded", path);
             return;
@@ -42,24 +41,22 @@ public:
         auto a = std::make_shared<asset>(std::move(asset_file), _data);
         // a._date_modified =
         // std::chrono::system_clock::now().time_since_epoch().count();
-        cache.register_asset(asset_manager::get_asset_id(
-                                 asset_manager::get_asset_key(p.full_path())),
+        cache.register_asset(asset_manager::get_asset_id_by_path(p.full_path()),
                              a);
     }
 
     void update(std::string_view path, asset_cache& cache) override
     {
         common::filesystem::path p { path };
-        if (!cache.contains(asset_manager::get_asset_id(
-                asset_manager::get_asset_key(p.full_path()))))
+        if (!cache.contains(asset_manager::get_asset_id_by_path(p.full_path())))
         {
             log()->info("Asset {} was not loaded", path);
             import(path, cache);
             return;
         }
 
-        auto ast = cache.find(asset_manager::get_asset_id(
-            asset_manager::get_asset_key(p.full_path())));
+        auto ast =
+            cache.find(asset_manager::get_asset_id_by_path(p.full_path()));
         internal_update(ast->template as<T>(), ast->_asset_file);
     }
 

@@ -57,7 +57,8 @@ void material_importer::internal_update(asset_data_t mat,
              shader_exclusive_name +
          ".shader")
             .full_path());
-    shader_exclusive_name = assets::asset_manager::get_asset_key(shader_path);
+    shader_exclusive_name =
+        assets::asset_manager::get_asset_key_by_path(shader_path);
 
     auto sh =
         assets::asset_manager::try_get<graphics::shader>(shader_exclusive_name);
