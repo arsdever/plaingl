@@ -80,7 +80,8 @@ struct asset_manager::impl
                 else
                 {
                     auto asset_path = path / file_path;
-                    auto asset_key = get_asset_key(asset_path.full_path());
+                    auto asset_key =
+                        get_asset_key_by_path(asset_path.full_path());
 
                     if (!_index[ "key_id" ].contains(asset_key))
                     {
@@ -142,7 +143,7 @@ struct asset_manager::impl
             for (const auto& dep : _index[ "requires" ][ id ])
             {
                 auto dep_path = _index[ "id_path" ][ dep ];
-                auto ast = _impl->_cache.find(get_asset_key(dep_path));
+                auto ast = _impl->_cache.find(get_asset_key_by_path(dep_path));
                 if (!ast)
                 {
                     log()->warn(
@@ -175,7 +176,7 @@ struct asset_manager::impl
             {
                 auto ast =
                     _impl->_cache.find(std::stoull(dep.get<std::string>()));
-                base_ast->_dependencies.push_back(ast);
+                // base_ast->_dependencies.push_back(ast);
                 if (ast)
                 {
                     ast->_on_modified += [ this, base ]()
@@ -206,7 +207,7 @@ struct asset_manager::impl
 
     void load_asset(std::string_view path)
     {
-        auto asset_key = get_asset_key(path);
+        auto asset_key = get_asset_key_by_path(path);
         log()->debug("Loading asset {}", asset_key);
 
         if (!_index[ "key_id" ].contains(asset_key))
@@ -239,12 +240,16 @@ struct asset_manager::impl
                 common::main_thread_dispatcher::dispatch(
                     [ this, path = std::move(path_str), change ]
                 {
+                    log()->info("File {} changed: {}",
+                                path,
+                                static_cast<unsigned>(change));
                     switch (change)
                     {
                     case common::file_change_type::created:
                     case common::file_change_type::modified:
                     {
-                        auto ast = _impl->_cache.find(get_asset_key(path));
+                        auto ast =
+                            _impl->_cache.find(get_asset_key_by_path(path));
                         if (ast)
                         {
                             load_asset(*ast);
@@ -329,16 +334,6 @@ std::shared_ptr<asset> asset_manager::try_get_internal(std::string_view name)
     return _impl->try_get_internal(name);
 }
 
-std::string asset_manager::get_asset_key(std::string_view path)
-{
-    auto pos = path.find(_impl->project_path);
-    auto relpath = path.substr(
-        pos != std::string::npos ? pos + _impl->project_path.size() + 1 : 0);
-    std::string result = std::string(relpath);
-    std::replace(result.begin(), result.end(), '/', '.');
-    return std::string(result);
-}
-
 void asset_manager::register_importer(
     std::string_view key, std::shared_ptr<type_importer_base> importer)
 {
@@ -349,13 +344,33 @@ asset_importer& asset_manager::get_importer() { return _impl->_importer; }
 
 asset_cache& asset_manager::get_cache() { return _impl->_cache; }
 
-size_t asset_manager::get_asset_id(std::string_view path)
+size_t asset_manager::get_asset_id_by_path(std::string_view path)
 {
-    if (!_impl->_index[ "key_id" ].contains(path))
+    return get_asset_id_by_key(get_asset_key_by_path(path));
+}
+
+size_t asset_manager::get_asset_id_by_key(std::string_view key)
+{
+    if (!_impl->_index[ "key_id" ].contains(key))
     {
         return 0;
     }
-    return std::stoull(_impl->_index[ "key_id" ][ path ].get<std::string>());
+    return std::stoull(_impl->_index[ "key_id" ][ key ].get<std::string>());
+}
+
+std::string asset_manager::get_asset_key_by_path(std::string_view path)
+{
+    auto pos = path.find(_impl->project_path);
+    auto relpath = path.substr(
+        pos != std::string::npos ? pos + _impl->project_path.size() + 1 : 0);
+    std::string result = std::string(relpath);
+    std::replace(result.begin(), result.end(), '/', '.');
+    return std::string(result);
+}
+
+std::string asset_manager::get_asset_key_by_id(size_t id)
+{
+    return _impl->_index[ "id_path" ][ std::to_string(id) ];
 }
 
 std::shared_ptr<asset_manager::impl> asset_manager::_impl = nullptr;
