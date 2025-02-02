@@ -33,7 +33,7 @@ private:
     void register_component(pybind11::class_<T, Extra...> cls);
 
 private:
-    std::unordered_map<std::string, pybind11::module_> _modules;
+    std::unordered_map<std::string, pybind11::module> _modules;
     std::unordered_multimap<std::string,
                             std::shared_ptr<python::python_component>>
         _bindings;

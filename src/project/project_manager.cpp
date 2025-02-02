@@ -22,7 +22,6 @@ struct project_manager::impl
 {
     std::unordered_map<uid, std::shared_ptr<object>> _objects;
     std::vector<std::shared_ptr<game_object>> _game_objects;
-    std::vector<std::shared_ptr<component>> _components;
     std::unordered_multimap<uid, std::shared_ptr<component>>
         _game_object_component_mapping;
 };
@@ -64,7 +63,6 @@ component& project_manager::create_component(game_object& obj,
 {
     auto comp = component_registry::instantiate(class_name, obj);
     _instance->_impl->_objects.emplace(comp->id(), comp);
-    _instance->_impl->_components.push_back(comp);
     _instance->_impl->_game_object_component_mapping.emplace(obj.id(), comp);
     return *comp;
 }
