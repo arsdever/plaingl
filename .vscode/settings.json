@@ -3,7 +3,6 @@
 		"args": [
 			"SPDLOG_LEVEL=trace",
 		],
-		// "cwd": "${workspaceFolder}/unittest/common_ut",
 		"console": "integratedTerminal"
 	},
 	"cmake.configureArgs": [
