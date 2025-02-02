@@ -13,8 +13,7 @@ public:
     static void initialize();
     static void shutdown();
 
-    static std::shared_ptr<script> load_script(common::file& f);
-    static void update_script(std::shared_ptr<script> s);
+    static void load_script(std::string_view script_path);
 
 private:
     backend();

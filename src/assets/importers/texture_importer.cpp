@@ -5,14 +5,13 @@
 
 namespace assets
 {
-void texture_importer::internal_load(common::file& asset_file)
+void texture_importer::initialize_asset(asset& ast)
 {
-    _data = graphics::texture::from_file(asset_file);
+    ast.get_raw_data() = std::make_shared<graphics::texture>();
 }
 
-void texture_importer::internal_update(std::shared_ptr<graphics::texture> txt,
-                                       common::file& f)
+void texture_importer::read_asset_data(std::string_view asset_path)
 {
-    txt->set_contents_from_file(f);
+    _data->set_contents_from_file(asset_path);
 }
 } // namespace assets

@@ -36,32 +36,9 @@ backend::impl::impl()
 
 backend::impl::~impl() = default;
 
-std::shared_ptr<script> backend::impl::load(std::string_view script_file_path)
+void backend::impl::load(std::string_view path)
 {
-    auto result = std::make_shared<script>(script_file_path);
-
-    auto module_name = path_to_module_name(script_file_path);
-    try
-    {
-        _modules[ module_name ] =
-            pybind11::module_::import(module_name.c_str());
-        for (auto& it : _modules[ module_name ].attr("module_exports"))
-        {
-            auto cls = it.cast<pybind11::class_<python_component>>();
-            register_component(cls);
-        }
-    }
-    catch (std::exception& e)
-    {
-        log()->error("Failed to load script: {}", e.what());
-    }
-
-    return result;
-}
-
-void backend::impl::update(std::string_view script_file_path)
-{
-    std::string module_name = path_to_module_name(script_file_path);
+    std::string module_name = path_to_module_name(path);
     common::main_thread_dispatcher::dispatch([ this, module_name ]
     {
         try

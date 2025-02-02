@@ -16,18 +16,15 @@ logger log() { return get_logger("asset_manager"); }
 
 namespace assets
 {
-void model_importer::internal_load(common::file& asset_file)
+void model_importer::initialize_asset(asset& ast)
 {
-    _data = std::make_shared<graphics::mesh>();
-    internal_update(_data, asset_file);
+    ast.get_raw_data() = std::make_shared<graphics::mesh>();
 }
 
-void model_importer::internal_update(std::shared_ptr<graphics::mesh> msh,
-                                     common::file& asset_file)
+void model_importer::read_asset_data(std::string_view asset_path)
 {
-    auto content = asset_file.read_all<std::vector<char>>();
-    common::file_lock file_lock(asset_file);
-    auto path = common::filesystem::path(asset_file.get_filepath());
+    auto content = common::file::read_all<std::vector<char>>(asset_path);
+    auto path = common::filesystem::path(asset_path);
     Assimp::Importer importer;
     const aiScene* ai_scene = importer.ReadFileFromMemory(
         content.data(),
@@ -39,7 +36,7 @@ void model_importer::internal_update(std::shared_ptr<graphics::mesh> msh,
 
     if (!ai_scene)
     {
-        log()->error("Failed to load: {}", asset_file.get_filepath());
+        log()->error("Failed to load: {}", asset_path);
         return;
     }
 
@@ -122,10 +119,10 @@ void model_importer::internal_update(std::shared_ptr<graphics::mesh> msh,
 
                     submeshes.push_back(std::move(info));
 
-                    msh->set_vertices(std::move(vertices));
-                    msh->set_indices(std::move(indices));
-                    msh->set_submeshes(std::move(submeshes));
-                    msh->init();
+                    _data->set_vertices(std::move(vertices));
+                    _data->set_indices(std::move(indices));
+                    _data->set_submeshes(std::move(submeshes));
+                    _data->init();
                 }
             }
         }

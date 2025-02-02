@@ -27,8 +27,6 @@ public:
     static void register_asset(std::string_view name,
                                std::shared_ptr<asset> ast);
 
-    static void load_asset(asset& ast);
-
     static asset& get(std::string_view name);
     template <typename T>
     static auto get(std::string_view name)

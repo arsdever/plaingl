@@ -111,7 +111,7 @@ void font::load(std::string path, float size)
     }
 
     FT_Face face;
-    if (FT_New_Face(ft, "resources/font.ttf", 0, &face))
+    if (FT_New_Face(ft, _font_file_path.c_str(), 0, &face))
     {
         log()->error("FREETYPE: Failed to load font");
         return;

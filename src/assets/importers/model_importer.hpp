@@ -10,8 +10,7 @@ class model_importer : public assets::type_importer<graphics::mesh>
 {
 public:
     static constexpr std::string_view extensions { ".fbx" };
-    void internal_load(common::file& asset_file) override;
-    void internal_update(std::shared_ptr<graphics::mesh> m,
-                         common::file& asset_file) override;
+    void initialize_asset(asset& ast) override;
+    void read_asset_data(std::string_view asset_path) override;
 };
 } // namespace assets

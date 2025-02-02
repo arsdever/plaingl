@@ -21,8 +21,7 @@ struct backend::impl
     impl();
     ~impl();
 
-    std::shared_ptr<script> load(std::string_view script_file_path);
-    void update(std::string_view script_file_path);
+    void load(std::string_view script_file_path);
 
     std::unique_ptr<pybind11::scoped_interpreter> _interpreter;
 
