@@ -23,6 +23,7 @@ macro(add_test_subdirectory test_folder_name)
   math(EXPR unit_test_index "${unit_test_index}+1")
 endmacro()
 
+add_test_subdirectory(assets)
 add_test_subdirectory(common)
 add_test_subdirectory(core)
 add_test_subdirectory(console)
