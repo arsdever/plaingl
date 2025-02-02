@@ -9,18 +9,18 @@ namespace fs = common::filesystem;
 TEST(File, read_all_directly)
 {
     {
-        file f { "test.txt" };
+        file f { "data/test.txt" };
         EXPECT_EQ("Hello world !!!\n", f.read_all());
     }
 
     {
-        EXPECT_EQ("Hello world !!!\n", file::read_all("test.txt"));
+        EXPECT_EQ("Hello world !!!\n", file::read_all("data/test.txt"));
     }
 }
 
 TEST(File, read_as_binary_file)
 {
-    file f { "test.txt" };
+    file f { "data/test.txt" };
     std::string contents = "Hello world !!!\r\n";
     EXPECT_EQ(std::vector<char>(contents.begin(), contents.end()),
               f.read_all<std::vector<char>>());
@@ -28,7 +28,7 @@ TEST(File, read_as_binary_file)
 
 TEST(File, seek_read)
 {
-    file f { "test.txt" };
+    file f { "data/test.txt" };
     f.seek(5);
     EXPECT_EQ("Hello world !!!\n", f.read_all());
     EXPECT_NE(" world", f.read_all());
@@ -38,7 +38,7 @@ TEST(File, seek_read)
 
 TEST(File, read_structure)
 {
-    file f { "struct_content.hex" };
+    file f { "data/struct_content.hex" };
     struct content
     {
         bool b;
@@ -58,7 +58,7 @@ TEST(File, read_structure)
 
 TEST(File, read_incomplete_structure)
 {
-    file f { "incomplete_struct_content.hex" };
+    file f { "data/incomplete_struct_content.hex" };
     struct content
     {
         bool b;
@@ -82,7 +82,7 @@ TEST(File, read_incomplete_structure)
 
 TEST(File, open_and_close)
 {
-    file f { "test.txt" };
+    file f { "data/test.txt" };
     EXPECT_FALSE(f.is_open());
     f.open(file::open_mode::read);
     EXPECT_TRUE(f.is_open());
@@ -92,9 +92,9 @@ TEST(File, open_and_close)
 
 TEST(File, prevent_multiple_open)
 {
-    file f { "test.txt" };
+    file f { "data/test.txt" };
     f.open(file::open_mode::read);
-    file f2 { "test.txt" };
+    file f2 { "data/test.txt" };
     f2.open(file::open_mode::read);
 
     EXPECT_TRUE(f.is_open());
@@ -104,19 +104,19 @@ TEST(File, prevent_multiple_open)
 TEST(File, close_on_destruction)
 {
     {
-        file f { "test.txt" };
+        file f { "data/test.txt" };
         f.open(file::open_mode::read);
         EXPECT_TRUE(f.is_open());
     }
 
-    file f { "test.txt" };
+    file f { "data/test.txt" };
     f.open(file::open_mode::read);
     EXPECT_TRUE(f.is_open());
 }
 
 TEST(File, move)
 {
-    file f { "test.txt" };
+    file f { "data/test.txt" };
     f.open(file::open_mode::read);
     EXPECT_EQ("Hello", f.read(5));
     file f2 { std::move(f) };
@@ -127,15 +127,15 @@ TEST(File, move)
 
 TEST(File, check_filepath)
 {
-    file f { "test.txt" };
-    EXPECT_EQ("test.txt", f.get_filepath());
+    file f { "data/test.txt" };
+    EXPECT_EQ("data/test.txt", f.get_filepath());
     file f1 { "non_existing_file.extension" };
     EXPECT_EQ("non_existing_file.extension", f1.get_filepath());
 }
 
 TEST(File, create_and_remove)
 {
-    file f { "create_and_remove.txt" };
+    file f { "data/create_and_remove.txt" };
     EXPECT_FALSE(f.exists());
     f.open(file::open_mode::read);
     EXPECT_FALSE(f.exists());
@@ -150,7 +150,7 @@ TEST(File, create_and_remove)
 
 TEST(File, change_content)
 {
-    file f { "change_content.txt" };
+    file f { "data/change_content.txt" };
     f.open(file::open_mode::read_write);
     f.write("Hello world !!!\n");
     f.seek(0);
@@ -178,7 +178,7 @@ TEST(File, write_structures)
         }
     };
 
-    file f { "write_structures.hex" };
+    file f { "data/write_structures.hex" };
     f.open(file::open_mode::read_write);
 
     std::vector<content> v;
@@ -196,7 +196,7 @@ TEST(File, write_structures)
 
 TEST(File, direct_file_access)
 {
-    static constexpr auto filename = "direct_file_access.txt";
+    static constexpr auto filename = "data/direct_file_access.txt";
     file::write(filename, "Hello world !!!\n");
     EXPECT_TRUE(file::exists(filename));
     EXPECT_EQ("Hello world !!!\n", file::read_all(filename));
@@ -210,7 +210,7 @@ TEST(File, watch_for_changes)
 {
     size_t counter = 0;
     size_t check_counter = 0;
-    file f { "watch_for_changes.txt" };
+    file f { "data/watch_for_changes.txt" };
     f.changed += [ &counter ](auto type) { ++counter; };
     f.open(file::open_mode::write);
     f.write("Hello world !!!\n");
