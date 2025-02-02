@@ -52,6 +52,7 @@ application::application()
     main_window->get_events()->render += [ this ](auto re) { render_game(); };
     main_window->get_events()->resize += [ this ](auto re)
     {
+        graphics::set_viewport({ 0, 0 }, _windows[ 0 ]->get_size());
         auto cam = components::camera::get_active();
         if (!cam)
             return;
