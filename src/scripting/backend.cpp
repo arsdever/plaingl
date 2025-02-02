@@ -17,14 +17,9 @@ void backend::initialize()
 
 void backend::shutdown() { _instance = nullptr; }
 
-std::shared_ptr<script> backend::load_script(common::file& f)
+void backend::load_script(std::string_view path)
 {
-    return _instance->_impl->load(f.get_filepath());
-}
-
-void backend::update_script(std::shared_ptr<script> s)
-{
-    return _instance->_impl->update(s->path().full_path());
+    _instance->_impl->load(path);
 }
 
 std::unique_ptr<backend> backend::_instance { nullptr };

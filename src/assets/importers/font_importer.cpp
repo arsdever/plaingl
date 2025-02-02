@@ -4,9 +4,13 @@
 
 namespace assets
 {
-void font_importer::internal_load(common::file& asset_file)
+void font_importer::initialize_asset(asset& ast)
 {
-    _data = std::make_shared<graphics::font>();
-    _data->load(asset_file, 12.0f);
+    ast.get_raw_data() = std::make_shared<graphics::font>();
+}
+
+void font_importer::read_asset_data(std::string_view asset_file)
+{
+    _data->load(std::string(asset_file), 12.0f);
 }
 } // namespace assets

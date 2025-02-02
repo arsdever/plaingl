@@ -91,8 +91,11 @@ struct asset_manager::impl
                             path.full_path();
                     }
 
+                    auto asset_load = [ &importer = _importer ](asset& ast)
+                    { importer.load_asset(ast); };
+
                     auto ast = std::make_shared<asset>(
-                        common::file(std::string(asset_path.full_path())));
+                        std::string { asset_path.full_path() }, asset_load);
                     _cache.register_asset(
                         std::stoull(
                             _index[ "key_id" ][ asset_key ].get<std::string>()),
@@ -126,52 +129,10 @@ struct asset_manager::impl
         return _index[ "id_path" ][ id ];
     }
 
-    void load_assets()
-    {
-        while (!_loading_queue.empty())
-        {
-            auto id = _loading_queue.front();
-            _loading_queue.pop();
-            auto path = get_resource_path_by_id(id);
-            _importer.import(path, _impl->_cache);
-
-            if (!_index[ "requires" ].contains(id))
-            {
-                continue;
-            }
-
-            for (const auto& dep : _index[ "requires" ][ id ])
-            {
-                auto dep_path = _index[ "id_path" ][ dep ];
-                auto ast = _impl->_cache.find(get_asset_key_by_path(dep_path));
-                if (!ast)
-                {
-                    log()->warn(
-                        "The dependency asset {} of asset {} was not loaded",
-                        dep.get<std::string>(),
-                        id);
-                    continue;
-                }
-                ast->_on_modified += [ this, id ]()
-                {
-                    auto path = _index[ "id_path" ][ id ];
-                    _cache.register_asset(
-                        id, std::make_shared<asset>(path.get<std::string>()));
-                };
-            }
-        }
-    }
-
     void resolve_dependencies()
     {
         for (const auto& [ base, deps ] : _index[ "requires" ].items())
         {
-            auto base_ast = _impl->_cache.find(std::stoull(base));
-            if (!base_ast)
-            {
-                continue;
-            }
-
             for (const auto& dep : deps)
             {
                 auto ast =
@@ -181,8 +142,16 @@ struct asset_manager::impl
                 {
                     ast->_on_modified += [ this, base ]()
                     {
-                        auto path = _index[ "id_path" ][ base ];
-                        _importer.update(path, _impl->_cache);
+                        auto base_ast = _impl->_cache.find(std::stoull(base));
+                        if (!base_ast)
+                        {
+                            return;
+                        }
+
+                        if (base_ast->is_loaded())
+                        {
+                            _importer.update_asset(*base_ast);
+                        }
                     };
                 }
             }
@@ -203,26 +172,6 @@ struct asset_manager::impl
 
             load_asset(*ast);
         }
-    }
-
-    void load_asset(std::string_view path)
-    {
-        auto asset_key = get_asset_key_by_path(path);
-        log()->debug("Loading asset {}", asset_key);
-
-        if (!_index[ "key_id" ].contains(asset_key))
-        {
-            log()->warn("Asset {} is not in the index", asset_key);
-            return;
-        }
-
-        if (_cache.contains(asset_key))
-        {
-            _importer.update(path, _cache);
-            return;
-        }
-
-        _importer.import(path, _cache);
     }
 
     void setup_directory_watch()
@@ -252,7 +201,7 @@ struct asset_manager::impl
                             _impl->_cache.find(get_asset_key_by_path(path));
                         if (ast)
                         {
-                            load_asset(*ast);
+                            update_asset(*ast);
                         }
                     }
                     // case common::file_change_type::removed:
@@ -281,6 +230,18 @@ struct asset_manager::impl
         _importer.load_asset(ast);
         ast._on_modified();
     }
+
+    void update_asset(asset& ast)
+    {
+        _importer.update_asset(ast);
+        ast._on_modified();
+    }
+
+    void perform_asset_load(asset& ast) { }
+
+    void perform_asset_update(asset& ast) { }
+
+    void perform_asset_unload(asset& ast) { }
 };
 
 void asset_manager::initialize(asset_manager* existing_instance)
@@ -324,8 +285,6 @@ void asset_manager::setup_project_directory_watch()
 {
     _impl->setup_directory_watch();
 }
-
-void asset_manager::load_asset(asset& ast) { _impl->load_asset(ast); }
 
 asset& asset_manager::get(std::string_view name) { return *try_get(name); }
 

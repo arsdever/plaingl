@@ -1,5 +1,6 @@
 add_library(
   ${PROJECT}_assets STATIC
+  asset.cpp
   asset.hpp
   asset_importer.cpp
   asset_importer.hpp

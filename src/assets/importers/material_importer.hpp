@@ -10,7 +10,7 @@ class material_importer : public assets::type_importer<graphics::material>
 {
 public:
     static constexpr std::string_view extensions { ".mat" };
-    void internal_load(common::file& asset_file) override;
-    void internal_update(asset_data_t mat, common::file& asset_file) override;
+    void initialize_asset(asset& ast) override;
+    void read_asset_data(std::string_view asset_path) override;
 };
 }

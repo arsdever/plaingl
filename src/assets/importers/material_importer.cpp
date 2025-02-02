@@ -36,24 +36,20 @@ std::tuple<Args...> from_json(const nlohmann::json& args,
 
 namespace assets
 {
-void material_importer::internal_load(common::file& asset_file)
+void material_importer::initialize_asset(asset& ast)
 {
-    _data = std::make_shared<graphics::material>();
-    internal_update(_data, asset_file);
+    ast.get_raw_data() = std::make_shared<graphics::material>();
 }
 
-void material_importer::internal_update(asset_data_t mat,
-                                        common::file& asset_file)
+void material_importer::read_asset_data(std::string_view asset_file)
 {
-    std::string content = asset_file.read_all();
-    common::file_lock file_lock(asset_file);
+    std::string content = common::file::read_all(asset_file);
     json mat_struct = json::parse(content);
 
     std::string shader_exclusive_name =
         mat_struct[ "shader" ].get<std::string>();
     std::string shader_path(
-        (fs::path(
-             fs::path(asset_file.get_filepath()).full_path_without_filename()) /
+        (fs::path(fs::path(asset_file).full_path_without_filename()) /
              shader_exclusive_name +
          ".shader")
             .full_path());
@@ -63,12 +59,6 @@ void material_importer::internal_update(asset_data_t mat,
     auto sh =
         assets::asset_manager::try_get<graphics::shader>(shader_exclusive_name);
 
-    if (!sh)
-    {
-        assets::asset_manager::get_importer().import(
-            shader_path, assets::asset_manager::get_cache());
-    }
-
     if (sh = assets::asset_manager::try_get<graphics::shader>(
             shader_exclusive_name);
         !sh)
@@ -76,11 +66,11 @@ void material_importer::internal_update(asset_data_t mat,
         log()->error(
             "(Shader file '{}' required by material '{}' could not be found) ",
             shader_path,
-            asset_file.get_filepath());
+            asset_file);
         return;
     }
 
-    mat->set_shader_program(sh);
+    _data->set_shader_program(sh);
 
     for (auto& prop : mat_struct[ "properties" ])
     {
@@ -93,7 +83,7 @@ void material_importer::internal_update(asset_data_t mat,
             {
             case 1:
             {
-                mat->set_property_value(
+                _data->set_property_value(
                     prop_name,
                     details::from_json<float>(prop[ "value" ],
                                               std::make_index_sequence<1>()));
@@ -101,7 +91,7 @@ void material_importer::internal_update(asset_data_t mat,
             }
             case 4:
             {
-                mat->set_property_value(
+                _data->set_property_value(
                     prop_name,
                     details::from_json<float, float, float, float>(
                         prop[ "value" ], std::make_index_sequence<4>()));

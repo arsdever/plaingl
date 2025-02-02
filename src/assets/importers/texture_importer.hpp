@@ -8,9 +8,7 @@ class texture_importer : public assets::type_importer<graphics::texture>
 {
 public:
     static constexpr std::string_view extensions { ".png,.jpg,.jpeg" };
-    void internal_load(common::file& asset_file) override;
-
-    void internal_update(std::shared_ptr<graphics::texture>,
-                         common::file&) override;
+    void initialize_asset(asset& ast) override;
+    void read_asset_data(std::string_view asset_path) override;
 };
 } // namespace assets

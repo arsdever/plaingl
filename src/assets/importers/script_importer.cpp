@@ -1,21 +1,18 @@
 
 #include "assets/importers/script_importer.hpp"
 
-#include "common/file_lock.hpp"
 #include "scripting/backend.hpp"
 #include "scripting/script.hpp"
 
 namespace assets
 {
-void script_importer::internal_load(common::file& asset_file)
+void script_importer::initialize_asset(asset& ast)
 {
-    common::file_lock file_lock(asset_file);
-    _data = scripting::backend::load_script(asset_file);
+    ast.get_raw_data() = std::make_shared<scripting::script>();
 }
 
-void script_importer::internal_update(asset_data_t scr,
-                                      common::file& asset_file)
+void script_importer::read_asset_data(std::string_view asset_path)
 {
-    scripting::backend::update_script(scr);
+    scripting::backend::load_script(asset_path);
 }
 } // namespace assets
