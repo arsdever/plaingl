@@ -82,6 +82,7 @@ void backend::impl::update(std::string_view script_file_path)
                 module = pybind11::module_::import(module_name.c_str());
             }
 
+            _modules[ module_name ] = module;
             for (auto& it : module.attr("module_exports"))
             {
                 auto cls = it.cast<pybind11::class_<python_component>>();
@@ -104,6 +105,7 @@ void backend::impl::update(std::string_view script_file_path)
                         }
                     }
                 }
+                _bindings.erase(cls_name);
 
                 component_registry::unregister_component(
                     cls.attr("name").cast<std::string>());
