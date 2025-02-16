@@ -14,7 +14,7 @@
 
 material_viewer::material_viewer()
 {
-    set_title("material Viewer");
+    set_title("Material Viewer");
     resize(600, 600);
     on_user_initialize +=
         [ this ](std::shared_ptr<core::window>) { initialize(); };
