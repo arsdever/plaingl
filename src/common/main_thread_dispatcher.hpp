@@ -13,6 +13,7 @@ public:
     static std::function<void()> pull_one();
     static void run_one();
     static void run_all();
+    static void wait_task_available();
 
     static bool is_main_thread();
 

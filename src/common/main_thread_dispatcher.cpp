@@ -68,6 +68,12 @@ void main_thread_dispatcher::run_all()
     }
 }
 
+void main_thread_dispatcher::wait_task_available()
+{
+    std::unique_lock<std::mutex> lock(_instance->_mutex);
+    _instance->_cv.wait(lock, [ & ] { return !_instance->_queue.empty(); });
+}
+
 bool main_thread_dispatcher::is_main_thread()
 {
     return std::this_thread::get_id() == _instance->_main_thread_id;
