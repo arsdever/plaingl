@@ -4,9 +4,16 @@ set(CMAKE_AUTORCC ON)
 
 add_executable(
 	${PROJECT}_apps_material_editor
-	material_editor.cpp)
+	material_editor.cpp
+)
 
-target_link_libraries(${PROJECT}_apps_material_editor PRIVATE ${PROJECT}::lib Qt::Widgets Qt::Core Qt::Gui Qt::OpenGLWidgets)
+target_link_libraries(${PROJECT}_apps_material_editor PRIVATE
+	${PROJECT}::lib
+	${PROJECT}::tools
+	Qt::Widgets
+	Qt::Core
+	Qt::Gui
+)
 find_program(Qt6 QUIET Qt::windeployqt)
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
