@@ -59,8 +59,11 @@ private:
 template <typename T>
 std::shared_ptr<T> asset::get_raw_data() const
 {
-    return std::any_cast<std::shared_ptr<T>>(
-        const_cast<asset&>(*this).get_raw_data().value());
+    if (const_cast<asset&>(*this).get_raw_data())
+        return std::any_cast<std::shared_ptr<T>>(
+            const_cast<asset&>(*this).get_raw_data().value());
+
+    return nullptr;
 }
 
 template <typename T>

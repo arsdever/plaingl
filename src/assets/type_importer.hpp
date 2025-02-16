@@ -44,6 +44,12 @@ public:
     void update_asset(asset& ast) override
     {
         _data = ast.template get_raw_data<T>();
+        if (!_data)
+        {
+            load_asset(ast);
+            return;
+        }
+
         read_asset_data(ast.file_path());
     }
 
