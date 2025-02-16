@@ -132,7 +132,7 @@ void window::init()
 
     activate();
 
-    if (!graphics::initialize())
+    if (!graphics::initialize(glfwGetProcAddress))
     {
         return;
     }

@@ -14,10 +14,13 @@ namespace
 {
 static inline logger log() { return get_logger("graphics"); }
 } // namespace
-bool initialize()
+bool initialize(graphics_proc_address_getter proc_getter)
 {
-    if (!gladLoadGL((GLADloadfunc)glfwGetProcAddress))
+    if (!gladLoadGL(proc_getter))
+    {
         log()->error("Failed to initialize GLAD");
+        return false;
+    }
 
     glEnable(GL_DEBUG_OUTPUT);
     glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
