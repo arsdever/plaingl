@@ -112,16 +112,8 @@ struct asset_manager::impl
         common::file index_file(
             std::string((project_path / "resources.json").full_path()));
 
-        // if (!index_file.exists())
-        // {
         common::file::remove(index_file.get_filepath());
-        common::file::create(index_file.get_filepath(), _index.dump());
-        // }
-        // else
-        // {
-        //     index_file.open(common::file::open_mode::write);
-        //     index_file.write(_index.dump());
-        // }
+        common::file::create(index_file.get_filepath(), _index.dump(2));
     }
 
     std::string get_resource_path_by_id(std::string id)
@@ -137,7 +129,6 @@ struct asset_manager::impl
             {
                 auto ast =
                     _impl->_cache.find(std::stoull(dep.get<std::string>()));
-                // base_ast->_dependencies.push_back(ast);
                 if (ast)
                 {
                     ast->_on_modified += [ this, base ]()
