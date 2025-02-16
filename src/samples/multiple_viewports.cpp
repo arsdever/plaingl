@@ -150,7 +150,8 @@ void init_scene()
         glm::dvec4(0.7, 0.6, 0.1, 1.0));
 
     auto obj = game_object::create();
-    auto m = assets::asset_manager::get<graphics::mesh>("meshes.susane_head.fbx");
+    auto m =
+        assets::asset_manager::get<graphics::mesh>("meshes.susane_head.fbx");
     obj->add<components::mesh_filter>().set_mesh(m);
     obj->add<components::mesh_renderer>().set_material(basic_mat);
     obj->set_name("susane");
