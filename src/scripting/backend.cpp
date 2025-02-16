@@ -1,8 +1,6 @@
 #include "scripting/backend.hpp"
 
-#include "common/file.hpp"
 #include "scripting/python/python_backend.hpp"
-#include "scripting/script.hpp"
 
 namespace scripting
 {
@@ -19,6 +17,11 @@ void backend::shutdown() { _instance = nullptr; }
 
 void backend::load_script(std::string_view path)
 {
+    if (_instance == nullptr)
+    {
+        get_logger("scripting")->info("Scripting backend is not initialized");
+        return;
+    }
     _instance->_impl->load(path);
 }
 
