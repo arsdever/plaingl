@@ -3,6 +3,7 @@
 #include "assets/asset_manager.hpp"
 #include "common/logging.hpp"
 #include "graphics/texture.hpp"
+#include "tools/material_viewer/material_viewer.hpp"
 #include "tools/mesh_viewer/mesh_viewer.hpp"
 #include "tools/profiler/profiler.hpp"
 #include "tools/texture_viewer/texture_viewer.hpp"
@@ -35,6 +36,28 @@ void cmd_show_mesh::execute()
     open_window_requested(mv);
 }
 
+void cmd_show_material::execute()
+{
+    auto material_asset = assets::asset_manager::try_get(get<0>());
+    if (!material_asset)
+    {
+        log()->error("Material '{}' not found", get<0>());
+        return;
+    }
+
+    auto mv = std::make_shared<material_viewer>();
+    mv->init();
+    log()->debug("Showing material '{}'", get<0>());
+    mv->set_material(material_asset->as<graphics::material>());
+    std::vector<std::shared_ptr<graphics::mesh>> mesh_presets {
+        assets::asset_manager::try_get<graphics::mesh>("meshes.cube.fbx"),
+        assets::asset_manager::try_get<graphics::mesh>("meshes.sphere.fbx"),
+        assets::asset_manager::try_get<graphics::mesh>("meshes.shader.fbx"),
+    };
+    mv->set_mesh_presets(std::move(mesh_presets));
+    open_window_requested(mv);
+}
+
 void cmd_show_texture::execute()
 {
     auto texture_asset =
@@ -63,6 +86,8 @@ void cmd_list_textures::execute()
 }
 
 event<void(std::shared_ptr<core::window>)> cmd_show_mesh::open_window_requested;
+event<void(std::shared_ptr<core::window>)>
+    cmd_show_material::open_window_requested;
 event<void(std::shared_ptr<core::window>)>
     cmd_show_profiler::open_window_requested;
 event<void(std::shared_ptr<core::window>)>

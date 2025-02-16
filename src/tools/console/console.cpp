@@ -81,7 +81,7 @@ struct console::impl
 
         if (node->func == nullptr)
         {
-            log()->warn("Invalid command path \"{}\"", path);
+            log()->warn("Invalid command path \"{} {}\"", path, *token_it);
             return;
         }
 

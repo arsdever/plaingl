@@ -13,6 +13,15 @@ public:
     static event<void(std::shared_ptr<core::window>)> open_window_requested;
 };
 
+class cmd_show_material : public core::command<std::string>
+{
+public:
+    using command::command;
+    void execute() override;
+
+    static event<void(std::shared_ptr<core::window>)> open_window_requested;
+};
+
 class cmd_show_mesh : public core::command<std::string>
 {
 public:

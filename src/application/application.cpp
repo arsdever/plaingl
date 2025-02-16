@@ -112,6 +112,13 @@ void application::setup_console()
         w->get_events()->close += [ this ](auto ce)
         { std::erase(_windows, ce.get_sender()->shared_from_this()); };
     };
+    cmd_show_material::open_window_requested +=
+        [ this ](std::shared_ptr<core::window> w)
+    {
+        _windows.push_back(w);
+        w->get_events()->close += [ this ](auto ce)
+        { std::erase(_windows, ce.get_sender()->shared_from_this()); };
+    };
     cmd_show_texture::open_window_requested +=
         [ this ](std::shared_ptr<core::window> w)
     {
@@ -132,6 +139,7 @@ void application::setup_console()
     _console->register_for_logs();
     _console->register_command<cmd_show_texture, std::string>("show.texture");
     _console->register_command<cmd_show_mesh, std::string>("show.mesh");
+    _console->register_command<cmd_show_material, std::string>("show.material");
     _console->register_command<cmd_show_profiler>("show.profiler");
     _console->register_command<cmd_list_textures>("list.textures");
     _console->register_command<project::cmd_create_game_object>(
