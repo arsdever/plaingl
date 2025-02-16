@@ -44,7 +44,17 @@ void material_importer::initialize_asset(asset& ast)
 void material_importer::read_asset_data(std::string_view asset_file)
 {
     std::string content = common::file::read_all(asset_file);
-    json mat_struct = json::parse(content);
+    json mat_struct;
+    try
+    {
+        mat_struct = json::parse(content);
+    }
+    catch (std::exception& e)
+    {
+        log()->error(
+            "Failed to parse material file {}: {}", asset_file, e.what());
+        return;
+    }
 
     std::string shader_exclusive_name =
         mat_struct[ "shader" ].get<std::string>();
