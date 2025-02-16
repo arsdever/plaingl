@@ -7,8 +7,12 @@ set(PROJECT gamify)
 
 project(${PROJECT} LANGUAGES C CXX)
 
+set(${PROJECT}_LIBRARY_DIR ${CMAKE_BINARY_DIR}/lib)
+
 message(STATUS "Setting default binary directory to ${RUNTIME_DIRECTORY}")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${RUNTIME_DIRECTORY})
+
+set(BUILD_DEBUG ON)
 
 include($ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake)
 find_package(ZLIB REQUIRED)

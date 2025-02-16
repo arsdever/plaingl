@@ -6,7 +6,8 @@
 		"console": "integratedTerminal"
 	},
 	"cmake.configureArgs": [
-		"-DBUILD_TESTING=ON"
+		"-DBUILD_TESTING=ON",
+		"-DQT_APPS=TRUE"
 	],
 	"sonarlint.pathToCompileCommands": "${workspaceFolder}\\build\\compile_commands.json",
 	"C_Cpp.default.compileCommands": "${workspaceFolder}\\build\\compile_commands.json",
